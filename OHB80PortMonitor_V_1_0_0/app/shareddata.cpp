@@ -7,6 +7,7 @@
 #include "scheduler/tasks/monitor_data_task.h"
 #include "scheduler/tasks/alarm_dispatch_task.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/sh85_periodic_self_check_task.h"
 #include "setofohbinfo.h"
 #include <QDebug>
 #include <QHash>
@@ -17,6 +18,7 @@ NetworkStatusTask* SharedData::s_networkStatusTask = nullptr;
 MonitorDataTask* SharedData::s_monitorDataTask = nullptr;
 AlarmDispatchTask* SharedData::s_alarmDispatchTask = nullptr;
 OperationDispatchTask* SharedData::s_operationDispatchTask = nullptr;
+SH85PeriodicSelfCheckTask* SharedData::s_sh85PeriodicSelfCheckTask = nullptr;
 
 SharedData::SharedData() {
 
@@ -161,6 +163,13 @@ void SharedData::initScheduler()
         qDebug() << "[SharedData] 已提交监控数据任务, TaskID:" << monitorTaskId;
     }
 
+    // 创建并提交 SH85 周期自检任务（长驻任务）
+    if (!s_sh85PeriodicSelfCheckTask) {
+        s_sh85PeriodicSelfCheckTask = new SH85PeriodicSelfCheckTask();
+        QString id = scheduler->submitTask(s_sh85PeriodicSelfCheckTask);
+        qDebug() << "[SharedData] 已提交 SH85 周期自检任务, TaskID:" << id;
+    }
+
     qDebug() << "[SharedData] 调度器已启动，所有常驻任务已提交";
 }
 
@@ -182,4 +191,9 @@ AlarmDispatchTask* SharedData::getAlarmDispatchTask()
 OperationDispatchTask* SharedData::getOperationDispatchTask()
 {
     return s_operationDispatchTask;
+}
+
+SH85PeriodicSelfCheckTask* SharedData::getSH85PeriodicSelfCheckTask()
+{
+    return s_sh85PeriodicSelfCheckTask;
 }

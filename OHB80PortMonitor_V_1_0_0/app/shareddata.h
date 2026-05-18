@@ -12,6 +12,7 @@ class NetworkStatusTask;
 class MonitorDataTask;
 class AlarmDispatchTask;
 class OperationDispatchTask;
+class SH85PeriodicSelfCheckTask;
 
 class SharedData
 {
@@ -44,12 +45,16 @@ public:
     // 获取操作调度任务（logMessage / logWarn / logError 入口）
     static OperationDispatchTask* getOperationDispatchTask();
 
+    // 获取 SH85 周期自检任务（常驻任务）
+    static SH85PeriodicSelfCheckTask* getSH85PeriodicSelfCheckTask();
+
 private:
     static bool s_modbusManagerInitialized;
     static NetworkStatusTask* s_networkStatusTask;
     static MonitorDataTask* s_monitorDataTask;
     static AlarmDispatchTask* s_alarmDispatchTask;
     static OperationDispatchTask* s_operationDispatchTask;
+    static SH85PeriodicSelfCheckTask* s_sh85PeriodicSelfCheckTask;
 };
 
 #endif // SHAREDDATA_H

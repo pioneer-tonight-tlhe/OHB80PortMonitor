@@ -12,6 +12,21 @@
 #include <QDebug>
 #include <QTimer>
 
+// ====================================================================
+// 静态注册
+// ====================================================================
+namespace {
+struct SH85PeriodicMetaTypeRegister {
+    SH85PeriodicMetaTypeRegister() {
+        qRegisterMetaType<SH85PeriodicSelfCheckTask::TimeUnit>("SH85PeriodicSelfCheckTask::TimeUnit");
+        qRegisterMetaType<SH85PeriodicSelfCheckTask::State>("SH85PeriodicSelfCheckTask::State");
+        qRegisterMetaType<SH85PeriodicSelfCheckTask::DeviceResult>("SH85PeriodicSelfCheckTask::DeviceResult");
+        qRegisterMetaType<SH85PeriodicSelfCheckTask::SelfCheckSummary>("SH85PeriodicSelfCheckTask::SelfCheckSummary");
+    }
+};
+static SH85PeriodicMetaTypeRegister s_sh85PeriodicMetaRegister;
+} // namespace
+
 // ============================================================
 // 构造 / 析构
 // ============================================================
@@ -19,6 +34,10 @@
 SH85PeriodicSelfCheckTask::SH85PeriodicSelfCheckTask(QObject *parent)
     : SchedulerTask(parent)
 {
+    m_tickTimer = new QTimer(this);
+    m_tickTimer->setInterval(1000);
+    connect(m_tickTimer, &QTimer::timeout, this, &SH85PeriodicSelfCheckTask::onIntervalTick);
+
     qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 创建任务";
     LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[Scheduler][SH85PeriodicSelfCheckTask] 创建任务").toStdString());
@@ -26,294 +45,448 @@ SH85PeriodicSelfCheckTask::SH85PeriodicSelfCheckTask(QObject *parent)
 
 SH85PeriodicSelfCheckTask::~SH85PeriodicSelfCheckTask()
 {
-    stopAllTimers();
-    disconnectChecker();
+    if (m_tickTimer) m_tickTimer->stop();
+    disconnectAllCheckers();
     qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 任务销毁";
     LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[Scheduler][SH85PeriodicSelfCheckTask] 任务销毁").toStdString());
 }
 
 // ============================================================
-// 配置
+// 公开控制接口
 // ============================================================
 
-void SH85PeriodicSelfCheckTask::setIntervalSeconds(int seconds)
+void SH85PeriodicSelfCheckTask::setEnabled(bool enabled)
 {
-    if (seconds <= 0) seconds = 1;
-    m_intervalSec = seconds;
-    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] setIntervalSeconds:" << seconds;
+    if (m_enabled == enabled) {
+        return;
+    }
+    m_enabled = enabled;
 
-    // 若当前正处于 Idle 倒计时，重置剩余秒数（立即生效）
-    if (m_status == Status::Idle && m_idleTimer && m_idleTimer->isActive()) {
-        m_remainingSec = m_intervalSec;
-        emit countdownTick(m_remainingSec);
+    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] setEnabled:" << enabled;
+    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        QString("[Scheduler][SH85PeriodicSelfCheckTask] setEnabled=%1").arg(enabled).toStdString());
+
+    if (auto* op = SharedData::getOperationDispatchTask()) {
+        op->log(OperationDispatchTask::MsgType::Message,
+                QString("Periodic SH85 self-check %1").arg(enabled ? "enabled" : "disabled"), 0);
+    }
+
+    if (enabled) {
+        // 启用：立即执行一轮自检
+        // - Stopped → 直接进入 Checking
+        // - Checking / WaitingNext → 已在运行；让其自然推进即可
+        if (m_state == State::Stopped) {
+            enterChecking();
+        }
+    } else {
+        // 停用：
+        // - Checking → 不打断本轮，本轮结束后由 tryEndRound() 进入 Stopped
+        // - WaitingNext → 立即停止
+        // - Stopped → 无操作
+        if (m_state == State::WaitingNext || m_state == State::Stopped) {
+            enterStopped();
+        } else {
+            qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] setEnabled(false) 当前正在 Checking, "
+                        "等待本轮完成后再转 Stopped";
+            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+                QString("[Scheduler][SH85PeriodicSelfCheckTask] disable pending: wait current round to finish")
+                    .toStdString());
+        }
     }
 }
 
+void SH85PeriodicSelfCheckTask::setPeriod(int value, TimeUnit unit)
+{
+    if (value <= 0) value = 1;
+
+    int totalSec = value;
+    switch (unit) {
+    case TimeUnit::Second: totalSec = value;          break;
+    case TimeUnit::Minute: totalSec = value * 60;     break;
+    case TimeUnit::Hour:   totalSec = value * 3600;   break;
+    }
+    m_periodSec = totalSec;
+
+    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] setPeriod:" << value
+             << timeUnitToString(unit) << "(" << totalSec << "s)";
+    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        QString("[Scheduler][SH85PeriodicSelfCheckTask] setPeriod=%1 %2 (=%3s)")
+            .arg(value).arg(timeUnitToString(unit)).arg(totalSec).toStdString());
+
+    // WaitingNext 状态下立即重置倒计时
+    if (m_state == State::WaitingNext) {
+        m_intervalRemaining = m_periodSec;
+        emit intervalCountdown(m_intervalRemaining);
+    }
+}
+
+QString SH85PeriodicSelfCheckTask::timeUnitToString(TimeUnit u)
+{
+    switch (u) {
+    case TimeUnit::Second: return "s";
+    case TimeUnit::Minute: return "min";
+    case TimeUnit::Hour:   return "hour";
+    }
+    return "?";
+}
+
+QString SH85PeriodicSelfCheckTask::stateToString(State s)
+{
+    switch (s) {
+    case State::Stopped:     return "Stopped";
+    case State::Checking:    return "Checking";
+    case State::WaitingNext: return "WaitingNext";
+    }
+    return "Unknown";
+}
+
 // ============================================================
-// 生命周期
+// SchedulerTask 接口
 // ============================================================
 
 void SH85PeriodicSelfCheckTask::start()
 {
     setState(Running);
-    m_stopRequested   = false;
     m_finishedEmitted = false;
 
-    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] start() 间隔=" << m_intervalSec << "s";
+    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] start() period=" << m_periodSec << "s";
     LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SH85PeriodicSelfCheckTask] 任务启动 间隔=%1s").arg(m_intervalSec).toStdString());
+        QString("[Scheduler][SH85PeriodicSelfCheckTask] 任务启动 period=%1s").arg(m_periodSec).toStdString());
 
-    // 运行日志
-    if (auto* op = SharedData::getOperationDispatchTask()) {
-        op->log(OperationDispatchTask::MsgType::Message,
-                QString("Periodic SH85 self-check enabled, interval=%1s").arg(m_intervalSec), 0);
+    // 默认未启用；等待 UI 调用 setEnabled(true)
+    if (m_enabled) {
+        enterChecking();
+    } else {
+        enterStopped();
     }
-
-    // 立即执行一轮自检
-    beginRound();
 }
 
 void SH85PeriodicSelfCheckTask::stop()
 {
     if (m_finishedEmitted) return;
     m_finishedEmitted = true;
-    m_stopRequested   = true;
 
     qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] stop() 调用";
     LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[Scheduler][SH85PeriodicSelfCheckTask] 任务停止").toStdString());
 
-    // 停止定时器
-    stopAllTimers();
-
-    // 终止当前正在运行的 checker（如果有）
-    if (m_currentChecker) {
-        disconnect(m_checkerFinishedConn);
-        m_currentChecker->stop();
-        m_currentChecker = nullptr;
-        m_currentMaster  = nullptr;
-        m_currentQrcode.clear();
-    }
-
-    // 运行日志
-    if (auto* op = SharedData::getOperationDispatchTask()) {
-        op->log(OperationDispatchTask::MsgType::Message,
-                QString("Periodic SH85 self-check disabled"), 0);
-    }
+    enterStopped();
 
     setState(Cancelled);
     emit finished(true, QStringLiteral("SH85PeriodicSelfCheckTask stopped"));
 }
 
 // ============================================================
-// 间隔倒计时
+// 状态切换
 // ============================================================
 
-void SH85PeriodicSelfCheckTask::startIdleCountdown()
+void SH85PeriodicSelfCheckTask::enterStopped()
 {
-    m_status       = Status::Idle;
-    m_remainingSec = m_intervalSec;
-    emit statusChanged(m_status);
-    emit countdownTick(m_remainingSec);
+    if (m_tickTimer) m_tickTimer->stop();
 
-    if (!m_idleTimer) {
-        m_idleTimer = new QTimer(this);
-        m_idleTimer->setInterval(1000);
-        connect(m_idleTimer, &QTimer::timeout, this, &SH85PeriodicSelfCheckTask::onIdleTick);
+    // 取消所有进行中的 checker
+    disconnectAllCheckers();
+    for (const QString& qrcode : qAsConst(m_pendingQrcodes)) {
+        auto* master = ModbusTcpMasterManager::instance().getMaster(qrcode);
+        if (master && master->selfChecker() && master->selfChecker()->isRunning()) {
+            master->selfChecker()->stop();
+        }
     }
-    m_idleTimer->start();
+    m_pendingQrcodes.clear();
+    m_roundResults.clear();
+    m_roundOrderedQrcodes.clear();
+
+    m_state             = State::Stopped;
+    m_intervalRemaining = 0;
+    m_elapsedSeconds    = 0;
+    emit taskStateChanged(m_state);
 }
 
-void SH85PeriodicSelfCheckTask::onIdleTick()
+void SH85PeriodicSelfCheckTask::enterWaitingNext()
 {
-    if (m_stopRequested) return;
-    if (m_remainingSec > 0) {
-        --m_remainingSec;
-        emit countdownTick(m_remainingSec);
+    if (!m_enabled) {
+        enterStopped();
+        return;
     }
-    if (m_remainingSec <= 0) {
-        m_idleTimer->stop();
-        beginRound();
+
+    m_state             = State::WaitingNext;
+    m_intervalRemaining = m_periodSec;
+    m_elapsedSeconds    = 0;
+    emit taskStateChanged(m_state);
+    emit intervalCountdown(m_intervalRemaining);
+
+    if (m_tickTimer) m_tickTimer->start();
+}
+
+void SH85PeriodicSelfCheckTask::enterChecking()
+{
+    if (!m_enabled) {
+        enterStopped();
+        return;
+    }
+
+    m_state          = State::Checking;
+    m_elapsedSeconds = 0;
+    emit taskStateChanged(m_state);
+    emit elapsedTick(m_elapsedSeconds);
+
+    // Checking 期间也用 1Hz 计时显示已执行秒数
+    if (m_tickTimer) m_tickTimer->start();
+
+    beginRound();
+}
+
+// ============================================================
+// 1Hz tick
+// ============================================================
+
+void SH85PeriodicSelfCheckTask::onIntervalTick()
+{
+    if (m_state == State::WaitingNext) {
+        if (m_intervalRemaining > 0) {
+            --m_intervalRemaining;
+            emit intervalCountdown(m_intervalRemaining);
+        }
+        if (m_intervalRemaining <= 0) {
+            m_tickTimer->stop();
+            // 切换到 Checking 之前重新检查 enabled
+            if (m_enabled) {
+                enterChecking();
+            } else {
+                enterStopped();
+            }
+        }
+    } else if (m_state == State::Checking) {
+        ++m_elapsedSeconds;
+        emit elapsedTick(m_elapsedSeconds);
     }
 }
 
 // ============================================================
-// 一轮自检控制
+// 一轮自检（并行）
 // ============================================================
 
 void SH85PeriodicSelfCheckTask::beginRound()
 {
-    if (m_stopRequested) return;
-
-    m_status         = Status::Checking;
-    m_roundQrcodes   = SharedData::getAllQrcodes();
-    m_roundIndex     = 0;
-    m_successCount   = 0;
-    m_failureCount   = 0;
     m_roundStartTime = currentTimestamp();
+    m_roundOrderedQrcodes = SharedData::getAllQrcodes();
+    m_pendingQrcodes.clear();
+    m_roundResults.clear();
+    disconnectAllCheckers();
 
-    // 过滤掉 enable=false 的设备
-    QStringList filteredQrcodes;
-    for (const QString& qrcode : m_roundQrcodes) {
-        FoupOfOHBInfo* foupInfo = SharedData::getFoupByQRCode(qrcode);
-        if (foupInfo && foupInfo->enable()) {
-            filteredQrcodes.append(qrcode);
-        } else {
-            qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 跳过未启用设备 qrcode=" << qrcode;
-        }
-    }
-    m_roundQrcodes = filteredQrcodes;
-
-    emit statusChanged(m_status);
-    emit progressUpdate(0, m_roundQrcodes.size());
-
-    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 一轮开始, 过滤后设备数=" << m_roundQrcodes.size();
+    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 一轮开始, 总设备数=" << m_roundOrderedQrcodes.size();
     LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SH85PeriodicSelfCheckTask] 一轮开始 过滤后设备数=%1")
-            .arg(m_roundQrcodes.size()).toStdString());
+        QString("[Scheduler][SH85PeriodicSelfCheckTask] 一轮开始 总设备数=%1")
+            .arg(m_roundOrderedQrcodes.size()).toStdString());
 
-    if (m_roundQrcodes.isEmpty()) {
-        // 无设备，直接结束本轮
-        endRound();
-        return;
+    // 1) 初始化每个设备的结果（默认未参加）
+    for (const QString& qrcode : qAsConst(m_roundOrderedQrcodes)) {
+        DeviceResult dr;
+        dr.qrcode       = qrcode;
+        dr.participated = false;
+        dr.success      = false;
+        dr.description  = QString("Not enabled");
+        m_roundResults.insert(qrcode, dr);
     }
 
-    startNextDevice();
-}
-
-void SH85PeriodicSelfCheckTask::startNextDevice()
-{
-    if (m_stopRequested) return;
-
-    // 已完成所有设备
-    if (m_roundIndex >= m_roundQrcodes.size()) {
-        endRound();
-        return;
-    }
-
-    m_currentQrcode = m_roundQrcodes.at(m_roundIndex);
-    emit progressUpdate(m_roundIndex, m_roundQrcodes.size());
-
+    // 2) 收集需要参加的设备 → 并行启动
     auto& mgr = ModbusTcpMasterManager::instance();
-    m_currentMaster = mgr.getMaster(m_currentQrcode);
+    for (const QString& qrcode : qAsConst(m_roundOrderedQrcodes)) {
+        FoupOfOHBInfo* foupInfo = SharedData::getFoupByQRCode(qrcode);
+        const bool enabled = (foupInfo && foupInfo->enable());
 
-    // 设备不可用或未连接 → 视为自检失败，更新进度条
-    if (!m_currentMaster || !m_currentMaster->isConnected()) {
-        qWarning() << "[Scheduler][SH85PeriodicSelfCheckTask] master 不可用或未连接 qrcode=" << m_currentQrcode;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][SH85PeriodicSelfCheckTask] 设备未连接 qrcode=%1").arg(m_currentQrcode).toStdString());
-        if (auto* op = SharedData::getOperationDispatchTask()) {
-            op->log(OperationDispatchTask::MsgType::Warn,
-                    QString("Periodic SH85 self-check: device not connected, qrcode=%1").arg(m_currentQrcode), 0);
+        if (!enabled) {
+            // 不参加：保持初始状态，不进入 pending
+            qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 跳过未启用设备 qrcode=" << qrcode;
+            continue;
         }
-        finishCurrentDevice(false);
-        return;
+
+        // 过滤：如果设备处于 foup in 状态，不参加自检
+        if (foupInfo && foupInfo->foupIn()) {
+            DeviceResult& dr = m_roundResults[qrcode];
+            dr.description = QStringLiteral("FOUP in place, skipped");
+            qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 跳过 FOUP in 状态设备 qrcode=" << qrcode;
+            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+                QString("[Scheduler][SH85PeriodicSelfCheckTask] 跳过 FOUP in 状态设备 qrcode=%1").arg(qrcode).toStdString());
+            emit deviceParticipated(qrcode, false);
+            continue;
+        }
+
+        DeviceResult& dr = m_roundResults[qrcode];
+        dr.participated = true;
+        dr.description  = QString();
+
+        ModbusTcpMaster* master = mgr.getMaster(qrcode);
+        if (!master || !master->isConnected()) {
+            // 网络未连接 → 直接判为失败
+            const QString msg = QStringLiteral("Device not connected");
+            qWarning() << "[Scheduler][SH85PeriodicSelfCheckTask] 设备未连接 qrcode=" << qrcode;
+            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+                QString("[Scheduler][SH85PeriodicSelfCheckTask] 设备未连接 qrcode=%1").arg(qrcode).toStdString());
+            if (auto* op = SharedData::getOperationDispatchTask()) {
+                op->log(OperationDispatchTask::MsgType::Warn,
+                        QString("Periodic SH85 self-check: device not connected, qrcode=%1").arg(qrcode), 0);
+            }
+            finishDevice(qrcode, false, msg);
+            continue;
+        }
+
+        SH85SelfChecker* checker = master->selfChecker();
+        if (!checker) {
+            const QString msg = QStringLiteral("Self-checker is null");
+            qWarning() << "[Scheduler][SH85PeriodicSelfCheckTask] checker 为 null qrcode=" << qrcode;
+            finishDevice(qrcode, false, msg);
+            continue;
+        }
+
+        // 连接信号（每轮重新连接）
+        connectChecker(checker);
+
+        m_pendingQrcodes.insert(qrcode);
+
+        if (!checker->start()) {
+            const QString msg = QStringLiteral("Checker start failed");
+            qWarning() << "[Scheduler][SH85PeriodicSelfCheckTask] checker->start() 返回 false qrcode=" << qrcode;
+            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+                QString("[Scheduler][SH85PeriodicSelfCheckTask] checker->start() 失败 qrcode=%1").arg(qrcode).toStdString());
+            if (auto* op = SharedData::getOperationDispatchTask()) {
+                op->log(OperationDispatchTask::MsgType::Warn,
+                        QString("Periodic SH85 self-check: checker start failed, qrcode=%1").arg(qrcode), 0);
+            }
+            finishDevice(qrcode, false, msg);
+            continue;
+        }
+
+        qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 启动设备自检 qrcode=" << qrcode;
     }
 
-    m_currentChecker = m_currentMaster->selfChecker();
-    if (!m_currentChecker) {
-        qWarning() << "[Scheduler][SH85PeriodicSelfCheckTask] checker 为 null qrcode=" << m_currentQrcode;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][SH85PeriodicSelfCheckTask] checker 为 null qrcode=%1").arg(m_currentQrcode).toStdString());
-        if (auto* op = SharedData::getOperationDispatchTask()) {
-            op->log(OperationDispatchTask::MsgType::Warn,
-                    QString("Periodic SH85 self-check: checker is null, qrcode=%1").arg(m_currentQrcode), 0);
-        }
-        finishCurrentDevice(false);
-        return;
-    }
-
-    // 连接 finished 信号（一次性）
-    m_checkerFinishedConn = connect(
-        m_currentChecker, &SH85SelfChecker::finished,
-        this, &SH85PeriodicSelfCheckTask::onCheckerFinished,
-        Qt::QueuedConnection);
-
-    if (!m_currentChecker->start()) {
-        qWarning() << "[Scheduler][SH85PeriodicSelfCheckTask] checker->start() 返回 false qrcode=" << m_currentQrcode;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][SH85PeriodicSelfCheckTask] checker->start() 返回 false qrcode=%1").arg(m_currentQrcode).toStdString());
-        if (auto* op = SharedData::getOperationDispatchTask()) {
-            op->log(OperationDispatchTask::MsgType::Warn,
-                    QString("Periodic SH85 self-check: checker start failed, qrcode=%1").arg(m_currentQrcode), 0);
-        }
-        disconnectChecker();
-        finishCurrentDevice(false);
-        return;
-    }
-
-    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 启动设备自检 qrcode=" << m_currentQrcode
-             << "(" << (m_roundIndex + 1) << "/" << m_roundQrcodes.size() << ")";
+    // 若所有设备都已直接判定结束（无人参加 / 全部未连接），立即结束本轮
+    tryEndRound();
 }
+
+void SH85PeriodicSelfCheckTask::finishDevice(const QString& qrcode,
+                                             bool success,
+                                             const QString& description)
+{
+    DeviceResult& dr = m_roundResults[qrcode];
+    dr.qrcode       = qrcode;
+    dr.success      = success;
+    dr.description  = description;
+    // participated 已在 beginRound 中设置
+
+    m_pendingQrcodes.remove(qrcode);
+
+    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(),
+        success ? Level::INFO : Level::WARN,
+        QString("[Scheduler][SH85PeriodicSelfCheckTask] oneFinished qrcode=%1 success=%2 desc=%3")
+            .arg(qrcode).arg(success).arg(description).toStdString());
+
+    emit oneFinished(qrcode, success, description);
+}
+
+void SH85PeriodicSelfCheckTask::tryEndRound()
+{
+    if (!m_pendingQrcodes.isEmpty()) {
+        return;
+    }
+
+    // 汇总
+    SelfCheckSummary summary;
+    summary.startTime = m_roundStartTime;
+    summary.endTime   = currentTimestamp();
+    summary.successCount = 0;
+    summary.failureCount = 0;
+    summary.details.reserve(m_roundOrderedQrcodes.size());
+
+    for (const QString& qrcode : qAsConst(m_roundOrderedQrcodes)) {
+        const DeviceResult& dr = m_roundResults.value(qrcode);
+        summary.details.append(dr);
+        if (dr.participated) {
+            if (dr.success) ++summary.successCount;
+            else            ++summary.failureCount;
+        }
+    }
+
+    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 一轮结束 success=" << summary.successCount
+             << "failure=" << summary.failureCount;
+    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        QString("[Scheduler][SH85PeriodicSelfCheckTask] 一轮结束 success=%1 failure=%2")
+            .arg(summary.successCount).arg(summary.failureCount).toStdString());
+
+    emit allFinished(summary);
+
+    disconnectAllCheckers();
+
+    // 进入下一次等待
+    if (m_enabled) {
+        enterWaitingNext();
+    } else {
+        enterStopped();
+    }
+}
+
+// ============================================================
+// SH85SelfChecker 信号回调
+// ============================================================
 
 void SH85PeriodicSelfCheckTask::onCheckerFinished(bool success,
                                                   SH85SelfChecker::Result result,
                                                   const QString& message,
                                                   const QString& masterId)
 {
-    Q_UNUSED(result)
-    Q_UNUSED(message)
-    Q_UNUSED(masterId)
+    if (m_state != State::Checking) return;
+    if (!m_pendingQrcodes.contains(masterId)) return;
 
-    if (m_stopRequested) return;
+    const QString desc = success
+        ? QString("OK")
+        : QString("%1: %2").arg(SH85SelfChecker::resultToString(result), message);
 
-    disconnectChecker();
-    finishCurrentDevice(success);
+    finishDevice(masterId, success, desc);
+    tryEndRound();
 }
 
-void SH85PeriodicSelfCheckTask::finishCurrentDevice(bool success)
+void SH85PeriodicSelfCheckTask::onCheckerCountdown(int remainingSeconds, const QString& masterId)
 {
-    if (success) ++m_successCount;
-    else         ++m_failureCount;
-
-    m_currentChecker = nullptr;
-    m_currentMaster  = nullptr;
-    m_currentQrcode.clear();
-
-    ++m_roundIndex;
-    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] progressUpdate emit:" << m_roundIndex << "/" << m_roundQrcodes.size();
-    emit progressUpdate(m_roundIndex, m_roundQrcodes.size());
-
-    // 立即处理下一个设备（不引入额外间隔；如需间隔可改为 QTimer::singleShot）
-    QMetaObject::invokeMethod(this, [this]() { startNextDevice(); }, Qt::QueuedConnection);
+    if (m_state != State::Checking) return;
+    emit countdownTick(remainingSeconds, masterId);
 }
 
-void SH85PeriodicSelfCheckTask::endRound()
+void SH85PeriodicSelfCheckTask::onCheckerStateChanged(SH85SelfChecker::State state, const QString& masterId)
 {
-    const QString endTime = currentTimestamp();
-
-    qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 一轮结束 success=" << m_successCount
-             << "failure=" << m_failureCount;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SH85PeriodicSelfCheckTask] 一轮结束 success=%1 failure=%2")
-            .arg(m_successCount).arg(m_failureCount).toStdString());
-
-    emit roundFinished(m_successCount, m_failureCount, m_roundStartTime, endTime);
-
-    if (m_stopRequested) return;
-
-    // 进入下一次空闲倒计时
-    startIdleCountdown();
+    if (m_state != State::Checking) return;
+    emit selfCheckerStateChanged(state, masterId);
 }
 
 // ============================================================
 // 辅助
 // ============================================================
 
-void SH85PeriodicSelfCheckTask::stopAllTimers()
+void SH85PeriodicSelfCheckTask::connectChecker(SH85SelfChecker* checker)
 {
-    if (m_idleTimer) {
-        m_idleTimer->stop();
-    }
+    if (!checker) return;
+
+    auto c1 = connect(checker, &SH85SelfChecker::finished,
+                      this, &SH85PeriodicSelfCheckTask::onCheckerFinished,
+                      Qt::QueuedConnection);
+    auto c2 = connect(checker, &SH85SelfChecker::countdownTick,
+                      this, &SH85PeriodicSelfCheckTask::onCheckerCountdown,
+                      Qt::QueuedConnection);
+    auto c3 = connect(checker, &SH85SelfChecker::stateChanged,
+                      this, &SH85PeriodicSelfCheckTask::onCheckerStateChanged,
+                      Qt::QueuedConnection);
+
+    m_checkerConnections.append(c1);
+    m_checkerConnections.append(c2);
+    m_checkerConnections.append(c3);
 }
 
-void SH85PeriodicSelfCheckTask::disconnectChecker()
+void SH85PeriodicSelfCheckTask::disconnectAllCheckers()
 {
-    if (m_checkerFinishedConn) {
-        QObject::disconnect(m_checkerFinishedConn);
-        m_checkerFinishedConn = QMetaObject::Connection();
+    for (const QMetaObject::Connection& c : qAsConst(m_checkerConnections)) {
+        QObject::disconnect(c);
     }
+    m_checkerConnections.clear();
 }
 
 QString SH85PeriodicSelfCheckTask::currentTimestamp()

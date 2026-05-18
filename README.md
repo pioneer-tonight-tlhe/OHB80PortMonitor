@@ -8,6 +8,110 @@
 
 ## 更新日志
 
+### 2026-05-18 - Simon
+**SH85 周期自检 UI/Task 增量改进：英文化 / Participated 列 / Success 配色 / FOUP in 过滤 / 触屏滚动 / TX-RX 原始帧日志**
+
+#### 背景
+在前一版 `SH85 周期自检功能重构` 基础上，根据现场使用反馈做以下增量改进：UI 全英文化、增加设备参与状态实时反馈、Success 列条件配色、过滤处于 FOUP in 状态的设备、表格触屏滑动、并在 `SH85SelfChecker` 响应日志中记录 TX/RX 原始数据帧便于排查通讯问题。
+
+#### UI 层（`sh85selfcheckreportdialog.{h,cpp}` / `sh85periodicselfchecksettingwidget.cpp`）
+- **全英文化**：
+  - SettingWidget 状态文案：`Self-check disabled` / `Self-checking (elapsed: Xs)` / `Waiting for next check (countdown: Xs)`
+  - Live Log 表头：`QRCode` / `Execution Status` / `Countdown(s)` / `Success` / `Participated`
+  - Live Log `Execution Status` 单元格：通过本地 `stateText()` 把 `SH85SelfChecker::stateToString()` 中文状态映射为英文（`Idle` / `Sending self-check command` / `Waiting 5s (before phase 1)` / `Reading self-check status (phase 1)` / `Waiting 55s (before phase 2)` / `Polling self-check status` / `Done`）
+  - History Log 表头：`Last Check Start Time` / `Success Count` / `Failure Count` / `Participated` / `Description`
+- **新增 Live Log `Participated` 列（第 5 列）**：
+  - `onRoundStarted()` 默认全部置为 `Yes`
+  - 仅在收到 `deviceParticipated(qrcode, false)` 时改为 `No`，UI 即时反馈无需等本轮结束
+- **`Success` 列条件配色**：
+  - 成功：背景 `#32CD32`（Lime Green），字体保持默认
+  - 失败：背景 `#DC143C`（Crimson），字体白色
+  - 轮次开始时背景重置为 `transparent`、字体重置为黑色
+- **History Log 列宽**：`Last Check Start Time` 固定 `200px`，其他列 `Interactive` 可拖拽，最后一列 stretch
+- **触屏滑动**：参考 `OperationLogWidget::enableTouchScroll`，对 Live/History 两个 `QTableView` 启用 `QScroller::LeftMouseButtonGesture` 拖动手势，滚动条 handle 默认显示明显颜色 `#D4D0C8`
+
+#### 调度层（`sh85_periodic_self_check_task.{h,cpp}`）
+- **新增信号** `deviceParticipated(const QString& qrcode, bool participated)`：在 `beginRound()` 遍历设备时即时发射，提前通知 UI 设备是否参与本轮
+- **新增 FOUP in 过滤**：`beginRound()` 中若设备 `FoupOfOHBInfo::foupIn() == true`，跳过自检，描述置为 `FOUP in place, skipped`，并 `emit deviceParticipated(qrcode, false)`
+- 未启用设备的过滤路径同步发射 `deviceParticipated(qrcode, false)`，参与设备发射 `deviceParticipated(qrcode, true)`
+
+#### 数据层（`sh85selfchecker.cpp`）
+- **TX/RX 原始帧写入日志**：在 `onCommandFinished()` 中无论响应成功（INFO）还是失败（WARN），日志均追加请求与响应的原始字节（`rawBytes + crc`，大写空格分隔的 HEX）：
+  ```
+  [data][SH85SelfChecker] 响应 state=xxx ok=xxx id=xxx masterId=xxx
+  TX：XX XX XX XX ...
+  RX：XX XX XX XX ...
+  ```
+- 新增内部辅助 `frameToHex(const ModbusFrame&)`
+
+#### 信号连线（`sh85periodicselfchecksettingwidget.cpp`）
+- 新增 `task::deviceParticipated` → `SH85SelfCheckReportDialog::onDeviceParticipated`（`Qt::QueuedConnection`）
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85_periodic_self_check_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85_periodic_self_check_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.cpp`
+- 文档：
+  - `OHB80PortMonitor_V_1_0_0/docs/realize/sh85_periodic_self_check.md`（按当前实现重写）
+
+---
+
+### 2026-05-18 - Simon
+**SH85 周期自检功能重构：并行执行 / 状态机 / 自检报告 Dialog**
+
+#### 背景
+原 `SH85PeriodicSelfCheckTask` 采用串行执行（一台设备完成后才启动下一台），UI 仅展示当前进度与上一轮结果，缺少按设备维度的实时与历史明细，且控制接口（仅 `setIntervalSeconds`）不够语义化。本次按新需求重构。
+
+#### 调度层（`scheduler/tasks/sh85_periodic_self_check_task.{h,cpp}`）
+- **状态机** `State { Stopped, Checking, WaitingNext }`，1Hz 定时器仅在 `WaitingNext` / `Checking` 期间启用
+- **公开接口**：`setEnabled(bool)`、`setPeriod(int value, TimeUnit unit)`，`TimeUnit { Second, Minute, Hour }`
+- **执行逻辑**（一轮）：
+  1. 遍历所有 QRCode，过滤 `enable=false` 的设备（`Not enabled`，不参加）
+  2. 网络未连接的可参加设备 → 直接判失败（`Device not connected`）
+  3. 其余可用设备 **并行启动** `SH85SelfChecker`
+  4. 所有设备结束后发出 `allFinished(SelfCheckSummary)`，进入 `WaitingNext`
+- **信号**：
+  - `countdownTick(int, masterId)`：转发自 `SH85SelfChecker::countdownTick`
+  - `selfCheckerStateChanged(SH85SelfChecker::State, masterId)`：转发自 `SH85SelfChecker::stateChanged`
+  - `oneFinished(masterId, success, description)`
+  - `allFinished(SelfCheckSummary)`
+  - `taskStateChanged(State)`、`elapsedTick(int)`、`intervalCountdown(int)`：UI 辅助信号
+- **数据结构**：`DeviceResult{qrcode, participated, success, description}`、`SelfCheckSummary{startTime, endTime, successCount, failureCount, details}`
+
+#### UI 层
+- **`sh85periodicselfchecksettingwidget.{h,cpp}`** 重写，4 个 Item：
+  - **启用开关**：`ComboBox` (`false` / `true`) → `task->setEnabled(...)`
+  - **周期参数**：`SpinBox` + `ComboBox(s/min/hour)` + `Set` 按钮 → `task->setPeriod(value, unit)`
+  - **自检状态**：只读 `LineEdit`，三种文案：
+    - "自检功能未启用"
+    - "自检中（执行：Xs）"
+    - "等待下次自检中（倒计时：Xs）"
+  - **查看报告**：`PushButton`，打开自检报告模态框
+- **常驻任务**：由 `SharedData::initScheduler()` 创建并提交至调度器；UI 通过 `SharedData::getSH85PeriodicSelfCheckTask()` 获取实例并订阅信号；`setEnabled` / `setPeriod` 通过 `QMetaObject::invokeMethod` 跨线程下发
+- **新增 `sh85selfcheckreportdialog.{h,cpp}`**：自检报告模态框（Dialog + TabWidget）
+  - **Tab 1 Live Log**：80 行（项目所有 QRCode），列：QRCode / 执行状态 / 倒计时 / 是否成功
+  - **Tab 2 History Log**：80 行（每个 QRCode 一行），列：上一次自检开始时间 / 成功次数 / 失败次数 / 是否参加 / Description
+  - 数据仅保存在内存中（不持久化），按设备维度累计
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85_periodic_self_check_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85_periodic_self_check_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/configsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`（新增 `getSH85PeriodicSelfCheckTask()`）
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`（在 `initScheduler()` 中提交常驻任务）
+- 新增文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
+
+---
+
 ### 2026-05-16 - Simon
 **固件升级任务补发QRCode指令功能**
 

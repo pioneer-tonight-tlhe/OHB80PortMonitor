@@ -25,6 +25,14 @@ inline QString masterLogPath(const QString& id)
 {
     return AppLogger::SH85SelfCheckLoggerPath(id);
 }
+
+// 将原始字节 + CRC 拼接后转成大写空格分隔的 HEX 字符串（用于日志）
+inline QString frameToHex(const ModbusFrame& f)
+{
+    QByteArray bytes = f.rawBytes;
+    bytes.append(f.crc);
+    return QString::fromLatin1(bytes.toHex(' ').toUpper());
+}
 } // namespace
 
 // ============================================================
@@ -233,10 +241,14 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     qDebug() << "[data][SH85SelfChecker] 响应 state=" << stateToString(m_state)
              << "ok=" << ok << "id=" << cmd.id << "masterId=" << masterId;
 
+    const QString txHex = frameToHex(cmd.request);
+    const QString rxHex = frameToHex(cmd.response);
+
     LoggerManager::instance().log(masterLogPath(masterId).toStdString(),
         ok ? Level::INFO : Level::WARN,
-        QString("[data][SH85SelfChecker] 响应 state=%1 ok=%2 id=%3 masterId=%4")
-            .arg(stateToString(m_state)).arg(ok).arg(cmd.id).arg(masterId).toStdString());
+        QString("[data][SH85SelfChecker] 响应 state=%1 ok=%2 id=%3 masterId=%4\nTX：%5\nRX：%6")
+            .arg(stateToString(m_state)).arg(ok).arg(cmd.id).arg(masterId)
+            .arg(txHex).arg(rxHex).toStdString());
 
     switch (m_state) {
     // -------- 1) StartSelfCheck 响应 --------
