@@ -18,6 +18,11 @@ class SettingItemWidget;
 //
 //   按钮说明：
 //     - Set → 仅对 SpinBox 中的设备 ID 生效
+//
+//   功能：
+//     - 持久化到配置文件（OHBDeviceConfig）
+//     - 更新内存中 FoupOfOHBInfo::enable 状态
+//     - 下发 Modbus 指令 SetBoardEnable（FC06, 寄存器 0x00FF, 1=禁用, 0=正常）
 // ====================================================================
 class DeviceEnableSettingWidget : public SettingWidget
 {
@@ -34,6 +39,9 @@ private:
     void initUI();
     void initQrcodeItem();
     void initStatusItem();
+
+    // 下发 SetBoardEnable Modbus 指令
+    void submitBoardEnableCommand(const QString &qrcode, bool enable);
 
 private:
     QSpinBox        *m_qrcodeSpinBox = nullptr;

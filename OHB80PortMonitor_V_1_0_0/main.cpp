@@ -1,4 +1,3 @@
-// #include "head.h"
 #include "app.h"
 #include "quiwidget.h"
 #include "uidemo6.h"

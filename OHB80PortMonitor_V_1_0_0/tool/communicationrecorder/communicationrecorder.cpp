@@ -38,6 +38,12 @@ void CommunicationRecorder::submitCommand(const ModbusCommand& cmd, const QStrin
     // 检查响应时间差值必须大于0
     if (cmd.responseMs - cmd.sentMs <= 0) return;
 
+    // 仅对 THROTTLED_COMMAND_ID 指令进行节流，其它指令直接全量发射
+    if (cmd.id != QLatin1String(THROTTLED_COMMAND_ID)) {
+        emit shouldEmit(cmd, masterId);
+        return;
+    }
+
     // 仅存储最新指令；确保计数器存在
     m_latestCmd[masterId] = cmd;
     if (!m_counterMs.contains(masterId)) {
@@ -56,7 +62,7 @@ void CommunicationRecorder::onTick()
         // 根据 Foup 在位状态决定阈值
         FoupOfOHBInfo* foup = SharedData::getFoupByQRCode(masterId);
         int threshold = (foup && foup->foupIn()) ? THRESHOLD_FOUP_IN_MS
-                                               : THRESHOLD_FOUP_OUT_MS;
+                                                 : THRESHOLD_FOUP_OUT_MS;
 
         if (counter >= threshold) {
             // 达到阈值：发射信号并重置

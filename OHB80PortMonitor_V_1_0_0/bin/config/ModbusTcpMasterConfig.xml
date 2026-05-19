@@ -499,7 +499,60 @@
         </Command>
 
         <!-- ========================================
-             20. 功能码 10 — 写多个保持寄存器
+             20. 功能码 06 — 写单个保持寄存器
+             板卡状态禁用使能
+             请求帧: 01 06 00 FF XX XX CRC
+             响应帧: 01 06 00 FF XX XX CRC
+             数据：2 字节
+               CH_1 (2B) 板卡状态：1=禁用，0=正常
+             Note：
+               - 板卡禁用后关于 FOUP IN/OUT 切换产生的逻辑都会失效：
+                 1. 阀状态切换失效（气路均不导通）
+                 2. FOUP IN 30min 湿度检测失效（不执行）
+                 3. VEFC 流量下发为 0（但此时可直接配置 VEFC 气体介质；可下发 FOUP IN VEFC 流量设置，内部保存，注意不会生效，除非板卡禁用失能）
+               - 该禁用标志位会掉电保持
+             ======================================== -->
+        <Command id="SetBoardEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 FF</StartAddr>
+                <!-- 写入值：板卡状态（2字节，1=禁用，0=正常） -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 FF</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             21. 功能码 04 — 读输入寄存器（单寄存器）
+             读取板卡禁用状态
+             请求帧: 01 04 00 FF 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             数据：2 字节
+               CH_1 (2B) 板卡状态：1=禁用，0=正常
+             ======================================== -->
+        <Command id="ReadBoardEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 FF</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             22. 功能码 10 — 写多个保持寄存器
              设置 UI 页面刷新时间
              请求帧: 01 10 00 04 00 03 06 XX XX XX XX XX XX CRC
              响应帧: 01 10 00 04 00 03 CRC

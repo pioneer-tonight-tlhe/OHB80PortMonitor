@@ -104,6 +104,10 @@ void SendCommandTask::start()
         return;
     }
 
+    qDebug() << "[Scheduler][SendCommandTask] 目标设备数:" << targetIds.size();
+    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        QString("[Scheduler][SendCommandTask] 目标设备数=%1").arg(targetIds.size()).toStdString());
+
     // 构建参数覆盖的 registerValue（大端序）
     const QByteArray overrideRegisterValue = buildRegisterValue(m_params);
 
@@ -112,6 +116,13 @@ void SendCommandTask::start()
         ModbusTcpMaster *master = mgr.getMaster(id);
         if (!master) {
             qWarning() << "[Scheduler][SendCommandTask] Master 不存在:" << id;
+            m_resultFailedIds.append(id);
+            continue;
+        }
+
+        // 检查设备是否已连接
+        if (!master->isConnected()) {
+            qWarning() << "[Scheduler][SendCommandTask] 设备未连接:" << id;
             m_resultFailedIds.append(id);
             continue;
         }
@@ -138,6 +149,24 @@ void SendCommandTask::start()
         if (!overrideRegisterValue.isEmpty()) {
             cmd.request.registerValue = overrideRegisterValue;
             cmd.request.byteCount     = static_cast<quint8>(overrideRegisterValue.size());
+
+            // FC 0x06 rawBytes = [SlaveAddr(1) + Function(1) + StartAddr(2) + RegisterValue(2)]
+            // 需同步更新 rawBytes 中的 RegisterValue 部分，否则 buildRequestFrame 仍使用模板值
+            if (cmd.request.functionCode == 0x06
+                && cmd.request.rawBytes.size() >= 6
+                && overrideRegisterValue.size() >= 2) {
+                cmd.request.rawBytes[4] = overrideRegisterValue[0];
+                cmd.request.rawBytes[5] = overrideRegisterValue[1];
+            }
+            // FC 0x06 响应为请求的镜像回显，需同步更新 response 以通过校验
+            if (cmd.request.functionCode == 0x06
+                && overrideRegisterValue.size() >= 2) {
+                cmd.response.registerValue = overrideRegisterValue;
+                if (cmd.response.rawBytes.size() >= 6) {
+                    cmd.response.rawBytes[4] = overrideRegisterValue[0];
+                    cmd.response.rawBytes[5] = overrideRegisterValue[1];
+                }
+            }
         }
 
         // 直接连接 commandFinished 信号（信号已携带 masterId）

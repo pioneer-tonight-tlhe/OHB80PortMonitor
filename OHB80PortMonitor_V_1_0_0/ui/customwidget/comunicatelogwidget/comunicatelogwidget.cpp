@@ -471,7 +471,7 @@ void ComunicateLogWidget::setHistoryLogData(const QList<CommunicateRecord>& data
         model->setItem(row, 0, new QStandardItem(r.qrCode));
         model->setItem(row, 1, new QStandardItem(r.sendTime));
         model->setItem(row, 2, new QStandardItem(r.responseTime));
-        model->setItem(row, 3, new QStandardItem(r.qrCode));
+        model->setItem(row, 3, new QStandardItem(r.commandId));
         model->setItem(row, 4, new QStandardItem(QString::number(r.execStatus)));
         model->setItem(row, 5, new QStandardItem(QString::number(r.retryCount)));
         model->setItem(row, 6, new QStandardItem(QString(r.sendFrame.toHex(' ').toUpper())));

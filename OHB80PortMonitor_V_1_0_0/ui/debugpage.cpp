@@ -5,6 +5,7 @@
 #include "customwidget/debugsettingwidget/vefcgastypesettingwidget.h"
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
+#include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
 #include <QScrollBar>
 #include <QScroller>
 #include <QScrollerProperties>
@@ -17,6 +18,7 @@ DebugPage::DebugPage(QWidget *parent)
     , m_vefcGasTypeWidget(nullptr)
     , m_uiRefreshTimeWidget(nullptr)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
+    , m_boardEnableStatusWidget(nullptr)
 {
     ui->setupUi(this);
 
@@ -66,6 +68,10 @@ void DebugPage::initUI()
     // VEFC 流量单位 / 介质状态读取 SettingWidget
     m_vefcFlowUnitMediumStatusWidget = new VEFCFlowUnitMediumStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcFlowUnitMediumStatusWidget);
+
+    // 板卡禁用状态读取 SettingWidget
+    m_boardEnableStatusWidget = new BoardEnableStatusWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_boardEnableStatusWidget);
     
     ui->scrollAreaWidgetContents->layout()->addItem(
         new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding)
@@ -104,6 +110,8 @@ void DebugPage::navBtnClicked()
         targetWidget = m_uiRefreshTimeWidget;
     } else if (objName == "btnVEFCStatus") {
         targetWidget = m_vefcFlowUnitMediumStatusWidget;
+    } else if (objName == "btnBoardEnable") {
+        targetWidget = m_boardEnableStatusWidget;
     }
 
     if (targetWidget) {

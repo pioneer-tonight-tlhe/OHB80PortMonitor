@@ -13,7 +13,11 @@
  *
  * 作用：对 Modbus 通讯指令的上报频率进行节流，减轻 UI 日志写入压力。
  *
- * 策略：
+ * 范围：
+ *  - 仅对 THROTTLED_COMMAND_ID 指令（默认 "ReadFoupStatus"）进行节流上报；
+ *  - 其它指令通过 submitCommand() 立即全量发射 shouldEmit 信号。
+ *
+ * 节流策略（仅作用于 THROTTLED_COMMAND_ID）：
  *  - 当 FoupOfOHBInfo::foupIn == true（设备工作中）：每 1s 上报一次最新指令
  *  - 当 FoupOfOHBInfo::foupIn == false（设备空闲）：每 3s 上报一次最新指令
  *
@@ -21,7 +25,7 @@
  *  - 内部使用 QMap<QString, int> 记录每个设备累积的毫秒数
  *  - QTimer 每 1s 触发一次，累加计数器
  *  - 计数器达到阈值时发射 shouldEmit 信号，并重置计数器
- *  - submitCommand() 只存储最新指令，不直接发射信号
+ *  - submitCommand() 对目标指令只存储最新值并参与节流；其他指令直接转发
  *
  * 使用：
  *  - 创建实例，调用 start() 启动定时器
@@ -66,6 +70,9 @@ private:
     static constexpr int TICK_INTERVAL_MS      = 1000;  // 定时器间隔
     static constexpr int THRESHOLD_FOUP_IN_MS  = 1000;  // Foup 存在时阈值 1s
     static constexpr int THRESHOLD_FOUP_OUT_MS = 3000;  // Foup 空闲时阈值 3s
+
+    // 仅针对该指令进行节流（对应 ModbusTcpMasterConfig.xml 中 Command id）
+    static constexpr const char* THROTTLED_COMMAND_ID = "ReadFoupStatus";
 
     QTimer* m_timer = nullptr;
     QMap<QString, int>           m_counterMs;   // qrCode -> 累积毫秒数

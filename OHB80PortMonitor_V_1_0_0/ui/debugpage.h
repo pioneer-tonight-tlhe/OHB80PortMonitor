@@ -12,6 +12,7 @@ class FirmwareUpdateSettingWidget;
 class VEFCGasTypeSettingWidget;
 class UIRefreshTimeSettingWidget;
 class VEFCFlowUnitMediumStatusWidget;
+class BoardEnableStatusWidget;
 
 class DebugPage : public QWidget
 {
@@ -36,6 +37,7 @@ private:
     VEFCGasTypeSettingWidget          *m_vefcGasTypeWidget;
     UIRefreshTimeSettingWidget        *m_uiRefreshTimeWidget;
     VEFCFlowUnitMediumStatusWidget    *m_vefcFlowUnitMediumStatusWidget;
+    BoardEnableStatusWidget            *m_boardEnableStatusWidget;
 };
 
 #endif // DEBUGPAGE_H

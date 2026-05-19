@@ -14,9 +14,13 @@
 #include "operationrecord.h"
 #include "communicaterecord.h"
 #include "deviceparamrecord.h"
+#include "scheduler/scheduler_task.h"
 
 void MetaTypes::registerTypes()
 {
+    // 注册 SchedulerTask::State，用于 stateChanged 跨线程信号
+    qRegisterMetaType<SchedulerTask::State>("SchedulerTask::State");
+
     // 注册连接状态类型
     qRegisterMetaType<ModbusConnecter::ConnectionStatus>("ConnectionStatus");
 
