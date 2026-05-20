@@ -248,10 +248,18 @@ void SetPneumaticValvePressureTask::onCommandFinished(ModbusCommand cmd, const Q
                 description = parts.join(", ");
             }
         }
+        if (description.isEmpty()) {
+            description = QStringLiteral("OK");
+        }
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
                 : QString();
+            qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 插入通讯日志: sendTime=" << sentTimeStr
+                     << "respTime=" << respTimeStr << "commandId=" << cmd.id << "masterId=" << masterId
+                     << "execStatus=" << execStatus << "retryCount=" << retryCount
+                     << "sendFrame=" << cmd.request.rawBytes.toHex() << "respFrame=" << cmd.response.rawBytes.toHex()
+                     << "description=" << description;
             db->insertRecord(sentTimeStr, respTimeStr, cmd.id, masterId,
                              execStatus, retryCount,
                              cmd.request.rawBytes, cmd.response.rawBytes, description);

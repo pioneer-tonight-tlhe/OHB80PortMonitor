@@ -236,6 +236,20 @@ void MonitorDataTask::updateFoupInfo(const QString& masterId, const QString& com
             foup->setPurgeTimeSec(0);
         }
 
+        // // 将 foup 属性写入 device_param_log 数据库
+        // auto* dbCon = LogDB::DatabaseManager::instance().deviceParamLogCon();
+        // if (dbCon) {
+        //     dbCon->insertRecord(
+        //         masterId,
+        //         QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"),
+        //         foup->inletPressure(),
+        //         foup->negativePressure(),   // outlet_pressure 存储 negativePressure
+        //         foup->inletFlow(),
+        //         foup->RH(),
+        //         foup->temperature(),
+        //         foup->foupIn() ? 1 : 0);
+        // }
+
         // Process device status alarms
         bool vefcStatus = data.value("vefcStatus").toBool();
         bool tempHumStatus = data.value("tempHumStatus").toBool();

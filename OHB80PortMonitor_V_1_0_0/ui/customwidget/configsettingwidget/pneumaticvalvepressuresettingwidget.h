@@ -6,6 +6,7 @@
 #include <QSpinBox>
 #include <QPushButton>
 #include <QStringList>
+#include <QComboBox>
 
 class SettingItemWidget;
 
@@ -37,7 +38,8 @@ private:
 
 private:
     // 控件指针
-    QSpinBox  *m_qrcodeSpinBox;      // 设备 QRCode（int）
+    // QSpinBox  *m_qrcodeSpinBox;      // 设备 QRCode（int）
+    QComboBox *m_comboBox;              // 主设备队列
     QSpinBox  *m_pressureSpinBox;    // 压力设置（bar）
 
     // SettingItemWidget 指针（用于显示状态）

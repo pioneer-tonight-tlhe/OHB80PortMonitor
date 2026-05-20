@@ -10,6 +10,7 @@
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
 #include "loggermanager.h"
+#include "usermanager/usermanager.h"
 
 #include <QDebug>
 #include <QDateTime>
@@ -199,13 +200,17 @@ void SetUIRefreshTimeTask::onCommandFinished(ModbusCommand cmd, const QString &m
                 description = parts.join(", ");
             }
         }
+        if (description.isEmpty()) {
+            description = QStringLiteral("OK");
+        }
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
                 : QString();
             db->insertRecord(sentTimeStr, respTimeStr, cmd.id, masterId,
                              execStatus, retryCount,
-                             cmd.request.rawBytes, cmd.response.rawBytes, description);
+                             cmd.request.rawBytes, cmd.response.rawBytes, description,
+                             UserPermission::Engineer);
         }
     }
 

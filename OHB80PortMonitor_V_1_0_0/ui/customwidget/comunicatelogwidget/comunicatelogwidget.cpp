@@ -17,6 +17,18 @@
 #include <QScrollerProperties>
 #include <QMessageBox>
 
+// execStatus 数字转可读字符串
+static QString execStatusToString(int status)
+{
+    switch (status) {
+    case 0: return QStringLiteral("Success");
+    case 1: return QStringLiteral("Timeout");
+    case 2: return QStringLiteral("Retry");
+    case 3: return QStringLiteral("Send Failed");
+    default: return QString::number(status);
+    }
+}
+
 // 固定列头（包含完整的通讯日志字段）
 const QStringList ComunicateLogWidget::kLiveHeaders = {
     QStringLiteral("QRCode"),
@@ -227,7 +239,7 @@ void ComunicateLogWidget::writeLog(const QString& qrcode, const QString& sendTim
         model->setItem(row, 2, new QStandardItem(responseTime));
         model->setItem(row, 3, new QStandardItem(commandId));
         model->setItem(row, 4, new QStandardItem(durationMs));
-        model->setItem(row, 5, new QStandardItem(execStatus));
+        model->setItem(row, 5, new QStandardItem(execStatusToString(execStatus.toInt())));
         model->setItem(row, 6, new QStandardItem(retryCount));
         model->setItem(row, 7, new QStandardItem(request));
         model->setItem(row, 8, new QStandardItem(response));
@@ -472,11 +484,18 @@ void ComunicateLogWidget::setHistoryLogData(const QList<CommunicateRecord>& data
         model->setItem(row, 1, new QStandardItem(r.sendTime));
         model->setItem(row, 2, new QStandardItem(r.responseTime));
         model->setItem(row, 3, new QStandardItem(r.commandId));
-        model->setItem(row, 4, new QStandardItem(QString::number(r.execStatus)));
+        model->setItem(row, 4, new QStandardItem(execStatusToString(r.execStatus)));
         model->setItem(row, 5, new QStandardItem(QString::number(r.retryCount)));
         model->setItem(row, 6, new QStandardItem(QString(r.sendFrame.toHex(' ').toUpper())));
         model->setItem(row, 7, new QStandardItem(QString(r.responseFrame.toHex(' ').toUpper())));
         model->setItem(row, 8, new QStandardItem(r.description));
+
+        // 设置文本对齐：除 Description（第 8 列）外，其他字段居中
+        for (int col = 0; col < 8; ++col) {
+            if (auto* item = model->item(row, col)) {
+                item->setTextAlignment(Qt::AlignCenter);
+            }
+        }
     }
 
     // 设置列宽：确保时间字段完整显示

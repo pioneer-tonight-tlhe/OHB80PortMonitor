@@ -207,6 +207,9 @@ void SetPurgeFlowTask::onCommandFinished(ModbusCommand cmd, const QString &maste
                 description = parts.join(", ");
             }
         }
+        if (description.isEmpty()) {
+            description = QStringLiteral("OK");
+        }
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))

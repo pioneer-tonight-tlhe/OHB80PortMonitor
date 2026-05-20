@@ -1,5 +1,6 @@
 #include "pneumaticvalvepressuresettingwidget.h"
 #include "../settingwidget/settingitemwidget.h"
+#include "ohbdeviceconfig.h"
 #include "scheduler/scheduler.h"
 #include "tasks/set_pneumatic_valve_pressure_task.h"
 #include "app/shareddata.h"
@@ -11,7 +12,7 @@
 
 PneumaticValvePressureSettingWidget::PneumaticValvePressureSettingWidget(QWidget *parent)
     : SettingWidget(parent)
-    , m_qrcodeSpinBox(nullptr)
+    , m_comboBox(nullptr)
     , m_pressureSpinBox(nullptr)
     , m_qrcodeItem(nullptr)
     , m_pressureItem(nullptr)
@@ -40,19 +41,28 @@ void PneumaticValvePressureSettingWidget::initQrcodeItem()
     m_qrcodeItem->setTitle("Target Device");
     m_qrcodeItem->setTip("Target device QRCode (numeric, used by Set button)");
 
-    m_qrcodeSpinBox = new QSpinBox(m_qrcodeItem);
-    m_qrcodeSpinBox->setRange(0, 99999);
-    m_qrcodeSpinBox->setFixedWidth(160);
+    // m_qrcodeSpinBox = new QSpinBox(m_qrcodeItem);
+    // m_qrcodeSpinBox->setRange(0, 99999);
+    // m_qrcodeSpinBox->setFixedWidth(160);
 
-    const QStringList qrcodes = SharedData::getAllQrcodes();
-    if (!qrcodes.isEmpty()) {
-        bool ok = false;
-        const int v = qrcodes.first().toInt(&ok);
-        if (ok) m_qrcodeSpinBox->setValue(v);
-        else qWarning() << "[ui][PneumaticValvePressureSettingWidget] qrcode 转换 int 失败:" << qrcodes.first();
+    m_comboBox = new QComboBox(m_qrcodeItem);
+    m_comboBox->setFixedWidth(160);
+
+    // const QStringList qrcodes = SharedData::getAllQrcodes();
+    // if (!qrcodes.isEmpty()) {
+    //     bool ok = false;
+    //     const int v = qrcodes.first().toInt(&ok);
+    //     if (ok) m_qrcodeSpinBox->setValue(v);
+    //     else qWarning() << "[ui][PneumaticValvePressureSettingWidget] qrcode 转换 int 失败:" << qrcodes.first();
+    // }
+
+    for (auto qrcode : OHBDeviceConfig::getInstance().readMasterDevices())
+    {
+        m_comboBox->addItem(qrcode);
     }
 
-    m_qrcodeItem->addWidget("qrcode_spin", m_qrcodeSpinBox);
+    // m_qrcodeItem->addWidget("qrcode_spin", m_qrcodeSpinBox);
+    m_qrcodeItem->addWidget("qrcode_spin", m_comboBox);
     addItem(m_qrcodeItem);
 }
 
@@ -88,14 +98,19 @@ void PneumaticValvePressureSettingWidget::initPressureItem()
 
 void PneumaticValvePressureSettingWidget::onSetBtnClicked()
 {
-    const QString qrcode = QString::number(m_qrcodeSpinBox->value());
+    // const QString qrcode = QString::number(m_qrcodeSpinBox->value());
+    const QString qrcode = m_comboBox->currentText();
     const double pressureBar = m_pressureSpinBox->value();
     submitPressureTask(QStringList{qrcode}, pressureBar);
 }
 
 void PneumaticValvePressureSettingWidget::onSetAllBtnClicked()
 {
-    const QStringList qrcodes = SharedData::getAllQrcodes();
+    QStringList qrcodes;
+    for (auto qrcode : OHBDeviceConfig::getInstance().readMasterDevices())
+    {
+        qrcodes.append(qrcode);
+    }
     if (qrcodes.isEmpty()) {
         QMessageBox::warning(this, "Set Failed", "No target device available");
         return;

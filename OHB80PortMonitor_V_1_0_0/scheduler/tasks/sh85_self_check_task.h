@@ -61,6 +61,7 @@ private slots:
     void onCheckerCountdownTick(int remainingSeconds, const QString& masterId);
     void onCheckerErrorOccurred(SH85SelfChecker::Result result, const QString& message, const QString& masterId);
     void onCheckerFinished(bool success, SH85SelfChecker::Result result, const QString& message, const QString& masterId);
+    void onCommandCompleted(ModbusCommand cmd, const QString& masterId);
 
 private:
     // ---- 私有方法 ----

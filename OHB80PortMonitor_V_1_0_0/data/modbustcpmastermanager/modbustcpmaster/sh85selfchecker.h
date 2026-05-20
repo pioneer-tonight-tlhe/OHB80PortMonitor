@@ -150,6 +150,12 @@ signals:
     void stateChanged(SH85SelfChecker::State state, const QString& masterId);
 
     /**
+     * @brief 每条 Modbus 指令完成后发出（仅本 checker 下发的指令）
+     *        供 Task 层订阅后写入 communicatelogdb，不在 Data 层直接操作数据库
+     */
+    void commandCompleted(ModbusCommand cmd, const QString& masterId);
+
+    /**
      * @brief 错误信号（任意阶段失败均会发出）
      */
     void errorOccurred(SH85SelfChecker::Result result,

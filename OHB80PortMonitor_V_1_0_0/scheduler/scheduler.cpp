@@ -91,9 +91,9 @@ QString Scheduler::submitTask(SchedulerTask *task)
     
     QString taskId = task->taskId();
     
-    // 将任务移动到调度器线程
-    task->moveToThread(&m_thread);
+    // 先解除父对象，再移动到调度器线程（Qt 不允许移动有 parent 的对象）
     task->setParent(nullptr);
+    task->moveToThread(&m_thread);
     
     // 连接信号
     connectTaskSignals(task);

@@ -8,6 +8,177 @@
 
 ## 更新日志
 
+### 2026-05-19 - Simon
+**ComunicateLogWidget UI 优化：ExecStatus 字符串化 / 历史日志居中对齐**
+
+#### 背景
+通讯日志的 `ExecStatus` 字段原以数字形式显示（0/1/2/3），用户需查阅文档才能理解含义。历史日志文本对齐方式不统一，影响阅读体验。
+
+#### 修改内容
+- **`comunicatelogwidget.cpp`**：新增静态辅助函数 `execStatusToString(int status)`，将状态码映射为可读字符串：
+  - 0 → "Success"
+  - 1 → "Timeout"
+  - 2 → "Retry"
+  - 3 → "Send Failed"
+- **实时日志**：`setLiveLogData()` 第 5 列（Exec Status）由直接显示数字改为调用 `execStatusToString(execStatus.toInt())`
+- **历史日志**：`setHistoryLogData()` 第 4 列（Exec Status）改为调用 `execStatusToString(r.execStatus)`
+- **历史日志居中对齐**：`setHistoryLogData()` 中对除 Description（第 8 列）外的所有字段（0-7 列）设置 `Qt::AlignCenter`，提升表格对齐一致性
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/comunicatelogwidget/comunicatelogwidget.cpp`
+
+---
+
+### 2026-05-19 - Simon
+**MonitorDataTask：禁用设备参数日志写入**
+
+#### 背景
+`device_param_log` 数据库用于记录设备参数变化历史，但当前写入频率过高（每秒每台设备写入一次），且未被上层功能使用。为减少数据库写入压力，暂时禁用该日志写入功能。
+
+#### 修改内容
+- **`monitor_data_task.cpp`**：注释掉将 foup 属性写入 `device_param_log` 数据库的代码块（约 10 行），保留代码结构以便后续按需恢复
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/monitor_data_task.cpp`
+
+---
+
+### 2026-05-19 - Simon
+**ReadBoardEnable：新增读取板卡禁用状态指令 + DebugPage 集成**
+
+#### 背景
+新增通过 Modbus FC04 读取板卡当前禁用/正常状态的功能，配合已有的 `SetBoardEnable` 写指令，形成完整的读写闭环。UI 集成在 DebugPage 中。
+
+#### 数据层（`ModbusTcpMasterConfig.xml`）
+- **新增 `ReadBoardEnable` 指令**（FC 04, 寄存器 0x00FF, 读 1 个寄存器）
+  - 请求帧：`01 04 00 FF 00 01 CRC`
+  - 响应帧：`01 04 02 XX XX CRC`（CH_1：1=禁用，0=正常）
+
+#### UI 层（`boardenablestatuswidget.{h,cpp}` 新增）
+- **新增 `BoardEnableStatusWidget`**（DebugPage 下的 SettingWidget）
+  - Target Device：ComboBox 显示已注册设备 QRCode
+  - Read 按钮：读取指定设备状态
+  - Read All 按钮：读取所有已注册设备状态
+  - 通过 `SendCommandTask::dataResult` 解析响应 `registerValue`，弹窗显示每台设备结果（`Normal (Enabled)` / `Disabled`）
+
+#### DebugPage 集成（`debugpage.{ui,h,cpp}`）
+- 导航栏新增 `Board Enable` 按钮
+- 添加 `m_boardEnableStatusWidget` 成员和初始化
+
+#### 构建系统（`debugsettingwidget.pri`）
+- 新增 `boardenablestatuswidget.{h,cpp}`
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+- 新增文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/boardenablestatuswidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/boardenablestatuswidget.cpp`
+
+---
+
+### 2026-05-19 - Simon
+**SendCommandTask：修复 FC06 寄存器值未同步 rawBytes / 新增未连接设备早退**
+
+#### 背景
+`SendCommandTask` 覆盖 `registerValue` 后，`buildRequestFrame()` 仍使用模板预建的 `rawBytes`，导致实际发送帧中寄存器值始终为模板值（如 `00 00`），与传入参数不符。
+
+#### 修复内容
+- **`send_command_task.cpp::start()`**：覆盖 `registerValue` 后同步更新：
+  - `request.rawBytes[4..5]`（FC06 RegisterValue 字节位置）
+  - `response.registerValue` 及 `response.rawBytes[4..5]`（FC06 响应为请求镜像，需同步以通过校验）
+- **新增连接状态检查**：在获取 master 后调用 `master->isConnected()`，未连接设备直接标记为失败并跳过，避免向离线设备发送指令并阻塞超时等待
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/send_command_task.cpp`
+
+---
+
+### 2026-05-19 - Simon
+**PneumaticValvePressureSettingWidget：Target Device 改用 ComboBox**
+
+#### 背景
+原 Target Device 使用 `QSpinBox` 手动输入 QRCode，不直观且容易输错。改为 `QComboBox` 从配置文件读取已注册设备列表，提升操作安全性和便捷性。
+
+#### 修改内容
+- **`pneumaticvalvepressuresettingwidget.h`**：`QSpinBox *m_qrcodeSpinBox` 改为 `QComboBox *m_comboBox`，新增 `<QComboBox>` 头文件
+- **`pneumaticvalvepressuresettingwidget.cpp`**：
+  - `initQrcodeItem()`：改用 `QComboBox`，通过 `OHBDeviceConfig::getInstance().readMasterDevices()` 填充设备列表
+  - `onSetBtnClicked()`：从 `m_comboBox->currentText()` 获取 QRCode
+  - `onSetAllBtnClicked()`：改用 `OHBDeviceConfig::getInstance().readQRCodes()` 获取全部设备列表
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/pneumaticvalvepressuresettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/pneumaticvalvepressuresettingwidget.cpp`
+
+---
+
+### 2026-05-19 - Simon
+**ComunicateLogWidget：历史日志 CommandId 列修复**
+
+#### 背景
+历史日志第 3 列（CommandId）错误地显示了 `qrCode` 字段内容，应显示 `commandId`。
+
+#### 修改内容
+- `comunicatelogwidget.cpp::setHistoryLogData()`：第 3 列由 `r.qrCode` 改为 `r.commandId`
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/comunicatelogwidget/comunicatelogwidget.cpp`
+
+---
+
+### 2026-05-18 - Simon
+**MetaTypes：集中注册 SchedulerTask::State 元类型**
+
+#### 背景
+`SchedulerTask::State` 在跨线程队列连接（`stateChanged` 信号）中触发 Qt 警告 `Cannot queue arguments of type 'SchedulerTask::State'`，需注册元类型。原临时在构造函数中注册，现移至统一管理处。
+
+#### 修改内容
+- **`metatypes.cpp`**：在 `MetaTypes::registerTypes()` 中添加 `qRegisterMetaType<SchedulerTask::State>("SchedulerTask::State")`，并包含 `scheduler/scheduler_task.h`
+- **`scheduler_task.h`**：移除构造函数中的临时注册代码，构造函数恢复简洁
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/app/metatypes.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler_task.h`
+
+---
+
+### 2026-05-18 - Simon
+**DeviceEnableSettingWidget：板卡禁用使能指令下发**
+
+#### 背景
+`DeviceEnableSettingWidget` 原有功能仅在本地持久化设备 Enable/Disable 状态到 `ohb_device.ini`，未向设备下发 Modbus 指令。现新增通过 `SendCommandTask` 下发 `SetBoardEnable`（FC06, 寄存器 0x00FF）指令，且仅在指令成功后才持久化配置。
+
+#### UI 层（`deviceenablesettingwidget.{h,cpp}`）
+- **新增 `submitBoardEnableCommand()` 方法**：通过 `SendCommandTask` 向指定设备下发 `SetBoardEnable` 指令
+  - UI "Enable" → 寄存器值 `0x0000`（板卡正常）
+  - UI "Disable" → 寄存器值 `0x0001`（板卡禁用）
+- **流程调整**：`onSetClicked()` 不再先持久化，改为先下发 Modbus 指令，在 `allFinished` 成功回调中才：
+  1. 调用 `OHBDeviceConfig::setDeviceEnable()` 持久化到 `ohb_device.ini`
+  2. 更新内存 `FoupOfOHBInfo::enable` 状态
+  3. 弹窗提示成功/失败
+- 指令失败时不修改配置文件，状态栏显示失败
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceenablesettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceenablesettingwidget.cpp`
+- 依赖：
+  - `scheduler/tasks/send_command_task.h`（已有通用任务，直接复用）
+  - `bin/config/ModbusTcpMasterConfig.xml`（已有 `SetBoardEnable` 指令定义）
+
+---
+
 ### 2026-05-18 - Simon
 **SH85 周期自检 UI/Task 增量改进：英文化 / Participated 列 / Success 配色 / FOUP in 过滤 / 触屏滚动 / TX-RX 原始帧日志**
 
@@ -47,6 +218,11 @@
 #### 信号连线（`sh85periodicselfchecksettingwidget.cpp`）
 - 新增 `task::deviceParticipated` → `SH85SelfCheckReportDialog::onDeviceParticipated`（`Qt::QueuedConnection`）
 
+#### 工具层（`tool/communicationrecorder/communicationrecorder.{h,cpp}`）
+- **节流范围收窄**：`CommunicationRecorder` 之前对所有 Modbus 指令进行节流上报，现仅对 `THROTTLED_COMMAND_ID = "ReadFoupStatus"` 这一条高频指令做节流（FOUP in 1s / FOUP out 3s 阈值），其它指令在 `submitCommand()` 中**立即全量发射** `shouldEmit`，确保业务/低频指令日志不丢失。
+- 新增私有常量 `static constexpr const char* THROTTLED_COMMAND_ID = "ReadFoupStatus";`，后续如需扩展可改为集合。
+- `start()` / `stop()` / `onTick()` 行为保持原节流逻辑（仅服务于目标指令）。
+
 #### 影响范围
 - 修改文件：
   - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85_periodic_self_check_task.h`
@@ -55,6 +231,9 @@
   - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.h`
   - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
   - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.cpp`
+  - `OHB80PortMonitor_V_1_0_0/tool/communicationrecorder/communicationrecorder.h`
+  - `OHB80PortMonitor_V_1_0_0/tool/communicationrecorder/communicationrecorder.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`（新增 `SetBoardEnable` 指令，功能码 06 / 寄存器 0x00FF）
 - 文档：
   - `OHB80PortMonitor_V_1_0_0/docs/realize/sh85_periodic_self_check.md`（按当前实现重写）
 

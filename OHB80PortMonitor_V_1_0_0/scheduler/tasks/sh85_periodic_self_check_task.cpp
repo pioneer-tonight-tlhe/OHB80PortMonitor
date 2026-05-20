@@ -7,6 +7,10 @@
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
 #include "loggermanager.h"
+#include "usermanager/usermanager.h"
+#include "logdatabases/databasemanager.h"
+#include "logdatabases/communicatelogdb/communicatelogdbcon.h"
+#include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -476,9 +480,50 @@ void SH85PeriodicSelfCheckTask::connectChecker(SH85SelfChecker* checker)
                       this, &SH85PeriodicSelfCheckTask::onCheckerStateChanged,
                       Qt::QueuedConnection);
 
+    auto c4 = connect(checker, &SH85SelfChecker::commandCompleted,
+                      this, &SH85PeriodicSelfCheckTask::onCommandCompleted,
+                      Qt::QueuedConnection);
+
     m_checkerConnections.append(c1);
     m_checkerConnections.append(c2);
     m_checkerConnections.append(c3);
+    m_checkerConnections.append(c4);
+}
+
+void SH85PeriodicSelfCheckTask::onCommandCompleted(ModbusCommand cmd, const QString& masterId)
+{
+    const QString sentTimeStr = cmd.sentMs > 0
+        ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
+        : QStringLiteral("-");
+    int execStatus = 3;
+    if (cmd.received)           execStatus = 0;
+    else if (cmd.timedOut)      execStatus = 1;
+    else if (cmd.sendCount > 1) execStatus = 2;
+    const int retryCount = qMax(0, cmd.sendCount - 1);
+    QString description;
+    if (execStatus != 0) {
+        description = cmd.errorMessage;
+    } else {
+        QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
+        if (!parsedData.isEmpty()) {
+            QStringList parts;
+            for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it)
+                parts << QString("%1=%2").arg(it.key(), it.value().toString());
+            description = parts.join(", ");
+        }
+    }
+    if (description.isEmpty()) {
+        description = QStringLiteral("OK");
+    }
+    if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
+        const QString respTimeStr = cmd.responseMs > 0
+            ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
+            : QString();
+        db->insertRecord(sentTimeStr, respTimeStr, cmd.id, masterId,
+                         execStatus, retryCount,
+                         cmd.request.rawBytes, cmd.response.rawBytes, description,
+                         UserPermission::Engineer);
+    }
 }
 
 void SH85PeriodicSelfCheckTask::disconnectAllCheckers()

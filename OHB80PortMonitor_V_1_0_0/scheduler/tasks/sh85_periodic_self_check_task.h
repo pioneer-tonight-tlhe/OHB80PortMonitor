@@ -174,6 +174,7 @@ private slots:
                            const QString& masterId);
     void onCheckerCountdown(int remainingSeconds, const QString& masterId);
     void onCheckerStateChanged(SH85SelfChecker::State state, const QString& masterId);
+    void onCommandCompleted(ModbusCommand cmd, const QString& masterId);
 
 private:
     // ---- 状态切换 ----

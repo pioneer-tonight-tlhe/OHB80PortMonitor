@@ -15,6 +15,7 @@
 #include "communicaterecord.h"
 #include "deviceparamrecord.h"
 #include "scheduler/scheduler_task.h"
+#include "usermanager/usermanager.h"
 
 void MetaTypes::registerTypes()
 {
@@ -55,6 +56,9 @@ void MetaTypes::registerTypes()
     qRegisterMetaType<QList<OperationRecord>>("QList<OperationRecord>");
     qRegisterMetaType<QList<CommunicateRecord>>("QList<CommunicateRecord>");
     qRegisterMetaType<QList<DeviceParamRecord>>("QList<DeviceParamRecord>");
+
+    // 注册 UserPermission，用于 permissionChanged / loginSuccess 跨线程信号
+    qRegisterMetaType<UserPermission>("UserPermission");
 
     qDebug() << "All meta types registered successfully";
 }

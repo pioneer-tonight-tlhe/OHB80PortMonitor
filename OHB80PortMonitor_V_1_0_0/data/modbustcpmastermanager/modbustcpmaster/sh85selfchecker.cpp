@@ -236,6 +236,9 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
 
     m_pendingUuid = 0;
 
+    // 通知 Task 层写通讯日志（Data 层不直接操作 communicatelogdb）
+    emit commandCompleted(cmd, masterId);
+
     const bool ok = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
 
     qDebug() << "[data][SH85SelfChecker] 响应 state=" << stateToString(m_state)
