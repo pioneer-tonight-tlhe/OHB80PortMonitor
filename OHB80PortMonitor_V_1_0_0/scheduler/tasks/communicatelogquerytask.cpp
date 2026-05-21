@@ -1,6 +1,6 @@
 #include "communicatelogquerytask.h"
 #include "databasemanager.h"
-#include <QDebug>
+#include "loggermanager.h"
 
 CommunicateLogQueryTask::CommunicateLogQueryTask(QObject *parent)
     : SchedulerTask{parent}
@@ -11,6 +11,7 @@ CommunicateLogQueryTask::CommunicateLogQueryTask(QObject *parent)
     , m_pageSize(500)
     , m_sortOrder(LogDB::SortOrder::Desc)
 {
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[CommunicateLogQueryTask] 通讯日志查询任务已构造");
 }
 
 void CommunicateLogQueryTask::start()
@@ -19,17 +20,20 @@ void CommunicateLogQueryTask::start()
     m_db = LogDB::DatabaseManager::instance().communicateLogCon();
     if (!m_db) {
         setState(Failed);
+        LoggerManager::instance().log(LOG_PATH, Level::ERROR, "[start] 通讯日志数据库不可用");
         emit finished(false, "CommunicateLogDBCon unavailable");
         return;
     }
 
     setState(Running);
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[start] 通讯日志查询任务已启动");
     executeQuery();
 }
 
 void CommunicateLogQueryTask::stop()
 {
     setState(Finished);
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[stop] 通讯日志查询任务已停止");
 }
 
 void CommunicateLogQueryTask::setPageNumber(int pageNumber)
@@ -77,6 +81,7 @@ void CommunicateLogQueryTask::executeQuery()
 {
     if (!m_db) {
         setState(Failed);
+        LoggerManager::instance().log(LOG_PATH, Level::ERROR, "[executeQuery] 数据库连接不可用");
         emit finished(false, "Database connection not available");
         return;
     }
@@ -106,13 +111,13 @@ void CommunicateLogQueryTask::executeQuery()
             if (m_startTime > m_endTime) {
                 qSwap(m_startTime, m_endTime);
             }
-            qDebug() << "[CommunicateLogQueryTask] 钳制后时间范围:"
-                     << m_startTime << "->" << m_endTime
-                     << " (DB:" << dbEarliest << "->" << dbLatest << ")";
+            LoggerManager::instance().log(LOG_PATH, Level::INFO,
+                QString("[executeQuery] 钳制后时间范围: %1 -> %2 (数据库: %3 -> %4)")
+                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
         } else {
-            qDebug() << "[CommunicateLogQueryTask] 请求窗口与 DB 范围无重叠，不钳制:"
-                     << m_startTime << "->" << m_endTime
-                     << " (DB:" << dbEarliest << "->" << dbLatest << ")";
+            LoggerManager::instance().log(LOG_PATH, Level::INFO,
+                QString("[executeQuery] 请求窗口与数据库范围无重叠，不钳制: %1 -> %2 (数据库: %3 -> %4)")
+                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
         }
     }
 
@@ -133,5 +138,6 @@ void CommunicateLogQueryTask::executeQuery()
     emit totalCountWithConditionsResult(totalCountWithConditions);
 
     setState(Finished);
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[executeQuery] 查询完成");
     emit finished(true, "Query completed successfully");
 }

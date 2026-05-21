@@ -15,3 +15,7 @@ include ($$PWD/communicationrecorder/communicationrecorder.pri)
 INCLUDEPATH += $$PWD/communicationrecorder
 
 # usermanager 已迁移至 data/usermanager
+
+# defer - RAII 模式，在作用域结束时自动执行回调函数
+include ($$PWD/defer/defer.pri)
+INCLUDEPATH += $$PWD/defer

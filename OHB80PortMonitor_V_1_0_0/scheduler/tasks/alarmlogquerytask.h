@@ -38,6 +38,9 @@ signals:
 private:
     LogDB::AlarmLogDBCon* m_db;
 
+    // 日志路径
+    static constexpr const char* LOG_PATH = "scheduler/alarm_log_query_task";
+
     // 查询条件
     int     m_alarmLevel;       // -1 表示未设置
     QString m_qrCode;           // 空字符串表示未设置

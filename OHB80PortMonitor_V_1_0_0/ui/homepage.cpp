@@ -1,9 +1,11 @@
 #include "homepage.h"
 #include "ui_homepage.h"
 #include "app.h"
+#include "qthelper.h"
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QMessageBox>
 #include <QCoreApplication>
 #include <QDir>
 #include <QPointF>
@@ -13,6 +15,18 @@ HomePage::HomePage(QWidget *parent)
     , ui(new Ui::HomePage)
 {
     ui->setupUi(this);
+
+    // // 查询 D 盘磁盘情况
+    // qint64 totalBytes = QtHelper::diskTotalBytes("D:/");
+    // qint64 usedBytes  = QtHelper::diskUsedBytes("D:/");
+    // if (totalBytes >= 0 && usedBytes >= 0) {
+    //     double totalGB = totalBytes / 1024.0 / 1024.0 / 1024.0;
+    //     double usedGB  = usedBytes  / 1024.0 / 1024.0 / 1024.0;
+    //     QMessageBox::information(this, "D 盘磁盘情况",
+    //         QString("D 盘总容量: %1 GB\n已用: %2 GB").arg(totalGB, 0, 'f', 2).arg(usedGB, 0, 'f', 2));
+    // } else {
+    //     QMessageBox::warning(this, "磁盘信息", "无法获取 D 盘磁盘信息");
+    // }
 
     initUI();
 }

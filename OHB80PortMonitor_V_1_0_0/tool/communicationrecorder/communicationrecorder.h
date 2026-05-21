@@ -18,8 +18,9 @@
  *  - 其它指令通过 submitCommand() 立即全量发射 shouldEmit 信号。
  *
  * 节流策略（仅作用于 THROTTLED_COMMAND_ID）：
- *  - 当 FoupOfOHBInfo::foupIn == true（设备工作中）：每 1s 上报一次最新指令
- *  - 当 FoupOfOHBInfo::foupIn == false（设备空闲）：每 3s 上报一次最新指令
+ *  - 当 foupIn == true 且 purgeTimeSec >  30s（充气中）：每 5s 上报一次最新指令
+ *  - 当 foupIn == true 且 purgeTimeSec <= 30s（刚放入）：每 1s 上报一次最新指令
+ *  - 当 foupIn == false（设备空闲）              ：每 5s 上报一次最新指令
  *
  * 实现：
  *  - 内部使用 QMap<QString, int> 记录每个设备累积的毫秒数
@@ -67,9 +68,10 @@ private slots:
 
 private:
     // 节流常量（ms）
-    static constexpr int TICK_INTERVAL_MS      = 1000;  // 定时器间隔
-    static constexpr int THRESHOLD_FOUP_IN_MS  = 1000;  // Foup 存在时阈值 1s
-    static constexpr int THRESHOLD_FOUP_OUT_MS = 3000;  // Foup 空闲时阈值 3s
+    static constexpr int TICK_INTERVAL_MS       = 1000;  // 定时器间隔
+    static constexpr int THRESHOLD_FOUP_IN_MS   = 1000;  // Foup 刚放入时阈值 1s
+    static constexpr int THRESHOLD_PURGING_MS   = 5000;  // Foup 充气中(>30s)阈值 5s
+    static constexpr int THRESHOLD_FOUP_OUT_MS  = 5000;  // Foup 空闲时阈值 5s
 
     // 仅针对该指令进行节流（对应 ModbusTcpMasterConfig.xml 中 Command id）
     static constexpr const char* THROTTLED_COMMAND_ID = "ReadFoupStatus";

@@ -1,10 +1,15 @@
 #include "communicatelogsqllogic.h"
 #include "dbconnectionhelper.h"
 #include "logcleanupscheduler.h"
+#include "qthelper.h"
+#include "loggermanager.h"
+#include "defer/defer.h"
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlRecord>
+#include <QTimer>
 #include <QDateTime>
+#include <QDate>
 #include <QDebug>
 
 namespace LogDB {
@@ -15,6 +20,7 @@ CommunicateLogSqlLogic::CommunicateLogSqlLogic(const QString& databasePath, QObj
     , m_connectionName("CommunicateLogSqlLogicConnection")
     , m_sqlMapper(nullptr)
     , m_cleanupScheduler(nullptr)
+    , m_diskCheckTimer(nullptr)
 {
     QString sqlFilePath = QString("%1/communicate_log_queries.sql").arg(databasePath);
     m_sqlMapper = new SqlMapper(sqlFilePath);
@@ -22,6 +28,9 @@ CommunicateLogSqlLogic::CommunicateLogSqlLogic(const QString& databasePath, QObj
 
 CommunicateLogSqlLogic::~CommunicateLogSqlLogic()
 {
+    if (m_diskCheckTimer) {
+        m_diskCheckTimer->stop();
+    }
     if (m_cleanupScheduler) {
         m_cleanupScheduler->stop();
         delete m_cleanupScheduler;
@@ -44,6 +53,7 @@ bool CommunicateLogSqlLogic::initializeDatabase()
     }
 
     initializeCleanupScheduler();
+    initializeDiskCheckTimer();
     return true;
 }
 
@@ -53,6 +63,7 @@ void CommunicateLogSqlLogic::initializeCleanupScheduler()
     cfg.checkIntervalMs = 60000;
     cfg.retainMonths = 7;
     cfg.cleanupMonths = 1;
+    cfg.logPath = "log_db/communicate_log_db/month_clean";
     m_cleanupScheduler = new LogCleanupScheduler(cfg, this);
     m_cleanupScheduler->setMonthRangeProvider([this]() {
         return queryMonthRange();
@@ -294,6 +305,95 @@ bool CommunicateLogSqlLogic::deleteByTimeRange(const QString& startTime, const Q
 
     emit writeExecuted(result);
     return true;
+}
+
+void CommunicateLogSqlLogic::initializeDiskCheckTimer()
+{
+    m_diskCheckTimer = new QTimer(this);
+    connect(m_diskCheckTimer, &QTimer::timeout,
+            this, &CommunicateLogSqlLogic::checkDiskSpaceAndCleanup);
+    m_diskCheckTimer->start(DISK_CHECK_INTERVAL_MS);
+    LoggerManager::instance().log("log_db/communicate_log_db/clean", Level::INFO,
+        QString("磁盘空间检查定时器已启动，间隔: %1ms, 阈值: %2%")
+            .arg(DISK_CHECK_INTERVAL_MS)
+            .arg(DISK_USAGE_THRESHOLD * 100)
+            .toStdString());
+    LoggerManager::instance().flush("log_db/communicate_log_db/clean");
+}
+
+void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
+{
+    const std::string logPath = "log_db/communicate_log_db/clean";
+// 使用 Defer 确保函数退出时刷新日志
+    Tool::Defer defer([logPath]() {
+        LoggerManager::instance().flush(logPath);
+    });
+
+    
+    qint64 totalBytes = QtHelper::diskTotalBytes(m_databasePath);
+    qint64 usedBytes  = QtHelper::diskUsedBytes(m_databasePath);
+
+    if (totalBytes <= 0 || usedBytes < 0) {
+        LoggerManager::instance().log(logPath, Level::WARN,
+            QString("无法获取磁盘空间信息，路径: %1").arg(m_databasePath).toStdString());
+        return;
+    }
+
+    double usageRatio = static_cast<double>(usedBytes) / totalBytes;
+    double totalGB = totalBytes / 1024.0 / 1024.0 / 1024.0;
+    double usedGB  = usedBytes  / 1024.0 / 1024.0 / 1024.0;
+    bool needCleanup = usageRatio >= DISK_USAGE_THRESHOLD;
+
+    // 每次检测都打印磁盘使用情况
+    LoggerManager::instance().log(logPath, Level::INFO,
+        QString("磁盘空间检测: 使用率 %1% (已用 %2 GB / %3 GB), 阈值 %4%, 需要清理: %5")
+            .arg(QString::number(usageRatio * 100, 'f', 1))
+            .arg(QString::number(usedGB, 'f', 2))
+            .arg(QString::number(totalGB, 'f', 2))
+            .arg(DISK_USAGE_THRESHOLD * 100)
+            .arg(needCleanup ? "是" : "否")
+            .toStdString());
+
+    if (!needCleanup) {
+        return;
+    }
+
+    LoggerManager::instance().log(logPath, Level::WARN,
+        QString("磁盘使用率超过阈值，触发日志清理").toStdString());
+
+    QVariantMap monthRange = queryMonthRange();
+    QString earliestDate = monthRange.value("earliest_date").toString();
+    if (earliestDate.isEmpty()) {
+        LoggerManager::instance().log(logPath, Level::WARN,
+            "无法获取日志月份范围，跳过清理");
+        return;
+    }
+
+    QDate earliest = QDate::fromString(earliestDate.left(10), "yyyy-MM-dd");
+    if (!earliest.isValid()) {
+        LoggerManager::instance().log(logPath, Level::ERROR,
+            QString("无效的最早日期: %1").arg(earliestDate).toStdString());
+        return;
+    }
+
+    QDate cutoffDate = earliest.addMonths(DISK_CLEANUP_MONTHS);
+    QString startTime = earliest.toString("yyyy-MM-dd 00:00:00");
+    QString endTime   = cutoffDate.toString("yyyy-MM-dd 23:59:59");
+
+    LoggerManager::instance().log(logPath, Level::INFO,
+        QString("正在清理日志: %1 至 %2").arg(startTime, endTime).toStdString());
+
+    bool success = deleteByTimeRange(startTime, endTime);
+    if (success) {
+        LoggerManager::instance().log(logPath, Level::INFO,
+            QString("清理成功: 已删除 %1 至 %2 的日志记录").arg(startTime, endTime).toStdString());
+    } else {
+        LoggerManager::instance().log(logPath, Level::ERROR,
+            QString("清理失败: 无法删除 %1 至 %2 的日志记录").arg(startTime, endTime).toStdString());
+    }
+
+    // 每次检测完成后刷新日志到磁盘
+    LoggerManager::instance().flush(logPath);
 }
 
 int CommunicateLogSqlLogic::calculateOffset(int pageSize, int pageNumber)

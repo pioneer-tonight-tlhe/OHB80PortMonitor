@@ -8,6 +8,49 @@
 
 ## 更新日志
 
+### 2026-05-21 - Simon
+**数据库日志系统日志记录完善**
+
+#### 背景
+原系统中部分日志输出使用 qDebug，未统一使用 LoggerManager，导致日志记录不规范。数据库相关操作缺少详细的日志追踪，不利于问题排查。
+
+#### 修改内容
+
+**1. LogCleanupScheduler 日志增强**
+- 移除同一天内不重复清理检查的逻辑，每次定时器触发都执行清理检查
+- 添加详细的检测情况日志，包括最早日期、最新日期、覆盖月数、保留阈值和是否需要清理
+- 在关键节点添加日志刷新，确保日志及时写入
+- 移除 m_lastCheckedDate 成员变量
+
+**2. AlarmDispatchTask 日志标准化**
+- 将所有 qDebug 输出替换为 LoggerManager::instance().log()
+- 在构造、启动、停止等关键节点添加日志记录
+- 在 submitAlarm 方法中添加详细的提交日志，包括警报ID、类型、级别、设备标识和描述
+- 在 submitResolve 方法中添加解决提交日志
+- 在持久化操作中添加日志记录，包括插入和更新操作
+- 在数据库不可用时记录错误日志
+
+**3. AlarmLogQueryTask 日志标准化**
+- 将 qDebug 输出替换为 LoggerManager::instance().log()
+- 在构造、启动、停止等关键节点添加日志记录
+- 在查询执行中添加时间范围钳制日志
+- 在数据库连接不可用时记录错误日志
+
+**4. CommunicateLogSqlLogic 日志完善**
+- 引入 Defer 机制确保函数退出时自动刷新日志
+- 统一日志路径格式为 "log_db/{db_name}/..."
+- 在磁盘空间检查中添加详细的日志记录
+- 在定时器启动和磁盘检查中添加日志刷新
+
+#### 影响范围
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/logcleanupscheduler.{h,cpp}`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarmlogquerytask.{h,cpp}`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
+
+---
+
 ### 2026-05-19 - Simon
 **ComunicateLogWidget UI 优化：ExecStatus 字符串化 / 历史日志居中对齐**
 

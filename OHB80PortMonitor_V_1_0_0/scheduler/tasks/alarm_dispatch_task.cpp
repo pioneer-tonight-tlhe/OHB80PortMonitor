@@ -1,17 +1,17 @@
 #include "alarm_dispatch_task.h"
 
 #include <QDateTime>
-#include <QDebug>
 
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/alarmlogdb/alarmlogdbcon.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
 #include "app/shareddata.h"
+#include "loggermanager.h"
 
 AlarmDispatchTask::AlarmDispatchTask(QObject* parent)
     : SchedulerTask(parent)
 {
-    qDebug() << "[AlarmDispatchTask] constructed";
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[AlarmDispatchTask] 警报调度任务已构造");
 }
 
 void AlarmDispatchTask::start()
@@ -27,7 +27,8 @@ void AlarmDispatchTask::start()
                 Qt::QueuedConnection);
     }
 
-    qDebug() << "[AlarmDispatchTask] started, active=" << activeCount();
+    LoggerManager::instance().log(LOG_PATH, Level::INFO,
+        QString("[start] 警报调度任务已启动，活跃警报数=%1").arg(activeCount()).toStdString());
     emit progress(0, QStringLiteral("Alarm dispatcher running, active=%1").arg(activeCount()));
 }
 
@@ -36,7 +37,7 @@ void AlarmDispatchTask::stop()
     clearActive();
     setState(Cancelled);
     emit finished(false, QStringLiteral("Alarm dispatcher stopped"));
-    qDebug() << "[AlarmDispatchTask] stopped";
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[stop] 警报调度任务已停止");
 }
 
 // =====================================================================
@@ -87,6 +88,11 @@ QString AlarmDispatchTask::submitAlarm(AlarmInfo info)
         info.record.resolveTime.clear();
         persistInsert(info);
 
+        LoggerManager::instance().log(LOG_PATH, Level::INFO,
+            QString("[submitAlarm] 提交警报(无需解决): 警报ID=%1, 类型=%2, 设备标识=%3, 描述=%4")
+                .arg(info.alarmId).arg(info.record.alarmType)
+                .arg(info.record.qrCode).arg(info.record.description).toStdString());
+
         // 记录运行日志：NoNeed 类型使用 Warn 级别
         if (auto* opTask = SharedData::getOperationDispatchTask()) {
             opTask->logWarn(info.record.description);
@@ -100,12 +106,19 @@ QString AlarmDispatchTask::submitAlarm(AlarmInfo info)
         QMutexLocker locker(&m_mutex);
         // 去重：同一 alarmId 已活跃则忽略
         if (m_active.contains(info.alarmId)) {
+            LoggerManager::instance().log(LOG_PATH, Level::INFO,
+                QString("[submitAlarm] 提交警报(重复，已忽略): 警报ID=%1").arg(info.alarmId).toStdString());
             return info.alarmId;
         }
         info.record.isResolved = 0;
         info.record.resolveTime.clear();
         m_active.insert(info.alarmId, info);
     }
+
+    LoggerManager::instance().log(LOG_PATH, Level::INFO,
+        QString("[submitAlarm] 提交警报: 警报ID=%1, 类型=%2, 级别=%3, 设备标识=%4, 描述=%5")
+            .arg(info.alarmId).arg(info.record.alarmType).arg(info.record.alarmLevel)
+            .arg(info.record.qrCode).arg(info.record.description).toStdString());
 
     // 持久化：写 alarm_log（DBCon 内部 QueuedConnection 异步落盘）
     persistInsert(info);
@@ -136,6 +149,8 @@ void AlarmDispatchTask::submitResolve(const QString& alarmId)
         QMutexLocker locker(&m_mutex);
         auto it = m_active.find(alarmId);
         if (it == m_active.end()) {
+            LoggerManager::instance().log(LOG_PATH, Level::WARN,
+                QString("[submitResolve] 提交解决(非活跃): 警报ID=%1").arg(alarmId).toStdString());
             return;
         }
         resolvedInfo = it.value();
@@ -144,6 +159,11 @@ void AlarmDispatchTask::submitResolve(const QString& alarmId)
                                         .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
         m_active.erase(it);
     }
+
+    LoggerManager::instance().log(LOG_PATH, Level::INFO,
+        QString("[submitResolve] 提交解决: 警报ID=%1, 类型=%2, 设备标识=%3, 解决时间=%4")
+            .arg(resolvedInfo.alarmId).arg(resolvedInfo.record.alarmType)
+            .arg(resolvedInfo.record.qrCode).arg(resolvedInfo.record.resolveTime).toStdString());
 
     persistResolve(resolvedInfo);
 
@@ -211,7 +231,8 @@ void AlarmDispatchTask::loadActiveFromDb()
 {
     auto* db = LogDB::DatabaseManager::instance().alarmLogCon();
     if (!db) {
-        qWarning() << "[AlarmDispatchTask] AlarmLogDBCon unavailable, skip restore";
+        LoggerManager::instance().log(LOG_PATH, Level::WARN,
+            "[loadActiveFromDb] 警报日志数据库不可用，跳过恢复");
         return;
     }
 
@@ -260,8 +281,8 @@ void AlarmDispatchTask::loadActiveFromDb()
             locker.relock();
         }
     }
-    qDebug() << "[AlarmDispatchTask] restored" << restored
-             << "unresolved alarms from alarm_log";
+    LoggerManager::instance().log(LOG_PATH, Level::INFO,
+        QString("[loadActiveFromDb] 从数据库恢复 %1 条未解决警报").arg(restored).toStdString());
 }
 
 // =====================================================================
@@ -271,8 +292,8 @@ void AlarmDispatchTask::persistInsert(const AlarmInfo& info)
 {
     auto* db = LogDB::DatabaseManager::instance().alarmLogCon();
     if (!db) {
-        qWarning() << "[AlarmDispatchTask] AlarmLogDBCon unavailable, drop:"
-                   << info.alarmId;
+        LoggerManager::instance().log(LOG_PATH, Level::ERROR,
+            QString("[persistInsert] 警报日志数据库不可用，丢弃警报: %1").arg(info.alarmId).toStdString());
         return;
     }
 
@@ -286,6 +307,10 @@ void AlarmDispatchTask::persistInsert(const AlarmInfo& info)
         info.record.description,
         info.record.userPermission);
 
+    LoggerManager::instance().log(LOG_PATH, Level::INFO,
+        QString("[persistInsert] 持久化插入: 警报ID=%1, 级别=%2, 类型=%3").arg(info.alarmId)
+            .arg(info.record.alarmLevel).arg(info.record.alarmType).toStdString());
+
     // 发出插入完成信号，供 UI 接收显示
     emit alarmLogInserted(info.record);
 }
@@ -297,14 +322,19 @@ void AlarmDispatchTask::persistResolve(const AlarmInfo& info)
 {
     auto* db = LogDB::DatabaseManager::instance().alarmLogCon();
     if (!db) {
-        qWarning() << "[AlarmDispatchTask] AlarmLogDBCon unavailable, skip resolve:"
-                   << info.alarmId;
+        LoggerManager::instance().log(LOG_PATH, Level::ERROR,
+            QString("[persistResolve] 警报日志数据库不可用，跳过解决: %1").arg(info.alarmId).toStdString());
         return;
     }
     // updateResolve 按 (qr_code, alarm_type) 联合定位单条
     db->updateResolve(info.record.qrCode,
                       QString::number(info.record.alarmType),
                       info.record.resolveTime);
+
+    LoggerManager::instance().log(LOG_PATH, Level::INFO,
+        QString("[persistResolve] 持久化更新: 警报ID=%1, 设备标识=%2, 类型=%3, 解决时间=%4")
+            .arg(info.alarmId).arg(info.record.qrCode)
+            .arg(info.record.alarmType).arg(info.record.resolveTime).toStdString());
 }
 
 // =====================================================================
@@ -327,8 +357,9 @@ void AlarmDispatchTask::onAlarmDBRecordResolved(const QString& qrCode, const QSt
         /*pageNumber*/ 1);
 
     if (records.isEmpty()) {
-        qWarning() << "[AlarmDispatchTask] resolve record not found after DB write:"
-                   << qrCode << alarmType << resolveTime;
+        LoggerManager::instance().log(LOG_PATH, Level::WARN,
+            QString("[onAlarmDBRecordResolved] 数据库写入后未找到解决记录: 设备标识=%1, 类型=%2, 解决时间=%3")
+                .arg(qrCode).arg(alarmType).arg(resolveTime).toStdString());
         return;
     }
 
@@ -339,6 +370,7 @@ void AlarmDispatchTask::onAlarmDBRecordResolved(const QString& qrCode, const QSt
             return;
         }
     }
-    qWarning() << "[AlarmDispatchTask] resolve record with matching resolveTime not found:"
-               << qrCode << alarmType << resolveTime;
+    LoggerManager::instance().log(LOG_PATH, Level::WARN,
+        QString("[onAlarmDBRecordResolved] 未找到匹配解决时间的记录: 设备标识=%1, 类型=%2, 解决时间=%3")
+            .arg(qrCode).arg(alarmType).arg(resolveTime).toStdString());
 }

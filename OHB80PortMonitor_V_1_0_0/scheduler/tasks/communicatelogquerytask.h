@@ -40,6 +40,9 @@ signals:
 private:
     LogDB::CommunicateLogDBCon* m_db;
 
+    // 日志路径
+    static constexpr const char* LOG_PATH = "scheduler/communicate_log_query_task";
+
     // 查询条件
     QString m_commandId;                // 空字符串表示未设置
     QString m_qrCode;                   // 空字符串表示未设置

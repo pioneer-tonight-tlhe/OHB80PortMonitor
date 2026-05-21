@@ -10,6 +10,8 @@
 #include "sqlmapper.h"
 #include "dbtypes.h"
 
+class QTimer;
+
 namespace LogDB {
 
 class LogCleanupScheduler;
@@ -73,18 +75,31 @@ signals:
     // 写入语句执行结果信号
     void writeExecuted(const WriteResult& result);
 
+private slots:
+    // 定期检查磁盘空间，超阈值时清理最早的日志
+    void checkDiskSpaceAndCleanup();
+
 private:
     // 初始化清理调度器
     void initializeCleanupScheduler();
 
+    // 初始化磁盘空间检查定时器
+    void initializeDiskCheckTimer();
+
     // 计算偏移量
     int calculateOffset(int pageSize, int pageNumber);
+
+    // 磁盘空间检查常量
+    static constexpr int    DISK_CHECK_INTERVAL_MS = 60000;  // 检查间隔 60s
+    static constexpr double DISK_USAGE_THRESHOLD   = 0.90;   // 磁盘使用率 90% 触发清理
+    static constexpr int    DISK_CLEANUP_MONTHS    = 1;      // 每次清理最早的 1 个月
 
     QString m_databasePath;
     QString m_connectionName;
     SqlMapper* m_sqlMapper;
     QSqlDatabase m_database;
     LogCleanupScheduler* m_cleanupScheduler;
+    QTimer* m_diskCheckTimer;
 };
 
 } // namespace LogDB

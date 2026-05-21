@@ -59,10 +59,15 @@ void CommunicationRecorder::onTick()
         int& counter = it.value();
         counter += TICK_INTERVAL_MS;
 
-        // 根据 Foup 在位状态决定阈值
+        // 根据 Foup 在位状态及充气时长决定阈值
         FoupOfOHBInfo* foup = SharedData::getFoupByQRCode(masterId);
-        int threshold = (foup && foup->foupIn()) ? THRESHOLD_FOUP_IN_MS
-                                                 : THRESHOLD_FOUP_OUT_MS;
+        int threshold;
+        if (foup && foup->foupIn()) {
+            threshold = (foup->purgeTimeSec() > 30) ? THRESHOLD_PURGING_MS
+                                                    : THRESHOLD_FOUP_IN_MS;
+        } else {
+            threshold = THRESHOLD_FOUP_OUT_MS;
+        }
 
         if (counter >= threshold) {
             // 达到阈值：发射信号并重置

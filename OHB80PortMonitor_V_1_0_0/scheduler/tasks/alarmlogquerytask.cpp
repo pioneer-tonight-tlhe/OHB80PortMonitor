@@ -1,6 +1,6 @@
 #include "alarmlogquerytask.h"
 #include "databasemanager.h"
-#include <QDebug>
+#include "loggermanager.h"
 
 AlarmLogQueryTask::AlarmLogQueryTask(QObject *parent)
     : SchedulerTask{parent}
@@ -10,6 +10,7 @@ AlarmLogQueryTask::AlarmLogQueryTask(QObject *parent)
     , m_pageNumber(0)
     , m_pageSize(500)
 {
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[AlarmLogQueryTask] 警报日志查询任务已构造");
 }
 
 void AlarmLogQueryTask::start()
@@ -18,17 +19,20 @@ void AlarmLogQueryTask::start()
     m_db = LogDB::DatabaseManager::instance().alarmLogCon();
     if (!m_db) {
         setState(Failed);
+        LoggerManager::instance().log(LOG_PATH, Level::ERROR, "[start] 警报日志数据库不可用");
         emit finished(false, "AlarmLogDBCon unavailable");
         return;
     }
 
     setState(Running);
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[start] 警报日志查询任务已启动");
     executeQuery();
 }
 
 void AlarmLogQueryTask::stop()
 {
     setState(Finished);
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[stop] 警报日志查询任务已停止");
 }
 
 void AlarmLogQueryTask::setPageNumber(int pageNumber)
@@ -71,6 +75,7 @@ void AlarmLogQueryTask::executeQuery()
 {
     if (!m_db) {
         setState(Failed);
+        LoggerManager::instance().log(LOG_PATH, Level::ERROR, "[executeQuery] 数据库连接不可用");
         emit finished(false, "Database connection not available");
         return;
     }
@@ -98,13 +103,13 @@ void AlarmLogQueryTask::executeQuery()
             if (m_startTime > m_endTime) {
                 qSwap(m_startTime, m_endTime);
             }
-            qDebug() << "[AlarmLogQueryTask] 钳制后时间范围:"
-                     << m_startTime << "->" << m_endTime
-                     << " (DB:" << dbEarliest << "->" << dbLatest << ")";
+            LoggerManager::instance().log(LOG_PATH, Level::INFO,
+                QString("[executeQuery] 钳制后时间范围: %1 -> %2 (数据库: %3 -> %4)")
+                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
         } else {
-            qDebug() << "[AlarmLogQueryTask] 请求窗口与 DB 范围无重叠，不钳制:"
-                     << m_startTime << "->" << m_endTime
-                     << " (DB:" << dbEarliest << "->" << dbLatest << ")";
+            LoggerManager::instance().log(LOG_PATH, Level::INFO,
+                QString("[executeQuery] 请求窗口与数据库范围无重叠，不钳制: %1 -> %2 (数据库: %3 -> %4)")
+                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
         }
     }
 
@@ -124,5 +129,6 @@ void AlarmLogQueryTask::executeQuery()
     emit totalCountWithConditionsResult(totalCountWithConditions);
 
     setState(Finished);
+    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[executeQuery] 查询完成");
     emit finished(true, "Query completed successfully");
 }

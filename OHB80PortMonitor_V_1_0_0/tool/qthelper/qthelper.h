@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <QVector>
+#include <QStorageInfo>
 
 class QLabel;
 class QString;
@@ -30,6 +31,20 @@ public:
      * @return 起始下标，未找到返回 -1
      */
     static int kmpSearch(const QByteArray &buffer, const QByteArray &pattern);
+
+    /**
+     * @brief 获取指定路径所在磁盘分区的总容量（字节）
+     * @param path 要查询的路径，默认为应用程序所在目录
+     * @return 磁盘分区总容量（字节），失败返回 -1
+     */
+    static qint64 diskTotalBytes(const QString &path = QString());
+
+    /**
+     * @brief 获取指定路径所在磁盘分区的已用容量（字节）
+     * @param path 要查询的路径，默认为应用程序所在目录
+     * @return 磁盘分区已用容量（字节），失败返回 -1
+     */
+    static qint64 diskUsedBytes(const QString &path = QString());
 
 };
 

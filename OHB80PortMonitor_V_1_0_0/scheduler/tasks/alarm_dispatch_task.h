@@ -112,6 +112,9 @@ private:
     // 把 AlarmInfo 写入 alarm_log（INSERT）
     void persistInsert(const AlarmInfo& info);
 
+    // 日志路径
+    static constexpr const char* LOG_PATH = "scheduler/alarm_dispatch_task";
+
     // 把同 alarm_type + 未解决的行原位标记为已解决
     void persistResolve(const AlarmInfo& info);
 

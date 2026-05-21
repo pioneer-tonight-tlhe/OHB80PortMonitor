@@ -13,6 +13,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QScreen>
+#include <QStorageInfo>
+#include <QCoreApplication>
 #include <QDebug>
 
 QtHelper::QtHelper() {}
@@ -155,4 +157,26 @@ int QtHelper::kmpSearch(const QByteArray &buffer, const QByteArray &pattern)
             return i - m + 1;         // 完全匹配，返回起始下标
     }
     return -1;
+}
+
+qint64 QtHelper::diskTotalBytes(const QString &path)
+{
+    const QString target = path.isEmpty() ? QCoreApplication::applicationDirPath() : path;
+    QStorageInfo info(target);
+    if (!info.isValid() || !info.isReady()) {
+        qWarning() << "[QtHelper] diskTotalBytes: 无法获取磁盘信息，路径=" << target;
+        return -1;
+    }
+    return info.bytesTotal();
+}
+
+qint64 QtHelper::diskUsedBytes(const QString &path)
+{
+    const QString target = path.isEmpty() ? QCoreApplication::applicationDirPath() : path;
+    QStorageInfo info(target);
+    if (!info.isValid() || !info.isReady()) {
+        qWarning() << "[QtHelper] diskUsedBytes: 无法获取磁盘信息，路径=" << target;
+        return -1;
+    }
+    return info.bytesTotal() - info.bytesFree();
 }

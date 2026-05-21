@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVariantMap>
 #include <functional>
+#include <string>
 
 class QTimer;
 
@@ -42,11 +43,13 @@ public:
         int checkIntervalMs;  // 检查间隔（毫秒），默认60秒
         int retainMonths;    // 数据库最多保留多少个月的日志
         int cleanupMonths;   // 触发清理时一次性删除最早的多少个月
+        std::string logPath; // LoggerManager 日志路径，格式: log_db/{db_name}/month_clean
 
         Config()
             : checkIntervalMs(60000)
             , retainMonths(12)
             , cleanupMonths(3)
+            , logPath("log_db/month_clean")
         {}
     };
 
@@ -76,7 +79,6 @@ private:
 
     Config m_config;
     QTimer* m_timer;
-    QDate m_lastCheckedDate;
     MonthRangeProvider m_monthRangeProvider;
     DeleteByRangeFn m_deleteByRangeFn;
 };
