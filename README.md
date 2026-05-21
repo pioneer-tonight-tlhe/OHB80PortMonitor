@@ -20,7 +20,7 @@
 - 移除同一天内不重复清理检查的逻辑，每次定时器触发都执行清理检查
 - 添加详细的检测情况日志，包括最早日期、最新日期、覆盖月数、保留阈值和是否需要清理
 - 在关键节点添加日志刷新，确保日志及时写入
-- 移除 m_lastCheckedDate 成员变量
+- 移除 m_lastCheckedDate 成员变量。
 
 **2. AlarmDispatchTask 日志标准化**
 - 将所有 qDebug 输出替换为 LoggerManager::instance().log()
