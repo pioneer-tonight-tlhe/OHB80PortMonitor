@@ -205,3 +205,47 @@ bool OHBDeviceConfig::setDeviceEnable(const QString& qrCode, bool enable)
     qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode << "的设备";
     return false;
 }
+
+bool OHBDeviceConfig::readSH85SelfCheckEnabled() const
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    settings.beginGroup("sh85selfchecktask");
+    const bool enabled = settings.value("enabled", true).toBool();
+    settings.endGroup();
+    qDebug() << "OHBDeviceConfig: SH85SelfCheck enabled=" << enabled;
+    return enabled;
+}
+
+int OHBDeviceConfig::readSH85SelfCheckPeriodSeconds() const
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    settings.beginGroup("sh85selfchecktask");
+    // period_s 直接为秒数，默认 1800s（30 分钟）
+    const int seconds = settings.value("period_s", 1800).toInt();
+    settings.endGroup();
+    qDebug() << "OHBDeviceConfig: SH85SelfCheck period_s=" << seconds;
+    return seconds > 0 ? seconds : 1800;
+}
+
+bool OHBDeviceConfig::setSH85SelfCheckEnabled(bool enabled)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    settings.beginGroup("sh85selfchecktask");
+    settings.setValue("enabled", enabled);
+    settings.endGroup();
+    settings.sync();
+    qDebug() << "OHBDeviceConfig: set SH85SelfCheck enabled=" << enabled;
+    return settings.status() == QSettings::NoError;
+}
+
+bool OHBDeviceConfig::setSH85SelfCheckPeriodSeconds(int seconds)
+{
+    if (seconds <= 0) seconds = 1800; // 合理下限保护（默认 30 分钟）
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    settings.beginGroup("sh85selfchecktask");
+    settings.setValue("period_s", seconds);
+    settings.endGroup();
+    settings.sync();
+    qDebug() << "OHBDeviceConfig: set SH85SelfCheck period_s=" << seconds;
+    return settings.status() == QSettings::NoError;
+}

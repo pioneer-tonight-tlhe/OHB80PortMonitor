@@ -170,6 +170,21 @@ void SharedData::initScheduler()
         s_sh85PeriodicSelfCheckTask = new SH85PeriodicSelfCheckTask();
         QString id = scheduler->submitTask(s_sh85PeriodicSelfCheckTask);
         qDebug() << "[SharedData] 已提交 SH85 周期自检任务, TaskID:" << id;
+
+        // 应用配置：从 ohb_device.ini 读取 [sh85selfchecktask] 段
+        OHBDeviceConfig &cfg = AppConfig::getInstance().getOHBDeviceConfig();
+        const bool enabled  = cfg.readSH85SelfCheckEnabled();
+        const int  period_s = cfg.readSH85SelfCheckPeriodSeconds();
+
+        // 先设置周期（单位：秒），再设置启用状态
+        QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask, "setPeriod",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(int, period_s),
+                                  Q_ARG(SH85PeriodicSelfCheckTask::TimeUnit,
+                                        SH85PeriodicSelfCheckTask::TimeUnit::Second));
+        QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask, "setEnabled",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(bool, enabled));
     }
 
     // // 创建并提交 VEFC 传感器监控任务（长驻任务）

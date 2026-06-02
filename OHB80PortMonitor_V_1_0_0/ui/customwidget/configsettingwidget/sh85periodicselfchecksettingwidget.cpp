@@ -6,6 +6,7 @@
 #include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
 #include "app/applogger.h"
 #include "app/shareddata.h"
+#include "app/ohbdeviceconfig.h"
 #include "loggermanager.h"
 
 #include <QDebug>
@@ -75,7 +76,7 @@ void SH85PeriodicSelfCheckSettingWidget::initPeriodItem()
     m_periodItem->setTip("Configure the interval between two self-check rounds");
 
     m_periodSpinBox = new QSpinBox(m_periodItem);
-    m_periodSpinBox->setRange(1, 999);
+    m_periodSpinBox->setRange(0, 999999);
     m_periodSpinBox->setValue(5);
     m_periodSpinBox->setFixedWidth(80);
 
@@ -151,12 +152,27 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
         m_enableCombo->setCurrentIndex(m_isEnabled ? 1 : 0);
     }
 
-    // 同步 UI 当前值到任务（不影响 enable 状态）
-    QMetaObject::invokeMethod(task, "setPeriod",
-                              Qt::QueuedConnection,
-                              Q_ARG(int, m_periodSpinBox->value()),
-                              Q_ARG(SH85PeriodicSelfCheckTask::TimeUnit,
-                                    unitFromIndex(m_unitCombo->currentIndex())));
+    // 同步配置到 UI（不覆盖任务设置；任务的周期已在 SharedData 初始化时按配置应用）
+    {
+        const int periodSec = OHBDeviceConfig::getInstance().readSH85SelfCheckPeriodSeconds();
+        int displayValue = periodSec;
+        int unitIndex = 0; // 0=s, 1=min, 2=hour
+        if (periodSec > 0 && (periodSec % 3600 == 0)) {
+            unitIndex = 2;
+            displayValue = periodSec / 3600;
+        } else if (periodSec > 0 && (periodSec % 60 == 0)) {
+            unitIndex = 1;
+            displayValue = periodSec / 60;
+        }
+        if (m_unitCombo) {
+            const QSignalBlocker blockerUnit(m_unitCombo);
+            m_unitCombo->setCurrentIndex(unitIndex);
+        }
+        if (m_periodSpinBox) {
+            const QSignalBlocker blockerSpin(m_periodSpinBox);
+            m_periodSpinBox->setValue(displayValue);
+        }
+    }
 
     // 同步当前任务状态到 UI（任务可能此时已经在某个状态）
     m_currentTaskState = task->currentState();
@@ -229,6 +245,9 @@ void SH85PeriodicSelfCheckSettingWidget::onEnableComboChanged(int index)
                                   Q_ARG(bool, enable));
     }
 
+    // 持久化到配置
+    OHBDeviceConfig::getInstance().setSH85SelfCheckEnabled(enable);
+
     // —— UI 立即反馈（真实状态会随 taskStateChanged 信号同步覆盖）——
     // 启用：立即提示「自检中（执行：0s）」；
     // 停用：若当前正在 Checking，不修改状态文案（继续显示自检中，直到本轮完成）。
@@ -259,6 +278,15 @@ void SH85PeriodicSelfCheckSettingWidget::onSetBtnClicked()
     LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][SH85PeriodicSelfCheckSettingWidget] setPeriod=%1 %2")
             .arg(value).arg(unitStr).toStdString());
+
+    // 计算周期秒数并写入配置
+    int seconds = value;
+    switch (unit) {
+    case SH85PeriodicSelfCheckTask::TimeUnit::Second: seconds = value; break;
+    case SH85PeriodicSelfCheckTask::TimeUnit::Minute: seconds = value * 60; break;
+    case SH85PeriodicSelfCheckTask::TimeUnit::Hour:   seconds = value * 3600; break;
+    }
+    OHBDeviceConfig::getInstance().setSH85SelfCheckPeriodSeconds(seconds);
 
     // 调用任务的 setPeriod 方法
     if (m_task) {

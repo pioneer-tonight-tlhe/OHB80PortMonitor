@@ -10,6 +10,28 @@
 
 ### 2026-06-02 - Simon
 
+#### SH85 周期自检：配置化与 UI 对接
+- 配置文件新增段落（ohb_device.ini）：
+  ```ini
+  [sh85selfchecktask]
+  enabled=true           ; 是否启用周期自检
+  period_s=1800          ; 周期秒数（默认 1800 秒 = 30 分钟）
+  ```
+- 启动应用配置：`SharedData::initScheduler()` 在提交 `SH85PeriodicSelfCheckTask` 后，读取上述配置并应用：
+  - `setPeriod(period_s, TimeUnit::Second)`
+  - `setEnabled(enabled)`
+- 配置读写接口：`app/ohbdeviceconfig.{h,cpp}`
+  - 读取：`readSH85SelfCheckEnabled()`、`readSH85SelfCheckPeriodSeconds()`（默认与非法值回退均为 1800）
+  - 写入：`setSH85SelfCheckEnabled(bool)`、`setSH85SelfCheckPeriodSeconds(int seconds)`
+- 设置页 UI 对接：`ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.cpp`
+  - 绑定时从配置读取秒数并“智能选择最大单位”显示：
+    - 能被 3600 整除 → 显示为 hour（值=period_s/3600）
+    - 否则能被 60 整除 → 显示为 min（值=period_s/60）
+    - 否则用 s（值=period_s）
+  - 用户点击 Set：将值与单位换算为秒，写回 ini，并通过 `setPeriod(value, unit)` 实时生效
+  - 启用开关：调用 `setEnabled()` 同步到任务，同时写回 `enabled` 到 ini
+  - SpinBox 范围：`0..999999`，单位下拉 `s|min|hour`
+
 #### NetworkStatusTask 重构与日志规范
 - 重构 `start()` 为更清晰的私有方法：`startInitCheckTask()`、`startAutoReconnect()`、`processInitialStatusAndConnectSignals()`；并补充方法/成员中文注释。
 - 新增二维码专用日志类 `QRCodeWriteLogger`：

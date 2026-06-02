@@ -55,6 +55,12 @@ public:
 
     QString getConfigPath() const;
 
+    // SH85 周期自检配置
+    bool readSH85SelfCheckEnabled() const;
+    int  readSH85SelfCheckPeriodSeconds() const;
+    bool setSH85SelfCheckEnabled(bool enabled);
+    bool setSH85SelfCheckPeriodSeconds(int seconds);
+
 private:
     OHBDeviceConfig();
     ~OHBDeviceConfig() = default;
