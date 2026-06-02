@@ -50,10 +50,10 @@ static bool remove_directory_recursive(const std::string& path)
 
 LoggerManager::LoggerManager()
     : root_dir_("./logs"),
-      max_file_size_(10 * 1024 * 1024),      // 6.2.3 默认10MB
-      max_files_(5),                          // 6.2.3 默认保留5个文件
-      retention_days_(7),                     // 6.2.4 默认7天
-      trace_filename_("trace.log"),           // 6.2.5 默认trace.log
+      max_file_size_(10 * 1024 * 1024),      // 默认10MB
+      max_files_(5),                          // 默认保留5个文件
+      retention_days_(7),                     // 默认7天
+      trace_filename_("trace.log"),           // 默认trace.log
       auto_trace_enabled_(false),
       warn_error_split_enabled_(false),
       is_shutdown_(false),
@@ -61,7 +61,7 @@ LoggerManager::LoggerManager()
 {
     // 初始化 spdlog 全局异步线程池
     // 队列容量 131072 条，2个 I/O 线程，满足1000并发连接压力
-    spdlog::init_thread_pool(131072, 2);
+    spdlog::init_thread_pool(131072, 4);
     thread_pool_ = spdlog::thread_pool();
 
     // 启动日志清理线程

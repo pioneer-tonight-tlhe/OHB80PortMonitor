@@ -1,7 +1,7 @@
 #include "communicatepage.h"
 #include "ui_communicatepage.h"
 #include "app/shareddata.h"
-#include "scheduler/tasks/monitor_data_task.h"
+#include "scheduler/tasks/monitor_data_task/monitor_data_task.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
 #include "usermanager.h"
@@ -65,14 +65,12 @@ void CommunicatePage::onCommunicationCompleted(ModbusCommand cmd, QString master
         ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
         : QString();
 
-    // exec_status：0=Success / 1=Timeout / 2=Retry / 3=Send Failed
-    int execStatus = 3;
+    // exec_status：0=Success / 1=Timeout / 2=Send Failed
+    int execStatus = 2;
     if (cmd.received) {
         execStatus = 0;
     } else if (cmd.timedOut) {
         execStatus = 1;
-    } else if (cmd.sendCount > 1) {
-        execStatus = 2;
     }
 
     const int retryCount = qMax(0, cmd.sendCount - 1);

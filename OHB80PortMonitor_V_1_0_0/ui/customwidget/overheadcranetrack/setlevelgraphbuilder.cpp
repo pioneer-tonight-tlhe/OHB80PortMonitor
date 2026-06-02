@@ -18,7 +18,7 @@ Graph::SetLevelGraphBuilder::SetLevelGraphBuilder(GraphMultilist &graph, QMap<in
       m_frameDeviceWidth(120),
       m_startNodePosition(20.0, 170.0),
       m_currentConfig(nullptr),
-      m_logger(LoggerManager::instance()),
+      m_logger(*LoggerManager::getInstance()),
       m_loggerFileName(AppLogger::CraneMapLoggerPath().toStdString()),
       m_stage(BuildStage::NotStarted)
 {

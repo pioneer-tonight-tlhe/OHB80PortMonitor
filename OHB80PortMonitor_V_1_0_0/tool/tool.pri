@@ -1,4 +1,4 @@
-# loggermanange
+loggermanange
 include ($$PWD/loggermananger/loggermananger.pri)
 INCLUDEPATH += $$PWD/loggermananger
 

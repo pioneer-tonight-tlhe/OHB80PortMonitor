@@ -3,12 +3,13 @@
 #include "sh85selfcheckreportdialog.h"
 
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
 #include "app/applogger.h"
 #include "app/shareddata.h"
 #include "loggermanager.h"
 
 #include <QDebug>
+#include <QSignalBlocker>
 
 // ============================================================
 // 构造 / 析构
@@ -26,6 +27,7 @@ SH85PeriodicSelfCheckSettingWidget::SH85PeriodicSelfCheckSettingWidget(QWidget *
 SH85PeriodicSelfCheckSettingWidget::~SH85PeriodicSelfCheckSettingWidget()
 {
     // 常驻任务由 SharedData 持有，UI 不负责销毁
+    // 仅销毁报告对话框
     if (m_reportDialog) {
         m_reportDialog->deleteLater();
         m_reportDialog = nullptr;
@@ -38,14 +40,17 @@ SH85PeriodicSelfCheckSettingWidget::~SH85PeriodicSelfCheckSettingWidget()
 
 void SH85PeriodicSelfCheckSettingWidget::initUI()
 {
+    // 初始化所有界面项
     initEnableItem();
     initPeriodItem();
     initStatusItem();
     initReportItem();
+    refreshActionControlsState();
 }
 
 void SH85PeriodicSelfCheckSettingWidget::initEnableItem()
 {
+    // 初始化启用项：创建启用/禁用周期性自检的下拉框
     m_enableItem = new SettingItemWidget(this);
     m_enableItem->setTitle("Enable Periodic Self-check");
     m_enableItem->setTip("Enable or disable periodic SH85 self-check");
@@ -64,6 +69,7 @@ void SH85PeriodicSelfCheckSettingWidget::initEnableItem()
 
 void SH85PeriodicSelfCheckSettingWidget::initPeriodItem()
 {
+    // 初始化周期项：创建周期数值、单位和设置按钮
     m_periodItem = new SettingItemWidget(this);
     m_periodItem->setTitle("Self-check Period");
     m_periodItem->setTip("Configure the interval between two self-check rounds");
@@ -92,13 +98,13 @@ void SH85PeriodicSelfCheckSettingWidget::initPeriodItem()
 
 void SH85PeriodicSelfCheckSettingWidget::initStatusItem()
 {
+    // 初始化状态项：创建只读状态显示框
     m_statusItem = new SettingItemWidget(this);
     m_statusItem->setTitle("Self-check Status");
     m_statusItem->setTip("Current periodic self-check status");
 
     m_statusEdit = new QLineEdit(m_statusItem);
     m_statusEdit->setReadOnly(true);
-    m_statusEdit->setMinimumWidth(360);
     m_statusEdit->setStyleSheet("QLineEdit { color: #386487; font-weight: bold; }");
 
     m_statusItem->addWidget("status_edit", m_statusEdit);
@@ -107,6 +113,7 @@ void SH85PeriodicSelfCheckSettingWidget::initStatusItem()
 
 void SH85PeriodicSelfCheckSettingWidget::initReportItem()
 {
+    // 初始化报告项：创建打开报告对话框的按钮
     m_reportItem = new SettingItemWidget(this);
     m_reportItem->setTitle("Self-check Report");
     m_reportItem->setTip("Open the periodic self-check report dialog");
@@ -126,15 +133,23 @@ void SH85PeriodicSelfCheckSettingWidget::initReportItem()
 
 void SH85PeriodicSelfCheckSettingWidget::bindTask()
 {
+    // 绑定 SharedData 持有的常驻任务
     auto *task = SharedData::getSH85PeriodicSelfCheckTask();
     if (!task) {
         qWarning() << "[SH85PeriodicSelfCheckSettingWidget] SharedData::getSH85PeriodicSelfCheckTask() 返回空，"
                       "请确认 SharedData::initScheduler() 已调用";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+        LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
             QString("[ui][SH85PeriodicSelfCheckSettingWidget] SharedData::getSH85PeriodicSelfCheckTask() returns null").toStdString());
         return;
     }
     m_task = task;
+
+    // 同步任务启用状态到 UI
+    m_isEnabled = task->isEnabled();
+    if (m_enableCombo) {
+        const QSignalBlocker blocker(m_enableCombo);
+        m_enableCombo->setCurrentIndex(m_isEnabled ? 1 : 0);
+    }
 
     // 同步 UI 当前值到任务（不影响 enable 状态）
     QMetaObject::invokeMethod(task, "setPeriod",
@@ -163,6 +178,7 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
     m_reportDialog->hide();                       // 默认隐藏
     m_reportDialog->setQrcodes(SharedData::getAllQrcodes());
 
+    // 连接任务信号到报告对话框
     connect(task, &SH85PeriodicSelfCheckTask::countdownTick,
             m_reportDialog.data(), &SH85SelfCheckReportDialog::onCheckerCountdown,
             Qt::QueuedConnection);
@@ -187,7 +203,7 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
             },
             Qt::QueuedConnection);
 
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][SH85PeriodicSelfCheckSettingWidget] bound to resident SH85PeriodicSelfCheckTask").toStdString());
 }
 
@@ -197,14 +213,16 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
 
 void SH85PeriodicSelfCheckSettingWidget::onEnableComboChanged(int index)
 {
+    // 启用下拉框改变事件处理
     const bool enable = (index == 1);
     if (enable == m_isEnabled) return;
     m_isEnabled = enable;
 
     qDebug() << "[SH85PeriodicSelfCheckSettingWidget] enable changed:" << enable;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][SH85PeriodicSelfCheckSettingWidget] enable=%1").arg(enable).toStdString());
 
+    // 调用任务的 setEnabled 方法
     if (m_task) {
         QMetaObject::invokeMethod(m_task.data(), "setEnabled",
                                   Qt::QueuedConnection,
@@ -232,15 +250,17 @@ void SH85PeriodicSelfCheckSettingWidget::onEnableComboChanged(int index)
 
 void SH85PeriodicSelfCheckSettingWidget::onSetBtnClicked()
 {
+    // 设置按钮点击事件处理
     const int value = m_periodSpinBox->value();
     const auto unit = unitFromIndex(m_unitCombo->currentIndex());
     const QString unitStr = SH85PeriodicSelfCheckTask::timeUnitToString(unit);
 
     qDebug() << "[SH85PeriodicSelfCheckSettingWidget] period set:" << value << unitStr;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][SH85PeriodicSelfCheckSettingWidget] setPeriod=%1 %2")
             .arg(value).arg(unitStr).toStdString());
 
+    // 调用任务的 setPeriod 方法
     if (m_task) {
         QMetaObject::invokeMethod(m_task.data(), "setPeriod",
                                   Qt::QueuedConnection,
@@ -258,6 +278,7 @@ void SH85PeriodicSelfCheckSettingWidget::onSetBtnClicked()
 
 void SH85PeriodicSelfCheckSettingWidget::onReportBtnClicked()
 {
+    // 报告按钮点击事件处理：显示报告对话框
     if (!m_reportDialog) {
         qWarning() << "[SH85PeriodicSelfCheckSettingWidget] report dialog not initialized "
                       "(SharedData task may be null)";
@@ -274,6 +295,7 @@ void SH85PeriodicSelfCheckSettingWidget::onReportBtnClicked()
 
 void SH85PeriodicSelfCheckSettingWidget::onTaskStateChanged(SH85PeriodicSelfCheckTask::State state)
 {
+    // 任务状态改变回调
     m_currentTaskState = state;
     if (state == SH85PeriodicSelfCheckTask::State::Checking) {
         m_elapsedSec = 0;
@@ -285,6 +307,7 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskStateChanged(SH85PeriodicSelfChec
 
 void SH85PeriodicSelfCheckSettingWidget::onTaskElapsedTick(int elapsedSeconds)
 {
+    // 自检计时器回调
     m_elapsedSec = elapsedSeconds;
     if (m_currentTaskState == SH85PeriodicSelfCheckTask::State::Checking) {
         refreshStatusText();
@@ -293,6 +316,7 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskElapsedTick(int elapsedSeconds)
 
 void SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown(int remainingSeconds)
 {
+    // 间隔倒计时回调
     m_intervalRemainSec = remainingSeconds;
     if (m_currentTaskState == SH85PeriodicSelfCheckTask::State::WaitingNext) {
         refreshStatusText();
@@ -301,6 +325,7 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown(int remainingSe
 
 void SH85PeriodicSelfCheckSettingWidget::refreshStatusText()
 {
+    // 刷新状态文本：根据当前任务状态显示不同文案
     if (!m_statusEdit) return;
 
     QString text;
@@ -324,6 +349,7 @@ void SH85PeriodicSelfCheckSettingWidget::refreshStatusText()
 
 SH85PeriodicSelfCheckTask::TimeUnit SH85PeriodicSelfCheckSettingWidget::unitFromIndex(int idx)
 {
+    // 从下拉框索引转换为时间单位
     switch (idx) {
     case 0: return SH85PeriodicSelfCheckTask::TimeUnit::Second;
     case 1: return SH85PeriodicSelfCheckTask::TimeUnit::Minute;
@@ -332,12 +358,39 @@ SH85PeriodicSelfCheckTask::TimeUnit SH85PeriodicSelfCheckSettingWidget::unitFrom
     }
 }
 
+void SH85PeriodicSelfCheckSettingWidget::refreshActionControlsState()
+{
+    // 刷新操作控件的启用状态
+    if (m_enableCombo) {
+        m_enableCombo->setEnabled(m_periodicActionEnabled);
+    }
+    if (m_periodSpinBox) {
+        m_periodSpinBox->setEnabled(m_periodicActionEnabled);
+    }
+    if (m_unitCombo) {
+        m_unitCombo->setEnabled(m_periodicActionEnabled);
+    }
+    if (m_setBtn) {
+        m_setBtn->setEnabled(m_periodicActionEnabled);
+    }
+}
+
 void SH85PeriodicSelfCheckSettingWidget::setEnabled(bool enabled)
 {
+    // 设置控件是否启用
     QWidget::setEnabled(enabled);
 
     if (m_enableItem) m_enableItem->setEnabled(enabled);
     if (m_periodItem) m_periodItem->setEnabled(enabled);
     if (m_statusItem) m_statusItem->setEnabled(enabled);
     if (m_reportItem) m_reportItem->setEnabled(enabled);
+    refreshActionControlsState();
+}
+
+void SH85PeriodicSelfCheckSettingWidget::setPeriodicActionEnabled(bool enabled)
+{
+    // 设置周期性操作控件的启用状态（用于页面级互斥）
+    if (m_periodicActionEnabled == enabled) return;
+    m_periodicActionEnabled = enabled;
+    refreshActionControlsState();
 }

@@ -1,12 +1,15 @@
 #include "vefcgastypesettingwidget.h"
 #include "../settingwidget/settingitemwidget.h"
+#include "../modaltabledialog/modaltabledialog.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/set_vefc_gas_type_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
+#include "modbustcpmastermanager/modbustcpmastermanager.h"
 
 #include <QDebug>
+#include <QColor>
 #include <QMessageBox>
 #include <QVector>
 
@@ -91,7 +94,7 @@ void VEFCGasTypeSettingWidget::onSetBtnClicked()
 
 void VEFCGasTypeSettingWidget::onSetAllBtnClicked()
 {
-    const QStringList qrcodes = SharedData::getAllQrcodes();
+    const QStringList qrcodes = ModbusTcpMasterManager::instance().masterIds();
     if (qrcodes.isEmpty()) {
         QMessageBox::warning(this, "Set Failed", "No target device available");
         return;
@@ -112,36 +115,78 @@ void VEFCGasTypeSettingWidget::submitTask(const QStringList &qrcodes, int gasTyp
 
     m_gasTypeItem->setStatusWaiting();
 
+    // 保存设备列表用于后续构建表格，以及设备数量用于判断显示方式
+    auto *targetQrcodes = new QStringList(qrcodes);
+    const bool isSetAll = qrcodes.size() > 1;
+
+    connect(task, &SetVEFCGasTypeTask::deviceRetrying, this,
+            [this](const QString &qrCode, int retryCount, int maxRetry) {
+                m_gasTypeItem->setStatusWaiting(QString("Retrying %1 (%2/%3)")
+                    .arg(qrCode)
+                    .arg(retryCount)
+                    .arg(maxRetry));
+            },
+            Qt::QueuedConnection);
+
     connect(task, &SetVEFCGasTypeTask::allFinished,
-            this, [this, gasName](bool /*allSuccess*/, int successCount,
-                                  QStringList failedQrCodes, int gasFinal) {
-                const bool hasFailure = !failedQrCodes.isEmpty();
-                if (!hasFailure) {
+            this, [this, targetQrcodes, isSetAll, gasName]
+                  (bool allSuccess, int successCount,
+                   QStringList failedQrCodes, int gasFinal) {
+                if (allSuccess) {
                     m_gasTypeItem->setStatusOK();
-                    QMessageBox::information(
-                        this, "Set Succeeded",
-                        QString("Successfully set VEFC Gas Type=[%1 (0x%2)] on %3 device(s)")
-                            .arg(gasName)
-                            .arg(QString::number(gasFinal, 16).toUpper().rightJustified(4, '0'))
-                            .arg(successCount));
                 } else {
                     m_gasTypeItem->setStatusFailed();
-                    const QString failList = failedQrCodes.join(", ");
-                    QMessageBox::warning(
-                        this, "Set Failed",
-                        QString("Failed to set VEFC Gas Type=[%1 (0x%2)] on %3 device(s):\n%4")
-                            .arg(gasName)
-                            .arg(QString::number(gasFinal, 16).toUpper().rightJustified(4, '0'))
-                            .arg(failedQrCodes.count())
-                            .arg(failList));
                 }
+
+                // Set All 按钮（多个设备）使用 ModalTableDialog
+                if (isSetAll) {
+                    // 构建表格行数据：所有设备都显示设置的值
+                    QList<QStringList> tableRows;
+                    for (const QString &qrcode : *targetQrcodes) {
+                        const bool success = !failedQrCodes.contains(qrcode);
+                        const QString status = success ? "Success" : "Failed";
+                        const QString gasHex = QString("0x%1")
+                            .arg(QString::number(gasFinal, 16).toUpper().rightJustified(4, '0'));
+                        tableRows.append({qrcode, status, gasName, gasHex});
+                    }
+
+                    // 使用 ModalTableDialog 显示结果
+                    auto *dialog = ModalTableDialog::showAsync(
+                        this,
+                        QString("VEFC Gas Type Set Result"),
+                        QStringList{"QRCode", "Status", "Gas Type", "Value"},
+                        tableRows);
+
+                    // 设置颜色标记
+                    if (dialog) {
+                        dialog->setFieldTextColor("Status", "Success", QColor(0, 150, 0));
+                        dialog->setFieldTextColor("Status", "Failed", QColor(210, 0, 0));
+                    }
+                } else {
+                    // Set 按钮（单个设备）使用 QMessageBox
+                    const QString gasHex = QString("0x%1")
+                        .arg(QString::number(gasFinal, 16).toUpper().rightJustified(4, '0'));
+                    if (allSuccess) {
+                        QMessageBox::information(
+                            this, "Set Succeeded",
+                            QString("Successfully set VEFC Gas Type=[%1 (%2)]")
+                                .arg(gasName).arg(gasHex));
+                    } else {
+                        QMessageBox::warning(
+                            this, "Set Failed",
+                            QString("Failed to set VEFC Gas Type=[%1 (%2)]")
+                                .arg(gasName).arg(gasHex));
+                    }
+                }
+
+                delete targetQrcodes;
             });
 
     Scheduler::instance()->submitTask(task);
 
     qDebug() << "[ui][VEFCGasTypeSettingWidget][submitTask]：提交任务 设备数="
              << qrcodes.size() << "gasType=" << gasType << "(" << gasName << ")";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][VEFCGasTypeSettingWidget][submitTask]：提交任务 设备数=%1 gasType=%2 (%3)")
             .arg(qrcodes.size()).arg(gasType).arg(gasName).toStdString());
 }

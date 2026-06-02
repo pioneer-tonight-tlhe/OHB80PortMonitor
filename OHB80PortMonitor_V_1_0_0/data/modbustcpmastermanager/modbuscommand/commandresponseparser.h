@@ -69,6 +69,12 @@ private:
     // CH_1(0-1)：idlePurgeEnabled   CH_2(2-3)：idleState   CH_3(4-5)：idleWorkingTimeSec
     static QVariantMap parseReadIdlePurgeAll(const ModbusCommand& cmd);
 
+    // ReadVEFCPressure：1个寄存器，2字节，原始值 / 10，单位 Kpa
+    static QVariantMap parseReadVEFCPressure(const ModbusCommand& cmd);
+
+    // ReadVEFCTemperature：1个寄存器，2字节，原始值 / 100，单位 ℃
+    static QVariantMap parseReadVEFCTemperature(const ModbusCommand& cmd);
+
     QMap<QString, ParseFunc> m_parsers;
 };
 

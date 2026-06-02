@@ -3,11 +3,12 @@
 #include "ohbdeviceconfig.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/network_status_task.h"
-#include "scheduler/tasks/monitor_data_task.h"
-#include "scheduler/tasks/alarm_dispatch_task.h"
+#include "scheduler/tasks/network_status_task/network_status_task.h"
+#include "scheduler/tasks/monitor_data_task/monitor_data_task.h"
+#include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
-#include "scheduler/tasks/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h"
 #include "setofohbinfo.h"
 #include <QDebug>
 #include <QHash>
@@ -19,6 +20,7 @@ MonitorDataTask* SharedData::s_monitorDataTask = nullptr;
 AlarmDispatchTask* SharedData::s_alarmDispatchTask = nullptr;
 OperationDispatchTask* SharedData::s_operationDispatchTask = nullptr;
 SH85PeriodicSelfCheckTask* SharedData::s_sh85PeriodicSelfCheckTask = nullptr;
+VEFCSensorMonitorTask* SharedData::s_vefcSensorMonitorTask = nullptr;
 
 SharedData::SharedData() {
 
@@ -50,7 +52,7 @@ SharedData::SharedData() {
                 foup.setInletFlow(0);
                 foup.setRH(0);
                 foup.setFoupIn(false);
-                foup.setHasAlarm(true);
+                foup.setHasAlarm(false);
                 foups.append(foup);
 
                 // static int num = 0;
@@ -170,6 +172,13 @@ void SharedData::initScheduler()
         qDebug() << "[SharedData] 已提交 SH85 周期自检任务, TaskID:" << id;
     }
 
+    // // 创建并提交 VEFC 传感器监控任务（长驻任务）
+    // if (!s_vefcSensorMonitorTask) {
+    //     s_vefcSensorMonitorTask = new VEFCSensorMonitorTask();
+    //     QString id = scheduler->submitTask(s_vefcSensorMonitorTask);
+    //     qDebug() << "[SharedData] 已提交 VEFC 传感器监控任务, TaskID:" << id;
+    // }
+
     qDebug() << "[SharedData] 调度器已启动，所有常驻任务已提交";
 }
 
@@ -196,4 +205,9 @@ OperationDispatchTask* SharedData::getOperationDispatchTask()
 SH85PeriodicSelfCheckTask* SharedData::getSH85PeriodicSelfCheckTask()
 {
     return s_sh85PeriodicSelfCheckTask;
+}
+
+VEFCSensorMonitorTask* SharedData::getVEFCSensorMonitorTask()
+{
+    return s_vefcSensorMonitorTask;
 }

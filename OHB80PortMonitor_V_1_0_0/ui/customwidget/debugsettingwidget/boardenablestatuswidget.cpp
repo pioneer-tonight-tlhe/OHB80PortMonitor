@@ -1,5 +1,6 @@
 #include "boardenablestatuswidget.h"
 #include "../settingwidget/settingitemwidget.h"
+#include "../modaltabledialog/modaltabledialog.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/send_command_task.h"
 #include "app/shareddata.h"
@@ -7,6 +8,7 @@
 #include "loggermanager.h"
 
 #include <QDebug>
+#include <QColor>
 #include <QMessageBox>
 #include <QStringList>
 #include <QVector>
@@ -106,11 +108,23 @@ void BoardEnableStatusWidget::submitTask(const QStringList &qrcodes)
 
     m_readItem->setStatusWaiting();
 
-    // 收集每台设备的读取结果
-    auto *results = new QStringList();
+    // 收集每台设备的读取结果（结构化数据）
+    struct DeviceResult {
+        QString qrcode;
+        QString status;
+        QString value;
+        bool success;
+    };
+    auto *results = new QList<DeviceResult>();
+
+    // 保存原始设备列表，以及设备数量用于判断显示方式
+    auto *targetQrcodes = new QStringList(qrcodes);
+    const bool isReadAll = qrcodes.size() > 1;
 
     connect(task, &SendCommandTask::dataResult,
             this, [results](const QString &qrcode, const ModbusCommand &cmd) {
+                DeviceResult dr;
+                dr.qrcode = qrcode;
                 if (cmd.received && !cmd.timedOut && !cmd.checksumError) {
                     const QByteArray &regVal = cmd.response.registerValue;
                     quint16 value = 0;
@@ -118,45 +132,92 @@ void BoardEnableStatusWidget::submitTask(const QStringList &qrcodes)
                         value = (static_cast<quint16>(static_cast<quint8>(regVal[0])) << 8)
                               |  static_cast<quint16>(static_cast<quint8>(regVal[1]));
                     }
-                    const QString status = (value == 0) ? "Normal (Enabled)" : "Disabled";
-                    results->append(QString("[%1] %2 (0x%3)")
-                                        .arg(qrcode)
-                                        .arg(status)
-                                        .arg(value, 4, 16, QChar('0')));
+                    dr.value = QString("0x%1").arg(value, 4, 16, QChar('0'));
+                    dr.status = (value == 0) ? "Normal (Enabled)" : "Disabled";
+                    dr.success = true;
                 } else {
-                    results->append(QString("[%1] Communication FAILED").arg(qrcode));
+                    dr.status = "Communication FAILED";
+                    dr.value = "-";
+                    dr.success = false;
                 }
+                results->append(dr);
             });
 
     connect(task, &SendCommandTask::allFinished,
-            this, [this, results]
+            this, [this, results, targetQrcodes, isReadAll]
                   (bool allSuccess, int successCount,
                    int failCount, const QStringList &failedIds) {
                 Q_UNUSED(failCount)
                 if (allSuccess) {
                     m_readItem->setStatusOK();
-                    QMessageBox::information(
-                        this, "Read Succeeded",
-                        QString("All %1 device(s) read OK:\n\n%2")
-                            .arg(successCount)
-                            .arg(results->join("\n")));
                 } else {
                     m_readItem->setStatusFailed();
-                    QMessageBox::warning(
-                        this, "Read Result",
-                        QString("%1 succeeded, %2 failed:\n\n%3\n\nFailed devices: %4")
-                            .arg(successCount)
-                            .arg(failedIds.size())
-                            .arg(results->join("\n"))
-                            .arg(failedIds.join(", ")));
                 }
+
+                // Read All 按钮（多个设备）使用 ModalTableDialog
+                if (isReadAll) {
+                    // 构建表格行数据：根据原始设备列表构建，确保所有设备都显示
+                    QList<QStringList> tableRows;
+                    for (const QString &qrcode : *targetQrcodes) {
+                        // 先在结果中查找该设备
+                        bool found = false;
+                        for (const DeviceResult &dr : *results) {
+                            if (dr.qrcode == qrcode) {
+                                tableRows.append({dr.qrcode, dr.status, dr.value});
+                                found = true;
+                                break;
+                            }
+                        }
+                        // 如果不在结果中，说明是失败的设备（dataResult 信号只在成功时发出）
+                        if (!found) {
+                            tableRows.append({qrcode, "Communication FAILED", "-"});
+                        }
+                    }
+
+                    // 使用 ModalTableDialog 显示结果
+                    auto *dialog = ModalTableDialog::showAsync(
+                        this,
+                        QString("Board Enable Status Result"),
+                        QStringList{"QRCode", "Status", "Value"},
+                        tableRows);
+
+                    // 设置颜色标记
+                    if (dialog) {
+                        dialog->setFieldTextColor("Status", "Normal (Enabled)", QColor(0, 150, 0));
+                        dialog->setFieldTextColor("Status", "Disabled", QColor(210, 0, 0));
+                        dialog->setFieldTextColor("Status", "Communication FAILED", QColor(210, 0, 0));
+                    }
+                } else {
+                    // Read 按钮（单个设备）使用 QMessageBox
+                    if (!results->isEmpty()) {
+                        const DeviceResult &dr = results->first();
+                        if (dr.success) {
+                            QMessageBox::information(
+                                this, "Read Succeeded",
+                                QString("Device %1: %2 (Value: %3)")
+                                    .arg(dr.qrcode).arg(dr.status).arg(dr.value));
+                        } else {
+                            QMessageBox::warning(
+                                this, "Read Failed",
+                                QString("Device %1: Communication FAILED")
+                                    .arg(dr.qrcode));
+                        }
+                    } else {
+                        QMessageBox::warning(
+                            this, "Read Failed",
+                            QString("Device %1: Communication FAILED")
+                                .arg(targetQrcodes->first()));
+                    }
+                }
+
                 delete results;
+                delete targetQrcodes;
             });
 
     Scheduler::instance()->submitTask(task);
 
     qDebug() << "[ui][BoardEnableStatusWidget][submitTask] 设备数=" << qrcodes.size();
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][BoardEnableStatusWidget][submitTask] 设备数=%1")
             .arg(qrcodes.size()).toStdString());
 }

@@ -5,6 +5,7 @@
 
 #include <optional>
 
+
 class SetFirmwareConfigTask : public SchedulerTask
 {
     Q_OBJECT
@@ -39,6 +40,8 @@ private:
     std::optional<int> m_sendInterval;
     std::optional<int> m_transferTimeout;
     std::optional<int> m_postTransferWaitTime;
+
+    const std::string m_taskLogPath = "scheduler/set_firmware_config_task";
 };
 
 #endif // SET_FIRMWARE_CONFIG_TASK_H

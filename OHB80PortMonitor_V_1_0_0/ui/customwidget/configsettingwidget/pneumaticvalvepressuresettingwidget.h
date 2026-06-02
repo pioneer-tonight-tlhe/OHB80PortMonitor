@@ -36,11 +36,18 @@ private:
     // 提交压力设置任务
     void submitPressureTask(const QStringList &qrcodes, double pressureBar);
 
+    // 设置任务运行期间所有 Set 按钮的启用状态
+    void setAllSetButtonsEnabled(bool enabled);
+
 private:
     // 控件指针
     // QSpinBox  *m_qrcodeSpinBox;      // 设备 QRCode（int）
     QComboBox *m_comboBox;              // 主设备队列
     QSpinBox  *m_pressureSpinBox;    // 压力设置（bar）
+
+    // Set 按钮指针（任务期间禁用，避免并发任务提交）
+    QPushButton *m_pressureSetBtn;
+    QPushButton *m_pressureSetAllBtn;
 
     // SettingItemWidget 指针（用于显示状态）
     SettingItemWidget *m_qrcodeItem;

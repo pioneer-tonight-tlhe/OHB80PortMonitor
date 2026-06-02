@@ -6,6 +6,7 @@
 #include "communicaterecord.h"
 #include "dbtypes.h"
 
+
 class CommunicateLogQueryTask : public SchedulerTask
 {
     Q_OBJECT
@@ -40,9 +41,6 @@ signals:
 private:
     LogDB::CommunicateLogDBCon* m_db;
 
-    // 日志路径
-    static constexpr const char* LOG_PATH = "scheduler/communicate_log_query_task";
-
     // 查询条件
     QString m_commandId;                // 空字符串表示未设置
     QString m_qrCode;                   // 空字符串表示未设置
@@ -53,6 +51,8 @@ private:
     int m_pageNumber;                   // 1-based，0 表示未设置
     int m_pageSize;                     // 默认500
     LogDB::SortOrder m_sortOrder;       // 按 send_time 的排序方向，默认降序
+
+    const std::string m_taskLogPath = "scheduler/communicatelogquerytask";
 };
 
 #endif // COMMUNICATELOGQUERYTASK_H

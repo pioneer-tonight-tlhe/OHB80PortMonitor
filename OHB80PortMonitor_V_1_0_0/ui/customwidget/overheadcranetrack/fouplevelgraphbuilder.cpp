@@ -21,7 +21,7 @@ Graph::FoupLevelGraphBuilder::FoupLevelGraphBuilder(GraphMultilist &graph, QMap<
       m_foupUnit(0.0),
       m_startNodePosition(20.0, 170.0),
       m_currentConfig(nullptr),
-      m_logger(LoggerManager::instance()),
+      m_logger(*LoggerManager::getInstance()),
       m_loggerFileName(AppLogger::CraneMapLoggerPath().toStdString()),
       m_stage(BuildStage::NotStarted)
 {

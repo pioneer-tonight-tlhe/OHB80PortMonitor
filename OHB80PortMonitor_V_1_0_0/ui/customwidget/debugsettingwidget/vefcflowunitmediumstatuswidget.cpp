@@ -1,13 +1,16 @@
 #include "vefcflowunitmediumstatuswidget.h"
 #include "../settingwidget/settingitemwidget.h"
+#include "modaltabledialog.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/read_vefc_flow_unit_medium_status_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
+#include "modbustcpmastermanager/modbustcpmastermanager.h"
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QColor>
 #include <QStringList>
 #include <QVector>
 
@@ -83,13 +86,47 @@ void VEFCFlowUnitMediumStatusWidget::onReadBtnClicked()
 
 void VEFCFlowUnitMediumStatusWidget::onReadAllBtnClicked()
 {
-    const QStringList qrcodes = SharedData::getAllQrcodes();
+    const QStringList qrcodes = ModbusTcpMasterManager::instance().masterIds();
     if (qrcodes.isEmpty()) {
         QMessageBox::warning(this, "Read Failed", "No target device available");
         return;
     }
     submitTask(qrcodes);
 }
+
+// ============================================================
+// 辅助函数
+// ============================================================
+
+namespace {
+QList<QStringList> buildDeviceResultRows(const QList<ReadVEFCFlowUnitAndMediumStatusTask::DeviceStatus>& results)
+{
+    QList<QStringList> rows;
+    for (const auto& st : results) {
+        rows.append({
+            st.qrcode,
+            st.commFailed ? QStringLiteral("Failed") : QStringLiteral("OK"),
+            st.unitOk ? QStringLiteral("OK") : QStringLiteral("Failed"),
+            st.mediumOk ? QStringLiteral("OK") : QStringLiteral("Failed"),
+            st.allOk() ? QStringLiteral("Success") : QStringLiteral("Failed")
+        });
+    }
+    return rows;
+}
+
+void applyResultColors(ModalTableDialog *dialog)
+{
+    if (!dialog) return;
+    dialog->setFieldTextColor(QStringLiteral("Communication"), QStringLiteral("Failed"), QColor(210, 0, 0));
+    dialog->setFieldTextColor(QStringLiteral("Communication"), QStringLiteral("OK"), QColor(0, 150, 0));
+    dialog->setFieldTextColor(QStringLiteral("Unit Status"), QStringLiteral("Failed"), QColor(210, 0, 0));
+    dialog->setFieldTextColor(QStringLiteral("Unit Status"), QStringLiteral("OK"), QColor(0, 150, 0));
+    dialog->setFieldTextColor(QStringLiteral("Medium Status"), QStringLiteral("Failed"), QColor(210, 0, 0));
+    dialog->setFieldTextColor(QStringLiteral("Medium Status"), QStringLiteral("OK"), QColor(0, 150, 0));
+    dialog->setFieldTextColor(QStringLiteral("Overall"), QStringLiteral("Failed"), QColor(210, 0, 0));
+    dialog->setFieldTextColor(QStringLiteral("Overall"), QStringLiteral("Success"), QColor(0, 150, 0));
+}
+} // namespace
 
 // ============================================================
 // 提交任务
@@ -103,69 +140,36 @@ void VEFCFlowUnitMediumStatusWidget::submitTask(const QStringList &qrcodes)
 
     m_readItem->setStatusWaiting();
 
+    connect(task, &Task::deviceRetrying, this,
+            [this](const QString &qrCode, int retryCount, int maxRetry) {
+                m_readItem->setStatusWaiting(QString("Retrying %1 (%2/%3)")
+                    .arg(qrCode)
+                    .arg(retryCount)
+                    .arg(maxRetry));
+            },
+            Qt::QueuedConnection);
+
     connect(task, &Task::allFinished,
-            this, [this](bool /*allSuccess*/, int successCount,
+            this, [this](bool allSuccess, int successCount,
                          QList<Task::DeviceStatus> results) {
-                // 按类别收集失败设备
-                QStringList commFailedDevices;
-                QStringList unitFailedDevices;
-                QStringList mediumFailedDevices;
-                for (const Task::DeviceStatus &st : results) {
-                    if (st.allOk()) continue;
-                    if (st.commFailed) {
-                        commFailedDevices.append(st.qrcode);
-                    } else {
-                        if (!st.unitOk)   unitFailedDevices.append(st.qrcode);
-                        if (!st.mediumOk) mediumFailedDevices.append(st.qrcode);
-                    }
-                }
-
-                const bool hasFailure = !commFailedDevices.isEmpty()
-                                     || !unitFailedDevices.isEmpty()
-                                     || !mediumFailedDevices.isEmpty();
-
-                if (!hasFailure) {
+                if (allSuccess) {
                     m_readItem->setStatusOK();
-                    QMessageBox::information(
-                        this, "Read Succeeded",
-                        QString("All %1 device(s) passed:\nUnit OK + Medium OK")
-                            .arg(successCount));
                 } else {
                     m_readItem->setStatusFailed();
-                    const int failCount = results.size() - successCount;
-                    QMessageBox::warning(
-                        this, "Read Failed",
-                        QString("%1/%2 device(s) passed, %3 failed.")
-                            .arg(successCount).arg(results.size()).arg(failCount));
-
-                    if (!commFailedDevices.isEmpty()) {
-                        QMessageBox::warning(
-                            this, "Communication Failed",
-                            QString("Communication failed on %1 device(s):\n%2")
-                                .arg(commFailedDevices.size())
-                                .arg(commFailedDevices.join(", ")));
-                    }
-                    if (!unitFailedDevices.isEmpty()) {
-                        QMessageBox::warning(
-                            this, "Unit Config Failed",
-                            QString("Unit config failed on %1 device(s):\n%2")
-                                .arg(unitFailedDevices.size())
-                                .arg(unitFailedDevices.join(", ")));
-                    }
-                    if (!mediumFailedDevices.isEmpty()) {
-                        QMessageBox::warning(
-                            this, "Medium Config Failed",
-                            QString("Medium config failed on %1 device(s):\n%2")
-                                .arg(mediumFailedDevices.size())
-                                .arg(mediumFailedDevices.join(", ")));
-                    }
                 }
+
+                auto *dialog = ModalTableDialog::showAsync(
+                    this,
+                    QString("VEFC Flow Unit/Medium Status Result"),
+                    QStringList{"QRCode", "Communication", "Unit Status", "Medium Status", "Overall"},
+                    buildDeviceResultRows(results));
+                applyResultColors(dialog);
             });
 
     Scheduler::instance()->submitTask(task);
 
     qDebug() << "[ui][VEFCFlowUnitMediumStatusWidget][submitTask]：提交任务 设备数=" << qrcodes.size();
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][VEFCFlowUnitMediumStatusWidget][submitTask]：提交任务 设备数=%1")
             .arg(qrcodes.size()).toStdString());
 }

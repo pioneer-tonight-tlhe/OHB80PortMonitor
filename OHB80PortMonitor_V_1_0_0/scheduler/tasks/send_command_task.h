@@ -2,6 +2,7 @@
 #define SEND_COMMAND_TASK_H
 
 #include "../scheduler_task.h"
+#include "ilogger.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"
 
 #include <QAtomicInt>
@@ -42,9 +43,13 @@ signals:
     void allFinished(bool allSuccess, int successCount, int failCount,
                      const QStringList &failedIds);
 
+    // 设备指令超时重试信号（通知 UI 层显示重试状态）
+    void deviceRetrying(QString qrCode, int retryCount, int maxRetry);
+
 private slots:
     // 单设备指令完成回调（通过 lambda 捕获 masterId 传入）
     void onCommandFinished(ModbusCommand cmd, const QString &masterId);
+    void onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId);
 
 private:
     // 根据 quint16 参数构建请求帧的 registerValue（大端序）
@@ -55,6 +60,14 @@ private:
 
     // 完成一台设备后检查是否全部结束
     void checkAllFinished();
+
+    void writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason);
+    void writeDeviceCommandLog(const QString& qrCode, const ModbusCommand& cmd, bool success);
+    QString commandFrameLogString(const ModbusCommand& cmd) const;
+    QString deviceLogPath() const;
+    static QString safeLogPathSegment(const QString& value);
+    ILogger& deviceDetailLogger();
+    QString subFunctionName() const;
 
     // ---- 配置 ----
     QVector<QString> m_targetQrcodes;   // 为空时发给所有设备
@@ -74,6 +87,9 @@ private:
     // ---- 汇总结果 ----
     int                         m_resultSuccessCount = 0;
     QStringList                 m_resultFailedIds;
+
+    ILogger deviceLogger;               ///< 设备详细日志记录器（subFunction 级共享）
+    bool m_loggerInitialized = false;   ///< deviceLogger 路径是否已设置
 };
 
 #endif // SEND_COMMAND_TASK_H

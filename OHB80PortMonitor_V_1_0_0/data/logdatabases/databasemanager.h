@@ -7,6 +7,7 @@
 #include "communicatelogdbcon.h"
 #include "alarmlogdbcon.h"
 #include "deviceparamlogdbcon.h"
+#include "vefcsensormonitordbcon.h"
 
 namespace LogDB {
 
@@ -34,6 +35,9 @@ public:
     // 获取DeviceParamLogDBCon指针
     DeviceParamLogDBCon* deviceParamLogCon();
 
+    // 获取VEFCSensorMonitorDBCon指针
+    VEFCSensorMonitorDBCon* vefcSensorMonitorCon();
+
     // 禁用拷贝构造和赋值
     DatabaseManager(const DatabaseManager&) = delete;
     DatabaseManager& operator=(const DatabaseManager&) = delete;
@@ -51,6 +55,7 @@ private:
     CommunicateLogDBCon* m_communicateLogCon;
     AlarmLogDBCon* m_alarmLogCon;
     DeviceParamLogDBCon* m_deviceParamLogCon;
+    VEFCSensorMonitorDBCon* m_vefcSensorMonitorCon;
 
     static QMutex s_mutex;
     static DatabaseManager* s_instance;

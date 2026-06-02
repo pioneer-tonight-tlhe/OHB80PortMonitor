@@ -53,10 +53,19 @@ private:
                     double valuePct,
                     SettingItemWidget *targetItem);
 
+    // 设置任务运行期间所有 Set 按钮的启用状态
+    void setAllSetButtonsEnabled(bool enabled);
+
 private:
     QSpinBox        *m_qrcodeSpinBox     = nullptr;
     QDoubleSpinBox  *m_thresholdSpinBox  = nullptr;
     QDoubleSpinBox  *m_offsetSpinBox     = nullptr;
+
+    // Set 按钮指针（任务期间禁用，避免并发任务提交）
+    QPushButton *m_thresholdSetBtn;
+    QPushButton *m_thresholdSetAllBtn;
+    QPushButton *m_offsetSetBtn;
+    QPushButton *m_offsetSetAllBtn;
 
     SettingItemWidget *m_qrcodeItem    = nullptr;
     SettingItemWidget *m_thresholdItem = nullptr;

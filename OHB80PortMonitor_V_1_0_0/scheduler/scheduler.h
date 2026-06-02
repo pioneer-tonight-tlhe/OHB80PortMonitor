@@ -10,6 +10,8 @@
 #include <QQueue>
 #include <QSet>
 
+#define TASK_LOG_PATH "scheduler/scheduler"
+
 class Scheduler : public QObject
 {
     Q_OBJECT
@@ -54,6 +56,7 @@ private:
 
     // 连接任务信号
     void connectTaskSignals(SchedulerTask *task);
+    void enqueueTask(SchedulerTask *task);
 
     // 调度下一个任务
     void scheduleNext();

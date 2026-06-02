@@ -6,6 +6,7 @@
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
 #include "loggermanager.h"
+#include "defer/defer.h"
 
 #include <QDebug>
 
@@ -13,15 +14,17 @@ SetFirmwareConfigTask::SetFirmwareConfigTask(QObject *parent)
     : SchedulerTask(parent)
 {
     qDebug() << "=============================SetFirmwareConfigTask 调度任务开始=============================";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        "=============================SetFirmwareConfigTask 调度任务开始=============================");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        "[SetFirmwareConfigTask][构造] 任务创建");
+    LoggerManager::getInstance()->flush(m_taskLogPath);
 }
 
 SetFirmwareConfigTask::~SetFirmwareConfigTask()
 {
     qDebug() << "=============================SetFirmwareConfigTask 调度任务结束=============================";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        "=============================SetFirmwareConfigTask 调度任务结束=============================");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        "[SetFirmwareConfigTask][析构] 任务销毁");
+    LoggerManager::getInstance()->flush(m_taskLogPath);
 }
 
 void SetFirmwareConfigTask::setPrepareTimeout(int ms)       { m_prepareTimeout       = ms; }
@@ -32,10 +35,12 @@ void SetFirmwareConfigTask::setPostTransferWaitTime(int ms) { m_postTransferWait
 
 void SetFirmwareConfigTask::start()
 {
+    Tool::Defer defer([this]() { LoggerManager::getInstance()->flush(m_taskLogPath); });
+    
     setState(Running);
 
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        "[Scheduler][SetFirmwareConfigTask] 开始配置固件升级参数");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        "[SetFirmwareConfigTask][start] 任务开始");
 
     // 写入运行日志：任务启动
     if (auto* opTaskStart = SharedData::getOperationDispatchTask()) {
@@ -60,6 +65,8 @@ void SetFirmwareConfigTask::start()
         if (m_postTransferWaitTime.has_value()) upgrader->setPostTransferWaitTime(m_postTransferWaitTime.value());
 
         qDebug() << "[SetFirmwareConfigTask] Applied config to" << id;
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+            QString("[SetFirmwareConfigTask][start] 应用配置到设备 %1").arg(id).toStdString());
         appliedCount++;
     }
 
@@ -71,8 +78,8 @@ void SetFirmwareConfigTask::start()
 
     setState(Finished);
     emit finished(true, "Firmware config applied");
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SetFirmwareConfigTask] 固件升级参数配置完成，应用到 %1 个设备").arg(appliedCount).toStdString());
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        QString("[SetFirmwareConfigTask][start] 固件升级参数配置完成，应用到 %1 个设备").arg(appliedCount).toStdString());
 
     // 写入运行日志：任务完成
     if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
@@ -85,5 +92,10 @@ void SetFirmwareConfigTask::start()
 
 void SetFirmwareConfigTask::stop()
 {
+    Tool::Defer defer([this]() { LoggerManager::getInstance()->flush(m_taskLogPath); });
+    
     setState(Cancelled);
+    emit finished(false, "SetFirmwareConfigTask: 任务被取消");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        "[SetFirmwareConfigTask][stop] 任务被取消");
 }

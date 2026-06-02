@@ -1,6 +1,5 @@
 #include "modbuscommandsender.h"
-#include "loggermanager.h"
-#include "app/applogger.h"
+#include "modbuslogger.h"
 #include <QDateTime>
 #include <QDebug>
 #include <QString>
@@ -20,6 +19,21 @@ static inline QString toHexSpaced(const QByteArray& data)
     }
     if (!s.isEmpty()) s.chop(1);
     return s;
+}
+
+static inline QString commandModuleToString(CommandModule module)
+{
+    switch (module) {
+        case CommandModule::InitialCommandIssuer:  return "INITIAL";
+        case CommandModule::PeriodicCommandSender: return "PERIODIC";
+        case CommandModule::BusinessCommandIssuer: return "BUSINESS";
+    }
+    return "UNKNOWN";
+}
+
+static inline bool shouldLogCommand(const ModbusCommand& cmd)
+{
+    return cmd.module != CommandModule::PeriodicCommandSender;
 }
 }
 
@@ -64,14 +78,13 @@ void ModbusCommandSender::submit(const ModbusCommand& cmd)
         rejected.timedOut = false;
         rejected.checksumError = false;
         rejected.errorMessage = QString("设备繁忙，拒绝指令下发（%1已满）").arg(queueName);
-        qDebug() << "[BUSY-REJECT] [设备ID=" << m_masterId << "] " << nowStr()
-                 << "id=" << rejected.id
-                 << "uuid=" << rejected.uuid
-                 << "queue=" << queueName;
-        if (cmd.module != CommandModule::PeriodicCommandSender) {
-            QString logMsg = QString("设备繁忙，指令被拒绝 - 设备ID=%1 id=%2 uuid=%3 queue=%4").arg(m_masterId).arg(rejected.id).arg(rejected.uuid).arg(queueName);
-            LoggerManager::instance().log(AppLogger::ModbusMasterLoggerPath(m_masterId).toStdString(), Level::WARN, QString("[data][ModbusCommandSender][submit]：%1").arg(logMsg).toStdString());
-        }
+//        qDebug() << "[BUSY-REJECT] [设备ID=" << m_masterId << "] " << nowStr()
+//                 << "id=" << rejected.id
+//                 << "uuid=" << rejected.uuid
+//                 << "queue=" << queueName;
+        ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "submit",
+            QString("指令队列已满，拒绝提交 module=%1 id=%2 uuid=%3 queue=%4")
+                .arg(commandModuleToString(rejected.module)).arg(rejected.id).arg(rejected.uuid).arg(queueName));
         locker.unlock();
         emit commandFinished(rejected, m_masterId);
         return;
@@ -94,6 +107,7 @@ void ModbusCommandSender::setQueueCapacity(int capacity)
 void ModbusCommandSender::start()
 {
     m_running = true;
+    ModbusLogger::masterInfo(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "start", "指令发送器启动");
     if (!m_hasPendingCommand) {
         dispatch();
     }
@@ -107,6 +121,7 @@ void ModbusCommandSender::stop()
     if (m_receiver) {
         m_receiver->cancelPending();
     }
+    ModbusLogger::masterInfo(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "stop", "指令发送器停止");
 }
 
 void ModbusCommandSender::dispatch()
@@ -174,6 +189,9 @@ void ModbusCommandSender::doSend(ModbusCommand cmd)
         cmd.timedOut = false;
         cmd.checksumError = false;
         cmd.deviceBusy = false;
+        ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "doSend",
+            QString("指令发送失败 module=%1 id=%2 uuid=%3 error=%4")
+                .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid).arg(cmd.errorMessage));
         emit commandFinished(cmd, m_masterId);
         return;
     }
@@ -184,6 +202,9 @@ void ModbusCommandSender::doSend(ModbusCommand cmd)
         cmd.timedOut = false;
         cmd.checksumError = false;
         cmd.deviceBusy = false;
+        ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "doSend",
+            QString("指令发送失败 module=%1 id=%2 uuid=%3 error=%4")
+                .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid).arg(cmd.errorMessage));
         emit commandFinished(cmd, m_masterId);
         return;
     }
@@ -198,35 +219,35 @@ void ModbusCommandSender::doSend(ModbusCommand cmd)
         cmd.request.crc = requestFrame.right(2);
     }
 
-    QString moduleStr;
-    switch (cmd.module) {
-        case CommandModule::InitialCommandIssuer:  moduleStr = "INITIAL"; break;
-        case CommandModule::PeriodicCommandSender: moduleStr = "PERIODIC"; break;
-        case CommandModule::BusinessCommandIssuer: moduleStr = "BUSINESS"; break;
-    }
-
-    // 拼接日志字符串
-    QString logMsg = QString("[发送] %1 设备ID=%2 module=%3 id=%4 uuid=%5 sendCount=%6/%7 timeout=%8ms crc=%9 len=%10")
-            .arg(nowStr())
-            .arg(m_masterId)
-            .arg(moduleStr)
-            .arg(cmd.id)
-            .arg(cmd.uuid)
-            .arg(cmd.sendCount)
-            .arg(cmd.maxRetryCount + 1)
-            .arg(cmd.timeoutMs)
-            .arg(toHexSpaced(cmd.request.crc))
-            .arg(requestFrame.size());
-
-    // frame 部分换行处理
-    QString frameHex = toHexSpaced(requestFrame);
-    QString logMsgWithFrame = logMsg + "\nframe=" + frameHex;
-
-    qDebug() << logMsgWithFrame;
-
-    // 写入文件日志（PeriodicCommandSender 不记录）
-    if (cmd.module != CommandModule::PeriodicCommandSender) {
-        LoggerManager::instance().log(AppLogger::ModbusMasterLoggerPath(m_masterId).toStdString(), Level::INFO, QString("[data][ModbusCommandSender][doSend]：%1").arg(logMsgWithFrame).toStdString());
+//    QString moduleStr;
+//    switch (cmd.module) {
+//        case CommandModule::InitialCommandIssuer:  moduleStr = "INITIAL"; break;
+//        case CommandModule::PeriodicCommandSender: moduleStr = "PERIODIC"; break;
+//        case CommandModule::BusinessCommandIssuer: moduleStr = "BUSINESS"; break;
+//    }
+//
+//    QString logMsg = QString("[发送] %1 设备ID=%2 module=%3 id=%4 uuid=%5 sendCount=%6/%7 timeout=%8ms crc=%9 len=%10")
+//            .arg(nowStr())
+//            .arg(m_masterId)
+//            .arg(moduleStr)
+//            .arg(cmd.id)
+//            .arg(cmd.uuid)
+//            .arg(cmd.sendCount)
+//            .arg(cmd.maxRetryCount + 1)
+//            .arg(cmd.timeoutMs)
+//            .arg(toHexSpaced(cmd.request.crc))
+//            .arg(requestFrame.size());
+//
+//    QString frameHex = toHexSpaced(requestFrame);
+//    QString logMsgWithFrame = logMsg + "\nframe=" + frameHex;
+//
+//    qDebug() << logMsgWithFrame;
+    if (shouldLogCommand(cmd)) {
+        ModbusLogger::masterInfo(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "doSend",
+            QString("发送指令 module=%1 id=%2 uuid=%3 sendCount=%4/%5 timeout=%6ms bytes=%7 crc=%8")
+                .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid)
+                .arg(cmd.sendCount).arg(cmd.maxRetryCount + 1).arg(cmd.timeoutMs)
+                .arg(requestFrame.size()).arg(toHexSpaced(cmd.request.crc)));
     }
 
     const qint64 written = m_socket->write(requestFrame);
@@ -298,12 +319,12 @@ void ModbusCommandSender::handleFailedCommand(ModbusCommand cmd, const QString& 
     cmd.timedOut = timedOut;
     cmd.checksumError = checksumError;
 
-    QString moduleStr;
-    switch (cmd.module) {
-        case CommandModule::InitialCommandIssuer:  moduleStr = "INITIAL"; break;
-        case CommandModule::PeriodicCommandSender: moduleStr = "PERIODIC"; break;
-        case CommandModule::BusinessCommandIssuer: moduleStr = "BUSINESS"; break;
-    }
+//    QString moduleStr;
+//    switch (cmd.module) {
+//        case CommandModule::InitialCommandIssuer:  moduleStr = "INITIAL"; break;
+//        case CommandModule::PeriodicCommandSender: moduleStr = "PERIODIC"; break;
+//        case CommandModule::BusinessCommandIssuer: moduleStr = "BUSINESS"; break;
+//    }
 
     // 定时查询指令失败不进入重发队列（依赖下一次周期轮询，避免堆积）
     const bool shouldRetry = !cmd.deviceBusy && !cmd.checksumError
@@ -311,22 +332,21 @@ void ModbusCommandSender::handleFailedCommand(ModbusCommand cmd, const QString& 
                            && cmd.module != CommandModule::PeriodicCommandSender;
 
     if (!shouldRetry) {
-        qDebug() << "[FAILED] [设备ID=" << m_masterId << "] " << nowStr()
-                 << "module=" << moduleStr
-                 << "id=" << cmd.id
-                 << "uuid=" << cmd.uuid
-                 << "error=" << errorMessage
-                 << "sendCount=" << cmd.sendCount
-                 << "/" << (cmd.maxRetryCount + 1)
-                 << (cmd.deviceBusy ? " (deviceBusy)" : QString())
-                 << (cmd.checksumError ? " (checksumError)" : QString());
-        if (cmd.module != CommandModule::PeriodicCommandSender) {
-            QString logMsg = QString("指令失败 - 设备ID=%1 module=%2 id=%3 uuid=%4 error=%5 sendCount=%6/%7%8%9")
-                    .arg(m_masterId).arg(moduleStr).arg(cmd.id).arg(cmd.uuid).arg(errorMessage)
+//        qDebug() << "[FAILED] [设备ID=" << m_masterId << "] " << nowStr()
+//                 << "module=" << moduleStr
+//                 << "id=" << cmd.id
+//                 << "uuid=" << cmd.uuid
+//                 << "error=" << errorMessage
+//                 << "sendCount=" << cmd.sendCount
+//                 << "/" << (cmd.maxRetryCount + 1)
+//                 << (cmd.deviceBusy ? " (deviceBusy)" : QString())
+//                 << (cmd.checksumError ? " (checksumError)" : QString());
+        if (shouldLogCommand(cmd)) {
+            ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "handleFailedCommand",
+                QString("指令失败 module=%1 id=%2 uuid=%3 error=%4 sendCount=%5/%6 timedOut=%7 checksumError=%8 deviceBusy=%9")
+                    .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid).arg(errorMessage)
                     .arg(cmd.sendCount).arg(cmd.maxRetryCount + 1)
-                    .arg(cmd.deviceBusy ? " (deviceBusy)" : "")
-                    .arg(cmd.checksumError ? " (checksumError)" : "");
-            LoggerManager::instance().log(AppLogger::ModbusMasterLoggerPath(m_masterId).toStdString(), Level::WARN, QString("[data][ModbusCommandSender][handleFailedCommand]：%1").arg(logMsg).toStdString());
+                    .arg(timedOut).arg(checksumError).arg(cmd.deviceBusy));
         }
         emit commandFinished(cmd, m_masterId);
         if (m_running) {
@@ -335,30 +355,22 @@ void ModbusCommandSender::handleFailedCommand(ModbusCommand cmd, const QString& 
         return;
     }
 
-    qDebug() << "[RETRY] [设备ID=" << m_masterId << "] " << nowStr()
-             << "module=" << moduleStr
-             << "id=" << cmd.id
-             << "uuid=" << cmd.uuid
-             << "error=" << errorMessage
-             << "sendCount=" << cmd.sendCount
-             << "/" << (cmd.maxRetryCount + 1);
-    if (cmd.module != CommandModule::PeriodicCommandSender) {
-        QString logMsg = QString("指令重试 - 设备ID=%1 module=%2 id=%3 uuid=%4 error=%5 sendCount=%6/%7")
-                .arg(m_masterId).arg(moduleStr).arg(cmd.id).arg(cmd.uuid).arg(errorMessage)
-                .arg(cmd.sendCount).arg(cmd.maxRetryCount + 1);
-        LoggerManager::instance().log(AppLogger::ModbusMasterLoggerPath(m_masterId).toStdString(), Level::INFO, QString("[data][ModbusCommandSender][handleFailedCommand]：%1").arg(logMsg).toStdString());
+//    qDebug() << "[RETRY] [设备ID=" << m_masterId << "] " << nowStr()
+//             << "module=" << moduleStr
+//             << "id=" << cmd.id
+//             << "uuid=" << cmd.uuid
+//             << "error=" << errorMessage
+//             << "sendCount=" << cmd.sendCount
+//             << "/" << (cmd.maxRetryCount + 1);
+    if (shouldLogCommand(cmd)) {
+        ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "handleFailedCommand",
+            QString("指令失败，准备重发 module=%1 id=%2 uuid=%3 error=%4 sendCount=%5/%6")
+                .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid).arg(errorMessage)
+                .arg(cmd.sendCount).arg(cmd.maxRetryCount + 1));
     }
 
     // 超时重发：先通知外部底层正在尝试重新发送该指令，再投递到重发队列
     if (timedOut) {
-        if (cmd.module != CommandModule::PeriodicCommandSender) {
-            QString logMsg = QString("超时重发通知 - 设备ID=%1 module=%2 id=%3 uuid=%4 sendCount=%5/%6")
-                    .arg(m_masterId).arg(moduleStr).arg(cmd.id).arg(cmd.uuid)
-                    .arg(cmd.sendCount).arg(cmd.maxRetryCount + 1);
-            LoggerManager::instance().log(AppLogger::ModbusMasterLoggerPath(m_masterId).toStdString(),
-                Level::INFO,
-                QString("[data][ModbusCommandSender][handleFailedCommand]：%1").arg(logMsg).toStdString());
-        }
         emit commandTimeoutRetry(cmd, m_masterId);
     }
 
@@ -369,24 +381,28 @@ void ModbusCommandSender::addToRetryQueue(ModbusCommand cmd)
 {
     if (!enqueue(m_retryState, cmd)) {
         cmd.errorMessage = "重发队列已满，放弃发送";
+        ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "addToRetryQueue",
+            QString("重发队列已满，放弃发送 module=%1 id=%2 uuid=%3")
+                .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid));
         emit commandFinished(cmd, m_masterId);
     } else {
-        QString moduleStr;
-        switch (cmd.module) {
-            case CommandModule::InitialCommandIssuer:  moduleStr = "INITIAL"; break;
-            case CommandModule::PeriodicCommandSender: moduleStr = "PERIODIC"; break;
-            case CommandModule::BusinessCommandIssuer: moduleStr = "BUSINESS"; break;
-        }
-        qDebug() << "[RETRY-QUEUE] [设备ID=" << m_masterId << "] " << nowStr()
-                 << "module=" << moduleStr
-                 << "id=" << cmd.id
-                 << "uuid=" << cmd.uuid
-                 << "sendCount=" << cmd.sendCount
-                 << "/" << (cmd.maxRetryCount + 1);
-        if (cmd.module != CommandModule::PeriodicCommandSender) {
-            QString logMsg = QString("加入重发队列 - 设备ID=%1 module=%2 id=%3 uuid=%4 sendCount=%5/%6")
-                    .arg(m_masterId).arg(moduleStr).arg(cmd.id).arg(cmd.uuid).arg(cmd.sendCount).arg(cmd.maxRetryCount + 1);
-            LoggerManager::instance().log(AppLogger::ModbusMasterLoggerPath(m_masterId).toStdString(), Level::INFO, QString("[data][ModbusCommandSender][addToRetryQueue]：%1").arg(logMsg).toStdString());
+//        QString moduleStr;
+//        switch (cmd.module) {
+//            case CommandModule::InitialCommandIssuer:  moduleStr = "INITIAL"; break;
+//            case CommandModule::PeriodicCommandSender: moduleStr = "PERIODIC"; break;
+//            case CommandModule::BusinessCommandIssuer: moduleStr = "BUSINESS"; break;
+//        }
+//        qDebug() << "[RETRY-QUEUE] [设备ID=" << m_masterId << "] " << nowStr()
+//                 << "module=" << moduleStr
+//                 << "id=" << cmd.id
+//                 << "uuid=" << cmd.uuid
+//                 << "sendCount=" << cmd.sendCount
+//                 << "/" << (cmd.maxRetryCount + 1);
+        if (shouldLogCommand(cmd)) {
+            ModbusLogger::masterInfo(m_masterId, "ModbusTcpMaster", "ModbusCommandSender", "addToRetryQueue",
+                QString("指令已加入重发队列 module=%1 id=%2 uuid=%3 sendCount=%4/%5")
+                    .arg(commandModuleToString(cmd.module)).arg(cmd.id).arg(cmd.uuid)
+                    .arg(cmd.sendCount).arg(cmd.maxRetryCount + 1));
         }
     }
 

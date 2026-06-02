@@ -6,40 +6,57 @@
 #include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
-#include "app/applogger.h"
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
-#include "loggermanager.h"
 #include "usermanager/usermanager.h"
 
-#include <QDebug>
 #include <QDateTime>
+#include <QDebug>
 #include <QMetaType>
-#include <QTimer>
+#include <QtGlobal>
+#include <QVariantMap>
 
 namespace {
 constexpr const char *kCmdId          = "ReadVEFCFlowUnitAndMediumStatus";
-constexpr int         kTotalTimeoutMs = 5000;
+
+QString bytesToHexWithCrc(const QByteArray& bytes, const QByteArray& crc)
+{
+    QStringList hexList;
+    for (int i = 0; i < bytes.size(); ++i) {
+        hexList << QString("%1")
+            .arg(static_cast<quint8>(bytes[i]), 2, 16, QLatin1Char('0'))
+            .toUpper();
+    }
+    if (crc.size() >= 2) {
+        hexList << QString("%1")
+            .arg(static_cast<quint8>(crc[0]), 2, 16, QLatin1Char('0'))
+            .toUpper();
+        hexList << QString("%1")
+            .arg(static_cast<quint8>(crc[1]), 2, 16, QLatin1Char('0'))
+            .toUpper();
+    }
+    return hexList.isEmpty() ? QStringLiteral("无") : hexList.join(QStringLiteral(" "));
+}
 } // namespace
 
 ReadVEFCFlowUnitAndMediumStatusTask::ReadVEFCFlowUnitAndMediumStatusTask(
     const QVector<QString> &qrcodes, QObject *parent)
     : SchedulerTask(parent)
     , m_qrcodes(qrcodes)
+    , deviceLogger("scheduler/read_vefc_flow_unit_medium_status_task/detail")
 {
-    qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 创建任务: qrcodes=" << qrcodes;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 创建任务：设备数=%1")
-            .arg(qrcodes.size()).toStdString());
+    qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] create task: qrcodes=" << qrcodes;
 }
 
 ReadVEFCFlowUnitAndMediumStatusTask::~ReadVEFCFlowUnitAndMediumStatusTask()
 {
-    qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 任务销毁";
+    qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] destroy task";
 }
 
 void ReadVEFCFlowUnitAndMediumStatusTask::start()
 {
+    disconnectAll();
+
     setState(Running);
     m_stopped = false;
     m_totalCount = 0;
@@ -49,63 +66,70 @@ void ReadVEFCFlowUnitAndMediumStatusTask::start()
     m_resultMap.clear();
     m_allFinishedEmitted = false;
 
+    ModbusTcpMasterManager &mgr = ModbusTcpMasterManager::instance();
+    if (m_qrcodes.isEmpty()) {
+        const QStringList masterIds = mgr.masterIds();
+        m_qrcodes = QVector<QString>(masterIds.begin(), masterIds.end());
+    }
+
     if (m_qrcodes.isEmpty()) {
         setState(Failed);
         emit allFinished(false, 0, {});
-        emit finished(false, "ReadVEFCFlowUnitAndMediumStatusTask: qrcode 列表为空");
-        // 写入运行日志：失败原因
-        auto* opTask = SharedData::getOperationDispatchTask();
-        if (opTask) {
+        emit finished(false, QStringLiteral("ReadVEFCFlowUnitAndMediumStatusTask: 没有找到目标设备"));
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
             opTask->log(OperationDispatchTask::MsgType::Warn,
-                       "ReadVEFCStatus task failed: device identification failed", 0);
+                        QStringLiteral("读取 VEFC 流量单位/介质状态失败: 没有找到目标设备"), 0);
         }
         return;
     }
 
-    ModbusTcpMasterManager &mgr = ModbusTcpMasterManager::instance();
     CommandPool *pool = mgr.commandPool();
     if (!pool || !pool->contains(kCmdId)) {
         setState(Failed);
         emit allFinished(false, 0, {});
-        emit finished(false, QString("ReadVEFCFlowUnitAndMediumStatusTask: 指令 '%1' 不存在").arg(kCmdId));
-        // 写入运行日志：失败原因
-        auto* opTask = SharedData::getOperationDispatchTask();
-        if (opTask) {
+        emit finished(false, QStringLiteral("ReadVEFCFlowUnitAndMediumStatusTask: 指令 '%1' 不存在").arg(kCmdId));
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
             opTask->log(OperationDispatchTask::MsgType::Warn,
-                       "ReadVEFCStatus task failed: feature not implemented", 0);
+                        QStringLiteral("读取 VEFC 流量单位/介质状态失败: 指令不存在"), 0);
         }
         return;
     }
 
-    // 预初始化每台设备的结果（默认 commFailed=true，待响应再覆盖）
     for (const QString &id : m_qrcodes) {
         DeviceStatus st;
-        st.qrcode     = id;
+        st.qrcode = id;
         st.commFailed = true;
         m_resultMap.insert(id, st);
     }
 
-    // 写入运行日志：任务启动
-    auto* opTaskStart = SharedData::getOperationDispatchTask();
-    if (opTaskStart) {
+    if (auto* opTaskStart = SharedData::getOperationDispatchTask()) {
         opTaskStart->log(OperationDispatchTask::MsgType::Message,
-                         QString("ReadVEFCStatus task started: %1 devices").arg(m_qrcodes.size()), 0);
+                         QStringLiteral("读取 VEFC 流量单位/介质状态任务开始: %1 台设备").arg(m_qrcodes.size()), 0);
     }
 
     for (const QString &id : m_qrcodes) {
         ModbusTcpMaster *master = mgr.getMaster(id);
-        if (!master || !master->isConnected() || !master->sender()) {
-            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备不可用，跳过:" << id;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备 %1 不可用").arg(id).toStdString());
-            // commFailed 已经为 true，无需更改
+        if (!master) {
+            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] master not found, skip:" << id;
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("Master 不存在"));
+            continue;
+        }
+        if (!master->isConnected()) {
+            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] device disconnected, skip:" << id;
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("设备未连接"));
+            continue;
+        }
+        ModbusCommandSender *sender = master->sender();
+        if (!sender) {
+            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] sender is null, skip:" << id;
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("Sender 为空"));
             continue;
         }
 
-        ModbusCommandSender *sender = master->sender();
         ModbusCommand cmd = pool->clone(kCmdId);
         if (!cmd.isValid()) {
-            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 克隆指令失败:" << id;
+            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] clone command failed:" << id;
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("克隆指令失败"));
             continue;
         }
 
@@ -116,12 +140,16 @@ void ReadVEFCFlowUnitAndMediumStatusTask::start()
                             Qt::QueuedConnection);
         m_connections.append(conn);
 
-        m_pendingMap[cmd.uuid] = id;
-        m_totalCount++;
+        auto retryConn = connect(sender, &ModbusCommandSender::commandTimeoutRetry,
+                                 this, &ReadVEFCFlowUnitAndMediumStatusTask::onCommandTimeoutRetry,
+                                 Qt::QueuedConnection);
+        m_connections.append(retryConn);
 
-        qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 向设备" << id << "发送 ReadVEFCFlowUnitAndMediumStatus";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 向设备 %1 发送读取指令").arg(id).toStdString());
+        m_pendingMap[cmd.uuid] = id;
+        ++m_totalCount;
+
+        qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] send to device"
+                 << id << kCmdId;
 
         QMetaObject::invokeMethod(sender, [sender, cmd]() {
             sender->submit(cmd);
@@ -129,44 +157,36 @@ void ReadVEFCFlowUnitAndMediumStatusTask::start()
     }
 
     if (m_totalCount == 0) {
-        // 没有任何设备能发送指令 → 直接 forceFinish
         forceFinish();
         return;
     }
-
-    if (!m_timeoutTimer) {
-        m_timeoutTimer = new QTimer(this);
-        m_timeoutTimer->setSingleShot(true);
-        connect(m_timeoutTimer, &QTimer::timeout,
-                this, &ReadVEFCFlowUnitAndMediumStatusTask::onTimeout);
-    }
-    m_timeoutTimer->start(kTotalTimeoutMs);
 }
 
 void ReadVEFCFlowUnitAndMediumStatusTask::stop()
 {
     m_stopped = true;
-    if (m_timeoutTimer) m_timeoutTimer->stop();
     disconnectAll();
     setState(Cancelled);
-    emit finished(false, "ReadVEFCFlowUnitAndMediumStatusTask: 任务被取消");
+    emit finished(false, QStringLiteral("ReadVEFCFlowUnitAndMediumStatusTask: 任务已取消"));
 }
 
 void ReadVEFCFlowUnitAndMediumStatusTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
 {
+    Q_UNUSED(masterId)
+
     if (m_stopped) return;
     if (!m_pendingMap.contains(cmd.uuid)) return;
-    m_pendingMap.remove(cmd.uuid);
+    const QString qrCode = m_pendingMap.take(cmd.uuid);
 
-    // 写入通讯日志
     {
         const QString sentTimeStr = cmd.sentMs > 0
             ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
             : QStringLiteral("-");
         int execStatus = 3;
-        if (cmd.received)          execStatus = 0;
-        else if (cmd.timedOut)     execStatus = 1;
+        if (cmd.received) execStatus = 0;
+        else if (cmd.timedOut) execStatus = 1;
         else if (cmd.sendCount > 1) execStatus = 2;
+
         const int retryCount = qMax(0, cmd.sendCount - 1);
         QString description;
         if (execStatus != 0) {
@@ -175,36 +195,48 @@ void ReadVEFCFlowUnitAndMediumStatusTask::onCommandFinished(ModbusCommand cmd, c
             QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
             if (!parsedData.isEmpty()) {
                 QStringList parts;
-                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it)
+                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it) {
                     parts << QString("%1=%2").arg(it.key(), it.value().toString());
-                description = parts.join(", ");
+                }
+                description = parts.join(QStringLiteral(", "));
             }
         }
         if (description.isEmpty()) {
             description = QStringLiteral("OK");
         }
+
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
                 : QString();
-            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, masterId,
+
+            QByteArray requestWithCrc = cmd.request.rawBytes;
+            if (cmd.request.crc.size() >= 2) {
+                requestWithCrc.append(cmd.request.crc);
+            }
+
+            QByteArray responseWithCrc = cmd.response.rawBytes;
+            if (cmd.response.crc.size() >= 2) {
+                responseWithCrc.append(cmd.response.crc);
+            }
+
+            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, qrCode,
                              execStatus, retryCount,
-                             cmd.request.rawBytes, cmd.response.rawBytes, description,
+                             requestWithCrc, responseWithCrc, description,
                              UserPermission::Engineer);
         }
     }
 
-    DeviceStatus &st = m_resultMap[masterId];
-    const bool ok = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
+    DeviceStatus &st = m_resultMap[qrCode];
+    st.qrcode = qrCode;
 
-    if (!ok) {
+    const bool commandOk = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
+    if (!commandOk) {
         st.commFailed = true;
-        qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备" << masterId
-                   << "通信失败 timedOut=" << cmd.timedOut
+        qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] device failed:" << qrCode
+                   << "timedOut=" << cmd.timedOut
                    << "checksumError=" << cmd.checksumError
                    << "deviceBusy=" << cmd.deviceBusy;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备 %1 通信失败").arg(masterId).toStdString());
     } else {
         const QByteArray &reg = cmd.response.registerValue;
         if (reg.size() >= 2) {
@@ -215,23 +247,35 @@ void ReadVEFCFlowUnitAndMediumStatusTask::onCommandFinished(ModbusCommand cmd, c
             st.mediumRaw  = lo;
             st.unitOk     = (hi == 0);
             st.mediumOk   = (lo == 0);
-
-            qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备" << masterId
-                     << "结果 hi=" << hi << "lo=" << lo
+            qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] device result:" << qrCode
+                     << "unitRaw=" << hi << "mediumRaw=" << lo
                      << "unitOk=" << st.unitOk << "mediumOk=" << st.mediumOk;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-                QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备 %1 hi=%2 lo=%3 unitOk=%4 mediumOk=%5")
-                    .arg(masterId).arg(hi).arg(lo).arg(st.unitOk).arg(st.mediumOk).toStdString());
         } else {
             st.commFailed = true;
-            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备" << masterId
-                       << "响应寄存器长度不足:" << reg.size();
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 设备 %1 响应寄存器长度不足").arg(masterId).toStdString());
+            qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] registerValue too short:"
+                       << qrCode << reg.size();
         }
     }
 
+    writeDeviceCommandLog(qrCode, cmd, st.allOk());
     checkAllFinished();
+}
+
+void ReadVEFCFlowUnitAndMediumStatusTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId)
+{
+    Q_UNUSED(masterId)
+
+    if (m_stopped) return;
+    if (!m_pendingMap.contains(cmd.uuid)) return;
+
+    const QString qrCode = m_pendingMap.value(cmd.uuid);
+    const int retryCount = qMax(0, cmd.sendCount - 1);
+    const int maxRetry = cmd.maxRetryCount;
+
+    qDebug() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] command timeout retry:"
+             << qrCode << retryCount << "/" << maxRetry;
+
+    emit deviceRetrying(qrCode, retryCount, maxRetry);
 }
 
 void ReadVEFCFlowUnitAndMediumStatusTask::checkAllFinished()
@@ -241,50 +285,29 @@ void ReadVEFCFlowUnitAndMediumStatusTask::checkAllFinished()
     forceFinish();
 }
 
-void ReadVEFCFlowUnitAndMediumStatusTask::onTimeout()
-{
-    qWarning() << "[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 超时，剩余" << m_pendingMap.size() << "台设备未响应";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-        QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 超时，剩余 %1 台设备未响应")
-            .arg(m_pendingMap.size()).toStdString());
-
-    // 写入运行日志：超时原因
-    auto* opTask = SharedData::getOperationDispatchTask();
-    if (opTask) {
-        QStringList failedDevices;
-        for (const QString &qr : m_pendingMap.values()) {
-            failedDevices << qr;
-        }
-        const QString desc = QString("ReadVEFCStatus task timeout: %1 devices did not respond (%2)")
-            .arg(failedDevices.size()).arg(failedDevices.join(", "));
-        opTask->log(OperationDispatchTask::MsgType::Error, desc, 0);
-    }
-
-    forceFinish();
-}
-
 void ReadVEFCFlowUnitAndMediumStatusTask::forceFinish()
 {
     if (m_allFinishedEmitted) return;
     m_allFinishedEmitted = true;
 
-    if (m_timeoutTimer) m_timeoutTimer->stop();
     disconnectAll();
 
-    // 仍在 pending 的设备全部记为 commFailed
     for (const QString &qr : m_pendingMap.values()) {
-        if (m_resultMap.contains(qr)) m_resultMap[qr].commFailed = true;
+        if (m_resultMap.contains(qr)) {
+            m_resultMap[qr].commFailed = true;
+        }
     }
     m_pendingMap.clear();
 
-    // 按构造顺序输出
     QList<DeviceStatus> results;
     int successCount = 0;
     for (const QString &id : m_qrcodes) {
-        if (m_resultMap.contains(id)) {
-            const DeviceStatus &st = m_resultMap[id];
-            results.append(st);
-            if (st.allOk()) ++successCount;
+        if (!m_resultMap.contains(id)) continue;
+
+        const DeviceStatus &st = m_resultMap[id];
+        results.append(st);
+        if (st.allOk()) {
+            ++successCount;
         }
     }
 
@@ -294,28 +317,20 @@ void ReadVEFCFlowUnitAndMediumStatusTask::forceFinish()
     emit allFinished(allSuccess, successCount, results);
     emit finished(allSuccess,
                   allSuccess
-                      ? QString("ReadVEFCFlowUnitAndMediumStatusTask: %1 台全部通过").arg(successCount)
-                      : QString("ReadVEFCFlowUnitAndMediumStatusTask: %1/%2 台通过")
+                      ? QStringLiteral("ReadVEFCFlowUnitAndMediumStatusTask: %1 台全部通过").arg(successCount)
+                      : QStringLiteral("ReadVEFCFlowUnitAndMediumStatusTask: %1/%2 台通过")
                             .arg(successCount).arg(m_qrcodes.size()));
 
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(),
-        allSuccess ? Level::INFO : Level::WARN,
-        QString("[Scheduler][ReadVEFCFlowUnitAndMediumStatusTask] 任务结束: %1/%2 台通过")
-            .arg(successCount).arg(m_qrcodes.size()).toStdString());
-
-    // 写入运行日志：任务汇总
-    auto* opTaskEnd = SharedData::getOperationDispatchTask();
-    if (opTaskEnd) {
+    if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
         if (allSuccess) {
-            const QString desc = QString("ReadVEFCStatus task completed: %1/%2 devices succeeded")
+            const QString desc = QStringLiteral("读取 VEFC 流量单位/介质状态任务完成: %1/%2 台通过")
                 .arg(successCount).arg(m_qrcodes.size());
             opTaskEnd->log(OperationDispatchTask::MsgType::Message, desc, 0);
         } else {
             const int failCount = m_qrcodes.size() - successCount;
-            const QString desc = QString("ReadVEFCStatus task finished: %1 succeeded, %2 failed")
+            const QString desc = QStringLiteral("读取 VEFC 流量单位/介质状态任务结束: %1 台通过, %2 台失败")
                 .arg(successCount).arg(failCount);
             opTaskEnd->log(OperationDispatchTask::MsgType::Error, desc, 0);
-            // 每个失败设备单独写一条日志
             for (const QString &id : m_qrcodes) {
                 if (m_resultMap.contains(id)) {
                     const DeviceStatus &st = m_resultMap[id];
@@ -328,24 +343,115 @@ void ReadVEFCFlowUnitAndMediumStatusTask::forceFinish()
     }
 }
 
-void ReadVEFCFlowUnitAndMediumStatusTask::logFailedDevice(OperationDispatchTask* opTask, const QString& id, const DeviceStatus& st)
+void ReadVEFCFlowUnitAndMediumStatusTask::logFailedDevice(OperationDispatchTask* opTask,
+                                                          const QString& id,
+                                                          const DeviceStatus& st)
 {
     QString reason;
-    if (st.unitRaw == 0 && st.mediumRaw == 0) {
-        reason = "communication failed";
+    if (st.commFailed) {
+        reason = QStringLiteral("通信失败");
     } else {
         QStringList issues;
-        if (!st.unitOk) issues << "unit abnormal";
-        if (!st.mediumOk) issues << "medium abnormal";
-        reason = issues.join(", ");
+        if (!st.unitOk) {
+            issues << QStringLiteral("流量单位配置异常(raw=%1)").arg(st.unitRaw);
+        }
+        if (!st.mediumOk) {
+            issues << QStringLiteral("介质配置异常(raw=%1)").arg(st.mediumRaw);
+        }
+        reason = issues.join(QStringLiteral(", "));
     }
-    const QString desc = QString("ReadVEFCStatus task failed: device %1 (%2)").arg(id, reason);
+
+    const QString desc = QStringLiteral("[QRCode:%1]: 读取 VEFC 流量单位/介质状态失败 (%2)")
+        .arg(id, reason);
     opTask->log(OperationDispatchTask::MsgType::Error, desc, 0);
 }
 
 void ReadVEFCFlowUnitAndMediumStatusTask::disconnectAll()
 {
-    for (const QMetaObject::Connection &conn : qAsConst(m_connections))
+    for (const QMetaObject::Connection &conn : qAsConst(m_connections)) {
         QObject::disconnect(conn);
+    }
     m_connections.clear();
+}
+
+void ReadVEFCFlowUnitAndMediumStatusTask::writeDeviceSkipLog(const QString& qrCode,
+                                                             const QString& commandId,
+                                                             const QString& reason)
+{
+    deviceDetailLogger().info(
+        QString("[ReadVEFCFlowUnitAndMediumStatusTask][QRCode:%1] 跳过下发\n指令: %2\n原因: %3")
+            .arg(qrCode)
+            .arg(commandId)
+            .arg(reason)
+            .toStdString());
+}
+
+void ReadVEFCFlowUnitAndMediumStatusTask::writeDeviceCommandLog(const QString& qrCode,
+                                                                const ModbusCommand& cmd,
+                                                                bool success)
+{
+    const std::string msg = QString("[QRCode:%1] %2")
+        .arg(qrCode)
+        .arg(commandFrameLogString(cmd))
+        .toStdString();
+    if (success) {
+        deviceDetailLogger().info(msg);
+    } else {
+        deviceDetailLogger().warn(msg);
+    }
+}
+
+QString ReadVEFCFlowUnitAndMediumStatusTask::commandFrameLogString(const ModbusCommand& cmd) const
+{
+    const bool commandOk = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
+    QString responseFrame;
+    if (commandOk) {
+        responseFrame = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
+    } else {
+        QStringList failureReasons;
+        if (cmd.timedOut) failureReasons << QStringLiteral("超时");
+        if (cmd.checksumError) failureReasons << QStringLiteral("校验错误");
+        if (cmd.deviceBusy) failureReasons << QStringLiteral("设备忙");
+        if (!cmd.errorMessage.isEmpty()) failureReasons << cmd.errorMessage;
+
+        const QString failureText = failureReasons.isEmpty()
+            ? QStringLiteral("失败")
+            : failureReasons.join(QStringLiteral(", "));
+        if (!cmd.received) {
+            responseFrame = failureText;
+        } else {
+            const QString frameText = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
+            responseFrame = frameText == QStringLiteral("无")
+                ? failureText
+                : QString("%1, %2").arg(failureText, frameText);
+        }
+    }
+
+    return QString("[ReadVEFCFlowUnitAndMediumStatusTask] 指令下发完成\n"
+                   "指令: %1\n"
+                   "请求帧: %2\n"
+                   "响应帧: %3")
+        .arg(cmd.id)
+        .arg(bytesToHexWithCrc(cmd.request.rawBytes, cmd.request.crc))
+        .arg(responseFrame);
+}
+
+QString ReadVEFCFlowUnitAndMediumStatusTask::subFunctionName() const
+{
+    return QStringLiteral("read_vefc_flow_unit_medium_status");
+}
+
+QString ReadVEFCFlowUnitAndMediumStatusTask::deviceLogPath() const
+{
+    return QStringLiteral("scheduler/read_vefc_flow_unit_medium_status_task/%1")
+        .arg(subFunctionName());
+}
+
+ILogger& ReadVEFCFlowUnitAndMediumStatusTask::deviceDetailLogger()
+{
+    if (!m_loggerInitialized) {
+        deviceLogger.set_log_file(deviceLogPath().toStdString());
+        m_loggerInitialized = true;
+    }
+    return deviceLogger;
 }

@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/ilogger.h \
     $$PWD/loggermanager.h
 
 SOURCES += \

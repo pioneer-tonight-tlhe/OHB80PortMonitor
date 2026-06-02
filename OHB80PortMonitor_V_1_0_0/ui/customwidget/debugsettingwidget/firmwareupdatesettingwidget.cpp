@@ -15,14 +15,14 @@ FirmwareUpdateSettingWidget::FirmwareUpdateSettingWidget(QWidget *parent)
     addCustomWidget(m_firmwareUpdateWidget, VerticalLayout);
 
     qDebug() << "[ui][FirmwareUpdateSettingWidget][FirmwareUpdateSettingWidget]：固件升级界面已创建";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         "[ui][FirmwareUpdateSettingWidget][FirmwareUpdateSettingWidget]：固件升级界面已创建");
 }
 
 FirmwareUpdateSettingWidget::~FirmwareUpdateSettingWidget()
 {
     qDebug() << "[ui][FirmwareUpdateSettingWidget][~FirmwareUpdateSettingWidget]：固件升级界面已销毁";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         "[ui][FirmwareUpdateSettingWidget][~FirmwareUpdateSettingWidget]：固件升级界面已销毁");
 }
 

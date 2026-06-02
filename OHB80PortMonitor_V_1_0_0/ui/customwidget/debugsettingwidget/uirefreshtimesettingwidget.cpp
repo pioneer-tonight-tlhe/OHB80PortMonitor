@@ -1,12 +1,15 @@
 #include "uirefreshtimesettingwidget.h"
 #include "../settingwidget/settingitemwidget.h"
+#include "../modaltabledialog/modaltabledialog.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/set_ui_refresh_time_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
+#include "modbustcpmastermanager/modbustcpmastermanager.h"
 
 #include <QDebug>
+#include <QColor>
 #include <QMessageBox>
 #include <QVector>
 
@@ -126,7 +129,7 @@ void UIRefreshTimeSettingWidget::onSetBtnClicked()
 
 void UIRefreshTimeSettingWidget::onSetAllBtnClicked()
 {
-    const QStringList qrcodes = SharedData::getAllQrcodes();
+    const QStringList qrcodes = ModbusTcpMasterManager::instance().masterIds();
     if (qrcodes.isEmpty()) {
         QMessageBox::warning(this, "Set Failed", "No target device available");
         return;
@@ -151,30 +154,78 @@ void UIRefreshTimeSettingWidget::submitTask(const QStringList &qrcodes,
     m_paramTotalItem->setStatusWaiting();
     m_paramSwitchItem->setStatusWaiting();
 
+    // 保存设备列表用于后续构建表格，以及设备数量用于判断显示方式
+    auto *targetQrcodes = new QStringList(qrcodes);
+    const bool isSetAll = qrcodes.size() > 1;
+
+    connect(task, &SetUIRefreshTimeTask::deviceRetrying, this,
+            [this](const QString &qrCode, int retryCount, int maxRetry) {
+                const QString status = QString("Retrying %1 (%2/%3)")
+                    .arg(qrCode)
+                    .arg(retryCount)
+                    .arg(maxRetry);
+                m_logoItem->setStatusWaiting(status);
+                m_paramTotalItem->setStatusWaiting(status);
+                m_paramSwitchItem->setStatusWaiting(status);
+            },
+            Qt::QueuedConnection);
+
     connect(task, &SetUIRefreshTimeTask::allFinished,
-            this, [this](bool /*allSuccess*/, int successCount,
-                         QStringList failedQrCodes,
-                         int logoFinal, int totalFinal, int switchFinal) {
-                const bool hasFailure = !failedQrCodes.isEmpty();
-                if (!hasFailure) {
+            this, [this, targetQrcodes, isSetAll]
+                  (bool allSuccess, int successCount,
+                   QStringList failedQrCodes,
+                   int logoFinal, int totalFinal, int switchFinal) {
+                if (allSuccess) {
                     m_logoItem->setStatusOK();
                     m_paramTotalItem->setStatusOK();
                     m_paramSwitchItem->setStatusOK();
-                    QMessageBox::information(
-                        this, "Set Succeeded",
-                        QString("Successfully set UI Refresh Time (logo=%1s, total=%2s, switch=%3s) on %4 device(s)")
-                            .arg(logoFinal).arg(totalFinal).arg(switchFinal).arg(successCount));
                 } else {
                     m_logoItem->setStatusFailed();
                     m_paramTotalItem->setStatusFailed();
                     m_paramSwitchItem->setStatusFailed();
-                    const QString failList = failedQrCodes.join(", ");
-                    QMessageBox::warning(
-                        this, "Set Failed",
-                        QString("Failed to set UI Refresh Time (logo=%1s, total=%2s, switch=%3s) on %4 device(s):\n%5")
-                            .arg(logoFinal).arg(totalFinal).arg(switchFinal)
-                            .arg(failedQrCodes.count()).arg(failList));
                 }
+
+                // Set All 按钮（多个设备）使用 ModalTableDialog
+                if (isSetAll) {
+                    // 构建表格行数据：所有设备都显示设置的值
+                    QList<QStringList> tableRows;
+                    for (const QString &qrcode : *targetQrcodes) {
+                        const bool success = !failedQrCodes.contains(qrcode);
+                        const QString status = success ? "Success" : "Failed";
+                        const QString logoStr = QString("%1 s").arg(logoFinal);
+                        const QString totalStr = QString("%1 s").arg(totalFinal);
+                        const QString switchStr = QString("%1 s").arg(switchFinal);
+                        tableRows.append({qrcode, status, logoStr, totalStr, switchStr});
+                    }
+
+                    // 使用 ModalTableDialog 显示结果
+                    auto *dialog = ModalTableDialog::showAsync(
+                        this,
+                        QString("UI Refresh Time Set Result"),
+                        QStringList{"QRCode", "Status", "Logo Duration", "Param Total", "Param Switch"},
+                        tableRows);
+
+                    // 设置颜色标记
+                    if (dialog) {
+                        dialog->setFieldTextColor("Status", "Success", QColor(0, 150, 0));
+                        dialog->setFieldTextColor("Status", "Failed", QColor(210, 0, 0));
+                    }
+                } else {
+                    // Set 按钮（单个设备）使用 QMessageBox
+                    if (allSuccess) {
+                        QMessageBox::information(
+                            this, "Set Succeeded",
+                            QString("Successfully set UI Refresh Time (logo=%1s, total=%2s, switch=%3s)")
+                                .arg(logoFinal).arg(totalFinal).arg(switchFinal));
+                    } else {
+                        QMessageBox::warning(
+                            this, "Set Failed",
+                            QString("Failed to set UI Refresh Time (logo=%1s, total=%2s, switch=%3s)")
+                                .arg(logoFinal).arg(totalFinal).arg(switchFinal));
+                    }
+                }
+
+                delete targetQrcodes;
             });
 
     Scheduler::instance()->submitTask(task);
@@ -182,7 +233,7 @@ void UIRefreshTimeSettingWidget::submitTask(const QStringList &qrcodes,
     qDebug() << "[ui][UIRefreshTimeSettingWidget][submitTask]：提交任务 设备数="
              << qrcodes.size() << "logoSec=" << logoSec
              << "paramTotalSec=" << paramTotalSec << "paramSwitchSec=" << paramSwitchSec;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][UIRefreshTimeSettingWidget][submitTask]：提交任务 设备数=%1 logoSec=%2 paramTotalSec=%3 paramSwitchSec=%4")
             .arg(qrcodes.size()).arg(logoSec).arg(paramTotalSec).arg(paramSwitchSec).toStdString());
 }

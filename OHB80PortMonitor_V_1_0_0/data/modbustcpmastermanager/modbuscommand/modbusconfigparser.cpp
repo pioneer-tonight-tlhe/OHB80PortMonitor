@@ -2,8 +2,7 @@
 #include <QDomDocument>
 #include <QFile>
 #include <QDebug>
-#include "loggermanager.h"
-#include "app/applogger.h"
+#include "modbuslogger.h"
 
 // ============================================================
 // stateToString - 状态枚举转可读字符串
@@ -55,9 +54,8 @@ void ModbusConfigParser::transition(ParseState newState)
         qDebug() << QString("ModbusConfigParser: [%1  End] %2任务完成")
                         .arg(stateToString(m_state))
                         .arg(stateDescription(m_state));
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            "[data][ModbusConfigParser] [{} End] {}任务完成",
-            stateToString(m_state), stateDescription(m_state).toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "transition",
+            QString("[%1 End] %2任务完成").arg(stateToString(m_state)).arg(stateDescription(m_state)));
     }
 
     m_state = newState;
@@ -65,15 +63,13 @@ void ModbusConfigParser::transition(ParseState newState)
     // 记录新阶段开始（Completed 是终态，输出整体完成）
     if (m_state == ParseState::Completed) {
         qDebug() << "ModbusConfigParser: [Completed] 全部解析任务完成";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            "[data][ModbusConfigParser] [Completed] 全部解析任务完成");
+        ModbusLogger::systemInfo("ModbusConfigParser", "transition", "[Completed] 全部解析任务完成");
     } else {
         qDebug() << QString("ModbusConfigParser: [%1  Start] %2任务开始")
                         .arg(stateToString(m_state))
                         .arg(stateDescription(m_state));
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            "[data][ModbusConfigParser] [{} Start] {}任务开始",
-            stateToString(m_state), stateDescription(m_state).toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "transition",
+            QString("[%1 Start] %2任务开始").arg(stateToString(m_state)).arg(stateDescription(m_state)));
     }
 }
 
@@ -84,9 +80,8 @@ void ModbusConfigParser::fail(const QString& reason)
 {
     m_errorMsg = reason;
     qDebug() << "ModbusConfigParser: [FAILED]" << reason;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::ERROR,
-        "[data][ModbusConfigParser] 解析失败 (阶段: {}): {}",
-        stateToString(m_state), reason.toStdString());
+    ModbusLogger::systemError("ModbusConfigParser", "fail",
+        QString("解析失败，阶段=%1，原因=%2").arg(stateToString(m_state)).arg(reason));
     m_state = ParseState::Failed;
 }
 
@@ -140,12 +135,11 @@ bool ModbusConfigParser::parse(const QString& xmlFilePath)
         m_initial.refs       = parseCommandSet(initElem.firstChildElement("CommandSet"));
         qDebug() << "ModbusConfigParser: InitialCommands 已解析，指令数:"
                  << m_initial.refs.size();
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] InitialCommands 已解析，指令数: %1").arg(m_initial.refs.size()).toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse",
+            QString("InitialCommands 已解析，指令数=%1").arg(m_initial.refs.size()));
     } else {
         qDebug() << "ModbusConfigParser: <InitialCommands> 节点不存在，跳过";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] <InitialCommands> 节点不存在，跳过").toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse", "<InitialCommands> 节点不存在，跳过");
     }
 
     // ---- 阶段5: 解析 <PeriodicCommands> ----
@@ -159,12 +153,11 @@ bool ModbusConfigParser::parse(const QString& xmlFilePath)
         m_periodic.refs     = parseCommandSet(periodicElem.firstChildElement("CommandSet"));
         qDebug() << "ModbusConfigParser: PeriodicCommands 已解析，指令数:"
                  << m_periodic.refs.size();
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] PeriodicCommands 已解析，指令数: %1").arg(m_periodic.refs.size()).toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse",
+            QString("PeriodicCommands 已解析，指令数=%1").arg(m_periodic.refs.size()));
     } else {
         qDebug() << "ModbusConfigParser: <PeriodicCommands> 节点不存在，跳过";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] <PeriodicCommands> 节点不存在，跳过").toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse", "<PeriodicCommands> 节点不存在，跳过");
     }
 
     // ---- 阶段6: 解析 <BusinessCommands> ----
@@ -175,12 +168,10 @@ bool ModbusConfigParser::parse(const QString& xmlFilePath)
         m_business.timeout    = readInt(businessElem, "CommandTimeout", 1000);
         m_business.retryCount = readInt(businessElem, "RetryCount",      3);
         qDebug() << "ModbusConfigParser: BusinessCommands 已解析";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] BusinessCommands 已解析").toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse", "BusinessCommands 已解析");
     } else {
         qDebug() << "ModbusConfigParser: <BusinessCommands> 节点不存在，跳过";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] <BusinessCommands> 节点不存在，跳过").toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse", "<BusinessCommands> 节点不存在，跳过");
     }
 
     // ---- 阶段7: 解析 <CommandDefinitions> ----
@@ -199,21 +190,20 @@ bool ModbusConfigParser::parse(const QString& xmlFilePath)
                 qDebug() << "ModbusConfigParser: 已注册指令模板 -" << cmd.id
                          << "请求帧长度:" << cmd.request.rawBytes.size()
                          << "响应模板长度:" << cmd.response.rawBytes.size();
-                LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-                    QString("[data][ModbusConfigParser] 已注册指令模板 - %1 请求帧长度: %2 响应模板长度: %3").arg(cmd.id).arg(cmd.request.rawBytes.size()).arg(cmd.response.rawBytes.size()).toStdString());
+                ModbusLogger::systemDebug("ModbusConfigParser", "parse",
+                    QString("已注册指令模板 id=%1 请求帧长度=%2 响应模板长度=%3")
+                        .arg(cmd.id).arg(cmd.request.rawBytes.size()).arg(cmd.response.rawBytes.size()));
             } else {
-                LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                    "[data][ModbusConfigParser] 跳过一条 id 为空的 <Command> 节点");
+                ModbusLogger::systemWarn("ModbusConfigParser", "parse", "跳过一条 id 为空的 <Command> 节点");
             }
             cmdElem = cmdElem.nextSiblingElement("Command");
         }
         qDebug() << "ModbusConfigParser: CommandPool 共加载" << m_pool.size() << "条指令";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] CommandPool 共加载 %1 条指令").arg(m_pool.size()).toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse",
+            QString("CommandPool 共加载 %1 条指令").arg(m_pool.size()));
     } else {
         qDebug() << "ModbusConfigParser: <CommandDefinitions> 节点不存在，跳过";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusConfigParser] <CommandDefinitions> 节点不存在，跳过").toStdString());
+        ModbusLogger::systemInfo("ModbusConfigParser", "parse", "<CommandDefinitions> 节点不存在，跳过");
     }
 
     // ---- 阶段7: 完成 ----
@@ -229,13 +219,14 @@ ModbusCommand ModbusConfigParser::parseCommandDef(const QDomElement& cmdElem) co
     ModbusCommand cmd;
     cmd.id       = cmdElem.attribute("id");
     if (cmd.id.isEmpty()) {
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            "[data][ModbusConfigParser] 遇到缺少 id 属性的 <Command> 节点");
+        ModbusLogger::systemWarn("ModbusConfigParser", "parseCommandDef",
+            "遇到缺少 id 属性的 <Command> 节点");
     }
     cmd.request  = parseFrame(cmdElem.firstChildElement("request"));
     cmd.response = parseFrame(cmdElem.firstChildElement("respond"));
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-        QString("[data][ModbusConfigParser] 解析完成: id=%1 请求帧=%2字节 响应模板=%3字节").arg(cmd.id).arg(cmd.request.rawBytes.size()).arg(cmd.response.rawBytes.size()).toStdString());
+    ModbusLogger::systemDebug("ModbusConfigParser", "parseCommandDef",
+        QString("解析完成 id=%1 请求帧=%2字节 响应模板=%3字节")
+            .arg(cmd.id).arg(cmd.request.rawBytes.size()).arg(cmd.response.rawBytes.size()));
     return cmd;
 }
 
@@ -248,8 +239,7 @@ ModbusFrame ModbusConfigParser::parseFrame(const QDomElement& frameElem) const
 {
     ModbusFrame frame;
     if (frameElem.isNull()) {
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-            "[data][ModbusConfigParser] 帧节点为空，返回空帧");
+        ModbusLogger::systemDebug("ModbusConfigParser", "parseFrame", "帧节点为空，返回空帧");
         return frame;
     }
 
@@ -310,8 +300,8 @@ QStringList ModbusConfigParser::parseCommandSet(const QDomElement& setElem) cons
 {
     QStringList refs;
     if (setElem.isNull()) {
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-            "[data][ModbusConfigParser] <CommandSet> 节点为空，返回空列表");
+        ModbusLogger::systemDebug("ModbusConfigParser", "parseCommandSet",
+            "<CommandSet> 节点为空，返回空列表");
         return refs;
     }
 
@@ -323,8 +313,8 @@ QStringList ModbusConfigParser::parseCommandSet(const QDomElement& setElem) cons
         }
         cmd = cmd.nextSiblingElement("Command");
     }
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-        QString("[data][ModbusConfigParser] 提取 ref 列表完成，共 %1 条").arg(refs.size()).toStdString());
+    ModbusLogger::systemDebug("ModbusConfigParser", "parseCommandSet",
+        QString("提取 ref 列表完成，共 %1 条").arg(refs.size()));
     return refs;
 }
 
@@ -337,15 +327,16 @@ int ModbusConfigParser::readInt(const QDomElement& parent,
 {
     const QDomElement elem = parent.firstChildElement(tagName);
     if (elem.isNull()) {
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-            QString("[data][ModbusConfigParser] 元素 <%1> 不存在，使用默认值: %2").arg(tagName).arg(defaultVal).toStdString());
+        ModbusLogger::systemDebug("ModbusConfigParser", "readInt",
+            QString("元素 <%1> 不存在，使用默认值=%2").arg(tagName).arg(defaultVal));
         return defaultVal;
     }
     bool ok = false;
     const int val = elem.text().trimmed().toInt(&ok);
     if (!ok) {
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[data][ModbusConfigParser] 元素 <%1> 值 '%2' 无法转换为整数，使用默认值: %3").arg(tagName).arg(elem.text().trimmed()).arg(defaultVal).toStdString());
+        ModbusLogger::systemWarn("ModbusConfigParser", "readInt",
+            QString("元素 <%1> 值 '%2' 无法转换为整数，使用默认值=%3")
+                .arg(tagName).arg(elem.text().trimmed()).arg(defaultVal));
     }
     return ok ? val : defaultVal;
 }
@@ -356,8 +347,8 @@ int ModbusConfigParser::readInt(const QDomElement& parent,
 QList<ModbusCommand> ModbusConfigParser::initialCommandQueue() const
 {
     QList<ModbusCommand> list;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[data][ModbusConfigParser] 开始构建初始指令队列，共 %1 个引用").arg(m_initial.refs.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusConfigParser", "initialCommandQueue",
+        QString("开始构建初始指令队列，共 %1 个引用").arg(m_initial.refs.size()));
     for (const QString& ref : m_initial.refs) {
         if (m_pool.contains(ref)) {
             ModbusCommand cmd = m_pool.clone(ref);
@@ -365,16 +356,16 @@ QList<ModbusCommand> ModbusConfigParser::initialCommandQueue() const
             cmd.maxRetryCount = m_initial.retryCount;
             cmd.timeoutMs = m_initial.timeout;
             list.append(cmd);
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-                QString("[data][ModbusConfigParser] 已克隆初始指令: %1").arg(ref).toStdString());
+            ModbusLogger::systemDebug("ModbusConfigParser", "initialCommandQueue",
+                QString("已克隆初始指令 ref=%1").arg(ref));
         } else {
             qDebug() << "ModbusConfigParser: 初始指令引用未找到 -" << ref;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                QString("[data][ModbusConfigParser] 初始指令引用未找到 - %1").arg(ref).toStdString());
+            ModbusLogger::systemWarn("ModbusConfigParser", "initialCommandQueue",
+                QString("初始指令引用未找到 ref=%1").arg(ref));
         }
     }
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[data][ModbusConfigParser] 初始指令队列构建完成，共 %1 条").arg(list.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusConfigParser", "initialCommandQueue",
+        QString("初始指令队列构建完成，共 %1 条").arg(list.size()));
     return list;
 }
 
@@ -384,8 +375,8 @@ QList<ModbusCommand> ModbusConfigParser::initialCommandQueue() const
 QList<ModbusCommand> ModbusConfigParser::periodicCommandQueue() const
 {
     QList<ModbusCommand> list;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[data][ModbusConfigParser] 开始构建定时指令队列，共 %1 个引用").arg(m_periodic.refs.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusConfigParser", "periodicCommandQueue",
+        QString("开始构建定时指令队列，共 %1 个引用").arg(m_periodic.refs.size()));
     for (const QString& ref : m_periodic.refs) {
         if (m_pool.contains(ref)) {
             ModbusCommand cmd = m_pool.clone(ref);
@@ -393,15 +384,15 @@ QList<ModbusCommand> ModbusConfigParser::periodicCommandQueue() const
             cmd.maxRetryCount = m_periodic.retryCount;
             cmd.timeoutMs = m_periodic.timeout;
             list.append(cmd);
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::DEBUG,
-                QString("[data][ModbusConfigParser] 已克隆定时指令: %1").arg(ref).toStdString());
+            ModbusLogger::systemDebug("ModbusConfigParser", "periodicCommandQueue",
+                QString("已克隆定时指令 ref=%1").arg(ref));
         } else {
             qDebug() << "ModbusConfigParser: 定时指令引用未找到 -" << ref;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                QString("[data][ModbusConfigParser] 定时指令引用未找到 - %1").arg(ref).toStdString());
+            ModbusLogger::systemWarn("ModbusConfigParser", "periodicCommandQueue",
+                QString("定时指令引用未找到 ref=%1").arg(ref));
         }
     }
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[data][ModbusConfigParser] 定时指令队列构建完成，共 %1 条").arg(list.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusConfigParser", "periodicCommandQueue",
+        QString("定时指令队列构建完成，共 %1 条").arg(list.size()));
     return list;
 }

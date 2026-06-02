@@ -5,8 +5,7 @@
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "modbustcpmastermanager/modbuscommand/commandpool.h"
 
-#include "loggermanager.h"
-#include "app/applogger.h"
+#include "modbuslogger.h"
 
 #include <QDebug>
 
@@ -20,11 +19,6 @@ constexpr quint16 kStatusSuccess        = 2;
 constexpr quint16 kStatusHumidityFail   = 3;
 constexpr quint16 kStatusSensorCommFail = 4;
 constexpr quint16 kStatusThresholdParam = 5;
-
-inline QString masterLogPath(const QString& id)
-{
-    return AppLogger::SH85SelfCheckLoggerPath(id);
-}
 
 // 将原始字节 + CRC 拼接后转成大写空格分隔的 HEX 字符串（用于日志）
 inline QString frameToHex(const ModbusFrame& f)
@@ -91,8 +85,8 @@ bool SH85SelfChecker::start()
     CommandPool* pool = ModbusTcpMasterManager::instance().commandPool();
     if (!pool || !pool->contains(kCmdStart) || !pool->contains(kCmdRead)) {
         qWarning() << "[data][SH85SelfChecker] CommandPool 缺少 StartSelfCheck 或 ReadSelfCheckStatus";
-        LoggerManager::instance().log(masterLogPath(m_master->ID).toStdString(), Level::WARN,
-            "[data][SH85SelfChecker] CommandPool 缺少 StartSelfCheck 或 ReadSelfCheckStatus");
+        ModbusLogger::masterWarn(m_master->ID, "ModbusTcpMaster", "SH85SelfChecker", "start",
+            "CommandPool 缺少 StartSelfCheck 或 ReadSelfCheckStatus");
         return false;
     }
 
@@ -103,11 +97,14 @@ bool SH85SelfChecker::start()
     if (m_senderConn) QObject::disconnect(m_senderConn);
     m_senderConn = connect(m_master->sender(), &ModbusCommandSender::commandFinished,
                            this, &SH85SelfChecker::onCommandFinished, Qt::QueuedConnection);
+    if (m_senderRetryConn) QObject::disconnect(m_senderRetryConn);
+    m_senderRetryConn = connect(m_master->sender(), &ModbusCommandSender::commandTimeoutRetry,
+                                this, &SH85SelfChecker::onCommandTimeoutRetry, Qt::QueuedConnection);
 
     // 下发 StartSelfCheck
     if (!submitStartSelfCheck()) {
         cleanup();
-        emitErrorAndFinish(Result::StartCommandFailed, "Submit StartSelfCheck failed");
+        emitErrorAndFinish(Result::StartCommandFailed, "提交启动自检指令失败");
         return false;
     }
 
@@ -117,8 +114,7 @@ bool SH85SelfChecker::start()
     enterState(State::StartingSelfCheck);
     emit started(m_master->ID);
 
-    LoggerManager::instance().log(masterLogPath(m_master->ID).toStdString(), Level::INFO,
-        QString("[data][SH85SelfChecker] 自检流程已启动 masterId=%1").arg(m_master->ID).toStdString());
+    ModbusLogger::masterInfo(m_master->ID, "ModbusTcpMaster", "SH85SelfChecker", "start", "自检流程已启动");
     return true;
 }
 
@@ -126,7 +122,7 @@ void SH85SelfChecker::stop()
 {
     if (!isRunning()) return;
     qDebug() << "[data][SH85SelfChecker] stop() 被调用 masterId=" << (m_master ? m_master->ID : QString());
-    finishOnly(false, Result::Cancelled, "Cancelled by user");
+    finishOnly(false, Result::Cancelled, "用户取消");
 }
 
 QString SH85SelfChecker::stateToString(State s)
@@ -188,9 +184,8 @@ bool SH85SelfChecker::submitStartSelfCheck()
     qDebug() << "[data][SH85SelfChecker] 下发 StartSelfCheck uuid=" << cmd.uuid
              << "masterId=" << m_master->ID;
 
-    LoggerManager::instance().log(masterLogPath(m_master->ID).toStdString(), Level::INFO,
-        QString("[data][SH85SelfChecker] 下发 StartSelfCheck uuid=%1 masterId=%2")
-            .arg(cmd.uuid).arg(m_master->ID).toStdString());
+    ModbusLogger::masterInfo(m_master->ID, "ModbusTcpMaster", "SH85SelfChecker", "submitStartSelfCheck",
+        QString("下发 StartSelfCheck uuid=%1").arg(cmd.uuid));
 
     return true;
 }
@@ -217,9 +212,8 @@ bool SH85SelfChecker::submitReadStatus()
     qDebug() << "[data][SH85SelfChecker] 下发 ReadSelfCheckStatus uuid=" << cmd.uuid
              << "masterId=" << m_master->ID;
 
-    LoggerManager::instance().log(masterLogPath(m_master->ID).toStdString(), Level::INFO,
-        QString("[data][SH85SelfChecker] 下发 ReadSelfCheckStatus uuid=%1 masterId=%2")
-            .arg(cmd.uuid).arg(m_master->ID).toStdString());
+    ModbusLogger::masterInfo(m_master->ID, "ModbusTcpMaster", "SH85SelfChecker", "submitReadStatus",
+        QString("下发 ReadSelfCheckStatus uuid=%1").arg(cmd.uuid));
 
     return true;
 }
@@ -247,18 +241,22 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     const QString txHex = frameToHex(cmd.request);
     const QString rxHex = frameToHex(cmd.response);
 
-    LoggerManager::instance().log(masterLogPath(masterId).toStdString(),
-        ok ? Level::INFO : Level::WARN,
-        QString("[data][SH85SelfChecker] 响应 state=%1 ok=%2 id=%3 masterId=%4\nTX：%5\nRX：%6")
-            .arg(stateToString(m_state)).arg(ok).arg(cmd.id).arg(masterId)
-            .arg(txHex).arg(rxHex).toStdString());
+    if (ok) {
+        ModbusLogger::masterInfo(masterId, "ModbusTcpMaster", "SH85SelfChecker", "onCommandFinished",
+            QString("响应 state=%1 ok=%2 id=%3 uuid=%4\nTX：%5\nRX：%6")
+                .arg(stateToString(m_state)).arg(ok).arg(cmd.id).arg(cmd.uuid).arg(txHex).arg(rxHex));
+    } else {
+        ModbusLogger::masterWarn(masterId, "ModbusTcpMaster", "SH85SelfChecker", "onCommandFinished",
+            QString("响应 state=%1 ok=%2 id=%3 uuid=%4 error=%5\nTX：%6\nRX：%7")
+                .arg(stateToString(m_state)).arg(ok).arg(cmd.id).arg(cmd.uuid).arg(cmd.errorMessage).arg(txHex).arg(rxHex));
+    }
 
     switch (m_state) {
     // -------- 1) StartSelfCheck 响应 --------
     case State::StartingSelfCheck: {
         if (!ok) {
             emitErrorAndFinish(Result::StartCommandFailed,
-                QString("StartSelfCheck failed: %1").arg(cmd.errorMessage));
+                QString("启动自检指令下发失败: %1").arg(cmd.errorMessage));
             return;
         }
         // 进入阶段 1 等待
@@ -271,19 +269,19 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     case State::ReadingStatusEarly: {
         if (!ok) {
             emitErrorAndFinish(Result::ReadEarlyCommandFailed,
-                QString("Phase1 ReadSelfCheckStatus failed: %1").arg(cmd.errorMessage));
+                QString("阶段1读取自检状态指令失败: %1").arg(cmd.errorMessage));
             return;
         }
         const quint16 v = parseStatusValue(cmd);
         if (v == kStatusIdle) {
             // CH_1 == 0：未进入自检功能
-            emitErrorAndFinish(Result::DeviceNotEntered, "Device did not enter self-check (CH_1=0)");
+            emitErrorAndFinish(Result::DeviceNotEntered, "设备未进入自检状态 (CH_1=0)");
             return;
         }
         if (v != kStatusInProgress) {
             // CH_1 != 0 && != 1：底层固件异常
             emitErrorAndFinish(Result::FirmwareAbnormal,
-                QString("Firmware abnormal in phase1, CH_1=%1").arg(v));
+                QString("阶段1固件状态异常, CH_1=%1").arg(v));
             return;
         }
         // CH_1 == 1：进入阶段 2 等待 55s
@@ -296,7 +294,7 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     case State::PollingStatus: {
         if (!ok) {
             emitErrorAndFinish(Result::ReadPollCommandFailed,
-                QString("Phase2 ReadSelfCheckStatus failed: %1").arg(cmd.errorMessage));
+                QString("阶段2读取自检状态指令失败: %1").arg(cmd.errorMessage));
             return;
         }
         const quint16 v = parseStatusValue(cmd);
@@ -304,34 +302,34 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
         case kStatusIdle:
             // CH_1 == 0：自检中却返回空闲，固件异常
             emitErrorAndFinish(Result::FirmwareAbnormal,
-                "Firmware abnormal during polling, CH_1=0");
+                "轮询阶段固件状态异常, CH_1=0");
             return;
         case kStatusInProgress:
             // 仍在自检中：若 10s 窗口未超时，继续轮询
             if (!m_pollWindowTimer->isActive()) {
-                emitErrorAndFinish(Result::Timeout, "Self-check function timeout");
+                emitErrorAndFinish(Result::Timeout, "自检功能超时");
                 return;
             }
             if (!submitReadStatus()) {
-                emitErrorAndFinish(Result::ReadPollCommandFailed, "Submit ReadSelfCheckStatus failed");
+                emitErrorAndFinish(Result::ReadPollCommandFailed, "提交读取自检状态指令失败");
             }
             return;
         case kStatusSuccess:
             // CH_1 == 2：自检成功
-            finishOnly(true, Result::Success, "Self-check OK");
+            finishOnly(true, Result::Success, "自检成功");
             return;
         case kStatusHumidityFail:
-            emitErrorAndFinish(Result::HumidityExceeded, "Humidity exceeded threshold (CH_1=3)");
+            emitErrorAndFinish(Result::HumidityExceeded, "湿度超标 (CH_1=3)");
             return;
         case kStatusSensorCommFail:
-            emitErrorAndFinish(Result::SensorCommError, "SH85 sensor comm error (CH_1=4)");
+            emitErrorAndFinish(Result::SensorCommError, "SH85传感器通讯故障 (CH_1=4)");
             return;
         case kStatusThresholdParam:
-            emitErrorAndFinish(Result::ThresholdParamError, "Threshold parameter error (CH_1=5)");
+            emitErrorAndFinish(Result::ThresholdParamError, "阈值参数错误 (CH_1=5)");
             return;
         default:
             emitErrorAndFinish(Result::FirmwareAbnormal,
-                QString("Firmware abnormal during polling, unknown CH_1=%1").arg(v));
+                QString("轮询阶段固件状态异常, 未知 CH_1=%1").arg(v));
             return;
         }
     }
@@ -340,6 +338,15 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
         // 其他状态收到响应：忽略
         return;
     }
+}
+
+void SH85SelfChecker::onCommandTimeoutRetry(ModbusCommand cmd, const QString& masterId)
+{
+    if (!isRunning()) return;
+    if (!m_master || masterId != m_master->ID) return;
+    if (cmd.uuid == 0 || cmd.uuid != m_pendingUuid) return;
+
+    emit commandRetrying(cmd, masterId);
 }
 
 // ============================================================
@@ -351,13 +358,13 @@ void SH85SelfChecker::onPhase1WaitElapsed()
     if (m_state != State::WaitingPhase1) return;
 
     const QString id = m_master ? m_master->ID : QString();
-    LoggerManager::instance().log(masterLogPath(id).toStdString(), Level::INFO,
-        QString("[data][SH85SelfChecker] 阶段1等待5s到期 masterId=%1").arg(id).toStdString());
+    ModbusLogger::masterInfo(id, "ModbusTcpMaster", "SH85SelfChecker", "onPhase1WaitElapsed",
+        "阶段1等待5s到期");
 
     enterState(State::ReadingStatusEarly);
     if (!submitReadStatus()) {
         emitErrorAndFinish(Result::ReadEarlyCommandFailed,
-            "Submit phase1 ReadSelfCheckStatus failed");
+            "提交阶段1读取自检状态指令失败");
     }
 }
 
@@ -366,15 +373,15 @@ void SH85SelfChecker::onPhase2WaitElapsed()
     if (m_state != State::WaitingPhase2) return;
 
     const QString id = m_master ? m_master->ID : QString();
-    LoggerManager::instance().log(masterLogPath(id).toStdString(), Level::INFO,
-        QString("[data][SH85SelfChecker] 阶段2等待55s到期，开始轮询 masterId=%1").arg(id).toStdString());
+    ModbusLogger::masterInfo(id, "ModbusTcpMaster", "SH85SelfChecker", "onPhase2WaitElapsed",
+        "阶段2等待55s到期，开始轮询");
 
     enterState(State::PollingStatus);
     // 启动 10s 轮询窗口；首发 ReadSelfCheckStatus
     m_pollWindowTimer->start();
     if (!submitReadStatus()) {
         emitErrorAndFinish(Result::ReadPollCommandFailed,
-            "Submit phase2 ReadSelfCheckStatus failed");
+            "提交阶段2读取自检状态指令失败");
     }
 }
 
@@ -383,17 +390,17 @@ void SH85SelfChecker::onPollWindowElapsed()
     if (m_state != State::PollingStatus) return;
 
     const QString id = m_master ? m_master->ID : QString();
-    LoggerManager::instance().log(masterLogPath(id).toStdString(), Level::WARN,
-        QString("[data][SH85SelfChecker] 10s轮询窗口超时 masterId=%1").arg(id).toStdString());
+    ModbusLogger::masterWarn(id, "ModbusTcpMaster", "SH85SelfChecker", "onPollWindowElapsed",
+        "10s轮询窗口超时");
 
     // 10s 轮询窗口结束：若仍未拿到终态值，则视为自检功能超时
     // 注：若此刻刚好有响应未回，可在 onCommandFinished 中检查 m_pollWindowTimer->isActive() 判定
     if (m_pendingUuid != 0) {
         // 已下发但还未回响应：以超时收尾
-        emitErrorAndFinish(Result::Timeout, "Self-check function timeout (no response in 10s window)");
+        emitErrorAndFinish(Result::Timeout, "自检功能超时（10秒窗口内无响应）");
         return;
     }
-    emitErrorAndFinish(Result::Timeout, "Self-check function timeout");
+    emitErrorAndFinish(Result::Timeout, "自检功能超时");
 }
 
 // ============================================================
@@ -418,9 +425,8 @@ void SH85SelfChecker::enterState(State s)
              << "masterId=" << (m_master ? m_master->ID : QString());
 
     const QString id = m_master ? m_master->ID : QString();
-    LoggerManager::instance().log(masterLogPath(id).toStdString(), Level::INFO,
-        QString("[data][SH85SelfChecker] 状态切换: %1 -> %2 masterId=%3")
-            .arg(stateToString(old)).arg(stateToString(s)).arg(id).toStdString());
+    ModbusLogger::masterInfo(id, "ModbusTcpMaster", "SH85SelfChecker", "enterState",
+        QString("状态切换: %1 -> %2").arg(stateToString(old), stateToString(s)));
 
     emit stateChanged(s, id);
 }
@@ -430,9 +436,8 @@ void SH85SelfChecker::emitErrorAndFinish(Result r, const QString& msg)
     if (m_finished) return;
     const QString id = m_master ? m_master->ID : QString();
 
-    LoggerManager::instance().log(masterLogPath(id).toStdString(), Level::WARN,
-        QString("[data][SH85SelfChecker] errorOccurred: %1 (%2) masterId=%3")
-            .arg(resultToString(r)).arg(msg).arg(id).toStdString());
+    ModbusLogger::masterWarn(id, "ModbusTcpMaster", "SH85SelfChecker", "emitErrorAndFinish",
+        QString("自检失败 result=%1 msg=%2").arg(resultToString(r), msg));
 
     emit errorOccurred(r, msg, id);
     finishOnly(false, r, msg);
@@ -447,10 +452,13 @@ void SH85SelfChecker::finishOnly(bool success, Result r, const QString& msg)
     cleanup();
     enterState(State::Done);
 
-    LoggerManager::instance().log(masterLogPath(id).toStdString(),
-        success ? Level::INFO : Level::WARN,
-        QString("[data][SH85SelfChecker] finished success=%1 result=%2 msg='%3' masterId=%4")
-            .arg(success).arg(resultToString(r)).arg(msg).arg(id).toStdString());
+    if (success) {
+        ModbusLogger::masterInfo(id, "ModbusTcpMaster", "SH85SelfChecker", "finishOnly",
+            QString("自检完成 success=%1 result=%2 msg=%3").arg(success).arg(resultToString(r), msg));
+    } else {
+        ModbusLogger::masterWarn(id, "ModbusTcpMaster", "SH85SelfChecker", "finishOnly",
+            QString("自检完成 success=%1 result=%2 msg=%3").arg(success).arg(resultToString(r), msg));
+    }
 
     emit finished(success, r, msg, id);
 }
@@ -479,6 +487,10 @@ void SH85SelfChecker::cleanup()
     if (m_senderConn) {
         QObject::disconnect(m_senderConn);
         m_senderConn = QMetaObject::Connection();
+    }
+    if (m_senderRetryConn) {
+        QObject::disconnect(m_senderRetryConn);
+        m_senderRetryConn = QMetaObject::Connection();
     }
     m_pendingUuid = 0;
 }

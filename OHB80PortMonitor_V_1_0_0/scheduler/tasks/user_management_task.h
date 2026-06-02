@@ -4,6 +4,7 @@
 #include "../scheduler_task.h"
 #include "usermanager.h"
 
+
 // ============================================================
 // UserManagementTask - 用户管理调度任务（普通单次任务）
 //
@@ -68,6 +69,8 @@ private:
     UserPermission m_permission = UserPermission::Normal;
 
     bool m_stopped = false;
+
+    const std::string m_taskLogPath = "scheduler/user_management_task";
 };
 
 #endif // USER_MANAGEMENT_TASK_H

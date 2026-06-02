@@ -1,5 +1,6 @@
 HEADERS += \
     $$PWD/modbustcpmastermanager.h \
+    $$PWD/modbuslogger.h \
     $$PWD/modbustcpmasterpool.h
 
 SOURCES += \

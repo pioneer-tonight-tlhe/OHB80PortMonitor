@@ -142,8 +142,8 @@ void Graph::DeviceMonitorWidget::refreshFoupMonitor()
     // FoupMonitor 表：QRCode / InletPressure / OutletPressures / InletFlow / Humidity / Temperature
     QStringList rowData;
     rowData << foup->qrCode()
-            << QString::number(foup->inletPressure(),    'f', 2) + " Bar"
-            << "-" + QString::number(foup->negativePressure(), 'f', 2) + " Bar"
+            << QString::number(foup->inletPressure(),    'f', 2) + " Mpa"
+            << "-" + QString::number(std::abs(foup->negativePressure()), 'f', 2) + " Kpa"
             << QString::number(foup->inletFlow(),        'f', 2) + " L/Min"
             << QString::number(foup->RH(),               'f', 2) + " %"
             << QString::number(foup->temperature(),      'f', 2) + " ℃";
@@ -206,8 +206,8 @@ void Graph::DeviceMonitorWidget::refreshSetMonitor()
     for (const FoupOfOHBInfo* foup : m_monitoredFoupInfos) {
         QStringList rowData;
         rowData << foup->qrCode()
-                << QString::number(foup->inletPressure(),    'f', 2) + " Bar"
-                << "-" + QString::number(foup->negativePressure(), 'f', 2) + " Bar"
+                << QString::number(foup->inletPressure(),    'f', 2) + " Mpa"
+                << "-" + QString::number(std::abs(foup->negativePressure()), 'f', 2) + " Kpa"
                 << QString::number(foup->inletFlow(),        'f', 2) + " L/Min"
                 << QString::number(foup->RH(),               'f', 2) + " %"
                 << QString::number(foup->temperature(),      'f', 2) + " ℃";

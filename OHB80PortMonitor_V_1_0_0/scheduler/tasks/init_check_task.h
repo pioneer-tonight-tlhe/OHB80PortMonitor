@@ -9,6 +9,7 @@
 #include <QString>
 #include <QStringList>
 
+
 // 初始化检查任务
 // 监听所有 ModbusTcpMaster 的 InitialCommandIssuer::finished 信号，
 // 汇总检查是否存在失败的初始化指令。
@@ -45,6 +46,8 @@ private:
     QStringList m_failedMasterIds;
     QHash<QString, QList<ModbusCommand>> m_failedCommandsMap;
     QList<QMetaObject::Connection> m_connections;
+
+    const std::string m_taskLogPath = "scheduler/init_check_task";
 };
 
 #endif // INIT_CHECK_TASK_H

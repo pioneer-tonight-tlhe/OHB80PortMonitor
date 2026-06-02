@@ -1,6 +1,7 @@
 #include "logcleanupscheduler.h"
 #include "loggermanager.h"
 #include <QTimer>
+#include <QStringList>
 #include <QDebug>
 
 namespace LogDB {
@@ -54,10 +55,10 @@ void LogCleanupScheduler::onTimerTick()
 {
     const std::string& logPath = m_config.logPath;
 
-    LoggerManager::instance().log(logPath, Level::INFO,
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
         QString("定期检测: 执行清理检查").toStdString());
     performCleanupCheck();
-    LoggerManager::instance().flush(logPath);
+    LoggerManager::getInstance()->flush(logPath);
 }
 
 void LogCleanupScheduler::performCleanupCheck()
@@ -65,9 +66,9 @@ void LogCleanupScheduler::performCleanupCheck()
     const std::string& logPath = m_config.logPath;
 
     if (!m_monthRangeProvider || !m_deleteByRangeFn) {
-        LoggerManager::instance().log(logPath, Level::WARN,
+        LoggerManager::getInstance()->log(logPath, Level::WARN,
             "Provider or delete function not set");
-        LoggerManager::instance().flush(logPath);
+        LoggerManager::getInstance()->flush(logPath);
         return;
     }
 
@@ -76,17 +77,17 @@ void LogCleanupScheduler::performCleanupCheck()
     QString latestDate = monthRange.value("latest_time").toString();
 
     if (earliestDate.isEmpty() || latestDate.isEmpty()) {
-        LoggerManager::instance().log(logPath, Level::INFO,
+        LoggerManager::getInstance()->log(logPath, Level::INFO,
             QString("检测情况: 无法获取月份范围 (earliest=%1, latest=%2)")
                 .arg(earliestDate, latestDate).toStdString());
-        LoggerManager::instance().flush(logPath);
+        LoggerManager::getInstance()->flush(logPath);
         return;
     }
 
     int monthDiff = calculateMonthDifference(earliestDate, latestDate);
     bool needCleanup = monthDiff > m_config.retainMonths;
 
-    LoggerManager::instance().log(logPath, Level::INFO,
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
         QString("检测情况: 最早日期=%1, 最新日期=%2, 覆盖月数=%3, 保留阈值=%4, 需要清理: %5")
             .arg(earliestDate.left(10), latestDate.left(10))
             .arg(monthDiff)
@@ -95,20 +96,20 @@ void LogCleanupScheduler::performCleanupCheck()
             .toStdString());
 
     if (!needCleanup) {
-        LoggerManager::instance().flush(logPath);
+        LoggerManager::getInstance()->flush(logPath);
         return;
     }
 
-    LoggerManager::instance().log(logPath, Level::INFO,
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
         QString("日志覆盖月数: %1, 超过保留阈值: %2, 触发清理")
             .arg(monthDiff).arg(m_config.retainMonths).toStdString());
 
     // 计算要删除的时间区间：从最早日期开始到 +cleanupMonths 个月
     QDate earliest = QDate::fromString(earliestDate.left(10), "yyyy-MM-dd");
     if (!earliest.isValid()) {
-        LoggerManager::instance().log(logPath, Level::ERROR,
+        LoggerManager::getInstance()->log(logPath, Level::ERROR,
             QString("无效的最早日期: %1").arg(earliestDate).toStdString());
-        LoggerManager::instance().flush(logPath);
+        LoggerManager::getInstance()->flush(logPath);
         return;
     }
     QDate cutoffDate = earliest.addMonths(m_config.cleanupMonths);
@@ -116,16 +117,31 @@ void LogCleanupScheduler::performCleanupCheck()
     QString startTime = earliest.toString("yyyy-MM-dd 00:00:00");
     QString endTime = cutoffDate.toString("yyyy-MM-dd 23:59:59");
 
-    LoggerManager::instance().log(logPath, Level::INFO,
-        QString("正在清理日志: %1 至 %2").arg(startTime, endTime).toStdString());
+    // 计算涉及的月份列表
+    QStringList monthsList;
+    QDate monthIter = earliest;
+    while (monthIter <= cutoffDate) {
+        monthsList.append(monthIter.toString("yyyy-MM"));
+        monthIter = monthIter.addMonths(1);
+        monthIter = QDate(monthIter.year(), monthIter.month(), 1);
+    }
+    monthsList.removeDuplicates();
+    QString monthsStr = monthsList.join(", ");
+
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
+        QString("正在清理日志: %1 至 %2, 涉及月份: [%3], 覆盖月数: %4, 保留阈值: %5")
+            .arg(startTime, endTime, monthsStr)
+            .arg(monthDiff)
+            .arg(m_config.retainMonths)
+            .toStdString());
 
     m_deleteByRangeFn(startTime, endTime);
 
-    LoggerManager::instance().log(logPath, Level::INFO,
-        QString("清理完成: 已删除 %1 至 %2 的日志记录 (monthDiff=%3)")
-            .arg(startTime, endTime).arg(monthDiff).toStdString());
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
+        QString("清理完成: 已删除 %1 至 %2 的日志记录, 涉及月份: [%3], 覆盖月数: %4")
+            .arg(startTime, endTime, monthsStr).arg(monthDiff).toStdString());
 
-    LoggerManager::instance().flush(logPath);
+    LoggerManager::getInstance()->flush(logPath);
 }
 
 int LogCleanupScheduler::calculateMonthDifference(const QString& earliestDate, const QString& latestDate)

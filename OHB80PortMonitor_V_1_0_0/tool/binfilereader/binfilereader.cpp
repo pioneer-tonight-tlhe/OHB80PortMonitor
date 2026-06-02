@@ -11,14 +11,14 @@ BinFileReader::BinFileReader(QObject *parent)
     , m_defaultPacketSize(256)
     , m_watcher(new QFutureWatcher<void>(this))
 {
-    LoggerManager::instance().log("debug", Level::INFO, "BinFileReader 构造完成, 默认分包大小: {}", m_defaultPacketSize);
+    LoggerManager::getInstance()->log("debug", Level::INFO, "BinFileReader 构造完成, 默认分包大小: {}", m_defaultPacketSize);
 }
 
 BinFileReader::~BinFileReader()
 {
-    LoggerManager::instance().log("debug", Level::INFO, "BinFileReader 析构开始");
+    LoggerManager::getInstance()->log("debug", Level::INFO, "BinFileReader 析构开始");
     clean();
-    LoggerManager::instance().log("debug", Level::INFO, "BinFileReader 析构完成");
+    LoggerManager::getInstance()->log("debug", Level::INFO, "BinFileReader 析构完成");
 }
 
 void BinFileReader::setPacketSize(int bytesPerPacket)
@@ -26,7 +26,7 @@ void BinFileReader::setPacketSize(int bytesPerPacket)
     QMutexLocker locker(&m_mutex);
     m_packetSizes.clear();
     m_defaultPacketSize = (bytesPerPacket > 0) ? bytesPerPacket : 256;
-    LoggerManager::instance().log("debug", Level::INFO, "setPacketSize(int) 统一分包大小设置为: {}", m_defaultPacketSize);
+    LoggerManager::getInstance()->log("debug", Level::INFO, "setPacketSize(int) 统一分包大小设置为: {}", m_defaultPacketSize);
 }
 
 void BinFileReader::setPacketSize(const QVector<int>& bytesPerPacket)
@@ -36,7 +36,7 @@ void BinFileReader::setPacketSize(const QVector<int>& bytesPerPacket)
     if (!bytesPerPacket.isEmpty()) {
         m_defaultPacketSize = bytesPerPacket.last();
     }
-    LoggerManager::instance().log("debug", Level::INFO, "setPacketSize(QVector) 自定义分包规则, 规则数: {}, 默认尾帧大小: {}", m_packetSizes.size(), m_defaultPacketSize);
+    LoggerManager::getInstance()->log("debug", Level::INFO, "setPacketSize(QVector) 自定义分包规则, 规则数: {}, 默认尾帧大小: {}", m_packetSizes.size(), m_defaultPacketSize);
 }
 
 void BinFileReader::readBinFile(const QString& filePath)
@@ -44,19 +44,19 @@ void BinFileReader::readBinFile(const QString& filePath)
     {
         QMutexLocker locker(&m_mutex);
         if (m_state == Reading) {
-            LoggerManager::instance().log("debug", Level::WARN, "readBinFile 被调用但当前正在读取中, 忽略本次请求");
+            LoggerManager::getInstance()->log("debug", Level::WARN, "readBinFile 被调用但当前正在读取中, 忽略本次请求");
             return;
         }
         m_state = Reading;
     }
 
-    LoggerManager::instance().log("debug", Level::INFO, "readBinFile 开始读取文件: {}", filePath.toStdString());
+    LoggerManager::getInstance()->log("debug", Level::INFO, "readBinFile 开始读取文件: {}", filePath.toStdString());
     emit sigReadProgress(0);
 
     QFuture<void> future = QtConcurrent::run([this, filePath]() {
         QFile file(filePath);
         if (!file.exists()) {
-            LoggerManager::instance().log("debug", Level::ERROR, "文件不存在: {}", filePath.toStdString());
+            LoggerManager::getInstance()->log("debug", Level::ERROR, "文件不存在: {}", filePath.toStdString());
             QMutexLocker locker(&m_mutex);
             m_state = ReadFailed;
             QMetaObject::invokeMethod(this, [this]() {
@@ -66,7 +66,7 @@ void BinFileReader::readBinFile(const QString& filePath)
         }
 
         if (!file.open(QIODevice::ReadOnly)) {
-            LoggerManager::instance().log("debug", Level::ERROR, "文件打开失败: {}", filePath.toStdString());
+            LoggerManager::getInstance()->log("debug", Level::ERROR, "文件打开失败: {}", filePath.toStdString());
             QMutexLocker locker(&m_mutex);
             m_state = ReadFailed;
             QMetaObject::invokeMethod(this, [this]() {
@@ -76,9 +76,9 @@ void BinFileReader::readBinFile(const QString& filePath)
         }
 
         qint64 totalSize = file.size();
-        LoggerManager::instance().log("debug", Level::INFO, "文件大小: {} 字节", totalSize);
+        LoggerManager::getInstance()->log("debug", Level::INFO, "文件大小: {} 字节", totalSize);
         if (totalSize == 0) {
-            LoggerManager::instance().log("debug", Level::ERROR, "文件为空: {}", filePath.toStdString());
+            LoggerManager::getInstance()->log("debug", Level::ERROR, "文件为空: {}", filePath.toStdString());
             file.close();
             QMutexLocker locker(&m_mutex);
             m_state = ReadFailed;
@@ -108,7 +108,7 @@ void BinFileReader::readBinFile(const QString& filePath)
         }
 
         file.close();
-        LoggerManager::instance().log("debug", Level::INFO, "文件读取完毕, 共读取 {} 字节", bytesRead);
+        LoggerManager::getInstance()->log("debug", Level::INFO, "文件读取完毕, 共读取 {} 字节", bytesRead);
 
         {
             QMutexLocker locker(&m_mutex);
@@ -120,7 +120,7 @@ void BinFileReader::readBinFile(const QString& filePath)
         {
             QMutexLocker locker(&m_mutex);
             m_state = ReadComplete;
-            LoggerManager::instance().log("debug", Level::INFO, "状态变更为 ReadComplete, 分包数: {}", m_packets.size());
+            LoggerManager::getInstance()->log("debug", Level::INFO, "状态变更为 ReadComplete, 分包数: {}", m_packets.size());
         }
 
         QMetaObject::invokeMethod(this, [this]() {
@@ -142,10 +142,10 @@ void BinFileReader::clean()
 {
     QMutexLocker locker(&m_mutex);
     if (m_state == NotRead) {
-        LoggerManager::instance().log("debug", Level::DEBUG, "clean 已处于 NotRead 状态，跳过清理");
+        LoggerManager::getInstance()->log("debug", Level::DEBUG, "clean 已处于 NotRead 状态，跳过清理");
         return;
     }
-    LoggerManager::instance().log("debug", Level::INFO, "clean 清理读取器, 释放原始数据 {} 字节, 分包数 {}", m_rawData.size(), m_packets.size());
+    LoggerManager::getInstance()->log("debug", Level::INFO, "clean 清理读取器, 释放原始数据 {} 字节, 分包数 {}", m_rawData.size(), m_packets.size());
     m_state = NotRead;
     m_rawData.clear();
     m_rawData.squeeze();
@@ -162,10 +162,10 @@ int BinFileReader::packetCount() const
 QByteArray BinFileReader::packetAt(int index) const
 {
     if (index < 0 || index >= m_packets.size()) {
-        LoggerManager::instance().log("debug", Level::WARN, "packetAt 索引越界: index={}, packetCount={}", index, m_packets.size());
+        LoggerManager::getInstance()->log("debug", Level::WARN, "packetAt 索引越界: index={}, packetCount={}", index, m_packets.size());
         return QByteArray();
     }
-    LoggerManager::instance().log("debug", Level::DEBUG, "packetAt index={}, 帧大小={} 字节", index, m_packets.at(index).size());
+    LoggerManager::getInstance()->log("debug", Level::DEBUG, "packetAt index={}, 帧大小={} 字节", index, m_packets.at(index).size());
     return m_packets.at(index);
 }
 
@@ -173,22 +173,22 @@ const QByteArray& BinFileReader::getAllBytes() const
 {
     QMutexLocker locker(&m_mutex);
     if (m_rawData.isEmpty()) {
-        LoggerManager::instance().log("debug", Level::DEBUG, "getAllBytes 原始数据为空");
+        LoggerManager::getInstance()->log("debug", Level::DEBUG, "getAllBytes 原始数据为空");
         static QByteArray emptyData;
         return emptyData;
     }
-    LoggerManager::instance().log("debug", Level::DEBUG, "getAllBytes 返回原始数据引用 {} 字节", m_rawData.size());
+    LoggerManager::getInstance()->log("debug", Level::DEBUG, "getAllBytes 返回原始数据引用 {} 字节", m_rawData.size());
     return m_rawData;
 }
 
 bool BinFileReader::isLastPacket(int index) const
 {
     if (index < 0 || index >= m_packets.size()) {
-        LoggerManager::instance().log("debug", Level::WARN, "isLastPacket 索引无效: index={}, packetCount={}", index, m_packets.size());
+        LoggerManager::getInstance()->log("debug", Level::WARN, "isLastPacket 索引无效: index={}, packetCount={}", index, m_packets.size());
         return false;
     }
     bool isLast = (index == m_packets.size() - 1);
-    LoggerManager::instance().log("debug", Level::DEBUG, "isLastPacket index={}, packetCount={}, isLast={}", index, m_packets.size(), isLast);
+    LoggerManager::getInstance()->log("debug", Level::DEBUG, "isLastPacket index={}, packetCount={}, isLast={}", index, m_packets.size(), isLast);
     return isLast;
 }
 
@@ -198,13 +198,13 @@ void BinFileReader::splitData()
     m_packets.clear();
 
     if (m_rawData.isEmpty()) {
-        LoggerManager::instance().log("debug", Level::WARN, "splitData 原始数据为空, 跳过分包");
+        LoggerManager::getInstance()->log("debug", Level::WARN, "splitData 原始数据为空, 跳过分包");
         return;
     }
 
     int offset = 0;
     int totalSize = m_rawData.size();
-    LoggerManager::instance().log("debug", Level::INFO, "splitData 开始分包, 数据总大小: {} 字节, 自定义规则数: {}, 默认帧大小: {}", totalSize, m_packetSizes.size(), m_defaultPacketSize);
+    LoggerManager::getInstance()->log("debug", Level::INFO, "splitData 开始分包, 数据总大小: {} 字节, 自定义规则数: {}, 默认帧大小: {}", totalSize, m_packetSizes.size(), m_defaultPacketSize);
 
     if (m_packetSizes.isEmpty()) {
         while (offset < totalSize) {
@@ -231,5 +231,5 @@ void BinFileReader::splitData()
         }
     }
 
-    LoggerManager::instance().log("debug", Level::INFO, "splitData 分包完成, 总帧数: {}", m_packets.size());
+    LoggerManager::getInstance()->log("debug", Level::INFO, "splitData 分包完成, 总帧数: {}", m_packets.size());
 }

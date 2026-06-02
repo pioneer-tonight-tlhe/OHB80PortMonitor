@@ -300,10 +300,11 @@ void FrameDevice::updateSetInfo()
     setLabRHValue(m_setInfo->getRHRange());
 
     // 检查 Set 下的所有 Foup 是否有 hasAlarm 为 true 的
+    // Set 总览只统计启用设备的告警；禁用设备保持数据可见，但不影响 Set 告警状态。
     const QVector<FoupOfOHBInfo>& foups = m_setInfo->getFoups();
     bool hasAlarmFoup = false;
     for (const auto& foup : foups) {
-        if (foup.hasAlarm()) {
+        if (foup.enable() && foup.hasAlarm()) {
             hasAlarmFoup = true;
             break;
         }

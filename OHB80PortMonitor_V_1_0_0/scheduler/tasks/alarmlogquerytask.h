@@ -5,6 +5,7 @@
 #include "alarmlogdbcon.h"
 #include "alarmrecord.h"
 
+
 class AlarmLogQueryTask : public SchedulerTask
 {
     Q_OBJECT
@@ -38,9 +39,6 @@ signals:
 private:
     LogDB::AlarmLogDBCon* m_db;
 
-    // 日志路径
-    static constexpr const char* LOG_PATH = "scheduler/alarm_log_query_task";
-
     // 查询条件
     int     m_alarmLevel;       // -1 表示未设置
     QString m_qrCode;           // 空字符串表示未设置
@@ -50,6 +48,8 @@ private:
     QString m_endTime;          // 空字符串表示未设置
     int     m_pageNumber;       // 1-based，0 表示未设置
     int     m_pageSize;         // 默认500
+
+    const std::string m_taskLogPath = "scheduler/alarmlogquerytask";
 };
 
 #endif // ALARMLOGQUERYTASK_H

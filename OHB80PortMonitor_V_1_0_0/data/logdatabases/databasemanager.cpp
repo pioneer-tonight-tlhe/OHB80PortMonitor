@@ -27,6 +27,7 @@ DatabaseManager::DatabaseManager()
     , m_communicateLogCon(nullptr)
     , m_alarmLogCon(nullptr)
     , m_deviceParamLogCon(nullptr)
+    , m_vefcSensorMonitorCon(nullptr)
 {
 }
 
@@ -67,11 +68,21 @@ bool DatabaseManager::initialize(const QString& databasePath)
     m_deviceParamLogCon = new DeviceParamLogDBCon(m_databasePath, m_writeCon, nullptr);
     m_deviceParamLogCon->initialize();
 
+    // 创建 VEFC 传感器监控连接，传入外部写入连接
+    m_vefcSensorMonitorCon = new VEFCSensorMonitorDBCon(m_databasePath, m_writeCon, nullptr);
+    m_vefcSensorMonitorCon->initialize();
+
     return true;
 }
 
 void DatabaseManager::cleanup()
 {
+    if (m_vefcSensorMonitorCon) {
+        m_vefcSensorMonitorCon->cleanup();
+        delete m_vefcSensorMonitorCon;
+        m_vefcSensorMonitorCon = nullptr;
+    }
+
     if (m_deviceParamLogCon) {
         m_deviceParamLogCon->cleanup();
         delete m_deviceParamLogCon;
@@ -121,6 +132,11 @@ AlarmLogDBCon* DatabaseManager::alarmLogCon()
 DeviceParamLogDBCon* DatabaseManager::deviceParamLogCon()
 {
     return m_deviceParamLogCon;
+}
+
+VEFCSensorMonitorDBCon* DatabaseManager::vefcSensorMonitorCon()
+{
+    return m_vefcSensorMonitorCon;
 }
 
 bool DatabaseManager::createDatabaseFromSqlFile(const QString& sqlFilePath, const QString& dbFilePath)

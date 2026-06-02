@@ -23,6 +23,10 @@ INCLUDEPATH += $$PWD/communicatelogdb
 include ($$PWD/deviceparamlogdb/deviceparamlogdb.pri)
 INCLUDEPATH += $$PWD/deviceparamlogdb
 
+#vefcsensormonitordb
+include ($$PWD/vefcsensormonitordb/vefcsensormonitordb.pri)
+INCLUDEPATH += $$PWD/vefcsensormonitordb
+
 #operationlogdb
 include ($$PWD/operationlogdb/operationlogdb.pri)
 INCLUDEPATH += $$PWD/operationlogdb

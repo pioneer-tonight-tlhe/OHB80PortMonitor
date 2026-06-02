@@ -13,6 +13,8 @@ class MonitorDataTask;
 class AlarmDispatchTask;
 class OperationDispatchTask;
 class SH85PeriodicSelfCheckTask;
+class VEFCSensorMonitorTask;
+class VEFCMonitorInfo;
 
 class SharedData
 {
@@ -48,6 +50,12 @@ public:
     // 获取 SH85 周期自检任务（常驻任务）
     static SH85PeriodicSelfCheckTask* getSH85PeriodicSelfCheckTask();
 
+    // 获取 VEFC 传感器监控任务（常驻任务）
+    static VEFCSensorMonitorTask* getVEFCSensorMonitorTask();
+
+    // 获取 VEFC 监控信息（按 QRCode）
+    static VEFCMonitorInfo* getVEFCMonitorInfo(const QString& qrCode);
+
 private:
     static bool s_modbusManagerInitialized;
     static NetworkStatusTask* s_networkStatusTask;
@@ -55,6 +63,7 @@ private:
     static AlarmDispatchTask* s_alarmDispatchTask;
     static OperationDispatchTask* s_operationDispatchTask;
     static SH85PeriodicSelfCheckTask* s_sh85PeriodicSelfCheckTask;
+    static VEFCSensorMonitorTask* s_vefcSensorMonitorTask;
 };
 
 #endif // SHAREDDATA_H

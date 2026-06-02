@@ -2,15 +2,12 @@
 #include "modbustcpmaster.h"
 #include "modbustcpmaster/firmwareupgrader.h"
 #include "modbusconfigparser.h"
-#include "app/applogger.h"
-#include "loggermanager.h"
+#include "modbuslogger.h"
 #include "firmwareconfig.h"
 #include "initialcommandissuer.h"
 #include "periodiccommandsender.h"
 #include <QMetaObject>
 #include <QDebug>
-#include "loggermanager.h"
-#include "app/applogger.h"
 
 // 最大线程数限制
 static constexpr int MAX_THREAD_COUNT = 65535;
@@ -24,7 +21,7 @@ ModbusTcpMasterPool::ModbusTcpMasterPool(QObject* parent)
 ModbusTcpMasterPool::~ModbusTcpMasterPool()
 {
     qDebug() << "[data][ModbusTcpMasterPool] 析构开始，开始安全清理资源...";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 析构开始，开始安全清理资源").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "destructor", "析构开始，开始安全清理资源");
 
     // ── 第一步：同步停止所有 Master ──────────────────────────
     // BlockingQueuedConnection 保证每个 stop() 在 Master 所属线程上完成后才返回
@@ -33,7 +30,8 @@ ModbusTcpMasterPool::~ModbusTcpMasterPool()
     // ── 第二步：调度 Master 销毁（仅 deleteLater，不再二次 stop） ──
     // stop() 已在上一步同步完成，此处只需安排对象释放
     qDebug() << "[data][ModbusTcpMasterPool] 调度删除" << m_mastersById.size() << "个 Master";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 调度删除 %1 个 Master").arg(m_mastersById.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "destructor",
+        QString("调度删除 %1 个 Master").arg(m_mastersById.size()));
     for (auto it = m_mastersById.begin(); it != m_mastersById.end(); ++it) {
         ModbusTcpMaster* master = it.value();
         if (master) {
@@ -47,7 +45,8 @@ ModbusTcpMasterPool::~ModbusTcpMasterPool()
     // quit() 在 deleteLater 之后投递，事件循环按 FIFO 处理：
     //   先执行 DeferredDelete（销毁 Master），再退出事件循环
     qDebug() << "[data][ModbusTcpMasterPool] 向" << m_threads.size() << "个工作线程发出退出信号";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 向 %1 个工作线程发出退出信号").arg(m_threads.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "destructor",
+        QString("向 %1 个工作线程发出退出信号").arg(m_threads.size()));
     for (QThread* thread : qAsConst(m_threads)) {
         if (thread) {
             thread->quit();
@@ -63,7 +62,8 @@ ModbusTcpMasterPool::~ModbusTcpMasterPool()
 
         if (!thread->wait(5000)) {
             qWarning() << "[data][ModbusTcpMasterPool] 线程" << i << thread->objectName() << "优雅退出超时，强制终止";
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN, QString("[data][ModbusTcpMasterPool] 线程 %1 %2 优雅退出超时，强制终止").arg(i).arg(thread->objectName()).toStdString());
+            ModbusLogger::systemWarn("ModbusTcpMasterPool", "destructor",
+                QString("线程 %1 %2 优雅退出超时，强制终止").arg(i).arg(thread->objectName()));
             thread->terminate();
             thread->wait(1000);
         }
@@ -73,7 +73,7 @@ ModbusTcpMasterPool::~ModbusTcpMasterPool()
 
     m_threads.clear();
     qDebug() << "[data][ModbusTcpMasterPool] 析构完成，所有资源已清理";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 析构完成，所有资源已清理").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "destructor", "析构完成，所有资源已清理");
 }
 
 void ModbusTcpMasterPool::setThreadCount(int threadNum)
@@ -81,6 +81,8 @@ void ModbusTcpMasterPool::setThreadCount(int threadNum)
     // 如果已经有 Master，不允许修改线程数
     if (!m_mastersById.isEmpty()) {
         qWarning() << "[data][ModbusTcpMasterPool] 无法修改线程数：池中已有 Master 对象";
+        ModbusLogger::systemWarn("ModbusTcpMasterPool", "setThreadCount",
+            "无法修改线程数：池中已有 Master 对象");
         return;
     }
 
@@ -88,7 +90,8 @@ void ModbusTcpMasterPool::setThreadCount(int threadNum)
     if (threadNum <= 0) {
         threadNum = QThread::idealThreadCount();
         qDebug() << "[data][ModbusTcpMasterPool] 自动检测系统推荐线程数：" << threadNum;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 自动检测系统推荐线程数：%1").arg(threadNum).toStdString());
+        ModbusLogger::systemInfo("ModbusTcpMasterPool", "setThreadCount",
+            QString("自动检测系统推荐线程数：%1").arg(threadNum));
     }
 
     // 限制在 [1, MAX_THREAD_COUNT] 范围内
@@ -97,6 +100,8 @@ void ModbusTcpMasterPool::setThreadCount(int threadNum)
     } else if (threadNum > MAX_THREAD_COUNT) {
         qWarning() << "[data][ModbusTcpMasterPool] 请求的线程数" << threadNum
                    << "超过最大限制" << MAX_THREAD_COUNT << "，已调整为" << MAX_THREAD_COUNT;
+        ModbusLogger::systemWarn("ModbusTcpMasterPool", "setThreadCount",
+            QString("请求的线程数 %1 超过最大限制 %2，已调整").arg(threadNum).arg(MAX_THREAD_COUNT));
         threadNum = MAX_THREAD_COUNT;
     }
 
@@ -124,7 +129,8 @@ void ModbusTcpMasterPool::setThreadCount(int threadNum)
 
     m_nextThreadIndex = 0;
     qDebug() << "[data][ModbusTcpMasterPool] 已创建" << threadNum << "个工作线程";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 已创建 %1 个工作线程").arg(threadNum).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "setThreadCount",
+        QString("已创建 %1 个工作线程").arg(threadNum));
 }
 
 void ModbusTcpMasterPool::setThreadCount(ThreadCountMode mode)
@@ -132,7 +138,8 @@ void ModbusTcpMasterPool::setThreadCount(ThreadCountMode mode)
     // 先获取系统能够提供的最大线程数
     int systemMaxThreads = QThread::idealThreadCount();
     qDebug() << "[data][ModbusTcpMasterPool] 系统最大可用线程数：" << systemMaxThreads;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 系统最大可用线程数：%1").arg(systemMaxThreads).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "setThreadCount",
+        QString("系统最大可用线程数：%1").arg(systemMaxThreads));
 
     int requestedThreads = 0;
 
@@ -177,11 +184,15 @@ void ModbusTcpMasterPool::setThreadCount(ThreadCountMode mode)
         qWarning() << "[data][ModbusTcpMasterPool] 请求的线程数" << requestedThreads
                    << "超过系统最大可用线程数" << systemMaxThreads
                    << "，已调整为系统最大线程数";
+        ModbusLogger::systemWarn("ModbusTcpMasterPool", "setThreadCount",
+            QString("请求的线程数 %1 超过系统最大可用线程数 %2，已调整")
+                .arg(requestedThreads).arg(systemMaxThreads));
         requestedThreads = systemMaxThreads;
     }
 
     qDebug() << "[data][ModbusTcpMasterPool] 最终设置线程数：" << requestedThreads;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 最终设置线程数：%1").arg(requestedThreads).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "setThreadCount",
+        QString("最终设置线程数：%1").arg(requestedThreads));
     setThreadCount(requestedThreads);
 }
 
@@ -189,11 +200,14 @@ ModbusTcpMaster* ModbusTcpMasterPool::addMaster(const QString& ip, quint16 port,
 {
     if (id.isEmpty()) {
         qWarning() << "[data][ModbusTcpMasterPool] ID 为空，无法创建 Master";
+        ModbusLogger::systemWarn("ModbusTcpMasterPool", "addMaster", "ID 为空，无法创建 Master");
         return nullptr;
     }
 
     if (m_mastersById.contains(id)) {
         qWarning() << "[data][ModbusTcpMasterPool] 已存在 ID 为" << id << "的 Master";
+        ModbusLogger::systemWarn("ModbusTcpMasterPool", "addMaster",
+            QString("已存在 ID=%1 的 Master").arg(id));
         return nullptr;
     }
 
@@ -209,6 +223,8 @@ ModbusTcpMaster* ModbusTcpMasterPool::addMaster(const QString& ip, quint16 port,
     QThread* targetThread = m_threads[threadIndex];
     if (!targetThread) {
         qWarning() << "[data][ModbusTcpMasterPool] 线程" << threadIndex << "无效";
+        ModbusLogger::systemWarn("ModbusTcpMasterPool", "addMaster",
+            QString("线程 %1 无效").arg(threadIndex));
         return nullptr;
     }
 
@@ -225,7 +241,9 @@ ModbusTcpMaster* ModbusTcpMasterPool::addMaster(const QString& ip, quint16 port,
     qDebug() << "[data][ModbusTcpMasterPool] 已创建并添加 Master (ID:" << id
              << ", IP:" << ip << ", Port:" << port
              << ") 到线程" << threadIndex << targetThread->objectName();
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 已创建并添加 Master (ID:%1, IP:%2, Port:%3) 到线程 %4 %5").arg(id).arg(ip).arg(port).arg(threadIndex).arg(targetThread->objectName()).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "addMaster",
+        QString("已创建并添加 Master ID=%1 IP=%2 Port=%3 到线程 %4 %5")
+            .arg(id).arg(ip).arg(port).arg(threadIndex).arg(targetThread->objectName()));
 
     // 如果设置了配置解析器，初始化 Master
     if (m_configParser) {
@@ -239,7 +257,7 @@ void ModbusTcpMasterPool::setConfigParser(ModbusConfigParser* parser)
 {
     m_configParser = parser;
     qDebug() << "[data][ModbusTcpMasterPool] 已设置配置解析器";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 已设置配置解析器").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "setConfigParser", "已设置配置解析器");
 }
 
 void ModbusTcpMasterPool::initializeMaster(ModbusTcpMaster* master)
@@ -249,7 +267,8 @@ void ModbusTcpMasterPool::initializeMaster(ModbusTcpMaster* master)
     }
 
     qDebug() << "[data][ModbusTcpMasterPool] 开始初始化 Master (ID:" << master->ID << ")";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 开始初始化 Master (ID:%1)").arg(master->ID).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "initializeMaster",
+        QString("开始初始化 Master ID=%1").arg(master->ID));
 
     // 获取配置
     auto initialConfig = m_configParser->initialConfig();
@@ -273,7 +292,9 @@ void ModbusTcpMasterPool::initializeMaster(ModbusTcpMaster* master)
                  << "间隔=" << initialConfig.interval
                  << "超时=" << initialConfig.timeout
                  << "重试=" << initialConfig.retryCount;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 已配置 InitialCommandIssuer: 指令数=%1 间隔=%2 超时=%3 重试=%4").arg(initialQueue.size()).arg(initialConfig.interval).arg(initialConfig.timeout).arg(initialConfig.retryCount).toStdString());
+        ModbusLogger::systemInfo("ModbusTcpMasterPool", "InitialCommandIssuer", "initializeMaster",
+            QString("已配置 InitialCommandIssuer 指令数=%1 间隔=%2 超时=%3 重试=%4")
+                .arg(initialQueue.size()).arg(initialConfig.interval).arg(initialConfig.timeout).arg(initialConfig.retryCount));
     }
 
     // 配置 PeriodicCommandSender
@@ -286,7 +307,9 @@ void ModbusTcpMasterPool::initializeMaster(ModbusTcpMaster* master)
                  << "间隔=" << periodicConfig.interval
                  << "超时=" << periodicConfig.timeout
                  << "重试=" << periodicConfig.retryCount;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 已配置 PeriodicCommandSender: 指令数=%1 间隔=%2 超时=%3 重试=%4").arg(periodicQueue.size()).arg(periodicConfig.interval).arg(periodicConfig.timeout).arg(periodicConfig.retryCount).toStdString());
+        ModbusLogger::systemInfo("ModbusTcpMasterPool", "PeriodicCommandSender", "initializeMaster",
+            QString("已配置 PeriodicCommandSender 指令数=%1 间隔=%2 超时=%3 重试=%4")
+                .arg(periodicQueue.size()).arg(periodicConfig.interval).arg(periodicConfig.timeout).arg(periodicConfig.retryCount));
     }
 
     // 初始化固件升级模块
@@ -303,10 +326,10 @@ void ModbusTcpMasterPool::initializeMaster(ModbusTcpMaster* master)
                  << "WaitingTime=" << fwConfig.waitingForEquipmentReadyMs() << "ms"
                  << "SendInterval=" << fwConfig.sendIntervalForDataMs() << "ms"
                  << "TransferTimeout=" << fwConfig.transferResponseTimeoutMs() << "ms";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[data][ModbusTcpMasterPool] 已配置 FirmwareUpgrader: PrepareTimeout=%1ms WaitingTime=%2ms SendInterval=%3ms TransferTimeout=%4ms")
+        ModbusLogger::systemInfo("ModbusTcpMasterPool", "FirmwareUpgrader", "initializeMaster",
+            QString("已配置 FirmwareUpgrader PrepareTimeout=%1ms WaitingTime=%2ms SendInterval=%3ms TransferTimeout=%4ms")
                 .arg(fwConfig.prepareCmdTimeoutMs()).arg(fwConfig.waitingForEquipmentReadyMs())
-                .arg(fwConfig.sendIntervalForDataMs()).arg(fwConfig.transferResponseTimeoutMs()).toStdString());
+                .arg(fwConfig.sendIntervalForDataMs()).arg(fwConfig.transferResponseTimeoutMs()));
     }
 }
 
@@ -337,7 +360,8 @@ bool ModbusTcpMasterPool::removeMaster(const QString& id)
     }, Qt::QueuedConnection);
 
     qDebug() << "[data][ModbusTcpMasterPool] 已从池中移除并删除 Master (ID:" << id << ")";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 已从池中移除并删除 Master (ID:%1)").arg(id).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "removeMaster",
+        QString("已从池中移除并删除 Master ID=%1").arg(id));
     return true;
 }
 
@@ -348,7 +372,8 @@ void ModbusTcpMasterPool::clear()
     }
 
     qDebug() << "[data][ModbusTcpMasterPool] 清空池，删除" << m_mastersById.size() << "个 Master";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 清空池，删除 %1 个 Master").arg(m_mastersById.size()).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "clear",
+        QString("清空池，删除 %1 个 Master").arg(m_mastersById.size()));
 
     for (auto it = m_mastersById.begin(); it != m_mastersById.end(); ++it) {
         ModbusTcpMaster* master = it.value();
@@ -367,13 +392,14 @@ void ModbusTcpMasterPool::clear()
 void ModbusTcpMasterPool::stopAllMasters()
 {
     qDebug() << "[data][ModbusTcpMasterPool] 开始停止所有 Master...";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 开始停止所有 Master").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "stopAllMasters", "开始停止所有 Master");
 
     for (auto it = m_mastersById.begin(); it != m_mastersById.end(); ++it) {
         ModbusTcpMaster* master = it.value();
         if (master) {
             qDebug() << "[data][ModbusTcpMasterPool] 停止 Master (ID:" << master->ID << ")";
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 停止 Master (ID:%1)").arg(master->ID).toStdString());
+            ModbusLogger::systemInfo("ModbusTcpMasterPool", "stopAllMasters",
+                QString("停止 Master ID=%1").arg(master->ID));
             QMetaObject::invokeMethod(master, [master]() {
                 master->stop(ModbusConnecter::ConnectionMode::AutoReconnect);
             }, Qt::BlockingQueuedConnection);
@@ -381,5 +407,5 @@ void ModbusTcpMasterPool::stopAllMasters()
     }
 
     qDebug() << "[data][ModbusTcpMasterPool] 所有 Master 已停止";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterPool] 所有 Master 已停止").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "stopAllMasters", "所有 Master 已停止");
 }

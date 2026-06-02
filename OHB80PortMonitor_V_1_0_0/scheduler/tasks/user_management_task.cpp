@@ -1,6 +1,7 @@
 #include "user_management_task.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
+#include "defer/defer.h"
 
 #include <QDebug>
 
@@ -52,8 +53,21 @@ void UserManagementTask::setRemoveUser(const QString& username)
 
 void UserManagementTask::start()
 {
+    Tool::Defer defer([this]() { LoggerManager::getInstance()->flush(m_taskLogPath); });
+    
     if (m_stopped) return;
     setState(Running);
+    
+    QString opStr;
+    switch (m_operation) {
+    case Operation::Login:          opStr = "Login"; break;
+    case Operation::Logout:         opStr = "Logout"; break;
+    case Operation::ChangePassword: opStr = "ChangePassword"; break;
+    case Operation::AddUser:        opStr = "AddUser"; break;
+    case Operation::RemoveUser:     opStr = "RemoveUser"; break;
+    }
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        QString("[UserManagementTask][start] 任务开始，操作=%1").arg(opStr).toStdString());
 
     switch (m_operation) {
     case Operation::Login:          executeLogin();          break;
@@ -66,9 +80,13 @@ void UserManagementTask::start()
 
 void UserManagementTask::stop()
 {
+    Tool::Defer defer([this]() { LoggerManager::getInstance()->flush(m_taskLogPath); });
+    
     m_stopped = true;
     setState(Cancelled);
     emit finished(false, QStringLiteral("UserManagementTask: 任务被取消"));
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        "[UserManagementTask][stop] 任务被取消");
 }
 
 // ============================================================
@@ -90,8 +108,8 @@ void UserManagementTask::executeLogin()
             QObject::disconnect(connFail);
             qDebug() << "[UserManagementTask] 登录成功 user=" << username
                      << "perm=" << UserManager::permissionToString(perm);
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-                QString("[UserManagementTask] 登录成功 user=%1 perm=%2")
+            LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+                QString("[UserManagementTask][executeLogin] 登录成功 user=%1 perm=%2")
                     .arg(username, UserManager::permissionToString(perm)).toStdString());
             setState(Finished);
             emit loginSucceeded(username, perm);
@@ -104,7 +122,7 @@ void UserManagementTask::executeLogin()
             QObject::disconnect(connOk);
             QObject::disconnect(connFail);
             qWarning() << "[UserManagementTask] 登录失败:" << reason;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+            LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
                 QString("[UserManagementTask] 登录失败: %1").arg(reason).toStdString());
             setState(Failed);
             emit loginFailed(reason);
@@ -124,7 +142,7 @@ void UserManagementTask::executeLogout()
         this, [this, &conn]() {
             QObject::disconnect(conn);
             qDebug() << "[UserManagementTask] 登出成功";
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+            LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
                 "[UserManagementTask] 登出成功");
             setState(Finished);
             emit logoutSucceeded();
@@ -140,7 +158,7 @@ void UserManagementTask::executeChangePassword()
     const bool ok = UserManager::instance()->modifyUser(m_username, m_newPassword);
     if (ok) {
         qDebug() << "[UserManagementTask] 修改密码成功 user=" << m_username;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
             QString("[UserManagementTask] 修改密码成功 user=%1").arg(m_username).toStdString());
         setState(Finished);
         emit operationResult(true, QString("修改密码成功: %1").arg(m_username));
@@ -148,7 +166,7 @@ void UserManagementTask::executeChangePassword()
     } else {
         const QString msg = QString("修改密码失败: %1（用户不存在或权限不足）").arg(m_username);
         qWarning() << "[UserManagementTask]" << msg;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
             QString("[UserManagementTask] %1").arg(msg).toStdString());
         setState(Failed);
         emit operationResult(false, msg);
@@ -162,7 +180,7 @@ void UserManagementTask::executeAddUser()
     if (ok) {
         qDebug() << "[UserManagementTask] 添加用户成功 user=" << m_username
                  << "perm=" << UserManager::permissionToString(m_permission);
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
             QString("[UserManagementTask] 添加用户成功 user=%1 perm=%2")
                 .arg(m_username, UserManager::permissionToString(m_permission)).toStdString());
         setState(Finished);
@@ -171,7 +189,7 @@ void UserManagementTask::executeAddUser()
     } else {
         const QString msg = QString("添加用户失败: %1（已存在或权限不足）").arg(m_username);
         qWarning() << "[UserManagementTask]" << msg;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
             QString("[UserManagementTask] %1").arg(msg).toStdString());
         setState(Failed);
         emit operationResult(false, msg);
@@ -184,7 +202,7 @@ void UserManagementTask::executeRemoveUser()
     const bool ok = UserManager::instance()->removeUser(m_username);
     if (ok) {
         qDebug() << "[UserManagementTask] 删除用户成功 user=" << m_username;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
             QString("[UserManagementTask] 删除用户成功 user=%1").arg(m_username).toStdString());
         setState(Finished);
         emit operationResult(true, QString("删除用户成功: %1").arg(m_username));
@@ -192,7 +210,7 @@ void UserManagementTask::executeRemoveUser()
     } else {
         const QString msg = QString("删除用户失败: %1（不存在或权限不足）").arg(m_username);
         qWarning() << "[UserManagementTask]" << msg;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
             QString("[UserManagementTask] %1").arg(msg).toStdString());
         setState(Failed);
         emit operationResult(false, msg);

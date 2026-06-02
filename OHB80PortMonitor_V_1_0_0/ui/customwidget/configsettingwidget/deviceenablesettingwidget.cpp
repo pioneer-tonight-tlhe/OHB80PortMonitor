@@ -10,9 +10,16 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QColor>
+
 
 DeviceEnableSettingWidget::DeviceEnableSettingWidget(QWidget *parent)
     : SettingWidget(parent)
+    , m_qrcodeSpinBox(nullptr)
+    , m_statusComboBox(nullptr)
+    , m_setBtn(nullptr)
+    , m_qrcodeItem(nullptr)
+    , m_statusItem(nullptr)
 {
     setTitle("Device Enable Configuration");
     initUI();
@@ -68,9 +75,9 @@ void DeviceEnableSettingWidget::initStatusItem()
     m_statusComboBox->setFixedWidth(120);
     m_statusItem->addWidget("status_combo", m_statusComboBox);
 
-    auto *setBtn = new QPushButton("Set", m_statusItem);
-    m_statusItem->addWidget("set_btn", setBtn);
-    connect(setBtn, &QPushButton::clicked,
+    m_setBtn = new QPushButton("Set", m_statusItem);
+    m_statusItem->addWidget("set_btn", m_setBtn);
+    connect(m_setBtn, &QPushButton::clicked,
             this, &DeviceEnableSettingWidget::onSetClicked);
 
     addItem(m_statusItem);
@@ -106,6 +113,10 @@ void DeviceEnableSettingWidget::submitBoardEnableCommand(const QString &qrcode, 
                            QStringLiteral("SetBoardEnable"),
                            QVector<quint16>{registerValue});
 
+    m_statusItem->setStatusWaiting();
+    // 任务运行期间禁用 Set 按钮，避免并发任务提交
+    setAllSetButtonsEnabled(false);
+
     connect(task, &SendCommandTask::allFinished,
             this, [this, qrcode, enable]
                   (bool allSuccess, int successCount,
@@ -121,36 +132,58 @@ void DeviceEnableSettingWidget::submitBoardEnableCommand(const QString &qrcode, 
 
                     if (persistOk) {
                         m_statusItem->setStatusOK();
-                        QMessageBox::information(
-                            this,
-                            "Set Succeeded",
-                            QString("Successfully set device [%1] to [%2]")
-                                .arg(qrcode)
-                                .arg(enable ? "Enable" : "Disable"));
+                        auto *mb = new QMessageBox(QMessageBox::Information,
+                                                  "Set Succeeded",
+                                                  QString("Successfully set Device Enable=%1 on %2")
+                                                      .arg(enable ? "True" : "False").arg(qrcode),
+                                                  QMessageBox::Ok,
+                                                  this);
+                        mb->setAttribute(Qt::WA_DeleteOnClose);
+                        mb->setModal(false);
+                        mb->setWindowModality(Qt::NonModal);
+                        mb->show();
                     } else {
                         m_statusItem->setStatusFailed();
-                        QMessageBox::warning(
-                            this,
-                            "Set Failed",
-                            QString("Command succeeded but failed to persist config for device [%1]")
-                                .arg(qrcode));
+                        auto *mb = new QMessageBox(QMessageBox::Warning,
+                                                  "Persist Failed",
+                                                  QString("Device Enable=%1 set successfully on %2, but failed to persist to config")
+                                                      .arg(enable ? "True" : "False").arg(qrcode),
+                                                  QMessageBox::Ok,
+                                                  this);
+                        mb->setAttribute(Qt::WA_DeleteOnClose);
+                        mb->setModal(false);
+                        mb->setWindowModality(Qt::NonModal);
+                        mb->show();
                     }
                 } else {
                     m_statusItem->setStatusFailed();
-                    QMessageBox::warning(
-                        this,
-                        "Set Failed",
-                        QString("Failed to send SetBoardEnable to device [%1]:\n%2")
-                            .arg(qrcode)
-                            .arg(failedIds.join(", ")));
+                    const QString failList = failedIds.join(", ");
+                    auto *mb = new QMessageBox(QMessageBox::Warning,
+                                              "Set Failed",
+                                              QString("Failed to set Device Enable=%1 on %2:\n%3")
+                                                  .arg(enable ? "True" : "False").arg(qrcode).arg(failList),
+                                              QMessageBox::Ok,
+                                              this);
+                    mb->setAttribute(Qt::WA_DeleteOnClose);
+                    mb->setModal(false);
+                    mb->setWindowModality(Qt::NonModal);
+                    mb->show();
                 }
+                setAllSetButtonsEnabled(true);
             });
 
     Scheduler::instance()->submitTask(task);
 
     qDebug() << "[ui][DeviceEnableSettingWidget][submitBoardEnableCommand] qrcode=" << qrcode
              << "enable=" << enable;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][DeviceEnableSettingWidget] submitBoardEnableCommand qrcode=%1 enable=%2")
             .arg(qrcode).arg(enable).toStdString());
+}
+
+void DeviceEnableSettingWidget::setAllSetButtonsEnabled(bool enabled)
+{
+    if (m_setBtn) {
+        m_setBtn->setEnabled(enabled);
+    }
 }

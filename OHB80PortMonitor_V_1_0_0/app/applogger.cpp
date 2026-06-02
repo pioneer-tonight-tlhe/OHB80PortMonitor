@@ -24,25 +24,25 @@ bool AppLogger::initialize(const QString& logDir)
     
     qDebug() << "Initializing logger system...";
     
-    auto& logger_mgr = LoggerManager::instance();
+    auto logger_mgr = LoggerManager::getInstance();
     
     // 设置日志根目录
-    logger_mgr.set_root_dir(m_logDir.toStdString());
+    logger_mgr->set_root_dir(m_logDir.toStdString());
     
     // 设置日志回滚参数：单文件10MB，保留5个文件
-    logger_mgr.set_rotation(10 * 1024 * 1024, 5);
+    logger_mgr->set_rotation(10 * 1024 * 1024, 5);
     
     // 设置日志保留天数：7天
-    logger_mgr.set_retention_days(7);
+    logger_mgr->set_retention_days(7);
     
     // 启用自动trace日志
-    logger_mgr.enable_auto_trace(true);
+    logger_mgr->enable_auto_trace(true);
     
     // 启动自动分离warn日志
-    logger_mgr.enable_warn_error_split(true);
+    logger_mgr->enable_warn_error_split(true);
     
     // 记录系统启动日志
-    logger_mgr.log("system", Level::INFO, "日志系统初始化完成");
+    logger_mgr->log("system", Level::INFO, "日志系统初始化完成");
     
     m_initialized = true;
     
@@ -60,7 +60,7 @@ void AppLogger::shutdown()
     
     qDebug() << "Shutting down logger system...";
     
-    LoggerManager::instance().shutdown();
+    LoggerManager::getInstance()->shutdown();
     
     m_initialized = false;
 }
@@ -85,9 +85,9 @@ void AppLogger::crashHandler(int sig)
     case SIGILL:  sigName = "SIGILL (非法指令)"; break;
     }
     
-    LoggerManager::instance().log("system", Level::ERROR,
+    LoggerManager::getInstance()->log("system", Level::ERROR,
                                   "[CRASH] 程序崩溃! 信号: {} ({})", sigName, sig);
-    LoggerManager::instance().shutdown();
+    LoggerManager::getInstance()->shutdown();
     
     std::signal(sig, SIG_DFL);
     std::raise(sig);

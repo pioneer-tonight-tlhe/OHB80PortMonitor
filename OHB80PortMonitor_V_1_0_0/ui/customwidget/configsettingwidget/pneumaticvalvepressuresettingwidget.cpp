@@ -1,5 +1,6 @@
 #include "pneumaticvalvepressuresettingwidget.h"
 #include "../settingwidget/settingitemwidget.h"
+#include "modaltabledialog.h"
 #include "ohbdeviceconfig.h"
 #include "scheduler/scheduler.h"
 #include "tasks/set_pneumatic_valve_pressure_task.h"
@@ -9,11 +10,51 @@
 
 #include <QDebug>
 #include <QMessageBox>
+#include <QColor>
+
+namespace {
+QList<QStringList> buildDeviceResultRows(const QStringList &targetQrCodes,
+                                         const QStringList &failedQrCodes,
+                                         bool allSuccess,
+                                         double pressureBar)
+{
+    QStringList qrcodes = targetQrCodes;
+    for (const QString &qrCode : failedQrCodes) {
+        if (!qrcodes.contains(qrCode)) {
+            qrcodes.append(qrCode);
+        }
+    }
+
+    // 格式化设置值（带单位）
+    QString settingValueStr = QString("Set Pressure %1 bar").arg(pressureBar);
+
+    QList<QStringList> rows;
+    for (const QString &qrCode : qrcodes) {
+        const bool failed = !allSuccess
+            && (failedQrCodes.isEmpty() || failedQrCodes.contains(qrCode));
+        rows.append({
+            qrCode,
+            settingValueStr,
+            failed ? QStringLiteral("Fail") : QStringLiteral("Success")
+        });
+    }
+    return rows;
+}
+
+void applyResultColors(ModalTableDialog *dialog)
+{
+    if (!dialog) return;
+    dialog->setFieldTextColor(QStringLiteral("Result"), QStringLiteral("Fail"), QColor(210, 0, 0));
+    dialog->setFieldTextColor(QStringLiteral("Result"), QStringLiteral("Success"), QColor(0, 150, 0));
+}
+} // namespace
 
 PneumaticValvePressureSettingWidget::PneumaticValvePressureSettingWidget(QWidget *parent)
     : SettingWidget(parent)
     , m_comboBox(nullptr)
     , m_pressureSpinBox(nullptr)
+    , m_pressureSetBtn(nullptr)
+    , m_pressureSetAllBtn(nullptr)
     , m_qrcodeItem(nullptr)
     , m_pressureItem(nullptr)
 {
@@ -79,14 +120,14 @@ void PneumaticValvePressureSettingWidget::initPressureItem()
     m_pressureSpinBox->setFixedWidth(120);
     m_pressureItem->addWidget("pressure_spin", m_pressureSpinBox);
 
-    auto *setBtn = new QPushButton("Set", m_pressureItem);
-    m_pressureItem->addWidget("pressure_set_btn", setBtn);
-    connect(setBtn, &QPushButton::clicked,
+    m_pressureSetBtn = new QPushButton("Set", m_pressureItem);
+    m_pressureItem->addWidget("pressure_set_btn", m_pressureSetBtn);
+    connect(m_pressureSetBtn, &QPushButton::clicked,
             this, &PneumaticValvePressureSettingWidget::onSetBtnClicked);
 
-    auto *setAllBtn = new QPushButton("Set All", m_pressureItem);
-    m_pressureItem->addWidget("pressure_set_all_btn", setAllBtn);
-    connect(setAllBtn, &QPushButton::clicked,
+    m_pressureSetAllBtn = new QPushButton("Set All", m_pressureItem);
+    m_pressureItem->addWidget("pressure_set_all_btn", m_pressureSetAllBtn);
+    connect(m_pressureSetAllBtn, &QPushButton::clicked,
             this, &PneumaticValvePressureSettingWidget::onSetAllBtnClicked);
 
     addItem(m_pressureItem);
@@ -132,38 +173,79 @@ void PneumaticValvePressureSettingWidget::submitPressureTask(const QStringList &
     auto *task = new SetPneumaticValvePressureTask(qrcodeVec, pressureBar);
 
     m_pressureItem->setStatusWaiting();
+    // 任务运行期间禁用两个 Set 按钮，避免并发任务提交
+    setAllSetButtonsEnabled(false);
 
     connect(task, &SetPneumaticValvePressureTask::allFinished,
-            this, [this](bool /*allSuccess*/, int successCount,
+            this, [this, qrcodes](bool /*allSuccess*/, int successCount,
                          QStringList failedQrCodes, double pressureBarFinal) {
                 // 只要有一台失败即视为本次任务失败
                 const bool hasFailure = !failedQrCodes.isEmpty();
+                const bool showDeviceTable = qrcodes.size() > 1 || failedQrCodes.size() > 1;
                 if (!hasFailure) {
                     m_pressureItem->setStatusOK();
-                    QMessageBox::information(
-                        this,
-                        "Set Succeeded",
-                        QString("Successfully set Pneumatic Valve Pressure to [%1 bar] on %2 device(s)")
-                            .arg(pressureBarFinal).arg(successCount));
+                    if (showDeviceTable) {
+                        auto *dialog = ModalTableDialog::showAsync(
+                            this,
+                            QString("Pneumatic Valve Pressure=%1 bar Result").arg(pressureBarFinal),
+                            QStringList{"QRCode", "Setting", "Result"},
+                            buildDeviceResultRows(qrcodes, failedQrCodes, true, pressureBarFinal));
+                        applyResultColors(dialog);
+                    } else {
+                        auto *mb = new QMessageBox(QMessageBox::Information,
+                                                  "Set Succeeded",
+                                                  QString("Successfully set Pneumatic Valve Pressure to [%1 bar] on %2 device(s)")
+                                                      .arg(pressureBarFinal).arg(successCount),
+                                                  QMessageBox::Ok,
+                                                  this);
+                        mb->setAttribute(Qt::WA_DeleteOnClose);
+                        mb->setModal(false);
+                        mb->setWindowModality(Qt::NonModal);
+                        mb->show();
+                    }
                 } else {
                     m_pressureItem->setStatusFailed();
-
-                    const QString failList = failedQrCodes.join(", ");
-                    QMessageBox::warning(
-                        this,
-                        "Set Failed",
-                        QString("Failed to set Pneumatic Valve Pressure to [%1 bar] on %2 device(s):\n%3")
-                            .arg(pressureBarFinal)
-                            .arg(failedQrCodes.count())
-                            .arg(failList));
+                    if (showDeviceTable) {
+                        auto *dialog = ModalTableDialog::showAsync(
+                            this,
+                            QString("Pneumatic Valve Pressure=%1 bar Result").arg(pressureBarFinal),
+                            QStringList{"QRCode", "Setting", "Result"},
+                            buildDeviceResultRows(qrcodes, failedQrCodes, false, pressureBarFinal));
+                        applyResultColors(dialog);
+                    } else {
+                        const QString failList = failedQrCodes.join(", ");
+                        auto *mb = new QMessageBox(QMessageBox::Warning,
+                                                  "Set Failed",
+                                                  QString("Failed to set Pneumatic Valve Pressure to [%1 bar] on %2 device(s):\n%3")
+                                                      .arg(pressureBarFinal)
+                                                      .arg(failedQrCodes.count())
+                                                      .arg(failList),
+                                                  QMessageBox::Ok,
+                                                  this);
+                        mb->setAttribute(Qt::WA_DeleteOnClose);
+                        mb->setModal(false);
+                        mb->setWindowModality(Qt::NonModal);
+                        mb->show();
+                    }
                 }
+                setAllSetButtonsEnabled(true);
             });
 
     Scheduler::instance()->submitTask(task);
 
     qDebug() << "[ui][PneumaticValvePressureSettingWidget][submitPressureTask]：提交任务 设备数="
              << qrcodes.size() << "压力=" << pressureBar << "bar";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][PneumaticValvePressureSettingWidget][submitPressureTask]：提交任务 设备数=%1 压力=%2bar")
             .arg(qrcodes.size()).arg(pressureBar).toStdString());
+}
+
+void PneumaticValvePressureSettingWidget::setAllSetButtonsEnabled(bool enabled)
+{
+    if (m_pressureSetBtn) {
+        m_pressureSetBtn->setEnabled(enabled);
+    }
+    if (m_pressureSetAllBtn) {
+        m_pressureSetAllBtn->setEnabled(enabled);
+    }
 }

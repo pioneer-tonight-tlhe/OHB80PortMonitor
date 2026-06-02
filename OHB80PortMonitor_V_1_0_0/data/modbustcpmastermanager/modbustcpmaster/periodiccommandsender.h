@@ -21,7 +21,7 @@ class PeriodicCommandSender : public CyclicCommandIssuer
     Q_OBJECT
 
 public:
-    static constexpr int MAX_CONSECUTIVE_FAILURES = 100;
+    static constexpr int MAX_CONSECUTIVE_FAILURES = 10;
 
     explicit PeriodicCommandSender(ModbusCommandSender& sender, const QString& masterId = QString(), QObject* parent = nullptr);
 

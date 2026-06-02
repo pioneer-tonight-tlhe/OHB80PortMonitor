@@ -64,6 +64,7 @@ private:
     QLabel *m_titleLabel;
     QLabel *m_tipLabel;
     QLabel *m_statusLabel;
+    QString m_statusStyle;
     QWidget *m_widgetActions;
     QGridLayout *m_actionsLayout;
     QVBoxLayout *m_mainLayout;

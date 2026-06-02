@@ -1,7 +1,7 @@
 #ifndef SH85SELFCHECKREPORTDIALOG_H
 #define SH85SELFCHECKREPORTDIALOG_H
 
-#include "scheduler/tasks/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 
 #include <QDialog>

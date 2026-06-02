@@ -3,10 +3,9 @@
 #include "modbustcpmasterpool.h"
 #include "commandpool.h"
 #include "modbustcpmaster.h"
+#include "modbuslogger.h"
 #include <QMetaObject>
 #include <QDebug>
-#include "loggermanager.h"
-#include "app/applogger.h"
 
 ModbusTcpMasterManager& ModbusTcpMasterManager::instance()
 {
@@ -21,7 +20,7 @@ ModbusTcpMasterManager::ModbusTcpMasterManager(QObject* parent)
     , m_commandPool(new CommandPool())
 {
     qDebug() << "[data][ModbusTcpMasterManager] 已创建管理器";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterManager] 已创建管理器").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "constructor", "已创建管理器");
 }
 
 ModbusTcpMasterManager::~ModbusTcpMasterManager()
@@ -39,8 +38,7 @@ void ModbusTcpMasterManager::shutdown()
     if (!m_masterPool) return; // 已清理，幂等返回
 
     qDebug() << "[data][ModbusTcpMasterManager] shutdown: 销毁 Master 池及工作线程";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        "[data][ModbusTcpMasterManager] shutdown: 销毁 Master 池及工作线程");
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "shutdown", "销毁 Master 池及工作线程");
 
     // 主动销毁 Pool，触发 ~ModbusTcpMasterPool()：
     //   stopAllMasters() -> clear() -> quit/wait/delete 每个 QThread
@@ -52,10 +50,13 @@ void ModbusTcpMasterManager::shutdown()
 bool ModbusTcpMasterManager::loadConfig(const QString& xmlFilePath)
 {
     qDebug() << "[data][ModbusTcpMasterManager] 开始加载配置文件:" << xmlFilePath;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterManager] 开始加载配置文件：%1").arg(xmlFilePath).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "loadConfig",
+        QString("开始加载配置文件：%1").arg(xmlFilePath));
 
     if (!m_configParser->parse(xmlFilePath)) {
         qWarning() << "[data][ModbusTcpMasterManager] 配置文件解析失败:" << m_configParser->errorMessage();
+        ModbusLogger::systemError("ModbusTcpMasterManager", "loadConfig",
+            QString("配置文件解析失败：%1").arg(m_configParser->errorMessage()));
         return false;
     }
 
@@ -66,7 +67,7 @@ bool ModbusTcpMasterManager::loadConfig(const QString& xmlFilePath)
     m_masterPool->setConfigParser(m_configParser);
 
     qDebug() << "[data][ModbusTcpMasterManager] 配置文件加载成功";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterManager] 配置文件加载成功").toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "loadConfig", "配置文件加载成功");
     return true;
 }
 
@@ -83,7 +84,8 @@ void ModbusTcpMasterManager::setThreadCount(ModbusTcpMasterPool::ThreadCountMode
 ModbusTcpMaster* ModbusTcpMasterManager::addMaster(const QString& ip, quint16 port, const QString& id)
 {
     qDebug() << "[data][ModbusTcpMasterManager] 创建 Master (ID:" << id << ", IP:" << ip << ", Port:" << port << ")";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterManager] 创建 Master (ID:%1, IP:%2, Port:%3)").arg(id).arg(ip).arg(port).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "addMaster",
+        QString("创建 Master ID=%1 IP=%2 Port=%3").arg(id).arg(ip).arg(port));
     return m_masterPool->addMaster(ip, port, id);
 }
 
@@ -97,6 +99,8 @@ bool ModbusTcpMasterManager::startMaster(const QString& id, ModbusConnecter::Con
     ModbusTcpMaster* master = m_masterPool->getMaster(id);
     if (!master) {
         qWarning() << "[data][ModbusTcpMasterManager] 未找到要启动的 Master, ID:" << id;
+        ModbusLogger::systemWarn("ModbusTcpMasterManager", "startMaster",
+            QString("未找到要启动的 Master ID=%1").arg(id));
         return false;
     }
 
@@ -105,7 +109,8 @@ bool ModbusTcpMasterManager::startMaster(const QString& id, ModbusConnecter::Con
     }, Qt::QueuedConnection);
 
     qDebug() << "[data][ModbusTcpMasterManager] 已投递启动请求, ID:" << id;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, QString("[data][ModbusTcpMasterManager] 已投递启动请求, ID:%1").arg(id).toStdString());
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "startMaster",
+        QString("已投递启动请求 ID=%1").arg(id));
     return true;
 }
 

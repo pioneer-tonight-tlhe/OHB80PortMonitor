@@ -43,9 +43,15 @@ private:
     // 下发 SetBoardEnable Modbus 指令
     void submitBoardEnableCommand(const QString &qrcode, bool enable);
 
+    // 设置任务运行期间所有 Set 按钮的启用状态
+    void setAllSetButtonsEnabled(bool enabled);
+
 private:
     QSpinBox        *m_qrcodeSpinBox = nullptr;
     QComboBox       *m_statusComboBox = nullptr;
+
+    // Set 按钮指针（任务期间禁用，避免并发任务提交）
+    QPushButton *m_setBtn;
 
     SettingItemWidget *m_qrcodeItem = nullptr;
     SettingItemWidget *m_statusItem = nullptr;

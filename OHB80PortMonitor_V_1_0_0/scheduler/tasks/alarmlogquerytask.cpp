@@ -1,6 +1,7 @@
 #include "alarmlogquerytask.h"
 #include "databasemanager.h"
 #include "loggermanager.h"
+#include "defer/defer.h"
 
 AlarmLogQueryTask::AlarmLogQueryTask(QObject *parent)
     : SchedulerTask{parent}
@@ -10,29 +11,35 @@ AlarmLogQueryTask::AlarmLogQueryTask(QObject *parent)
     , m_pageNumber(0)
     , m_pageSize(500)
 {
-    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[AlarmLogQueryTask] 警报日志查询任务已构造");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[AlarmLogQueryTask] 警报日志查询任务已构造");
+    LoggerManager::getInstance()->flush(m_taskLogPath);
 }
 
 void AlarmLogQueryTask::start()
 {
-    // 获取警报日志数据库连接
+    // 获取警报日志数据库连  
     m_db = LogDB::DatabaseManager::instance().alarmLogCon();
     if (!m_db) {
         setState(Failed);
-        LoggerManager::instance().log(LOG_PATH, Level::ERROR, "[start] 警报日志数据库不可用");
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::ERROR, "[start] 警报日志数据库不可用");
         emit finished(false, "AlarmLogDBCon unavailable");
         return;
     }
 
     setState(Running);
-    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[start] 警报日志查询任务已启动");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[start] 警报日志查询任务已启");
     executeQuery();
 }
 
 void AlarmLogQueryTask::stop()
 {
+    // 使用 Defer 确保函数退出时刷新日志
+    Tool::Defer defer([this]() {
+        LoggerManager::getInstance()->flush(m_taskLogPath);
+    });
+
     setState(Finished);
-    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[stop] 警报日志查询任务已停止");
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[stop] 警报日志查询任务已停");
 }
 
 void AlarmLogQueryTask::setPageNumber(int pageNumber)
@@ -73,18 +80,18 @@ void AlarmLogQueryTask::setOccurTimeRange(const QString& startTime, const QStrin
 
 void AlarmLogQueryTask::executeQuery()
 {
+    // 使用 Defer 确保函数退出时刷新日志
+    Tool::Defer defer([this]() {
+        LoggerManager::getInstance()->flush(m_taskLogPath);
+    });
+
     if (!m_db) {
         setState(Failed);
-        LoggerManager::instance().log(LOG_PATH, Level::ERROR, "[executeQuery] 数据库连接不可用");
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::ERROR, "[executeQuery] 数据库连接不可用");
         emit finished(false, "Database connection not available");
         return;
     }
 
-    // 时间范围钳制：
-    //   - 开始 / 结束任一为空 → 用数据库的最早 / 最晚时间补齐
-    //   - 请求窗口与 DB 范围有重叠 → 把超出部分钳制到 DB 边界
-    //   - 请求窗口完全落在 DB 范围之外 → 保持原值，SQL 自然返回空集
-    //   - 数据库为空 → 不钳制，原样下发
     QString dbEarliest;
     QString dbLatest;
     m_db->queryTimeBounds(dbEarliest, dbLatest);
@@ -103,22 +110,31 @@ void AlarmLogQueryTask::executeQuery()
             if (m_startTime > m_endTime) {
                 qSwap(m_startTime, m_endTime);
             }
-            LoggerManager::instance().log(LOG_PATH, Level::INFO,
-                QString("[executeQuery] 钳制后时间范围: %1 -> %2 (数据库: %3 -> %4)")
-                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
+
         } else {
-            LoggerManager::instance().log(LOG_PATH, Level::INFO,
-                QString("[executeQuery] 请求窗口与数据库范围无重叠，不钳制: %1 -> %2 (数据库: %3 -> %4)")
-                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
+
         }
     }
 
+    // 记录查询条件
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        QString("[executeQuery] 查询条件: alarmLevel(告警级别)=%1, qrCode(设备标识)=%2, alarmType(告警类型)=%3, isResolved(是否解决)=%4, occurTime(时间范围)=%5 -> %6")
+            .arg(m_alarmLevel == -1 ? "全部" : QString::number(m_alarmLevel))
+            .arg(m_qrCode.isEmpty() ? "全部" : m_qrCode)
+            .arg(m_alarmType.isEmpty() ? "全部" : m_alarmType)
+            .arg(m_isResolved == -1 ? "全部" : (m_isResolved == 0 ? "未解" : "已解"))
+            .arg(m_startTime.isEmpty() ? "不限" : m_startTime)
+            .arg(m_endTime.isEmpty() ? "不限" : m_endTime)
+            .toStdString());
+
     // 有条件查询：当前页中所有满足条件的记录
+    int pageRecordCount = 0;
     if (m_pageNumber > 0) {
         QList<AlarmRecord> pageRecords = m_db->queryPageWithConditions(
             m_alarmLevel, m_qrCode, m_alarmType, m_isResolved,
             m_startTime, m_endTime,
             m_pageSize, m_pageNumber);
+        pageRecordCount = pageRecords.size();
         emit pageWithConditionsResult(pageRecords);
     }
 
@@ -129,6 +145,25 @@ void AlarmLogQueryTask::executeQuery()
     emit totalCountWithConditionsResult(totalCountWithConditions);
 
     setState(Finished);
-    LoggerManager::instance().log(LOG_PATH, Level::INFO, "[executeQuery] 查询完成");
+
+    // 记录查询结果
+    if (totalCountWithConditions == 0) {
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
+            QString("[executeQuery] 查询成功但无结果: 总记录数=%1, 当前页记录数=%2, 页码=%3, 每页大小=%4")
+                .arg(totalCountWithConditions)
+                .arg(pageRecordCount)
+                .arg(m_pageNumber)
+                .arg(m_pageSize)
+                .toStdString());
+    } else {
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+            QString("[executeQuery] 查询成功: 总记录数=%1, 当前页记录数=%2, 页码=%3, 每页大小=%4")
+                .arg(totalCountWithConditions)
+                .arg(pageRecordCount)
+                .arg(m_pageNumber)
+                .arg(m_pageSize)
+                .toStdString());
+    }
+
     emit finished(true, "Query completed successfully");
 }

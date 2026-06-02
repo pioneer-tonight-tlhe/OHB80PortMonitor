@@ -1,5 +1,23 @@
+#ifdef _WIN32
+// 排除 RPC 定义，避免与 std::byte 冲突。
+// 必须在任何包含 windows.h 的头文件之前定义。
+#ifndef NO_RPC
+#define NO_RPC
+#endif
+// 减少 windows.h 的内容，避免更多冲突。
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
 #ifndef LOGGERMANAGER_H
 #define LOGGERMANAGER_H
+
+// 先包含 cstddef 确保 std::byte 被定义。
+#include <cstddef>
 
 #include <string>
 #include <mutex>
@@ -14,13 +32,32 @@
 #include <vector>
 #include <condition_variable>
 
+// 在包含 spdlog 之前再次确保宏定义。
+#ifdef _WIN32
+#ifndef NO_RPC
+#define NO_RPC
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#endif
+
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
+#include "singleton.h"
+
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
+// 取消 Windows 的 byte 定义，避免与 std::byte 冲突。
+#ifdef byte
+#undef byte
+#endif
 #else
 #include <sys/stat.h>
 #include <dirent.h>
@@ -42,43 +79,36 @@ enum class Level {
     CRITICAL
 };
 
-class LoggerManager
+class LoggerManager : public Singleton<LoggerManager>
 {
+    // 允许 Singleton 模板访问私有构造函数
+    friend class Singleton<LoggerManager>;
+
 private:
     LoggerManager();
 
 public:
     ~LoggerManager();
 
-    // 禁止拷贝和赋值
-    LoggerManager(const LoggerManager&) = delete;
-    LoggerManager& operator=(const LoggerManager&) = delete;
-
-    // 6.2.1 单例模式
-    static LoggerManager& instance() {
-        static LoggerManager inst;
-        return inst;
-    }
-
-    // 6.2.2 设置根目录
+    // 设置根目录
     void set_root_dir(const std::string& root_dir);
 
-    // 6.2.3 设置日志回滚参数（默认单文件10MB，保留5个文件）
+    // 设置日志回滚参数（默认单文件10MB，保留5个文件）
     void set_rotation(size_t max_file_size = 10 * 1024 * 1024, size_t max_files = 5);
 
-    // 6.2.4 设置日志保留天数（默认7天）
+    // 设置日志保留天数（默认7天）
     void set_retention_days(int days);
 
-    // 6.2.5 设置trace日志文件名（默认为trace.log）
+    // 设置trace日志文件名（默认为trace.log）
     void set_trace_filename(const std::string& name);
 
-    // 6.2.6 启用自动trace日志（启用后，所有的日志都会汇总到该日志中）
+    // 启用自动trace日志（启用后，所有的日志都会汇总到该日志中）
     void enable_auto_trace(bool enabled);
 
-    // 6.2.7 启用自动分离warn和error日志
+    // 启用自动分离warn和error日志
     void enable_warn_error_split(bool enabled);
 
-    // 6.2.8 清理日志系统
+    // 清理日志系统
     void shutdown();
 
     // 手动刷新指定文件的 logger（立即写入磁盘）

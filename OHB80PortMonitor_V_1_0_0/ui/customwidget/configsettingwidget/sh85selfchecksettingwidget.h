@@ -2,7 +2,7 @@
 #define SH85SELFCHECKSETTINGWIDGET_H
 
 #include "settingwidget.h"
-#include "scheduler/tasks/sh85_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_self_check_task.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 
 #include <QSpinBox>
@@ -31,6 +31,7 @@ public:
 
     // 设置控件是否可用（false 时整个控件不可用）
     void setEnabled(bool enabled);
+    void setCheckActionEnabled(bool enabled);
 
     // 返回是否处于自检工作中
     bool isRunning() const;
@@ -55,6 +56,7 @@ private:
 
     void submitSelfCheckTask(const QString &qrcode);
     void resetButton();
+    void refreshActionState();
 
     static QString resultToFriendlyText(SH85SelfChecker::Result r);
 
@@ -69,6 +71,7 @@ private:
 
     // 当前正在执行任务的 qrcode（用于过滤无关信号）
     QString m_runningQrcode;
+    bool m_checkActionEnabled = true;
 };
 
 #endif // SH85SELFCHECKSETTINGWIDGET_H

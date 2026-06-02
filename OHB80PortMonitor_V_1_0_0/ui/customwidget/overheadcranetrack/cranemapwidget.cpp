@@ -86,7 +86,7 @@ CraneMapWidget::CraneMapWidget(QWidget *parent)
       m_foupLevelBuilder(nullptr),
       m_contentSize(2000, 1200),
       m_isDragging(false),
-      m_logger(LoggerManager::instance()),
+      m_logger(*LoggerManager::getInstance()),
       m_loggerFileName("debug.log")
 {
     m_fixSpacingValue = 6;

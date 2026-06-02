@@ -10,7 +10,7 @@ Graph::GraphConfigParser::GraphConfigParser(const QString& filePath)
       m_startNodeFound(false),
       m_fixSpacingValue(10.0),
       m_setNodeIndex(0),
-      m_logger(LoggerManager::instance()),
+      m_logger(*LoggerManager::getInstance()),
       m_loggerFileName(AppLogger::CraneMapLoggerPath().toStdString()),
       m_stage(ParseStage::NotStarted)
 {

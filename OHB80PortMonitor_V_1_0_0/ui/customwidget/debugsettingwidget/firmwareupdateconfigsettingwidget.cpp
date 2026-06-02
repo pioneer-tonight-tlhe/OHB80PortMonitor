@@ -28,14 +28,14 @@ FirmwareUpdateConfigSettingWidget::FirmwareUpdateConfigSettingWidget(QWidget *pa
     initUI();
 
     qDebug() << "[ui][FirmwareUpdateConfigSettingWidget][FirmwareUpdateConfigSettingWidget]：固件更新配置控件已创建";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         "[ui][FirmwareUpdateConfigSettingWidget][FirmwareUpdateConfigSettingWidget]：固件更新配置控件已创建");
 }
 
 FirmwareUpdateConfigSettingWidget::~FirmwareUpdateConfigSettingWidget()
 {
     qDebug() << "[ui][FirmwareUpdateConfigSettingWidget][~FirmwareUpdateConfigSettingWidget]：固件更新配置控件已销毁";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         "[ui][FirmwareUpdateConfigSettingWidget][~FirmwareUpdateConfigSettingWidget]：固件更新配置控件已销毁");
 }
 
@@ -60,7 +60,7 @@ void FirmwareUpdateConfigSettingWidget::initUI()
     initPostTransferWaitTimeItem();
 
     qDebug() << "[ui][FirmwareUpdateConfigSettingWidget][initUI]：固件更新配置UI初始化完成";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         "[ui][FirmwareUpdateConfigSettingWidget][initUI]：固件更新配置UI初始化完成");
 }
 
@@ -199,7 +199,7 @@ void FirmwareUpdateConfigSettingWidget::onLoadBinFileBtnClicked()
         emit binFilePathChanged(filePath);
         
         qDebug() << "[ui][FirmwareUpdateConfigSettingWidget][onLoadBinFileBtnClicked]：bin 文件已选择:" << filePath;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+        LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
             QString("[ui][FirmwareUpdateConfigSettingWidget][onLoadBinFileBtnClicked]：bin 文件已选择: %1").arg(filePath).toStdString());
     }
 }
@@ -211,7 +211,7 @@ void FirmwareUpdateConfigSettingWidget::submitConfigTask(SettingItemWidget *item
                                                          std::function<bool(int)> saveConfigCallback)
 {
     qDebug() << "[ui][FirmwareUpdateConfigSettingWidget][submitConfigTask]：" << paramName << "设置为:" << value << "ms";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][FirmwareUpdateConfigSettingWidget][submitConfigTask]：%1设置为: %2ms").arg(paramName).arg(value).toStdString());
     
     SetFirmwareConfigTask *task = new SetFirmwareConfigTask();
@@ -224,7 +224,7 @@ void FirmwareUpdateConfigSettingWidget::submitConfigTask(SettingItemWidget *item
             ? QString("[ui][FirmwareUpdateConfigSettingWidget][submitConfigTask]：%1设置成功: %2ms, %3").arg(paramName).arg(value).arg(msg)
             : QString("[ui][FirmwareUpdateConfigSettingWidget][submitConfigTask]：%1设置失败: %2").arg(paramName).arg(msg);
         qDebug() << logMsg;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), success ? Level::INFO : Level::WARN, logMsg.toStdString());
+        LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), success ? Level::INFO : Level::WARN, logMsg.toStdString());
         
         // 任务成功时保存到配置文件
         if (success && saveConfigCallback) {
@@ -233,7 +233,7 @@ void FirmwareUpdateConfigSettingWidget::submitConfigTask(SettingItemWidget *item
                 ? QString("[ui][FirmwareUpdateConfigSettingWidget][submitConfigTask]：%1已保存到配置文件").arg(paramName)
                 : QString("[ui][FirmwareUpdateConfigSettingWidget][submitConfigTask]：%1保存到配置文件失败").arg(paramName);
             qDebug() << saveLogMsg;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), saved ? Level::INFO : Level::WARN, saveLogMsg.toStdString());
+            LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), saved ? Level::INFO : Level::WARN, saveLogMsg.toStdString());
             
             // 显示状态
             if (item) {

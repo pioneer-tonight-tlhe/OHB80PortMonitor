@@ -1,5 +1,7 @@
 #include "operationlogquerytask.h"
 #include "databasemanager.h"
+#include "loggermanager.h"
+#include "defer/defer.h"
 #include <QDebug>
 
 OperationLogQueryTask::OperationLogQueryTask(QObject *parent)
@@ -10,6 +12,8 @@ OperationLogQueryTask::OperationLogQueryTask(QObject *parent)
     , m_targetPage(0)
     , m_cancelRequested(0)
 {
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[OperationLogQueryTask] 运行日志查询任务已构造");
+    LoggerManager::getInstance()->flush(m_taskLogPath);
 }
 
 void OperationLogQueryTask::setTimeRange(const QString& startTime, const QString& endTime)
@@ -40,32 +44,45 @@ void OperationLogQueryTask::setTargetPage(int page)
 
 void OperationLogQueryTask::start()
 {
+    // 使用 Defer 确保函数退出时刷新日志
+    Tool::Defer defer([this]() {
+        LoggerManager::getInstance()->flush(m_taskLogPath);
+    });
+
     m_db = LogDB::DatabaseManager::instance().operationLogCon();
     if (!m_db) {
         setState(Failed);
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::ERROR, "[start] 运行日志数据库不可用");
         emit finished(false, "OperationLogDBCon unavailable");
         return;
     }
 
     setState(Running);
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[start] 运行日志查询任务已启动");
     executeQuery();
 }
 
 void OperationLogQueryTask::stop()
 {
+    // 使用 Defer 确保函数退出时刷新日志
+    Tool::Defer defer([this]() {
+        LoggerManager::getInstance()->flush(m_taskLogPath);
+    });
+
     // 仅设置取消标志，executeQuery 在各子查询之间检查
     m_cancelRequested.storeRelaxed(1);
     setState(Cancelled);
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[stop] 运行日志查询任务已停止");
 }
 
 void OperationLogQueryTask::executeQuery()
 {
-    // 时间范围钳制：
-    //   - 开始 / 结束任一为空 → 用数据库的最早 / 最晚时间补齐
-    //   - 请求窗口与 DB 范围有重叠 → 把超出部分钳制到 DB 边界
-    //   - 请求窗口完全落在 DB 范围之外 → 保持原值，SQL 自然返回空集
-    //     （不能钳制为单点 dbEarliest 或 dbLatest，否则会误命中边界记录）
-    //   - 数据库为空 → 不钳制，原样下发
+    // 使用 Defer 确保函数退出时刷新日志
+    Tool::Defer defer([this]() {
+        LoggerManager::getInstance()->flush(m_taskLogPath);
+    });
+
+
     QString dbEarliest;
     QString dbLatest;
     m_db->queryTimeBounds(dbEarliest, dbLatest);
@@ -84,21 +101,30 @@ void OperationLogQueryTask::executeQuery()
             if (m_startTime > m_endTime) {
                 qSwap(m_startTime, m_endTime);
             }
-            qDebug() << "[OperationLogQueryTask] 钳制后时间范围:"
-                     << m_startTime << "->" << m_endTime
-                     << " (DB:" << dbEarliest << "->" << dbLatest << ")";
+            LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+                QString("[executeQuery] 钳制后时间范围: %1 -> %2 (数据库: %3 -> %4)")
+                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
         } else {
-            qDebug() << "[OperationLogQueryTask] 请求窗口与 DB 范围无重叠，不钳制:"
-                     << m_startTime << "->" << m_endTime
-                     << " (DB:" << dbEarliest << "->" << dbLatest << ")";
+            LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+                QString("[executeQuery] 请求窗口与数据库范围无重叠，不钳制: %1 -> %2 (数据库: %3 -> %4)")
+                    .arg(m_startTime, m_endTime, dbEarliest, dbLatest).toStdString());
         }
     }
+
+    // 记录查询条件
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        QString("[executeQuery] 查询条件: logType(日志类型)=%1, keyword(关键字)=%2, timeRange(时间范围)=%3 -> %4, pageSize(每页大小)=%5, targetPage(目标页)=%6")
+            .arg(m_logType == -1 ? "全部" : QString::number(m_logType))
+            .arg(m_keyword.isEmpty() ? "不限" : m_keyword)
+            .arg(m_startTime.isEmpty() ? "不限" : m_startTime)
+            .arg(m_endTime.isEmpty() ? "不限" : m_endTime)
+            .arg(m_pageSize)
+            .arg(m_targetPage > 0 ? QString::number(m_targetPage) : QString("自动定位"))
+            .toStdString());
 
     const bool hasMatchConditions = (m_logType != -1 || !m_keyword.isEmpty());
 
     // 1. 确定本次查询使用的页号：
-    //    用户指定 (>0) → 直接使用；否则若有匹配条件则自动定位首条命中所在页；
-    //    否则默认第 1 页。
     int targetPage = m_targetPage;
     if (targetPage <= 0) {
         if (hasMatchConditions) {
@@ -168,5 +194,32 @@ void OperationLogQueryTask::executeQuery()
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     setState(Finished);
+
+    // 记录查询结果
+    if (totalMatched == 0 && hasMatchConditions) {
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
+            QString("[executeQuery] 查询成功但无匹配结果: 总记录数=%1, 匹配数=%2, 当前页=%3, 每页大小=%4")
+                .arg(totalCountInRange)
+                .arg(totalMatched)
+                .arg(targetPage)
+                .arg(m_pageSize)
+                .toStdString());
+    } else if (totalCountInRange == 0) {
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
+            QString("[executeQuery] 查询成功但范围内无数据: 总记录数=%1, 当前页=%2, 每页大小=%3")
+                .arg(totalCountInRange)
+                .arg(targetPage)
+                .arg(m_pageSize)
+                .toStdString());
+    } else {
+        LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+            QString("[executeQuery] 查询成功: 总记录数=%1, 匹配数=%2, 当前页=%3, 每页大小=%4")
+                .arg(totalCountInRange)
+                .arg(totalMatched)
+                .arg(targetPage)
+                .arg(m_pageSize)
+                .toStdString());
+    }
+
     emit finished(true, "Query completed successfully");
 }

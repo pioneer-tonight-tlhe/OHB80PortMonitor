@@ -3,6 +3,7 @@
 
 #include "../scheduler_task.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"
+#include "ilogger.h"
 
 #include <QAtomicInt>
 #include <QHash>
@@ -10,6 +11,7 @@
 #include <QStringList>
 #include <QTimer>
 #include <QVector>
+
 
 class OperationDispatchTask;
 
@@ -62,8 +64,12 @@ signals:
                      bool thresholdSet, double thresholdPct,
                      bool offsetSet,    double offsetPct);
 
+    // 设备指令超时重试信号（通知 UI 层显示重试状态）
+    void deviceRetrying(QString qrCode, int retryCount, int maxRetry);
+
 private slots:
     void onCommandFinished(ModbusCommand cmd, const QString &masterId);
+    void onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId);
     void onTimeout();
 
 private:
@@ -82,6 +88,14 @@ private:
     void forceFinish();
     void logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode);
 
+    void writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason);
+    void writeDeviceCommandLog(const QString& qrCode, const ModbusCommand& cmd, bool success);
+    QString commandFrameLogString(const ModbusCommand& cmd) const;
+    QString deviceLogPath() const;
+    static QString safeLogPathSegment(const QString& value);
+    ILogger& deviceDetailLogger();
+    QString subFunctionName() const;
+
 private:
     QVector<QString>  m_qrcodes;
 
@@ -96,6 +110,7 @@ private:
 
     // uuid → (qrcode, kind)
     QHash<qint64, Pending>         m_pendingMap;
+    QHash<qint64, ModbusCommand>   m_pendingCommands;
     QList<QMetaObject::Connection> m_connections;
 
     QHash<QString, int>  m_deviceSuccessCount;   // qrcode → 已成功的子指令数
@@ -110,6 +125,11 @@ private:
 
     QTimer *m_timeoutTimer       = nullptr;
     bool    m_allFinishedEmitted = false;
+
+    QStringList m_targetQrCodes;  // 本次任务的目标设备列表（用于边界日志）
+
+    ILogger deviceLogger;               ///< 设备详细日志记录器（subFunction 级共享）
+    bool m_loggerInitialized = false;   ///< deviceLogger 路径是否已设置
 };
 
 #endif // SET_HUMIDITY_OFFSET_TASK_H

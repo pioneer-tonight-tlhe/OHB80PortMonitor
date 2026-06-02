@@ -6,19 +6,31 @@
 #include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
-#include "app/applogger.h"
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
-#include "loggermanager.h"
 
-#include <QDebug>
 #include <QDateTime>
-#include <QTimer>
+#include <QDebug>
+#include <QtGlobal>
+#include <QVariantMap>
 #include <cmath>
 
-// ============================================================
-// 构造 / 析构
-// ============================================================
+namespace {
+constexpr const char *kCmdId = "WritePneumaticValvePressure";
+
+QString bytesToHexWithCrc(const QByteArray& bytes, const QByteArray& crc)
+{
+    QStringList hexList;
+    for (int i = 0; i < bytes.size(); ++i) {
+        hexList << QString("%1").arg(static_cast<quint8>(bytes[i]), 2, 16, QLatin1Char('0')).toUpper();
+    }
+    if (crc.size() >= 2) {
+        hexList << QString("%1").arg(static_cast<quint8>(crc[0]), 2, 16, QLatin1Char('0')).toUpper();
+        hexList << QString("%1").arg(static_cast<quint8>(crc[1]), 2, 16, QLatin1Char('0')).toUpper();
+    }
+    return hexList.isEmpty() ? QStringLiteral("无") : hexList.join(QStringLiteral(" "));
+}
+} // namespace
 
 SetPneumaticValvePressureTask::SetPneumaticValvePressureTask(const QVector<QString> &qrcodes,
                                                              double pressureBar,
@@ -26,104 +38,90 @@ SetPneumaticValvePressureTask::SetPneumaticValvePressureTask(const QVector<QStri
     : SchedulerTask(parent)
     , m_qrcodes(qrcodes)
     , m_pressureBar(pressureBar)
+    , deviceLogger("scheduler/set_pneumatic_valve_pressure_task/detail")
 {
-    qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 创建任务："
-             << "qrcodes=" << qrcodes
-             << "pressure=" << pressureBar << "bar";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SetPneumaticValvePressureTask] 创建任务：设备数=%1 压力=%2bar")
-            .arg(qrcodes.size()).arg(pressureBar).toStdString());
+    qDebug() << "[Scheduler][SetPneumaticValvePressureTask] create task qrcodes="
+             << qrcodes << "pressure=" << pressureBar << "bar";
 }
 
 SetPneumaticValvePressureTask::~SetPneumaticValvePressureTask()
 {
-    qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 任务销毁";
+    qDebug() << "[Scheduler][SetPneumaticValvePressureTask] destroy task";
 }
-
-// ============================================================
-// start()
-// ============================================================
 
 void SetPneumaticValvePressureTask::start()
 {
+    // 断开所有之前的信号连接
+    disconnectAll();
+
+    // 初始化任务状态
     setState(Running);
-    m_stopped       = false;
-    m_totalCount    = 0;
+    m_stopped = false;
+    m_totalCount = 0;
     m_completedCount.storeRelease(0);
     m_pendingMap.clear();
     m_connections.clear();
-    m_successCount  = 0;
+    m_successCount = 0;
     m_failedQrCodes.clear();
+    m_targetQrCodes.clear();
     m_allFinishedEmitted = false;
 
+    // 检查设备列表是否为空
     if (m_qrcodes.isEmpty()) {
         setState(Failed);
         emit allFinished(false, 0, {}, m_pressureBar);
-        emit finished(false, "SetPneumaticValvePressureTask: qrcode 列表为空");
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            "[Scheduler][SetPneumaticValvePressureTask] qrcode 列表为空");
+        emit finished(false, QStringLiteral("SetPneumaticValvePressureTask: qrcode list is empty"));
         return;
     }
 
-    const QString cmdId = QStringLiteral("WritePneumaticValvePressure");
-
+    // 获取 Modbus 管理器和指令池
     ModbusTcpMasterManager &mgr = ModbusTcpMasterManager::instance();
     CommandPool *pool = mgr.commandPool();
     if (!pool) {
         setState(Failed);
         emit allFinished(false, 0, {}, m_pressureBar);
-        emit finished(false, "SetPneumaticValvePressureTask: CommandPool 未初始化");
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            "[Scheduler][SetPneumaticValvePressureTask] CommandPool 未初始化");
+        emit finished(false, QStringLiteral("SetPneumaticValvePressureTask: CommandPool is not initialized"));
         return;
     }
 
-    if (!pool->contains(cmdId)) {
+    // 检查指令池中是否包含所需指令
+    if (!pool->contains(kCmdId)) {
         setState(Failed);
         emit allFinished(false, 0, {}, m_pressureBar);
-        emit finished(false, QString("SetPneumaticValvePressureTask: 指令 '%1' 不存在").arg(cmdId));
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][SetPneumaticValvePressureTask] 指令 '%1' 不存在").arg(cmdId).toStdString());
+        emit finished(false, QStringLiteral("SetPneumaticValvePressureTask: command '%1' not found").arg(kCmdId));
         return;
     }
 
-    // 压力值 × 10000 转换为寄存器值（quint16）
-    const double scaled    = m_pressureBar * kRegisterScale;
-    const quint32 raw      = static_cast<quint32>(std::round(scaled));
-    const quint16 regVal   = static_cast<quint16>(qBound<quint32>(0, raw, 0xFFFF));
+    // 计算压力值的寄存器值（按寄存器倍率缩放）
+    const double scaled = m_pressureBar * kRegisterScale;
+    const quint32 raw = static_cast<quint32>(std::round(scaled));
+    const quint16 regVal = static_cast<quint16>(qBound<quint32>(0, raw, 0xFFFF));
     const QByteArray regBytes = buildRegisterValue(regVal);
 
-    qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 压力转寄存器值："
-             << m_pressureBar << "bar →" << regVal;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SetPneumaticValvePressureTask] 压力 %1 bar 转寄存器值 %2 (0x%3)")
-            .arg(m_pressureBar).arg(regVal)
-            .arg(QString::number(regVal, 16).toUpper()).toStdString());
-
-    // 写入运行日志：任务启动
-    auto* opTaskStart = SharedData::getOperationDispatchTask();
-    if (opTaskStart) {
+    // 记录任务启动日志
+    if (auto* opTaskStart = SharedData::getOperationDispatchTask()) {
         opTaskStart->log(OperationDispatchTask::MsgType::Message,
                          QString("SetPneumaticValvePressure task started: %1 bar for %2 devices")
-                             .arg(m_pressureBar).arg(m_qrcodes.size()), 0);
+                             .arg(m_pressureBar)
+                             .arg(m_qrcodes.size()),
+                         0);
     }
 
+    // 保存目标设备列表（用于边界日志）
+    for (const QString &id : m_qrcodes) {
+        m_targetQrCodes.append(id);
+    }
+
+    // 遍历所有设备，发送气动阀门压力设置指令
     for (const QString &id : m_qrcodes) {
         ModbusTcpMaster *master = mgr.getMaster(id);
-        if (!master) {
-            qWarning() << "[Scheduler][SetPneumaticValvePressureTask] Master 不存在:" << id;
-            m_failedQrCodes.append(id);
-            if (auto* opTask = SharedData::getOperationDispatchTask()) {
-                logFailedDevice(opTask, id);
+        // 检查设备是否可用
+        if (!master || !master->isConnected() || !master->sender()) {
+            qWarning() << "[Scheduler][SetPneumaticValvePressureTask] device unavailable, skip:" << id;
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("设备不可用"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
             }
-            continue;
-        }
-
-        if (!master->isConnected()) {
-            qWarning() << "[Scheduler][SetPneumaticValvePressureTask] 设备未连接，跳过:" << id;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                QString("[Scheduler][SetPneumaticValvePressureTask] 设备 %1 未连接，跳过下发").arg(id).toStdString());
-            m_failedQrCodes.append(id);
             if (auto* opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
@@ -131,110 +129,97 @@ void SetPneumaticValvePressureTask::start()
         }
 
         ModbusCommandSender *sender = master->sender();
-        if (!sender) {
-            qWarning() << "[Scheduler][SetPneumaticValvePressureTask] Sender 为空:" << id;
-            m_failedQrCodes.append(id);
-            if (auto* opTask = SharedData::getOperationDispatchTask()) {
-                logFailedDevice(opTask, id);
-            }
-            continue;
-        }
-
-        ModbusCommand cmd = pool->clone(cmdId);
+        ModbusCommand cmd = pool->clone(kCmdId);
+        // 检查指令克隆是否成功
         if (!cmd.isValid()) {
-            qWarning() << "[Scheduler][SetPneumaticValvePressureTask] 克隆指令失败:" << id;
-            m_failedQrCodes.append(id);
+            qWarning() << "[Scheduler][SetPneumaticValvePressureTask] clone command failed:" << id;
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("克隆指令失败"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
+            }
             if (auto* opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
             continue;
         }
 
+        // 设置指令参数
         cmd.module = CommandModule::BusinessCommandIssuer;
         cmd.request.registerValue = regBytes;
-        cmd.request.byteCount     = static_cast<quint8>(regBytes.size());
+        cmd.request.byteCount = static_cast<quint8>(regBytes.size());
 
-        // FC 0x06 rawBytes 同步更新寄存器值部分
+        // 手动填充请求帧的寄存器值（功能码 0x06 写单个寄存器）
         if (cmd.request.functionCode == 0x06
             && cmd.request.rawBytes.size() >= 6
             && regBytes.size() >= 2) {
-            cmd.request.rawBytes[4] = regBytes[0];
-            cmd.request.rawBytes[5] = regBytes[1];
+            cmd.request.rawBytes[4] = regBytes[0];  // 寄存器值高字节
+            cmd.request.rawBytes[5] = regBytes[1];  // 寄存器值低字节
         }
-        // FC 0x06 响应为请求镜像回显，同步更新 response
+
+        // 手动填充响应帧的寄存器值（用于测试/模拟）
         cmd.response.registerValue = regBytes;
         if (cmd.response.rawBytes.size() >= 6 && regBytes.size() >= 2) {
             cmd.response.rawBytes[4] = regBytes[0];
             cmd.response.rawBytes[5] = regBytes[1];
         }
 
+        // 连接信号：指令完成回调
         auto conn = connect(sender, &ModbusCommandSender::commandFinished,
                             this, &SetPneumaticValvePressureTask::onCommandFinished,
                             Qt::QueuedConnection);
         m_connections.append(conn);
 
-        m_pendingMap[cmd.uuid] = id;
-        m_totalCount++;
+        // 连接信号：指令超时重试回调
+        auto retryConn = connect(sender, &ModbusCommandSender::commandTimeoutRetry,
+                                 this, &SetPneumaticValvePressureTask::onCommandTimeoutRetry,
+                                 Qt::QueuedConnection);
+        m_connections.append(retryConn);
 
-        qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 向设备" << id
-                 << "发送" << cmdId << "寄存器值=" << regVal;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[Scheduler][SetPneumaticValvePressureTask] 向设备 %1 发送 %2 寄存器值=%3")
-                .arg(id).arg(cmdId).arg(regVal).toStdString());
+        // 记录待处理的指令
+        m_pendingMap[cmd.uuid] = id;
+        ++m_totalCount;
+
+        qDebug() << "[Scheduler][SetPneumaticValvePressureTask] send to device" << id
+                 << kCmdId << "pressure=" << m_pressureBar << "registerValue=" << regVal;
 
         QMetaObject::invokeMethod(sender, [sender, cmd]() {
             sender->submit(cmd);
         }, Qt::QueuedConnection);
     }
 
+    // 如果没有成功发送任何指令，强制完成任务
     if (m_totalCount == 0) {
         forceFinish();
         return;
     }
 
-    if (!m_timeoutTimer) {
-        m_timeoutTimer = new QTimer(this);
-        m_timeoutTimer->setSingleShot(true);
-        connect(m_timeoutTimer, &QTimer::timeout,
-                this, &SetPneumaticValvePressureTask::onTimeout);
-    }
-    m_timeoutTimer->start(5000);
 }
-
-// ============================================================
-// stop()
-// ============================================================
 
 void SetPneumaticValvePressureTask::stop()
 {
     m_stopped = true;
-    if (m_timeoutTimer) m_timeoutTimer->stop();
     disconnectAll();
     setState(Cancelled);
-    emit finished(false, "SetPneumaticValvePressureTask: 任务被取消");
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        "[Scheduler][SetPneumaticValvePressureTask] 任务被取消");
+    emit finished(false, QStringLiteral("SetPneumaticValvePressureTask: cancelled"));
 }
-
-// ============================================================
-// onCommandFinished()
-// ============================================================
 
 void SetPneumaticValvePressureTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
 {
+    Q_UNUSED(masterId)
+
     if (m_stopped) return;
     if (!m_pendingMap.contains(cmd.uuid)) return;
-    m_pendingMap.remove(cmd.uuid);
+    const QString qrCode = m_pendingMap.take(cmd.uuid);
 
-    // 写入通讯日志
     {
         const QString sentTimeStr = cmd.sentMs > 0
             ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
             : QStringLiteral("-");
         int execStatus = 3;
-        if (cmd.received)          execStatus = 0;
-        else if (cmd.timedOut)     execStatus = 1;
+        if (cmd.received) execStatus = 0;
+        else if (cmd.timedOut) execStatus = 1;
         else if (cmd.sendCount > 1) execStatus = 2;
+
         const int retryCount = qMax(0, cmd.sendCount - 1);
         QString description;
         if (execStatus != 0) {
@@ -243,26 +228,34 @@ void SetPneumaticValvePressureTask::onCommandFinished(ModbusCommand cmd, const Q
             QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
             if (!parsedData.isEmpty()) {
                 QStringList parts;
-                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it)
+                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it) {
                     parts << QString("%1=%2").arg(it.key(), it.value().toString());
+                }
                 description = parts.join(", ");
             }
         }
         if (description.isEmpty()) {
             description = QStringLiteral("OK");
         }
+
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
                 : QString();
-            qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 插入通讯日志: sendTime=" << sentTimeStr
-                     << "respTime=" << respTimeStr << "commandId=" << cmd.id << "masterId=" << masterId
-                     << "execStatus=" << execStatus << "retryCount=" << retryCount
-                     << "sendFrame=" << cmd.request.rawBytes.toHex() << "respFrame=" << cmd.response.rawBytes.toHex()
-                     << "description=" << description;
-            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, masterId,
+
+            QByteArray requestWithCrc = cmd.request.rawBytes;
+            if (cmd.request.crc.size() >= 2) {
+                requestWithCrc.append(cmd.request.crc);
+            }
+
+            QByteArray responseWithCrc = cmd.response.rawBytes;
+            if (cmd.response.crc.size() >= 2) {
+                responseWithCrc.append(cmd.response.crc);
+            }
+
+            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, qrCode,
                              execStatus, retryCount,
-                             cmd.request.rawBytes, cmd.response.rawBytes, description);
+                             requestWithCrc, responseWithCrc, description);
         }
     }
 
@@ -271,46 +264,48 @@ void SetPneumaticValvePressureTask::onCommandFinished(ModbusCommand cmd, const Q
                       && !cmd.checksumError
                       && !cmd.deviceBusy;
 
+    writeDeviceCommandLog(qrCode, cmd, success);
+
     if (success) {
         ++m_successCount;
-        qDebug() << "[Scheduler][SetPneumaticValvePressureTask] 设备" << masterId << "设置成功";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[Scheduler][SetPneumaticValvePressureTask] 设备 %1 设置成功").arg(masterId).toStdString());
+        qDebug() << "[Scheduler][SetPneumaticValvePressureTask] device success:" << qrCode;
     } else {
-        m_failedQrCodes.append(masterId);
-        qWarning() << "[Scheduler][SetPneumaticValvePressureTask] 设备" << masterId
-                   << "设置失败 timedOut=" << cmd.timedOut
+        if (!m_failedQrCodes.contains(qrCode)) {
+            m_failedQrCodes.append(qrCode);
+        }
+        qWarning() << "[Scheduler][SetPneumaticValvePressureTask] device failed:" << qrCode
+                   << "timedOut=" << cmd.timedOut
                    << "checksumError=" << cmd.checksumError
                    << "deviceBusy=" << cmd.deviceBusy;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][SetPneumaticValvePressureTask] 设备 %1 设置失败: timedOut=%2 checksumError=%3 deviceBusy=%4")
-                .arg(masterId).arg(cmd.timedOut).arg(cmd.checksumError).arg(cmd.deviceBusy).toStdString());
         if (auto* opTask = SharedData::getOperationDispatchTask()) {
-            logFailedDevice(opTask, masterId);
+            logFailedDevice(opTask, qrCode);
         }
     }
 
     checkAllFinished();
 }
 
-// ============================================================
-// 内部辅助
-// ============================================================
+void SetPneumaticValvePressureTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId)
+{
+    Q_UNUSED(masterId)
+
+    if (m_stopped) return;
+    if (!m_pendingMap.contains(cmd.uuid)) return;
+
+    const QString qrCode = m_pendingMap.value(cmd.uuid);
+    const int retryCount = qMax(0, cmd.sendCount - 1);
+    const int maxRetry = cmd.maxRetryCount;
+    qDebug() << "[Scheduler][SetPneumaticValvePressureTask] command timeout retry:" << qrCode
+             << retryCount << "/" << maxRetry;
+
+    emit deviceRetrying(qrCode, retryCount, maxRetry);
+}
 
 void SetPneumaticValvePressureTask::checkAllFinished()
 {
     const int done = m_completedCount.fetchAndAddOrdered(1) + 1;
     if (done < m_totalCount) return;
-    forceFinish();
-}
 
-void SetPneumaticValvePressureTask::onTimeout()
-{
-    const int remaining = m_pendingMap.size();
-    qWarning() << "[Scheduler][SetPneumaticValvePressureTask] 5秒超时，剩余" << remaining << "台设备未响应，标记为失败";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-        QString("[Scheduler][SetPneumaticValvePressureTask] 5秒超时，剩余 %1 台设备未响应")
-            .arg(remaining).toStdString());
     forceFinish();
 }
 
@@ -319,53 +314,50 @@ void SetPneumaticValvePressureTask::forceFinish()
     if (m_allFinishedEmitted) return;
     m_allFinishedEmitted = true;
 
-    if (m_timeoutTimer) m_timeoutTimer->stop();
     disconnectAll();
 
-    // 超时仍未响应的设备：补登失败日志
     auto* opTaskPending = SharedData::getOperationDispatchTask();
-    for (const QString &qrCode : m_pendingMap.values()) {
-        m_failedQrCodes.append(qrCode);
+    for (auto it = m_pendingMap.constBegin(); it != m_pendingMap.constEnd(); ++it) {
+        const QString qrCode = it.value();
+        if (!m_failedQrCodes.contains(qrCode)) {
+            m_failedQrCodes.append(qrCode);
+        }
         if (opTaskPending) {
             logFailedDevice(opTaskPending, qrCode);
         }
     }
     m_pendingMap.clear();
-
     const bool allSuccess = m_failedQrCodes.isEmpty();
     setState(allSuccess ? Finished : Failed);
 
-    // 写入运行日志：任务汇总
     if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
-        if (allSuccess) {
-            const QString desc = QString("SetPneumaticValvePressure %1 bar task completed: %2 devices succeeded")
-                  .arg(m_pressureBar).arg(m_successCount);
-            opTaskEnd->log(OperationDispatchTask::MsgType::Message, desc, 0);
-        } else {
-            const QString desc = QString("SetPneumaticValvePressure %1 bar task finished: %2 succeeded, %3 failed")
-                  .arg(m_pressureBar).arg(m_successCount).arg(m_failedQrCodes.count());
-            opTaskEnd->log(OperationDispatchTask::MsgType::Error, desc, 0);
-        }
+        const QString desc = allSuccess
+            ? QString("SetPneumaticValvePressure %1 bar task completed: %2 devices succeeded")
+                  .arg(m_pressureBar)
+                  .arg(m_successCount)
+            : QString("SetPneumaticValvePressure %1 bar task finished: %2 succeeded, %3 failed")
+                  .arg(m_pressureBar)
+                  .arg(m_successCount)
+                  .arg(m_failedQrCodes.count());
+        opTaskEnd->log(allSuccess ? OperationDispatchTask::MsgType::Message
+                                  : OperationDispatchTask::MsgType::Error,
+                       desc, 0);
     }
 
     emit allFinished(allSuccess, m_successCount, m_failedQrCodes, m_pressureBar);
     emit finished(allSuccess,
                   allSuccess
-                      ? QString("SetPneumaticValvePressureTask: 压力 %1 bar 设置完成（%2 台）")
+                      ? QString("SetPneumaticValvePressureTask: pressure %1 bar completed (%2 devices)")
                             .arg(m_pressureBar).arg(m_successCount)
-                      : QString("SetPneumaticValvePressureTask: 压力 %1 bar 设置完成，%2 台成功，%3 台失败")
+                      : QString("SetPneumaticValvePressureTask: pressure %1 bar completed, %2 succeeded, %3 failed")
                             .arg(m_pressureBar).arg(m_successCount).arg(m_failedQrCodes.count()));
-
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(),
-        allSuccess ? Level::INFO : Level::WARN,
-        QString("[Scheduler][SetPneumaticValvePressureTask] 压力 %1 bar 设置完成: %2 台成功，%3 台失败")
-            .arg(m_pressureBar).arg(m_successCount).arg(m_failedQrCodes.count()).toStdString());
 }
 
 void SetPneumaticValvePressureTask::logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode)
 {
     const QString desc = QString("SetPneumaticValvePressure %1 bar task failed: device %2")
-        .arg(m_pressureBar).arg(qrcode);
+        .arg(m_pressureBar)
+        .arg(qrcode);
     opTask->log(OperationDispatchTask::MsgType::Error, desc, 0);
 }
 
@@ -379,7 +371,104 @@ QByteArray SetPneumaticValvePressureTask::buildRegisterValue(quint16 value) cons
 
 void SetPneumaticValvePressureTask::disconnectAll()
 {
-    for (const QMetaObject::Connection &conn : qAsConst(m_connections))
+    for (const QMetaObject::Connection &conn : qAsConst(m_connections)) {
         QObject::disconnect(conn);
+    }
     m_connections.clear();
+}
+
+void SetPneumaticValvePressureTask::writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason)
+{
+    deviceDetailLogger().info(
+        QString("[SetPneumaticValvePressureTask][QRCode:%1] 跳过下发\n指令: %2\n原因: %3")
+            .arg(qrCode)
+            .arg(commandId)
+            .arg(reason)
+            .toStdString());
+}
+
+void SetPneumaticValvePressureTask::writeDeviceCommandLog(const QString& qrCode, const ModbusCommand& cmd, bool success)
+{
+    const std::string msg = QString("[QRCode:%1] %2")
+        .arg(qrCode)
+        .arg(commandFrameLogString(cmd))
+        .toStdString();
+    if (success) {
+        deviceDetailLogger().info(msg);
+    } else {
+        deviceDetailLogger().warn(msg);
+    }
+}
+
+QString SetPneumaticValvePressureTask::commandFrameLogString(const ModbusCommand& cmd) const
+{
+    QString responseFrame;
+    if (cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy) {
+        responseFrame = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
+    } else {
+        QStringList failureReasons;
+        if (cmd.timedOut) failureReasons << QStringLiteral("超时");
+        if (cmd.checksumError) failureReasons << QStringLiteral("校验错误");
+        if (cmd.deviceBusy) failureReasons << QStringLiteral("设备忙");
+        if (!cmd.errorMessage.isEmpty()) failureReasons << cmd.errorMessage;
+
+        const QString failureText = failureReasons.isEmpty()
+            ? QStringLiteral("失败")
+            : failureReasons.join(QStringLiteral(", "));
+        if (!cmd.received) {
+            responseFrame = failureText;
+        } else {
+            const QString frameText = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
+            responseFrame = frameText == QStringLiteral("无")
+                ? failureText
+                : QString("%1, %2").arg(failureText, frameText);
+        }
+    }
+
+    return QString("[SetPneumaticValvePressureTask] 指令下发完成\n"
+                   "指令: %1\n"
+                   "请求帧: %2\n"
+                   "响应帧: %3")
+        .arg(cmd.id)
+        .arg(bytesToHexWithCrc(cmd.request.rawBytes, cmd.request.crc))
+        .arg(responseFrame);
+}
+
+QString SetPneumaticValvePressureTask::subFunctionName() const
+{
+    return QStringLiteral("set_pneumatic_valve_pressure");
+}
+
+QString SetPneumaticValvePressureTask::deviceLogPath() const
+{
+    return QStringLiteral("scheduler/set_pneumatic_valve_pressure_task/%1").arg(subFunctionName());
+}
+
+QString SetPneumaticValvePressureTask::safeLogPathSegment(const QString& value)
+{
+    QString result = value.trimmed();
+    if (result.isEmpty()) {
+        return QStringLiteral("unknown");
+    }
+
+    const QString invalidChars = QStringLiteral("\\/:*?\"<>|");
+    for (int i = 0; i < result.size(); ++i) {
+        if (invalidChars.contains(result.at(i)) || result.at(i).unicode() < 0x20) {
+            result[i] = QLatin1Char('_');
+        }
+    }
+
+    if (result == QStringLiteral(".") || result == QStringLiteral("..")) {
+        return QStringLiteral("unknown");
+    }
+    return result;
+}
+
+ILogger& SetPneumaticValvePressureTask::deviceDetailLogger()
+{
+    if (!m_loggerInitialized) {
+        deviceLogger.set_log_file(deviceLogPath().toStdString());
+        m_loggerInitialized = true;
+    }
+    return deviceLogger;
 }

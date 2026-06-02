@@ -7,6 +7,7 @@
 
 #include <QStringList>
 #include <QHash>
+#include <string>
 
 class BinFileReader;
 class ModbusTcpMaster;
@@ -73,6 +74,8 @@ private:
     int  m_totalCount    = 0;
     int  m_finishedCount = 0;
     bool m_stopped       = false;
+
+    const std::string m_taskLogPath = "scheduler/firmware_upgrade_task";
 };
 
 #endif // FIRMWARE_UPGRADE_TASK_H

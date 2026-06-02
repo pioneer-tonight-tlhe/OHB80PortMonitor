@@ -53,7 +53,7 @@ void AlarmLogSqlLogic::initializeCleanupScheduler()
     cfg.checkIntervalMs = 60000;
     cfg.retainMonths = 7;
     cfg.cleanupMonths = 1;
-    cfg.logPath = "alarm_log_db/month_clean";
+    cfg.logPath = "log_db/alarm_log_db/month_clean";
     m_cleanupScheduler = new LogCleanupScheduler(cfg, this);
     m_cleanupScheduler->setMonthRangeProvider([this]() {
         return queryMonthRange();

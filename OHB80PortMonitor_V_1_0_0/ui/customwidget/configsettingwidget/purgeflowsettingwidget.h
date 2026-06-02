@@ -41,9 +41,16 @@ private:
 
     void submitTask(const QStringList &qrcodes, int flowValue);
 
+    // 设置任务运行期间所有 Set 按钮的启用状态
+    void setAllSetButtonsEnabled(bool enabled);
+
 private:
     QSpinBox *m_qrcodeSpinBox = nullptr;
     QSpinBox *m_flowSpinBox   = nullptr;
+
+    // Set 按钮指针（任务期间禁用，避免并发任务提交）
+    QPushButton *m_flowSetBtn;
+    QPushButton *m_flowSetAllBtn;
 
     SettingItemWidget *m_qrcodeItem = nullptr;
     SettingItemWidget *m_flowItem   = nullptr;

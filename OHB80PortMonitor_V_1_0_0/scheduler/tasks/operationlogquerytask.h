@@ -3,10 +3,12 @@
 
 #include "scheduler/scheduler_task.h"
 #include "operationlogdbcon.h"
+
 #include "operationrecord.h"
 #include "dbtypes.h"
 
 #include <QAtomicInt>
+
 
 // 运行日志查询任务（重新设计）。
 //
@@ -72,6 +74,8 @@ private:
 
     // 取消标志（线程安全；stop() 设置，executeQuery 在各子查询之间检查）
     QAtomicInt m_cancelRequested;
+
+    const std::string m_taskLogPath = "scheduler/operationlogquerytask";
 };
 
 #endif // OPERATIONLOGQUERYTASK_H

@@ -146,7 +146,9 @@ private:
     ConnectionStatus m_status;             // 当前连接状态
     bool m_autoReconnectEnabled;           // 自动重连启用标志
     bool m_asyncReconnecting = false;      // 是否正在异步重连中
+    bool m_autoReconnectStartedLogged = false; // 当前断线周期内是否已记录开始自动重连
     int m_retryCount;                      // 当前重试次数
+    qint64 m_disconnectStartMs = 0;         // 当前断线周期开始时间，用于恢复时统计持续时间
     QString m_lastError;                   // 最近一次错误信息
     QTimer* m_reconnectTimer;             // 重连定时器
     QTimer* m_reconnectTimeoutTimer = nullptr; // 异步重连超时定时器

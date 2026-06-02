@@ -89,6 +89,10 @@ public:
     bool isBusinessCmd() const {
         return module == CommandModule::BusinessCommandIssuer;
     }
+    
+    // 方便日志输出的格式化字符串
+    QString toLogString() const;
+    
     // Convert XML hexadecimal string to byte array
     static QByteArray fromHexString(const QString& hexStr);
 

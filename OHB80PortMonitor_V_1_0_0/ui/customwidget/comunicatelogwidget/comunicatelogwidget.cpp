@@ -23,7 +23,7 @@ static QString execStatusToString(int status)
     switch (status) {
     case 0: return QStringLiteral("Success");
     case 1: return QStringLiteral("Timeout");
-    case 2: return QStringLiteral("Retry");
+    case 2: return QStringLiteral("Send Failed");
     case 3: return QStringLiteral("Send Failed");
     default: return QString::number(status);
     }
@@ -286,12 +286,11 @@ void ComunicateLogWidget::initUi()
         }
     }
 
-    // 执行状态：0(成功) / 1(响应超时) / 2(重发指令) / 3(指令发送失败)
+    // 执行状态：0(成功) / 1(响应超时) / 2(指令发送失败)
     ui->comboBoxExecStatus->clear();
     ui->comboBoxExecStatus->addItem(tr("Success"),     0);
     ui->comboBoxExecStatus->addItem(tr("Timeout"),     1);
-    ui->comboBoxExecStatus->addItem(tr("Retry"),       2);
-    ui->comboBoxExecStatus->addItem(tr("Send Failed"), 3);
+    ui->comboBoxExecStatus->addItem(tr("Send Failed"), 2);
 
     // 初始化实时日志表格（使用前面已获取的 qrcodes）
     if (qrcodes.isEmpty()) {

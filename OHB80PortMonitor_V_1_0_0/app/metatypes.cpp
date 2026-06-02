@@ -6,7 +6,7 @@
 #include "modbustcpmastermanager/modbustcpmaster/firmwareupgrader.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 #include "loggerwidget/pagetable.h"
-#include "tasks/sh85_self_check_task.h"
+#include "tasks/sh85selfchecktask/sh85_self_check_task.h"
 #include "tasks/read_vefc_flow_unit_medium_status_task.h"
 #include "logdatabases/dbtypes.h"
 #include "alarminfo.h"
@@ -14,6 +14,7 @@
 #include "operationrecord.h"
 #include "communicaterecord.h"
 #include "deviceparamrecord.h"
+#include "vefcsensormonitorrecord.h"
 #include "scheduler/scheduler_task.h"
 #include "usermanager/usermanager.h"
 
@@ -51,11 +52,13 @@ void MetaTypes::registerTypes()
     qRegisterMetaType<OperationRecord>("OperationRecord");
     qRegisterMetaType<CommunicateRecord>("CommunicateRecord");
     qRegisterMetaType<DeviceParamRecord>("DeviceParamRecord");
+    qRegisterMetaType<VEFCSensorMonitorRecord>("VEFCSensorMonitorRecord");
     qRegisterMetaType<AlarmInfo>("AlarmInfo");
     qRegisterMetaType<QList<AlarmRecord>>("QList<AlarmRecord>");
     qRegisterMetaType<QList<OperationRecord>>("QList<OperationRecord>");
     qRegisterMetaType<QList<CommunicateRecord>>("QList<CommunicateRecord>");
     qRegisterMetaType<QList<DeviceParamRecord>>("QList<DeviceParamRecord>");
+    qRegisterMetaType<QVector<VEFCSensorMonitorRecord>>("QVector<VEFCSensorMonitorRecord>");
 
     // 注册 UserPermission，用于 permissionChanged / loginSuccess 跨线程信号
     qRegisterMetaType<UserPermission>("UserPermission");

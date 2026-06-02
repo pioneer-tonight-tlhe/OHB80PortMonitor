@@ -137,7 +137,7 @@ private:
 
 template <typename VertexType, typename EdgeType>
 GraphAdjacencyMultilist<VertexType, EdgeType>::GraphAdjacencyMultilist()
-    : m_logger(LoggerManager::instance())
+    : m_logger(*LoggerManager::getInstance())
     , m_loggerFileName(AppLogger::CraneMapLoggerPath().toStdString())
 {
 }

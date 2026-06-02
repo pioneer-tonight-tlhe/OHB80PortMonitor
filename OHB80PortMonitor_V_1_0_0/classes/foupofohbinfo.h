@@ -4,6 +4,8 @@
 #include <QTime>
 #include <QString>
 
+class VEFCMonitorInfo;
+
 // Idle 状态枚举
 enum class IdleState : int {
     Stopped = 0,   // 停止工作
@@ -43,6 +45,7 @@ public:
     QString alarmId() const;
     IdleState idleState() const;
     bool enable() const;
+    VEFCMonitorInfo* vefcMonitorInfo() const;
 
     // Setter 方法
     void setQrCode(const QString &qrCode) { m_qrCode = qrCode; }
@@ -65,6 +68,7 @@ public:
     void setAlarmId(const QString &alarmId) { m_alarmId = alarmId; }
     void setIdleState(IdleState idleState) { m_idleState = idleState; }
     void setEnable(bool enable) { m_enable = enable; }
+    void setVEFCMonitorInfo(VEFCMonitorInfo* vefcMonitorInfo) { m_vefcMonitorInfo = vefcMonitorInfo; }
 
 private:
     QString m_qrCode;           // 二维码（设备标识）
@@ -87,6 +91,7 @@ private:
     QString m_alarmId;              // 警报 ID
     IdleState m_idleState;          // IdlePurge 状态 (0=空闲,1=准备,2=充气,3=充气间隔)
     bool m_enable;                  // 使能状态 (true=可用, false=不可用)
+    VEFCMonitorInfo* m_vefcMonitorInfo = nullptr;  // VEFC 监控信息
 };
 
 

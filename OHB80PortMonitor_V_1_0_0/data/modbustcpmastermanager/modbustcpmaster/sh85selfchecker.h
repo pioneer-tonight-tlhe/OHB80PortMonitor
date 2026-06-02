@@ -156,6 +156,12 @@ signals:
     void commandCompleted(ModbusCommand cmd, const QString& masterId);
 
     /**
+     * @brief 指令超时且将要重试时发出（仅本 checker 下发的指令）
+     *        供 Task 层记录每一次实际发送过的指令帧。
+     */
+    void commandRetrying(ModbusCommand cmd, const QString& masterId);
+
+    /**
      * @brief 错误信号（任意阶段失败均会发出）
      */
     void errorOccurred(SH85SelfChecker::Result result,
@@ -173,6 +179,8 @@ signals:
 private slots:
     /// 接收来自 master->sender() 的指令完成信号
     void onCommandFinished(ModbusCommand cmd, const QString& masterId);
+    /// 接收来自 master->sender() 的指令超时重试信号
+    void onCommandTimeoutRetry(ModbusCommand cmd, const QString& masterId);
     /// 阶段 1 等待 5s 到期
     void onPhase1WaitElapsed();
     /// 阶段 2 等待 55s 到期
@@ -215,6 +223,7 @@ private:
     QElapsedTimer    m_elapsed;                   // 流程经过时间
 
     QMetaObject::Connection m_senderConn;         // sender::commandFinished 连接句柄
+    QMetaObject::Connection m_senderRetryConn;    // sender::commandTimeoutRetry 连接句柄
 
     bool             m_finished = false;        // 防止重复 emit finished
 };

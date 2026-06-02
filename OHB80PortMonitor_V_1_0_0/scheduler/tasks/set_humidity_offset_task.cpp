@@ -6,44 +6,48 @@
 #include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
-#include "app/applogger.h"
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
-#include "loggermanager.h"
 #include "usermanager/usermanager.h"
 
-#include <QDebug>
 #include <QDateTime>
+#include <QDebug>
 #include <QTimer>
+#include <QtGlobal>
+#include <QVariantMap>
 #include <cmath>
 
 namespace {
 constexpr const char *kCmdThreshold = "WriteHumidityOffsetThreshold";
-constexpr const char *kCmdOffset    = "WriteHumidityOffset";
-constexpr int kTotalTimeoutMs       = 8000;
-} // namespace
+constexpr const char *kCmdOffset = "WriteHumidityOffset";
+constexpr int kTotalTimeoutMs = 8000;
 
-// ============================================================
-// 构造 / 析构
-// ============================================================
+QString bytesToHexWithCrc(const QByteArray& bytes, const QByteArray& crc)
+{
+    QStringList hexList;
+    for (int i = 0; i < bytes.size(); ++i) {
+        hexList << QString("%1").arg(static_cast<quint8>(bytes[i]), 2, 16, QLatin1Char('0')).toUpper();
+    }
+    if (crc.size() >= 2) {
+        hexList << QString("%1").arg(static_cast<quint8>(crc[0]), 2, 16, QLatin1Char('0')).toUpper();
+        hexList << QString("%1").arg(static_cast<quint8>(crc[1]), 2, 16, QLatin1Char('0')).toUpper();
+    }
+    return hexList.isEmpty() ? QStringLiteral("无") : hexList.join(QStringLiteral(" "));
+}
+} // namespace
 
 SetHumidityOffsetTask::SetHumidityOffsetTask(const QVector<QString> &qrcodes, QObject *parent)
     : SchedulerTask(parent)
     , m_qrcodes(qrcodes)
+    , deviceLogger("scheduler/set_humidity_offset_task/detail")
 {
-    qDebug() << "[Scheduler][SetHumidityOffsetTask] 创建任务: qrcodes=" << qrcodes;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SetHumidityOffsetTask] 创建任务：设备数=%1").arg(qrcodes.size()).toStdString());
+    qDebug() << "[Scheduler][SetHumidityOffsetTask] create task qrcodes=" << qrcodes;
 }
 
 SetHumidityOffsetTask::~SetHumidityOffsetTask()
 {
-    qDebug() << "[Scheduler][SetHumidityOffsetTask] 任务销毁";
+    qDebug() << "[Scheduler][SetHumidityOffsetTask] destroy task";
 }
-
-// ============================================================
-// Setter
-// ============================================================
 
 void SetHumidityOffsetTask::setThreshold(double thresholdPct)
 {
@@ -57,42 +61,36 @@ void SetHumidityOffsetTask::setOffset(double offsetPct)
     m_offsetPct = offsetPct;
 }
 
-// ============================================================
-// start()
-// ============================================================
-
 void SetHumidityOffsetTask::start()
 {
+    disconnectAll();
+
     setState(Running);
-    m_stopped       = false;
-    m_totalDevices  = 0;
+    m_stopped = false;
+    m_totalDevices = 0;
     m_completedDevices.storeRelease(0);
     m_pendingMap.clear();
+    m_pendingCommands.clear();
     m_connections.clear();
     m_deviceSuccessCount.clear();
     m_deviceFailed.clear();
-    m_successCount  = 0;
+    m_successCount = 0;
     m_failedQrCodes.clear();
+    m_targetQrCodes.clear();
     m_allFinishedEmitted = false;
 
-    // 计算每台设备的子指令数
     m_subCmdPerDevice = (m_thresholdSet ? 1 : 0) + (m_offsetSet ? 1 : 0);
-
     if (m_subCmdPerDevice == 0) {
         setState(Failed);
         emit allFinished(false, 0, {}, m_thresholdSet, m_thresholdPct, m_offsetSet, m_offsetPct);
-        emit finished(false, "SetHumidityOffsetTask: 未指定任何待下发指令（threshold/offset 均未设置）");
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            "[Scheduler][SetHumidityOffsetTask] 未指定任何待下发指令");
+        emit finished(false, QStringLiteral("SetHumidityOffsetTask: no threshold/offset command configured"));
         return;
     }
 
     if (m_qrcodes.isEmpty()) {
         setState(Failed);
         emit allFinished(false, 0, {}, m_thresholdSet, m_thresholdPct, m_offsetSet, m_offsetPct);
-        emit finished(false, "SetHumidityOffsetTask: qrcode 列表为空");
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            "[Scheduler][SetHumidityOffsetTask] qrcode 列表为空");
+        emit finished(false, QStringLiteral("SetHumidityOffsetTask: qrcode list is empty"));
         return;
     }
 
@@ -100,46 +98,50 @@ void SetHumidityOffsetTask::start()
     CommandPool *pool = mgr.commandPool();
     if (!pool
         || (m_thresholdSet && !pool->contains(kCmdThreshold))
-        || (m_offsetSet    && !pool->contains(kCmdOffset))) {
+        || (m_offsetSet && !pool->contains(kCmdOffset))) {
         setState(Failed);
         emit allFinished(false, 0, {}, m_thresholdSet, m_thresholdPct, m_offsetSet, m_offsetPct);
-        emit finished(false, "SetHumidityOffsetTask: 指令池缺少所需指令");
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            "[Scheduler][SetHumidityOffsetTask] 指令池缺少所需指令");
+        emit finished(false, QStringLiteral("SetHumidityOffsetTask: required command is missing"));
         return;
     }
 
-    // 百分比 × 100 → 寄存器值
     auto pctToReg = [](double pct) -> quint16 {
         const double scaled = pct * kRegisterScale;
-        const quint32 raw   = static_cast<quint32>(std::round(scaled));
+        const quint32 raw = static_cast<quint32>(std::round(scaled));
         return static_cast<quint16>(qBound<quint32>(0, raw, 0xFFFF));
     };
 
     const quint16 thresholdReg = m_thresholdSet ? pctToReg(m_thresholdPct) : 0;
-    const quint16 offsetReg    = m_offsetSet    ? pctToReg(m_offsetPct)    : 0;
+    const quint16 offsetReg = m_offsetSet ? pctToReg(m_offsetPct) : 0;
     const QByteArray thresholdBytes = buildRegisterValue(thresholdReg);
-    const QByteArray offsetBytes    = buildRegisterValue(offsetReg);
+    const QByteArray offsetBytes = buildRegisterValue(offsetReg);
 
-    qDebug() << "[Scheduler][SetHumidityOffsetTask] 子指令配置:"
-             << "thresholdSet=" << m_thresholdSet << "value=" << m_thresholdPct << "% reg=" << thresholdReg
-             << "offsetSet="    << m_offsetSet    << "value=" << m_offsetPct    << "% reg=" << offsetReg;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SetHumidityOffsetTask] 子指令配置 thresholdSet=%1 (%2%%) offsetSet=%3 (%4%%)")
-            .arg(m_thresholdSet).arg(m_thresholdPct).arg(m_offsetSet).arg(m_offsetPct).toStdString());
+    QStringList commandLines;
+    if (m_thresholdSet) {
+        commandLines << QString("%1: Threshold=%2%, register=%3")
+                            .arg(kCmdThreshold)
+                            .arg(m_thresholdPct)
+                            .arg(thresholdReg);
+    }
+    if (m_offsetSet) {
+        commandLines << QString("%1: Offset=%2%, register=%3")
+                            .arg(kCmdOffset)
+                            .arg(m_offsetPct)
+                            .arg(offsetReg);
+    }
 
-    // 写入运行日志：任务启动
-    auto* opTaskStart = SharedData::getOperationDispatchTask();
-    if (opTaskStart) {
+    if (auto* opTaskStart = SharedData::getOperationDispatchTask()) {
         opTaskStart->log(OperationDispatchTask::MsgType::Message,
-                         QString("SetHumidityOffset task started: threshold=%1%% offset=%2%% for %3 devices")
-                             .arg(m_thresholdPct).arg(m_offsetPct).arg(m_qrcodes.size()), 0);
+                         QString("SetHumidityOffset task started: %1 for %2 devices")
+                             .arg(commandLines.join("; "))
+                             .arg(m_qrcodes.size()),
+                         0);
     }
 
     auto fillCmd = [](ModbusCommand &cmd, const QByteArray &regBytes) {
         cmd.module = CommandModule::BusinessCommandIssuer;
         cmd.request.registerValue = regBytes;
-        cmd.request.byteCount     = static_cast<quint8>(regBytes.size());
+        cmd.request.byteCount = static_cast<quint8>(regBytes.size());
 
         if (cmd.request.functionCode == 0x06
             && cmd.request.rawBytes.size() >= 6
@@ -147,6 +149,7 @@ void SetHumidityOffsetTask::start()
             cmd.request.rawBytes[4] = regBytes[0];
             cmd.request.rawBytes[5] = regBytes[1];
         }
+
         cmd.response.registerValue = regBytes;
         if (cmd.response.rawBytes.size() >= 6 && regBytes.size() >= 2) {
             cmd.response.rawBytes[4] = regBytes[0];
@@ -155,12 +158,18 @@ void SetHumidityOffsetTask::start()
     };
 
     for (const QString &id : m_qrcodes) {
+        m_targetQrCodes.append(id);
+    }
+
+    for (const QString &id : m_qrcodes) {
         ModbusTcpMaster *master = mgr.getMaster(id);
         if (!master || !master->isConnected() || !master->sender()) {
-            qWarning() << "[Scheduler][SetHumidityOffsetTask] 设备不可用，跳过:" << id;
-            LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-                QString("[Scheduler][SetHumidityOffsetTask] 设备 %1 不可用，跳过").arg(id).toStdString());
-            m_failedQrCodes.append(id);
+            qWarning() << "[Scheduler][SetHumidityOffsetTask] device unavailable, skip:" << id;
+            writeDeviceSkipLog(id, m_thresholdSet ? kCmdThreshold : kCmdOffset,
+                               QStringLiteral("设备不可用"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
+            }
             if (auto* opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
@@ -174,55 +183,63 @@ void SetHumidityOffsetTask::start()
                             Qt::QueuedConnection);
         m_connections.append(conn);
 
+        auto retryConn = connect(sender, &ModbusCommandSender::commandTimeoutRetry,
+                                 this, &SetHumidityOffsetTask::onCommandTimeoutRetry,
+                                 Qt::QueuedConnection);
+        m_connections.append(retryConn);
+
         m_deviceSuccessCount[id] = 0;
         m_deviceFailed[id] = false;
-        m_totalDevices++;
+        ++m_totalDevices;
 
         QVector<ModbusCommand> cmdsToSubmit;
         cmdsToSubmit.reserve(m_subCmdPerDevice);
-
         bool cloneOk = true;
 
         if (m_thresholdSet) {
-            ModbusCommand cmdT = pool->clone(kCmdThreshold);
-            if (!cmdT.isValid()) {
-                qWarning() << "[Scheduler][SetHumidityOffsetTask] 克隆 Threshold 指令失败:" << id;
+            ModbusCommand cmd = pool->clone(kCmdThreshold);
+            if (!cmd.isValid()) {
+                qWarning() << "[Scheduler][SetHumidityOffsetTask] clone threshold command failed:" << id;
+                writeDeviceSkipLog(id, kCmdThreshold, QStringLiteral("克隆指令失败"));
                 cloneOk = false;
             } else {
-                fillCmd(cmdT, thresholdBytes);
-                m_pendingMap[cmdT.uuid] = Pending{id, CmdKind::Threshold};
-                cmdsToSubmit.append(cmdT);
+                fillCmd(cmd, thresholdBytes);
+                m_pendingMap[cmd.uuid] = Pending{id, CmdKind::Threshold};
+                m_pendingCommands[cmd.uuid] = cmd;
+                cmdsToSubmit.append(cmd);
             }
         }
 
         if (cloneOk && m_offsetSet) {
-            ModbusCommand cmdO = pool->clone(kCmdOffset);
-            if (!cmdO.isValid()) {
-                qWarning() << "[Scheduler][SetHumidityOffsetTask] 克隆 Offset 指令失败:" << id;
+            ModbusCommand cmd = pool->clone(kCmdOffset);
+            if (!cmd.isValid()) {
+                qWarning() << "[Scheduler][SetHumidityOffsetTask] clone offset command failed:" << id;
+                writeDeviceSkipLog(id, kCmdOffset, QStringLiteral("克隆指令失败"));
                 cloneOk = false;
             } else {
-                fillCmd(cmdO, offsetBytes);
-                m_pendingMap[cmdO.uuid] = Pending{id, CmdKind::Offset};
-                cmdsToSubmit.append(cmdO);
+                fillCmd(cmd, offsetBytes);
+                m_pendingMap[cmd.uuid] = Pending{id, CmdKind::Offset};
+                m_pendingCommands[cmd.uuid] = cmd;
+                cmdsToSubmit.append(cmd);
             }
         }
 
         if (!cloneOk) {
-            // 撤销已加入 pending 的子指令
-            for (const ModbusCommand &c : cmdsToSubmit)
-                m_pendingMap.remove(c.uuid);
+            for (const ModbusCommand &cmd : cmdsToSubmit) {
+                m_pendingMap.remove(cmd.uuid);
+                m_pendingCommands.remove(cmd.uuid);
+            }
             markDeviceFailed(id);
             continue;
         }
 
-        qDebug() << "[Scheduler][SetHumidityOffsetTask] 向设备" << id
-                 << "下发" << cmdsToSubmit.size() << "条子指令";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[Scheduler][SetHumidityOffsetTask] 向设备 %1 下发 %2 条子指令").arg(id).arg(cmdsToSubmit.size()).toStdString());
+        qDebug() << "[Scheduler][SetHumidityOffsetTask] send to device" << id
+                 << cmdsToSubmit.size() << "sub commands";
 
         QMetaObject::invokeMethod(sender, [sender, cmdsToSubmit]() {
-            for (const ModbusCommand &c : cmdsToSubmit)
-                sender->submit(c);
+            for (const ModbusCommand &cmd : cmdsToSubmit) {
+                sender->submit(cmd);
+            }
         }, Qt::QueuedConnection);
     }
 
@@ -240,42 +257,33 @@ void SetHumidityOffsetTask::start()
     m_timeoutTimer->start(kTotalTimeoutMs);
 }
 
-// ============================================================
-// stop()
-// ============================================================
-
 void SetHumidityOffsetTask::stop()
 {
     m_stopped = true;
     if (m_timeoutTimer) m_timeoutTimer->stop();
     disconnectAll();
     setState(Cancelled);
-    emit finished(false, "SetHumidityOffsetTask: 任务被取消");
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        "[Scheduler][SetHumidityOffsetTask] 任务被取消");
+    emit finished(false, QStringLiteral("SetHumidityOffsetTask: cancelled"));
 }
-
-// ============================================================
-// onCommandFinished()
-// ============================================================
 
 void SetHumidityOffsetTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
 {
-    Q_UNUSED(masterId);
+    Q_UNUSED(masterId)
+
     if (m_stopped) return;
     if (!m_pendingMap.contains(cmd.uuid)) return;
+    const Pending pending = m_pendingMap.take(cmd.uuid);
+    m_pendingCommands.remove(cmd.uuid);
 
-    const Pending p = m_pendingMap.take(cmd.uuid);
-
-    // 写入通讯日志
     {
         const QString sentTimeStr = cmd.sentMs > 0
             ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
             : QStringLiteral("-");
         int execStatus = 3;
-        if (cmd.received)          execStatus = 0;
-        else if (cmd.timedOut)     execStatus = 1;
+        if (cmd.received) execStatus = 0;
+        else if (cmd.timedOut) execStatus = 1;
         else if (cmd.sendCount > 1) execStatus = 2;
+
         const int retryCount = qMax(0, cmd.sendCount - 1);
         QString description;
         if (execStatus != 0) {
@@ -284,21 +292,34 @@ void SetHumidityOffsetTask::onCommandFinished(ModbusCommand cmd, const QString &
             QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
             if (!parsedData.isEmpty()) {
                 QStringList parts;
-                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it)
+                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it) {
                     parts << QString("%1=%2").arg(it.key(), it.value().toString());
+                }
                 description = parts.join(", ");
             }
         }
         if (description.isEmpty()) {
             description = QStringLiteral("OK");
         }
+
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
                 : QString();
-            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, p.qrcode,
+
+            QByteArray requestWithCrc = cmd.request.rawBytes;
+            if (cmd.request.crc.size() >= 2) {
+                requestWithCrc.append(cmd.request.crc);
+            }
+
+            QByteArray responseWithCrc = cmd.response.rawBytes;
+            if (cmd.response.crc.size() >= 2) {
+                responseWithCrc.append(cmd.response.crc);
+            }
+
+            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, pending.qrcode,
                              execStatus, retryCount,
-                             cmd.request.rawBytes, cmd.response.rawBytes, description,
+                             requestWithCrc, responseWithCrc, description,
                              UserPermission::Engineer);
         }
     }
@@ -308,34 +329,22 @@ void SetHumidityOffsetTask::onCommandFinished(ModbusCommand cmd, const QString &
                       && !cmd.checksumError
                       && !cmd.deviceBusy;
 
-    const char *kindStr = (p.kind == CmdKind::Threshold) ? "Threshold" : "Offset";
+    writeDeviceCommandLog(pending.qrcode, cmd, success);
 
     if (success) {
-        qDebug() << "[Scheduler][SetHumidityOffsetTask] 设备" << p.qrcode
-                 << "子指令" << kindStr << "成功";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-            QString("[Scheduler][SetHumidityOffsetTask] 设备 %1 子指令 %2 成功")
-                .arg(p.qrcode).arg(kindStr).toStdString());
-
-        ++m_deviceSuccessCount[p.qrcode];
-        tryMarkDeviceSuccess(p.qrcode);
+        ++m_deviceSuccessCount[pending.qrcode];
+        qDebug() << "[Scheduler][SetHumidityOffsetTask] device sub-command success:"
+                 << pending.qrcode << cmd.id;
+        tryMarkDeviceSuccess(pending.qrcode);
     } else {
-        qWarning() << "[Scheduler][SetHumidityOffsetTask] 设备" << p.qrcode
-                   << "子指令" << kindStr << "失败"
+        qWarning() << "[Scheduler][SetHumidityOffsetTask] device sub-command failed:"
+                   << pending.qrcode << cmd.id
                    << "timedOut=" << cmd.timedOut
                    << "checksumError=" << cmd.checksumError
                    << "deviceBusy=" << cmd.deviceBusy;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[Scheduler][SetHumidityOffsetTask] 设备 %1 子指令 %2 失败: timedOut=%3 checksumError=%4 deviceBusy=%5")
-                .arg(p.qrcode).arg(kindStr).arg(cmd.timedOut).arg(cmd.checksumError).arg(cmd.deviceBusy).toStdString());
-
-        markDeviceFailed(p.qrcode);
+        markDeviceFailed(pending.qrcode);
     }
 }
-
-// ============================================================
-// 内部辅助
-// ============================================================
 
 void SetHumidityOffsetTask::tryMarkDeviceSuccess(const QString &qrcode)
 {
@@ -343,22 +352,20 @@ void SetHumidityOffsetTask::tryMarkDeviceSuccess(const QString &qrcode)
     if (m_deviceSuccessCount.value(qrcode, 0) < m_subCmdPerDevice) return;
 
     ++m_successCount;
-    qDebug() << "[Scheduler][SetHumidityOffsetTask] 设备" << qrcode << "整体成功";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[Scheduler][SetHumidityOffsetTask] 设备 %1 整体成功").arg(qrcode).toStdString());
-
+    qDebug() << "[Scheduler][SetHumidityOffsetTask] device success:" << qrcode;
     checkAllFinished();
 }
 
 void SetHumidityOffsetTask::markDeviceFailed(const QString &qrcode)
 {
     if (m_deviceFailed.value(qrcode, false)) return;
-    m_deviceFailed[qrcode] = true;
-    m_failedQrCodes.append(qrcode);
 
-    qWarning() << "[Scheduler][SetHumidityOffsetTask] 设备" << qrcode << "整体失败";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-        QString("[Scheduler][SetHumidityOffsetTask] 设备 %1 整体失败").arg(qrcode).toStdString());
+    m_deviceFailed[qrcode] = true;
+    if (!m_failedQrCodes.contains(qrcode)) {
+        m_failedQrCodes.append(qrcode);
+    }
+
+    qWarning() << "[Scheduler][SetHumidityOffsetTask] device failed:" << qrcode;
     if (auto* opTask = SharedData::getOperationDispatchTask()) {
         logFailedDevice(opTask, qrcode);
     }
@@ -370,15 +377,30 @@ void SetHumidityOffsetTask::checkAllFinished()
 {
     const int done = m_completedDevices.fetchAndAddOrdered(1) + 1;
     if (done < m_totalDevices) return;
+
     forceFinish();
+}
+
+void SetHumidityOffsetTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId)
+{
+    Q_UNUSED(masterId)
+
+    if (m_stopped) return;
+    if (!m_pendingMap.contains(cmd.uuid)) return;
+
+    const QString qrcode = m_pendingMap.value(cmd.uuid).qrcode;
+    const int retryCount = qMax(0, cmd.sendCount - 1);
+    const int maxRetry = cmd.maxRetryCount;
+    qDebug() << "[Scheduler][SetHumidityOffsetTask] command timeout retry:" << qrcode
+             << retryCount << "/" << maxRetry;
+
+    emit deviceRetrying(qrcode, retryCount, maxRetry);
 }
 
 void SetHumidityOffsetTask::onTimeout()
 {
-    const int remaining = m_pendingMap.size();
-    qWarning() << "[Scheduler][SetHumidityOffsetTask] 超时，剩余" << remaining << "条子指令未响应";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-        QString("[Scheduler][SetHumidityOffsetTask] 超时，剩余 %1 条子指令未响应").arg(remaining).toStdString());
+    qWarning() << "[Scheduler][SetHumidityOffsetTask] timeout, remaining"
+               << m_pendingMap.size() << "sub commands";
     forceFinish();
 }
 
@@ -390,51 +412,52 @@ void SetHumidityOffsetTask::forceFinish()
     if (m_timeoutTimer) m_timeoutTimer->stop();
     disconnectAll();
 
-    // 超时仍未响应的设备：补登失败日志
     auto* opTaskPending = SharedData::getOperationDispatchTask();
     for (auto it = m_pendingMap.constBegin(); it != m_pendingMap.constEnd(); ++it) {
-        const QString &qr = it.value().qrcode;
-        if (!m_deviceFailed.value(qr, false)) {
-            m_deviceFailed[qr] = true;
-            m_failedQrCodes.append(qr);
+        ModbusCommand timeoutCmd = m_pendingCommands.value(it.key());
+        timeoutCmd.timedOut = true;
+        timeoutCmd.received = false;
+        timeoutCmd.errorMessage = QStringLiteral("任务超时，未收到指令完成回调");
+
+        const QString qrCode = it.value().qrcode;
+        writeDeviceCommandLog(qrCode, timeoutCmd, false);
+        if (!m_deviceFailed.value(qrCode, false)) {
+            m_deviceFailed[qrCode] = true;
+            if (!m_failedQrCodes.contains(qrCode)) {
+                m_failedQrCodes.append(qrCode);
+            }
             if (opTaskPending) {
-                logFailedDevice(opTaskPending, qr);
+                logFailedDevice(opTaskPending, qrCode);
             }
         }
     }
     m_pendingMap.clear();
-
+    m_pendingCommands.clear();
     const bool allSuccess = m_failedQrCodes.isEmpty();
     setState(allSuccess ? Finished : Failed);
 
-    // 写入运行日志：任务汇总
     if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
-        if (allSuccess) {
-            const QString desc = QString("SetHumidityOffset task completed: %1 devices succeeded")
-                  .arg(m_successCount);
-            opTaskEnd->log(OperationDispatchTask::MsgType::Message, desc, 0);
-        } else {
-            const QString desc = QString("SetHumidityOffset task finished: %1 succeeded, %2 failed")
-                  .arg(m_successCount).arg(m_failedQrCodes.count());
-            opTaskEnd->log(OperationDispatchTask::MsgType::Error, desc, 0);
-        }
+        const QString desc = allSuccess
+            ? QString("SetHumidityOffset task completed: %1 devices succeeded")
+                  .arg(m_successCount)
+            : QString("SetHumidityOffset task finished: %1 succeeded, %2 failed")
+                  .arg(m_successCount)
+                  .arg(m_failedQrCodes.count());
+        opTaskEnd->log(allSuccess ? OperationDispatchTask::MsgType::Message
+                                  : OperationDispatchTask::MsgType::Error,
+                       desc, 0);
     }
 
     emit allFinished(allSuccess, m_successCount, m_failedQrCodes,
                      m_thresholdSet, m_thresholdPct,
-                     m_offsetSet,    m_offsetPct);
+                     m_offsetSet, m_offsetPct);
     emit finished(allSuccess,
                   allSuccess
-                      ? QString("SetHumidityOffsetTask: 设置完成（%1 台）").arg(m_successCount)
-                      : QString("SetHumidityOffsetTask: 设置完成，%1 台成功，%2 台失败")
-                            .arg(m_successCount).arg(m_failedQrCodes.count()));
-
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(),
-        allSuccess ? Level::INFO : Level::WARN,
-        QString("[Scheduler][SetHumidityOffsetTask] 任务结束: %1 台成功，%2 台失败 thresholdSet=%3 (%4%%) offsetSet=%5 (%6%%)")
-            .arg(m_successCount).arg(m_failedQrCodes.count())
-            .arg(m_thresholdSet).arg(m_thresholdPct)
-            .arg(m_offsetSet).arg(m_offsetPct).toStdString());
+                      ? QString("SetHumidityOffsetTask: completed, %1 devices succeeded")
+                            .arg(m_successCount)
+                      : QString("SetHumidityOffsetTask: completed, %1 succeeded, %2 failed")
+                            .arg(m_successCount)
+                            .arg(m_failedQrCodes.count()));
 }
 
 void SetHumidityOffsetTask::logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode)
@@ -453,7 +476,107 @@ QByteArray SetHumidityOffsetTask::buildRegisterValue(quint16 value) const
 
 void SetHumidityOffsetTask::disconnectAll()
 {
-    for (const QMetaObject::Connection &conn : qAsConst(m_connections))
+    for (const QMetaObject::Connection &conn : qAsConst(m_connections)) {
         QObject::disconnect(conn);
+    }
     m_connections.clear();
+}
+
+void SetHumidityOffsetTask::writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason)
+{
+    deviceDetailLogger().info(
+        QString("[SetHumidityOffsetTask][QRCode:%1] 跳过下发\n指令: %2\n原因: %3")
+            .arg(qrCode)
+            .arg(commandId)
+            .arg(reason)
+            .toStdString());
+}
+
+void SetHumidityOffsetTask::writeDeviceCommandLog(const QString& qrCode, const ModbusCommand& cmd, bool success)
+{
+    const std::string msg = QString("[QRCode:%1] %2")
+        .arg(qrCode)
+        .arg(commandFrameLogString(cmd))
+        .toStdString();
+    if (success) {
+        deviceDetailLogger().info(msg);
+    } else {
+        deviceDetailLogger().warn(msg);
+    }
+}
+
+QString SetHumidityOffsetTask::commandFrameLogString(const ModbusCommand& cmd) const
+{
+    QString responseFrame;
+    if (cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy) {
+        responseFrame = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
+    } else {
+        QStringList failureReasons;
+        if (cmd.timedOut) failureReasons << QStringLiteral("超时");
+        if (cmd.checksumError) failureReasons << QStringLiteral("校验错误");
+        if (cmd.deviceBusy) failureReasons << QStringLiteral("设备忙");
+        if (!cmd.errorMessage.isEmpty()) failureReasons << cmd.errorMessage;
+
+        const QString failureText = failureReasons.isEmpty()
+            ? QStringLiteral("失败")
+            : failureReasons.join(QStringLiteral(", "));
+        if (!cmd.received) {
+            responseFrame = failureText;
+        } else {
+            const QString frameText = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
+            responseFrame = frameText == QStringLiteral("无")
+                ? failureText
+                : QString("%1, %2").arg(failureText, frameText);
+        }
+    }
+
+    return QString("[SetHumidityOffsetTask] 指令下发完成\n"
+                   "指令: %1\n"
+                   "请求帧: %2\n"
+                   "响应帧: %3")
+        .arg(cmd.id)
+        .arg(bytesToHexWithCrc(cmd.request.rawBytes, cmd.request.crc))
+        .arg(responseFrame);
+}
+
+QString SetHumidityOffsetTask::subFunctionName() const
+{
+    QStringList parts;
+    if (m_thresholdSet) parts << QStringLiteral("threshold");
+    if (m_offsetSet) parts << QStringLiteral("offset");
+    return parts.isEmpty() ? QStringLiteral("unknown") : parts.join(QStringLiteral("_"));
+}
+
+QString SetHumidityOffsetTask::deviceLogPath() const
+{
+    return QStringLiteral("scheduler/set_humidity_offset_task/%1").arg(subFunctionName());
+}
+
+QString SetHumidityOffsetTask::safeLogPathSegment(const QString& value)
+{
+    QString result = value.trimmed();
+    if (result.isEmpty()) {
+        return QStringLiteral("unknown");
+    }
+
+    const QString invalidChars = QStringLiteral("\\/:*?\"<>|");
+    for (int i = 0; i < result.size(); ++i) {
+        if (invalidChars.contains(result.at(i)) || result.at(i).unicode() < 0x20) {
+            result[i] = QLatin1Char('_');
+        }
+    }
+
+    if (result == QStringLiteral(".") || result == QStringLiteral("..")) {
+        return QStringLiteral("unknown");
+    }
+    return result;
+}
+
+ILogger& SetHumidityOffsetTask::deviceDetailLogger()
+{
+    if (!m_loggerInitialized) {
+        deviceLogger.set_log_file(deviceLogPath().toStdString());
+        m_loggerInitialized = true;
+    }
+    return deviceLogger;
 }

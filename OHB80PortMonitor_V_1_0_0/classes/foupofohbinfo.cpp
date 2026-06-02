@@ -106,95 +106,85 @@ quint16 FoupOfOHBInfo::port() const
 
 double FoupOfOHBInfo::inletPressure() const
 {
-    if (!m_enable) return 0;
     return m_inletPressure;
 }
 
 double FoupOfOHBInfo::negativePressure() const
 {
-    if (!m_enable) return 0;
     return m_negativePressure;
 }
 
 double FoupOfOHBInfo::outletPressure() const
 {
-    if (!m_enable) return 0;
     return m_outletPressure;
 }
 
 double FoupOfOHBInfo::inletFlow() const
 {
-    if (!m_enable) return 0;
     return m_inletFlow;
 }
 
 double FoupOfOHBInfo::temperature() const
 {
-    if (!m_enable) return 0;
     return m_temperature;
 }
 
 double FoupOfOHBInfo::RH() const
 {
-    if (!m_enable) return 0;
     return m_RH;
 }
 
 QTime FoupOfOHBInfo::startTime() const
 {
-    if (!m_enable) return QTime(0, 0, 0);
     return m_startTime;
 }
 
 quint32 FoupOfOHBInfo::purgeTimeSec() const
 {
-    if (!m_enable) return 0;
     return m_purgeTimeSec;
 }
 
 quint16 FoupOfOHBInfo::idleWorkingTimeSec() const
 {
-    if (!m_enable) return 0;
     return m_idleWorkingTimeSec;
 }
 
 bool FoupOfOHBInfo::foupIn() const
 {
-    if (!m_enable) return false;
     return m_foupIn;
 }
 
 bool FoupOfOHBInfo::oldFoupIn() const
 {
-    if (!m_enable) return false;
     return m_oldFoupIn;
 }
 
 bool FoupOfOHBInfo::idlePurgeEnabled() const
 {
-    if (!m_enable) return false;
     return m_idlePurgeEnabled;
 }
 
 bool FoupOfOHBInfo::hasAlarm() const
 {
-    if (!m_enable) return false;
     return m_hasAlarm;
 }
 
 QString FoupOfOHBInfo::alarmId() const
 {
-    if (!m_enable) return "";
     return m_alarmId;
 }
 
 IdleState FoupOfOHBInfo::idleState() const
 {
-    if (!m_enable) return IdleState::Stopped;
     return m_idleState;
 }
 
 bool FoupOfOHBInfo::enable() const
 {
     return m_enable;
+}
+
+VEFCMonitorInfo* FoupOfOHBInfo::vefcMonitorInfo() const
+{
+    return m_vefcMonitorInfo;
 }

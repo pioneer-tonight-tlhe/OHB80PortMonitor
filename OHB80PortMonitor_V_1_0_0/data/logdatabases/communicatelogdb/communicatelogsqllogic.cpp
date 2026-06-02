@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QDate>
+#include <QStringList>
 #include <QDebug>
 
 namespace LogDB {
@@ -313,12 +314,12 @@ void CommunicateLogSqlLogic::initializeDiskCheckTimer()
     connect(m_diskCheckTimer, &QTimer::timeout,
             this, &CommunicateLogSqlLogic::checkDiskSpaceAndCleanup);
     m_diskCheckTimer->start(DISK_CHECK_INTERVAL_MS);
-    LoggerManager::instance().log("log_db/communicate_log_db/clean", Level::INFO,
+    LoggerManager::getInstance()->log("log_db/communicate_log_db/clean", Level::INFO,
         QString("磁盘空间检查定时器已启动，间隔: %1ms, 阈值: %2%")
             .arg(DISK_CHECK_INTERVAL_MS)
             .arg(DISK_USAGE_THRESHOLD * 100)
             .toStdString());
-    LoggerManager::instance().flush("log_db/communicate_log_db/clean");
+    LoggerManager::getInstance()->flush("log_db/communicate_log_db/clean");
 }
 
 void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
@@ -326,7 +327,7 @@ void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
     const std::string logPath = "log_db/communicate_log_db/clean";
 // 使用 Defer 确保函数退出时刷新日志
     Tool::Defer defer([logPath]() {
-        LoggerManager::instance().flush(logPath);
+        LoggerManager::getInstance()->flush(logPath);
     });
 
     
@@ -334,7 +335,7 @@ void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
     qint64 usedBytes  = QtHelper::diskUsedBytes(m_databasePath);
 
     if (totalBytes <= 0 || usedBytes < 0) {
-        LoggerManager::instance().log(logPath, Level::WARN,
+        LoggerManager::getInstance()->log(logPath, Level::WARN,
             QString("无法获取磁盘空间信息，路径: %1").arg(m_databasePath).toStdString());
         return;
     }
@@ -345,7 +346,7 @@ void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
     bool needCleanup = usageRatio >= DISK_USAGE_THRESHOLD;
 
     // 每次检测都打印磁盘使用情况
-    LoggerManager::instance().log(logPath, Level::INFO,
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
         QString("磁盘空间检测: 使用率 %1% (已用 %2 GB / %3 GB), 阈值 %4%, 需要清理: %5")
             .arg(QString::number(usageRatio * 100, 'f', 1))
             .arg(QString::number(usedGB, 'f', 2))
@@ -358,20 +359,21 @@ void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
         return;
     }
 
-    LoggerManager::instance().log(logPath, Level::WARN,
+    LoggerManager::getInstance()->log(logPath, Level::WARN,
         QString("磁盘使用率超过阈值，触发日志清理").toStdString());
 
     QVariantMap monthRange = queryMonthRange();
     QString earliestDate = monthRange.value("earliest_date").toString();
+    QString latestDate   = monthRange.value("latest_time").toString();
     if (earliestDate.isEmpty()) {
-        LoggerManager::instance().log(logPath, Level::WARN,
+        LoggerManager::getInstance()->log(logPath, Level::WARN,
             "无法获取日志月份范围，跳过清理");
         return;
     }
 
     QDate earliest = QDate::fromString(earliestDate.left(10), "yyyy-MM-dd");
     if (!earliest.isValid()) {
-        LoggerManager::instance().log(logPath, Level::ERROR,
+        LoggerManager::getInstance()->log(logPath, Level::ERROR,
             QString("无效的最早日期: %1").arg(earliestDate).toStdString());
         return;
     }
@@ -380,20 +382,36 @@ void CommunicateLogSqlLogic::checkDiskSpaceAndCleanup()
     QString startTime = earliest.toString("yyyy-MM-dd 00:00:00");
     QString endTime   = cutoffDate.toString("yyyy-MM-dd 23:59:59");
 
-    LoggerManager::instance().log(logPath, Level::INFO,
-        QString("正在清理日志: %1 至 %2").arg(startTime, endTime).toStdString());
+    // 查询待删除区间的记录数
+    int deleteCount = queryTotalCountWithConditions(QString(), QString(), -1, -1, startTime, endTime);
+
+    // 计算涉及的月份列表
+    QStringList monthsList;
+    QDate monthIter = earliest;
+    while (monthIter <= cutoffDate) {
+        monthsList.append(monthIter.toString("yyyy-MM"));
+        monthIter = monthIter.addMonths(1);
+        monthIter = QDate(monthIter.year(), monthIter.month(), 1);
+    }
+    monthsList.removeDuplicates();
+    QString monthsStr = monthsList.join(", ");
+
+    LoggerManager::getInstance()->log(logPath, Level::INFO,
+        QString("正在清理日志: %1 至 %2, 涉及月份: [%3], 预计删除记录数: %4, 数据库最早: %5, 最新: %6")
+            .arg(startTime, endTime, monthsStr)
+            .arg(deleteCount)
+            .arg(earliestDate.left(10), latestDate.left(10))
+            .toStdString());
 
     bool success = deleteByTimeRange(startTime, endTime);
     if (success) {
-        LoggerManager::instance().log(logPath, Level::INFO,
-            QString("清理成功: 已删除 %1 至 %2 的日志记录").arg(startTime, endTime).toStdString());
+        LoggerManager::getInstance()->log(logPath, Level::INFO,
+            QString("清理成功: 已删除 %1 至 %2 的日志记录, 涉及月份: [%3], 删除记录数: %4")
+                .arg(startTime, endTime, monthsStr).arg(deleteCount).toStdString());
     } else {
-        LoggerManager::instance().log(logPath, Level::ERROR,
+        LoggerManager::getInstance()->log(logPath, Level::ERROR,
             QString("清理失败: 无法删除 %1 至 %2 的日志记录").arg(startTime, endTime).toStdString());
     }
-
-    // 每次检测完成后刷新日志到磁盘
-    LoggerManager::instance().flush(logPath);
 }
 
 int CommunicateLogSqlLogic::calculateOffset(int pageSize, int pageNumber)

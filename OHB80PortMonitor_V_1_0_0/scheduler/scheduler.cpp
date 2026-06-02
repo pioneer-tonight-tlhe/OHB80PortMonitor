@@ -10,7 +10,7 @@ Scheduler::Scheduler(QObject *parent)
     : QObject(parent)
 {
     qDebug() << "=============================Scheduler 调度器开始=============================";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO,
         "=============================Scheduler 调度器开始=============================");
     // 将调度器移动到独立线程
     this->moveToThread(&m_thread);
@@ -21,7 +21,7 @@ Scheduler::~Scheduler()
 {
     stop();
     qDebug() << "=============================Scheduler 调度器结束=============================";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO,
         "=============================Scheduler 调度器结束=============================");
 }
 
@@ -38,7 +38,7 @@ void Scheduler::start()
     if (!m_thread.isRunning()) {
         m_thread.start();
         qDebug() << "[Scheduler][start] 调度器线程已启动";
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, "[Scheduler][start] 调度器线程已启动");
+        LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO, "[Scheduler][start] 调度器线程已启动");
     }
 }
 
@@ -80,50 +80,66 @@ void Scheduler::stop()
     m_thread.quit();
     m_thread.wait();
     qDebug() << "[Scheduler][stop] 调度器线程已停止";
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, "[Scheduler][stop] 调度器线程已停止");
+    LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO, "[Scheduler][stop] 调度器线程已停止");
 }
 
 QString Scheduler::submitTask(SchedulerTask *task)
 {
     if (!task) return QString();
-    
-    QMutexLocker locker(&m_mutex);
-    
-    QString taskId = task->taskId();
-    
-    // 先解除父对象，再移动到调度器线程（Qt 不允许移动有 parent 的对象）
+
+    const QString taskId = task->taskId();
+
     task->setParent(nullptr);
-    task->moveToThread(&m_thread);
-    
-    // 连接信号
-    connectTaskSignals(task);
-    
-    // 注册任务
-    m_tasks[taskId] = task;
-    
-    if (task->isPersistent()) {
-        // 长驻任务：立即启动，不入队，不占并发槽位
-        m_persistentTasks.insert(task);
-        qDebug() << "[Scheduler][submitTask] 提交长驻任务:" << task->taskType() << "taskId:" << taskId;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, 
-            QString("[Scheduler][submitTask] 提交长驻任务: %1 taskId: %2").arg(task->taskType()).arg(taskId).toStdString());
+    if (task->thread() != &m_thread) {
+        task->moveToThread(&m_thread);
+    }
+
+    if (QThread::currentThread() == thread()) {
+        enqueueTask(task);
+    } else {
+        QMetaObject::invokeMethod(this, [this, task]() {
+            enqueueTask(task);
+        }, Qt::QueuedConnection);
+    }
+
+    return taskId;
+}
+
+void Scheduler::enqueueTask(SchedulerTask *task)
+{
+    if (!task) return;
+
+    const QString taskId = task->taskId();
+    const QString taskType = task->taskType();
+    const bool persistent = task->isPersistent();
+
+    {
+        QMutexLocker locker(&m_mutex);
+        if (m_tasks.contains(taskId)) {
+            return;
+        }
+
+        connectTaskSignals(task);
+        m_tasks[taskId] = task;
+
+        if (persistent) {
+            m_persistentTasks.insert(task);
+        } else {
+            m_pendingQueue.enqueue(task);
+        }
+    }
+
+    if (persistent) {
+        qDebug() << "[Scheduler][submitTask] 提交长驻任务:" << taskType << "taskId:" << taskId;
+        LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO,
+            QString("[Scheduler][submitTask] 提交长驻任务: %1 taskId: %2").arg(taskType).arg(taskId).toStdString());
         QMetaObject::invokeMethod(task, [task]() { task->start(); }, Qt::QueuedConnection);
     } else {
-        // 普通任务：入队等待调度
-        m_pendingQueue.enqueue(task);
-        qDebug() << "[Scheduler][submitTask] 提交普通任务:" << task->taskType() << "taskId:" << taskId;
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, 
-            QString("[Scheduler][submitTask] 提交普通任务: %1 taskId: %2").arg(task->taskType()).arg(taskId).toStdString());
-    }
-    
-    locker.unlock();
-    
-    // 尝试调度普通任务
-    if (!task->isPersistent()) {
+        qDebug() << "[Scheduler][submitTask] 提交普通任务:" << taskType << "taskId:" << taskId;
+        LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO,
+            QString("[Scheduler][submitTask] 提交普通任务: %1 taskId: %2").arg(taskType).arg(taskId).toStdString());
         scheduleNext();
     }
-    
-    return taskId;
 }
 
 bool Scheduler::cancelTask(const QString &taskId)
@@ -153,7 +169,7 @@ bool Scheduler::cancelTask(const QString &taskId)
     task->deleteLater();
     
     qDebug() << "[Scheduler][cancelTask] 取消任务:" << taskId;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, 
+    LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO,
         QString("[Scheduler][cancelTask] 取消任务: %1").arg(taskId).toStdString());
     
     return true;
@@ -187,7 +203,7 @@ void Scheduler::scheduleNext()
         m_runningTasks.insert(task);
         
         qDebug() << "[Scheduler][scheduleNext] 启动任务:" << task->taskType() << "taskId:" << task->taskId();
-        LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO, 
+        LoggerManager::getInstance()->log(TASK_LOG_PATH, Level::INFO,
             QString("[Scheduler][scheduleNext] 启动任务: %1 taskId: %2").arg(task->taskType()).arg(task->taskId()).toStdString());
         
         // 在调度器线程中启动任务
@@ -213,7 +229,7 @@ void Scheduler::onTaskFinished(bool success, const QString &msg)
     qDebug() << "[Scheduler][onTaskFinished] 任务完成:" << task->taskType()
              << "taskId:" << taskId
              << "成功:" << success << msg;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(),
+    LoggerManager::getInstance()->log(TASK_LOG_PATH,
         success ? Level::INFO : Level::WARN,
         QString("[Scheduler][onTaskFinished] 任务完成: %1 taskId: %2 成功: %3 %4").arg(task->taskType()).arg(taskId).arg(success).arg(msg).toStdString());
 

@@ -850,7 +850,7 @@ initScheduler() 执行 (UI 线程):
 
 ### 3.5 MonitorDataTask — 实时数据监控任务（长驻）
 
-**文件**：`scheduler/tasks/monitor_data_task.h`、`scheduler/tasks/monitor_data_task.cpp`
+**文件**：`scheduler/tasks/monitor_data_task/monitor_data_task.h`、`scheduler/tasks/monitor_data_task/monitor_data_task.cpp`
 
 这是第二个**长驻任务**，职责是监听所有设备的 `ReadStatus` 命令响应，解析出压力、流量、湿度等实时数据并上报给 UI。
 
@@ -1123,8 +1123,9 @@ scheduler/
     ├── connect_all_task.cpp      # 连接监控任务（长驻）— 实现
     ├── init_port_data_task.h     # 初始化端口数据任务（普通）— 头文件
     ├── init_port_data_task.cpp   # 初始化端口数据任务（普通）— 实现
-    ├── monitor_data_task.h       # 实时数据监控任务（长驻）— 头文件
-    └── monitor_data_task.cpp     # 实时数据监控任务（长驻）— 实现
+    └── monitor_data_task/        # 实时数据监控任务（长驻）
+        ├── monitor_data_task.h   # 头文件
+        └── monitor_data_task.cpp # 实现
 ```
 
 ---

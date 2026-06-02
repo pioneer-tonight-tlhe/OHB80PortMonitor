@@ -27,7 +27,8 @@ SOURCES += \
     main.cpp
 
 HEADERS += \
-    head.h
+    head.h \
+    singleton.h
 
 #app
 include ($$PWD/app/app.pri)

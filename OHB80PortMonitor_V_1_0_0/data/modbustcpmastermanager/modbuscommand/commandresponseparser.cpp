@@ -23,6 +23,8 @@ void CommandResponseParser::registerBuiltinParsers()
     registerParser("ReadIdlePurgeStatus",     &CommandResponseParser::parseReadIdlePurgeStatus);
     registerParser("ReadIdlePurgeWorkingTime",&CommandResponseParser::parseReadIdlePurgeWorkingTime);
     registerParser("ReadIdlePurgeAll",        &CommandResponseParser::parseReadIdlePurgeAll);
+    registerParser("ReadVEFCPressure",        &CommandResponseParser::parseReadVEFCPressure);
+    registerParser("ReadVEFCTemperature",     &CommandResponseParser::parseReadVEFCTemperature);
 }
 
 void CommandResponseParser::registerParser(const QString& commandId, ParseFunc func)
@@ -67,11 +69,14 @@ QVariantMap CommandResponseParser::parseReadFoupStatus(const ModbusCommand& cmd)
         return result;
     }
 
-    // CH_1 (bytes 0-1): 进气主路气压值 (0~10 Bar) = raw / 10000
-    result["inletPressure"]     = readU16BE(payload, 0) / 10000.0;
+    // CH_1 (bytes 0-1): 进气主路气压值 = raw / 100，单位 Mpa
+    result["inletPressure"]     = readU16BE(payload, 0) / 100.0;
 
-    // CH_2 (bytes 2-3): 负压值 = raw / 10000
-    result["negativePressure"]  = readU16BE(payload, 2) / 10000.0;
+    // CH_2 (bytes 2-3): 主路负压值（补码，需要解析为有符号数）
+    quint16 negativePressureRaw = readU16BE(payload, 2);
+    int16_t negativePressureSigned = static_cast<int16_t>(negativePressureRaw);  // 补码转为有符号数
+    double negativePressureKpa = negativePressureSigned / 100.0;  // -10~10 Kpa
+    result["negativePressure"]  = negativePressureKpa;  // 单位 Kpa
 
     // CH_3 (bytes 4-5): 进气主路流量值 (4~200 L/Min) = raw / 100
     result["inletFlow"]         = readU16BE(payload, 4) / 100.0;
@@ -165,5 +170,33 @@ QVariantMap CommandResponseParser::parseReadIdlePurgeAll(const ModbusCommand& cm
     result["idleState"]         = static_cast<int>(readU16BE(payload, 2));
     // CH_3 (0x001F): 工作计时时长（秒）
     result["idleWorkingTimeSec"] = static_cast<quint16>(readU16BE(payload, 4));
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadVEFCPressure(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 2) {
+        qWarning() << "[CommandResponseParser] ReadVEFCPressure 响应字节数不足，实际=" << payload.size();
+        return result;
+    }
+
+    result["sensorPressure"] = readU16BE(payload, 0) / 10.0;
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadVEFCTemperature(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 2) {
+        qWarning() << "[CommandResponseParser] ReadVEFCTemperature 响应字节数不足，实际=" << payload.size();
+        return result;
+    }
+
+    result["sensorTemperature"] = readU16BE(payload, 0) / 100.0;
     return result;
 }

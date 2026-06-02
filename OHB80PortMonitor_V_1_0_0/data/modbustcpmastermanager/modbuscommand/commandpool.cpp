@@ -38,6 +38,11 @@ bool CommandPool::contains(const QString& id) const
     return m_templates.contains(id);
 }
 
+ModbusCommand CommandPool::templateCommand(const QString& id) const
+{
+    return m_templates.value(id);
+}
+
 // 从池中拷贝一份指令副本（已重置运行时状态）
 ModbusCommand CommandPool::clone(const QString& id) const
 {

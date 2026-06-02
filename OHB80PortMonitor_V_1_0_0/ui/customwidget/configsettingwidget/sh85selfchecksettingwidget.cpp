@@ -76,6 +76,7 @@ void SH85SelfCheckSettingWidget::initSelfCheckItem()
     connect(m_checkBtn, &QPushButton::clicked,
             this, &SH85SelfCheckSettingWidget::onCheckBtnClicked);
 
+    refreshActionState();
     addItem(m_selfCheckItem);
 }
 
@@ -105,9 +106,8 @@ void SH85SelfCheckSettingWidget::submitSelfCheckTask(const QString &qrcode)
     m_runningQrcode = qrcode;
 
     // 锁定 UI：按钮禁用 + 初始倒计时文案
-    m_checkBtn->setEnabled(false);
     m_checkBtn->setText(QString("Processing (%1)").arg(kButtonInitialSec));
-    m_deviceIdSpinBox->setEnabled(false);
+    refreshActionState();
     m_selfCheckItem->setStatusWaiting();
 
     emit runningStateChanged(true);
@@ -124,7 +124,7 @@ void SH85SelfCheckSettingWidget::submitSelfCheckTask(const QString &qrcode)
     Scheduler::instance()->submitTask(task);
 
     qDebug() << "[ui][SH85SelfCheckSettingWidget][submitSelfCheckTask]：提交任务 qrcode=" << qrcode;
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][SH85SelfCheckSettingWidget][submitSelfCheckTask]：提交任务 qrcode=%1")
             .arg(qrcode).toStdString());
 }
@@ -181,7 +181,7 @@ void SH85SelfCheckSettingWidget::onAllFinished(bool success,
             QString("SH85 self-check failed on device [%1]:\n%2").arg(qrcode).arg(friendly));
     }
 
-    LoggerManager::instance().log(AppLogger::SystemLoggerPath().toStdString(),
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(),
         success ? Level::INFO : Level::WARN,
         QString("[ui][SH85SelfCheckSettingWidget][onAllFinished]：qrcode=%1 result=%2")
             .arg(qrcode).arg(friendly).toStdString());
@@ -196,8 +196,19 @@ void SH85SelfCheckSettingWidget::onAllFinished(bool success,
 void SH85SelfCheckSettingWidget::resetButton()
 {
     m_checkBtn->setText("Check");
-    m_checkBtn->setEnabled(true);
-    m_deviceIdSpinBox->setEnabled(true);
+    refreshActionState();
+}
+
+void SH85SelfCheckSettingWidget::refreshActionState()
+{
+    const bool running = isRunning();
+    if (m_checkBtn) {
+        m_checkBtn->setEnabled(m_checkActionEnabled && !running);
+    }
+    if (m_deviceIdSpinBox) {
+        // 互斥只限制动作入口按钮，参数输入仅在任务执行中锁定
+        m_deviceIdSpinBox->setEnabled(!running);
+    }
 }
 
 QString SH85SelfCheckSettingWidget::resultToFriendlyText(SH85SelfChecker::Result r)
@@ -230,9 +241,17 @@ void SH85SelfCheckSettingWidget::setEnabled(bool enabled)
     // 禁用/启用所有子控件
     if (m_deviceIdItem) m_deviceIdItem->setEnabled(enabled);
     if (m_selfCheckItem) m_selfCheckItem->setEnabled(enabled);
+    refreshActionState();
 }
 
 bool SH85SelfCheckSettingWidget::isRunning() const
 {
     return !m_runningQrcode.isEmpty();
+}
+
+void SH85SelfCheckSettingWidget::setCheckActionEnabled(bool enabled)
+{
+    if (m_checkActionEnabled == enabled) return;
+    m_checkActionEnabled = enabled;
+    refreshActionState();
 }

@@ -2,6 +2,7 @@
 #define SET_VEFC_GAS_TYPE_TASK_H
 
 #include "../scheduler_task.h"
+#include "ilogger.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"
 
 #include <QAtomicInt>
@@ -10,6 +11,7 @@
 #include <QStringList>
 #include <QTimer>
 #include <QVector>
+
 
 class OperationDispatchTask;
 
@@ -55,8 +57,12 @@ signals:
                      QStringList failedQrCodes,
                      int gasType);
 
+    // 设备指令超时重试信号（通知 UI 层显示重试状态）
+    void deviceRetrying(QString qrCode, int retryCount, int maxRetry);
+
 private slots:
     void onCommandFinished(ModbusCommand cmd, const QString &masterId);
+    void onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId);
     void onTimeout();
 
 private:
@@ -65,6 +71,12 @@ private:
     void checkAllFinished();
     void forceFinish();
     void logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode);
+    void writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason);
+    void writeDeviceCommandLog(const QString& qrCode, const ModbusCommand& cmd, bool success);
+    QString commandFrameLogString(const ModbusCommand& cmd) const;
+    QString deviceLogPath() const;
+    QString subFunctionName() const;
+    ILogger& deviceDetailLogger();
 
 private:
     QVector<QString> m_qrcodes;
@@ -81,6 +93,9 @@ private:
 
     QTimer *m_timeoutTimer       = nullptr;
     bool    m_allFinishedEmitted = false;
+
+    ILogger deviceLogger;
+    bool m_loggerInitialized = false;
 };
 
 #endif // SET_VEFC_GAS_TYPE_TASK_H

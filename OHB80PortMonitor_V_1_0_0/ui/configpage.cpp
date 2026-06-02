@@ -61,6 +61,8 @@ void ConfigPage::initUI()
     ui->scrollAreaWidgetContents->layout()->addWidget(m_sh85SelfCheckWidget);
     connect(m_sh85SelfCheckWidget, &SH85SelfCheckSettingWidget::runningStateChanged,
             this, &ConfigPage::onSelfCheckRunningStateChanged);
+    onPeriodicSelfCheckRunningStateChanged(m_sh85PeriodicSelfCheckWidget->isRunning());
+    onSelfCheckRunningStateChanged(m_sh85SelfCheckWidget->isRunning());
 
     m_humidityOffsetWidget = new HumidityOffsetSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_humidityOffsetWidget);
@@ -127,7 +129,7 @@ void ConfigPage::onSelfCheckRunningStateChanged(bool running)
 {
     // 手动自检状态变化时，禁用/启用定期自检控件
     if (m_sh85PeriodicSelfCheckWidget) {
-        m_sh85PeriodicSelfCheckWidget->setEnabled(!running);
+        m_sh85PeriodicSelfCheckWidget->setPeriodicActionEnabled(!running);
     }
 }
 
@@ -135,6 +137,6 @@ void ConfigPage::onPeriodicSelfCheckRunningStateChanged(bool running)
 {
     // 定期自检状态变化时，禁用/启用手动自检控件
     if (m_sh85SelfCheckWidget) {
-        m_sh85SelfCheckWidget->setEnabled(!running);
+        m_sh85SelfCheckWidget->setCheckActionEnabled(!running);
     }
 }

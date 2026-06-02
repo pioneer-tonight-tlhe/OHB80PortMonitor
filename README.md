@@ -8,6 +8,100 @@
 
 ## 更新日志
 
+### 2026-06-02 - Simon
+#### LoggerConfig 单例与配置文件
+- 新增 `config/loggerconfig.{h,cpp}`，基于项目 `Singleton` 模板实现线程安全单例，提供读取/写入 INI 的封装。
+- 更新并使用 `bin/config/logger_config.ini`：
+  - `[scheduler] monitor_data_task.summary` / `monitor_data_task.devices`
+  - `[scheduler] alarm_dispatch_task.summary` / `alarm_dispatch_task.devices`
+  - `[scheduler] vefc_sensor_monitor_task.summary` / `vefc_sensor_monitor_task.devices`
+
+#### MonitorDataTask 日志修复
+- `m_logger` 为指针类型，统一将成员访问由 `.` 修正为 `->`，消除编译错误并避免潜在崩溃。
+- 涉及文件：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/monitor_data_task/monitor_data_task.cpp`
+
+#### Modbus 指令新增（VEFC 传感器）
+- 在 `bin/config/ModbusTcpMasterConfig.xml` 的指令定义中新增：
+  - `ReadVEFCPressure`（FC 04，寄存器 `0x0016`，单寄存器，值解析：`(256*hi+lo)/10` KPa）
+  - `ReadVEFCTemperature`（FC 04，寄存器 `0x0017`，单寄存器，值解析：`(256*hi+lo)/100` ℃）
+
+#### VEFC 监控类与统计能力
+- 新增 `classes/vefcmonitorinfo.{h,cpp}`：
+  - `VEFCData{gasPressure, actualFlow, sensorPressure, sensorTemperature, timestamp}`
+  - 统计接口：最小/最大/平均/中位数/标准差；分时段（逐小时）与固定窗口平均值。
+  - 重置接口精简为 `resetAll()`。
+- `FoupOfOHBInfo` 集成 `VEFCMonitorInfo*` 指针及访问器：
+  - 成员：`m_vefcMonitorInfo`，方法：`vefcMonitorInfo()` / `setVEFCMonitorInfo(...)`。
+- 将“第一次开机值”语义调整为“今天第一条数据”：
+  - 成员由 `m_bootData` 更名为 `m_dailyFirstData`；对应 getter/setter：`getDailyFirstData()` / `setDailyFirstData()`。
+- 相关文件：
+  - 新增：`OHB80PortMonitor_V_1_0_0/classes/vefcmonitorinfo.h`
+  - 新增：`OHB80PortMonitor_V_1_0_0/classes/vefcmonitorinfo.cpp`
+  - 修改：`OHB80PortMonitor_V_1_0_0/classes/foupofohbinfo.h`
+  - 修改：`OHB80PortMonitor_V_1_0_0/classes/foupofohbinfo.cpp`
+  - 声明：`OHB80PortMonitor_V_1_0_0/app/shareddata.h` 新增 `getVEFCMonitorInfo(const QString&)` 接口声明
+
+#### 影响范围
+- 配置：`bin/config/logger_config.ini`
+- 日志：`config/loggerconfig.{h,cpp}`、`scheduler/tasks/monitor_data_task/monitor_data_task.cpp`
+- 指令：`bin/config/ModbusTcpMasterConfig.xml`
+- 数据结构：`classes/vefcmonitorinfo.{h,cpp}`、`classes/foupofohbinfo.{h,cpp}`、`app/shareddata.h`
+
+---
+
+## Scheduler 任务模块与专属日志接口
+
+为便于维护与阅读，调度任务按子目录划分模块，并为每个任务提供专属日志接口与独立日志目录/开关。
+
+### 模块总览（目录）
+- `OHB80PortMonitor_V_1_0_0/scheduler/tasks/`（根目录）
+  - `vefc_sensor_monitor_task/`（VEFC 传感器监控与落库）
+  - `sh85selfchecktask/`（SH85 周期自检）
+  - `network_status_task/`（网络状态监控）
+  - `monitor_data_task/`（设备实时监控数据采集）
+  - `alarm_dispatch_task/`（告警分发调度）
+
+### 日志接口与目录约定
+- 每个任务模块对应一个专属 Logger 封装（约定命名：`<TaskName>Logger`）。
+- 日志输出目录结构：`scheduler/<task_dir>/{summary | <QRCode>}`。
+  - `summary`：任务生命周期与汇总统计
+  - `<QRCode>`：按设备维度记录明细（当该任务涉及设备维度）
+- 配置开关（`bin/config/logger_config.ini`）：
+  - 已存在：
+    - `scheduler.monitor_data_task.summary` / `scheduler.monitor_data_task.devices`
+    - `scheduler.alarm_dispatch_task.summary` / `scheduler.alarm_dispatch_task.devices`
+    - `scheduler.vefc_sensor_monitor_task.summary` / `scheduler.vefc_sensor_monitor_task.devices`
+  - 建议后续补充（如需）：
+    - `scheduler.network_status_task.summary` / `scheduler.network_status_task.devices`
+    - `scheduler.sh85selfchecktask.summary` / `scheduler.sh85selfchecktask.devices`
+
+### 各模块说明（要点）
+- **monitor_data_task**
+  - 目标：周期采集设备数据、解析并维护 FOUP 状态、上报告警
+  - 日志：`scheduler/monitor_data_task/summary`、`scheduler/monitor_data_task/<QRCode>`
+  - 开关：`monitor_data_task.summary` / `monitor_data_task.devices`
+
+- **alarm_dispatch_task**
+  - 目标：统一接收/分发告警发生与恢复事件，负责持久化
+  - 建议日志：`scheduler/alarm_dispatch_task/summary`、`scheduler/alarm_dispatch_task/<QRCode>`
+  - 开关：`alarm_dispatch_task.summary` / `alarm_dispatch_task.devices`
+
+- **network_status_task**
+  - 目标：监控设备网络连接与状态变更
+  - 建议日志：`scheduler/network_status_task/summary`、`scheduler/network_status_task/<QRCode>`
+  - 开关（可按需在 INI 中补充）：`network_status_task.summary` / `network_status_task.devices`
+
+- **sh85selfchecktask**
+  - 目标：定期并行执行 SH85 自检，汇总每轮结果
+  - 建议日志：`scheduler/sh85selfchecktask/summary`、`scheduler/sh85selfchecktask/<QRCode>`
+  - 开关（可按需在 INI 中补充）：`sh85selfchecktask.summary` / `sh85selfchecktask.devices`
+
+- **vefc_sensor_monitor_task**
+  - 目标：采集并落库 VEFC 相关传感器数据（如输出压力/平均温度），提供统计报表输入
+  - 日志：`scheduler/vefc_sensor_monitor_task/summary`、`scheduler/vefc_sensor_monitor_task/<QRCode>`
+  - 开关：`vefc_sensor_monitor_task.summary` / `vefc_sensor_monitor_task.devices`
+
+
 ### 2026-05-21 - Simon
 **数据库日志系统日志记录完善**
 

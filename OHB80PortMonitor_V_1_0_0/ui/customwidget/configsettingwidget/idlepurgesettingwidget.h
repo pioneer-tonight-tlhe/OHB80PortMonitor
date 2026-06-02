@@ -46,11 +46,20 @@ private:
                        quint16 value);
 
 private:
+    // 设置任务运行期间所有 Set 按钮的启用状态
+    void setAllSetButtonsEnabled(bool enabled);
+
+private:
     // 控件指针
     QLineEdit  *m_prepTimeLineEdit;     // 准备阶段时间（只读）
     QComboBox  *m_enableComboBox;       // 使能选择
     QSpinBox   *m_durationSpinBox;      // 充气持续时间
     QSpinBox   *m_intervalSpinBox;      // 充气间隔时间
+
+    // Set 按钮指针（任务期间禁用，避免并发任务提交）
+    QPushButton *m_enableSetBtn;
+    QPushButton *m_durationSetBtn;
+    QPushButton *m_intervalSetBtn;
 
     // SettingItemWidget 指针（用于显示状态）
     SettingItemWidget *m_enableItem;
