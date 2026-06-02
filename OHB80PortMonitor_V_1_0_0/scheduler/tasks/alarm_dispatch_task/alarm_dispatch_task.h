@@ -10,6 +10,9 @@
 #include <QMutex>
 #include <QString>
 #include <QTimer>
+#include <QSet>
+#include <QStringList>
+#include <algorithm>
 
 // ====================================================================
 // AlarmDispatchTask 实现流程
@@ -186,6 +189,21 @@ private:
     mutable QMutex            m_mutex;
     AlarmDispatchTaskLogger*  m_logger = nullptr;
     QTimer*                   m_foupAlarmSyncTimer = nullptr;
+
+/*汇总日志*/
+private slots:
+    // 输出当前未恢复错误的汇总快照。
+    void writeSummarySnapshot();
+
+private:
+    void initSummaryTimer();
+    // 启动/停止 Summary 周期输出定时器。
+    void startSummaryTimer();
+    void stopSummaryTimer();
+
+
+    QTimer* m_summaryTimer = nullptr;
+    
 };
 
 #endif // ALARM_DISPATCH_TASK_H

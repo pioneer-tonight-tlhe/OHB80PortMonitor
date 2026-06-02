@@ -40,7 +40,10 @@ QString alarmTypeDisplayText(int type)
 AlarmDispatchTask::AlarmDispatchTask(QObject* parent)
     : SchedulerTask(parent)
 {
+    // 初始化日志接口类
     initAlarmDispatchTaskLogger();
+    // 初始化汇总日志计时器
+    initSummaryTimer();
 
     m_foupAlarmSyncTimer = new QTimer(this);
     m_foupAlarmSyncTimer->setInterval(kFoupAlarmSyncIntervalMs);
@@ -53,6 +56,11 @@ AlarmDispatchTask::AlarmDispatchTask(QObject* parent)
 
 AlarmDispatchTask::~AlarmDispatchTask()
 {
+    if (m_summaryTimer) {
+        m_summaryTimer->stop();
+        delete m_summaryTimer;
+        m_summaryTimer = nullptr;
+    }
     if (m_logger) {
         m_logger->summaryLogger().info("[AlarmDispatchTask] 警报调度任务已销毁");
     }
@@ -139,6 +147,77 @@ QString AlarmDispatchTask::selectedActiveAlarmIdForQrCode(const QString& qrCode)
     }
 
     return selectedAlarmId;
+}
+
+void AlarmDispatchTask::writeSummarySnapshot()
+{
+    QHash<int, QSet<QString>> groups;
+    {
+        QMutexLocker locker(&m_mutex);
+        for (auto it = m_active.constBegin(); it != m_active.constEnd(); ++it) {
+            const AlarmInfo& info = it.value();
+            const QString qr = info.record.qrCode.trimmed();
+            if (!qr.isEmpty()) {
+                groups[info.record.alarmType].insert(qr);
+            }
+        }
+    }
+
+    if (groups.isEmpty()) {
+        return;
+    }
+
+    const QString ts = QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz"));
+    QStringList lines;
+    lines << QStringLiteral("[%1] 当前未恢复错误汇总").arg(ts);
+
+    QList<int> types = groups.keys();
+    std::sort(types.begin(), types.end());
+    for (int type : types) {
+        const QString typeName = alarmTypeName(type);
+        QStringList qrs = QStringList(groups.value(type).values());
+        std::sort(qrs.begin(), qrs.end(), [](const QString& a, const QString& b){
+            bool ok1=false, ok2=false; int ia=a.toInt(&ok1); int ib=b.toInt(&ok2);
+            if (ok1 && ok2) return ia < ib; return a < b;
+        });
+        const int count = qrs.size();
+        const QString display = qrs.join(QStringLiteral("，"));
+        lines << QStringLiteral("%1（%2个）：%3").arg(typeName).arg(count).arg(display);
+    }
+
+    const QString block = lines.join('\n');
+    m_logger->summaryLogger().info(block.toStdString());
+    m_logger->summaryLogger().flush();
+}
+
+void AlarmDispatchTask::initSummaryTimer()
+{
+    m_summaryTimer = new QTimer(this);
+    m_summaryTimer->setObjectName("AlarmSummaryTimer");
+    connect(m_summaryTimer, &QTimer::timeout, this, &AlarmDispatchTask::writeSummarySnapshot, Qt::QueuedConnection);
+    m_logger->summaryLogger().info("汇总计时器AlarmSummaryTimer开启。。。");
+
+    startSummaryTimer();
+}
+
+void AlarmDispatchTask::startSummaryTimer()
+{
+    if (!m_summaryTimer || m_summaryTimer->isActive()) {
+        return;
+    }
+    const int periodMs = LoggerConfig::getInstance()->getAlarmDispatchTaskSummaryPeriodMs();
+    m_summaryTimer->setInterval(periodMs);
+    m_summaryTimer->start();
+    m_logger->summaryLogger().info(QString("[startSummaryTimer] Summary timer started, interval=%1 ms").arg(periodMs).toStdString());
+}
+
+void AlarmDispatchTask::stopSummaryTimer()
+{
+    if (!m_summaryTimer || !m_summaryTimer->isActive()) {
+        return;
+    }
+    m_summaryTimer->stop();
+    m_logger->summaryLogger().info("[stopSummaryTimer] Summary timer stopped");
 }
 
 void AlarmDispatchTask::startFoupAlarmSyncTimer()
@@ -230,7 +309,7 @@ QString AlarmDispatchTask::submitAlarm(AlarmInfo info)
             .arg(alarmLevelDisplayText(info.record.alarmLevel))
             .arg(info.record.qrCode)
             .arg(info.record.description);
-        m_logger->summaryLogger().info(message.toStdString());
+        // m_logger->summaryLogger().info(message.toStdString());
         m_logger->deviceLogger(info.record.qrCode).info(message.toStdString());
 
         // 记录运行日志：NoNeed 类型使用 Warn 级别
@@ -271,7 +350,7 @@ QString AlarmDispatchTask::submitAlarm(AlarmInfo info)
         .arg(alarmLevelDisplayText(info.record.alarmLevel))
         .arg(info.record.qrCode)
         .arg(info.record.description);
-    m_logger->summaryLogger().warn(submitMessage.toStdString());
+    // m_logger->summaryLogger().warn(submitMessage.toStdString());
     m_logger->deviceLogger(info.record.qrCode).warn(submitMessage.toStdString());
 
     // 持久化：写 alarm_log（DBCon 内部 QueuedConnection 异步落盘）
@@ -329,7 +408,7 @@ void AlarmDispatchTask::submitResolve(const QString& alarmId)
         .arg(resolvedInfo.record.qrCode)
         .arg(resolvedInfo.record.resolveTime)
         .arg(resolvedInfo.record.description);
-    m_logger->summaryLogger().info(resolveMessage.toStdString());
+    // m_logger->summaryLogger().info(resolveMessage.toStdString());
     m_logger->deviceLogger(resolvedInfo.record.qrCode).info(resolveMessage.toStdString());
 
     persistResolve(resolvedInfo);
@@ -391,9 +470,6 @@ void AlarmDispatchTask::clearActive()
 // =====================================================================
 void AlarmDispatchTask::loadActiveFromDb()
 {
-    Tool::Defer defer([this]() {
-        m_logger->summaryLogger().flush();
-    });
     auto* db = LogDB::DatabaseManager::instance().alarmLogCon();
     if (!db) {
         m_logger->summaryLogger().warn("[loadActiveFromDb] 警报日志数据库不可用，跳过恢复");
@@ -477,7 +553,7 @@ void AlarmDispatchTask::persistInsert(const AlarmInfo& info)
             .arg(info.alarmId)
             .arg(info.record.qrCode)
             .arg(alarmTypeDisplayText(info.record.alarmType));
-        m_logger->summaryLogger().error(message.toStdString());
+        // m_logger->summaryLogger().error(message.toStdString());
         m_logger->deviceLogger(info.record.qrCode).error(message.toStdString());
         return;
     }
@@ -505,7 +581,7 @@ void AlarmDispatchTask::persistInsert(const AlarmInfo& info)
         .arg(info.record.qrCode)
         .arg(info.record.occurTime)
         .arg(info.record.description);
-    m_logger->summaryLogger().info(insertMessage.toStdString());
+    // m_logger->summaryLogger().info(insertMessage.toStdString());
     m_logger->deviceLogger(info.record.qrCode).info(insertMessage.toStdString());
 
     // 发出插入完成信号，供 UI 接收显示
@@ -529,7 +605,7 @@ void AlarmDispatchTask::persistResolve(const AlarmInfo& info)
             .arg(info.alarmId)
             .arg(info.record.qrCode)
             .arg(alarmTypeDisplayText(info.record.alarmType));
-        m_logger->summaryLogger().error(message.toStdString());
+        // m_logger->summaryLogger().error(message.toStdString());
         m_logger->deviceLogger(info.record.qrCode).error(message.toStdString());
         return;
     }
@@ -551,7 +627,7 @@ void AlarmDispatchTask::persistResolve(const AlarmInfo& info)
         .arg(info.record.qrCode)
         .arg(info.record.resolveTime)
         .arg(info.record.description);
-    m_logger->summaryLogger().info(persistResolveMessage.toStdString());
+    // m_logger->summaryLogger().info(persistResolveMessage.toStdString());
     m_logger->deviceLogger(info.record.qrCode).info(persistResolveMessage.toStdString());
 }
 
@@ -582,7 +658,7 @@ void AlarmDispatchTask::onAlarmDBRecordResolved(const QString& qrCode, const QSt
             .arg(qrCode)
             .arg(alarmTypeDisplayText(alarmType.toInt()))
             .arg(resolveTime);
-        m_logger->summaryLogger().warn(message.toStdString());
+        // m_logger->summaryLogger().warn(message.toStdString());
         m_logger->deviceLogger(qrCode).warn(message.toStdString());
         return;
     }
@@ -598,6 +674,6 @@ void AlarmDispatchTask::onAlarmDBRecordResolved(const QString& qrCode, const QSt
         .arg(qrCode)
         .arg(alarmTypeDisplayText(alarmType.toInt()))
         .arg(resolveTime);
-    m_logger->summaryLogger().warn(message.toStdString());
+    // m_logger->summaryLogger().warn(message.toStdString());
     m_logger->deviceLogger(qrCode).warn(message.toStdString());
 }

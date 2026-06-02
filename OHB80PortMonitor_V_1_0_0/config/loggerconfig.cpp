@@ -30,6 +30,7 @@ SchedulerLoggerConfig LoggerConfig::readSchedulerLoggerConfig() const
     config.monitorDataTaskDevices = settings.value("monitor_data_task.devices", true).toBool();
     config.alarmDispatchTaskSummary = settings.value("alarm_dispatch_task.summary", true).toBool();
     config.alarmDispatchTaskDevices = settings.value("alarm_dispatch_task.devices", true).toBool();
+    config.alarmDispatchTaskSummaryPeriodMs = settings.value("alarm_dispatch_task.summary_period_ms", 60000).toInt();
     config.vefcSensorMonitorTaskSummary = settings.value("vefc_sensor_monitor_task.summary", true).toBool();
     config.vefcSensorMonitorTaskDevices = settings.value("vefc_sensor_monitor_task.devices", true).toBool();
     settings.endGroup();
@@ -46,6 +47,7 @@ bool LoggerConfig::writeSchedulerLoggerConfig(const SchedulerLoggerConfig& confi
     settings.setValue("monitor_data_task.devices", config.monitorDataTaskDevices);
     settings.setValue("alarm_dispatch_task.summary", config.alarmDispatchTaskSummary);
     settings.setValue("alarm_dispatch_task.devices", config.alarmDispatchTaskDevices);
+    settings.setValue("alarm_dispatch_task.summary_period_ms", config.alarmDispatchTaskSummaryPeriodMs);
     settings.setValue("vefc_sensor_monitor_task.summary", config.vefcSensorMonitorTaskSummary);
     settings.setValue("vefc_sensor_monitor_task.devices", config.vefcSensorMonitorTaskDevices);
     settings.endGroup();
@@ -105,6 +107,12 @@ bool LoggerConfig::setAlarmDispatchTaskDevicesEnabled(bool enabled)
     SchedulerLoggerConfig config = readSchedulerLoggerConfig();
     config.alarmDispatchTaskDevices = enabled;
     return writeSchedulerLoggerConfig(config);
+}
+
+int LoggerConfig::getAlarmDispatchTaskSummaryPeriodMs() const
+{
+    SchedulerLoggerConfig config = readSchedulerLoggerConfig();
+    return config.alarmDispatchTaskSummaryPeriodMs;
 }
 
 bool LoggerConfig::isVEFCSensorMonitorTaskSummaryEnabled() const

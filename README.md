@@ -9,6 +9,21 @@
 ## 更新日志
 
 ### 2026-06-02 - Simon
+#### AlarmDispatchTask Summary 周期输出
+- 新增 `scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.{h,cpp}` 周期汇总输出功能：
+  - 成员：`QTimer* m_summaryTimer`
+  - 方法：[initSummaryTimer()](cci:1://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h:16:4-16:28)、[startSummaryTimer()](cci:1://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h:17:4-18:29)、[stopSummaryTimer()](cci:1://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h:19:4-19:28)、[writeSummarySnapshot()](cci:1://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h:12:4-13:32)
+  - 配置：`[scheduler] alarm_dispatch_task.summary_period_ms`（默认 60000ms）
+  - 行为：每周期（可配置）输出一次"当前未恢复错误汇总"，仅当存在未恢复告警时输出
+  - 格式：`[timestamp] 当前未恢复错误汇总` + 按错误类型分组的设备 QRCode 列表（全部显示，不截断）
+  - 级别：info
+  - 日志路径：`scheduler/alarm_dispatch_task/summary.log`
+- 优化：注释掉原有逐条告警/恢复的 summary 日志输出，保留设备维度日志
+- 相关文件：
+  - 修改：[OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h](cci:7://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h:0:0-0:0)
+  - 修改：[OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp](cci:7://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp:0:0-0:0)
+  - 配置：[bin/config/logger_config.ini](cci:7://file:///d:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/bin/config/logger_config.ini:0:0-0:0) 新增 `alarm_dispatch_task.summary_period_ms=60000`
+
 #### LoggerConfig 单例与配置文件
 - 新增 `config/loggerconfig.{h,cpp}`，基于项目 `Singleton` 模板实现线程安全单例，提供读取/写入 INI 的封装。
 - 更新并使用 `bin/config/logger_config.ini`：

@@ -13,6 +13,7 @@ struct SchedulerLoggerConfig
     bool alarmDispatchTaskDevices = true;
     bool vefcSensorMonitorTaskSummary = true;
     bool vefcSensorMonitorTaskDevices = true;
+    int  alarmDispatchTaskSummaryPeriodMs = 60000; // AlarmDispatchTask 汇总输出周期（毫秒）
 
     SchedulerLoggerConfig() = default;
 };
@@ -56,6 +57,9 @@ public:
 
     // 设置 AlarmDispatchTask 设备日志开关
     bool setAlarmDispatchTaskDevicesEnabled(bool enabled);
+
+    // 获取 AlarmDispatchTask 汇总日志输出周期（毫秒）
+    int getAlarmDispatchTaskSummaryPeriodMs() const;
 
     // ========== VEFCSensorMonitorTask 任务日志 ==========
     // 获取 VEFCSensorMonitorTask 汇总日志开关
