@@ -104,6 +104,10 @@ void PeriodicCommandSender::onRoundComplete(QList<ModbusCommand> failedCommands)
                     .arg(failedCommands.size()).arg(queueSize).arg(summarizeFailedCommands(failedCommands)));
         }
         m_consecutiveFailRounds = 0;
+        // 将本轮失败的指令逐条转发为完成事件，便于上层统一处理
+        for (const auto& cmd : failedCommands) {
+            emit commandCompleted(cmd, m_masterId);
+        }
         return;
     }
 
@@ -117,6 +121,11 @@ void PeriodicCommandSender::onRoundComplete(QList<ModbusCommand> failedCommands)
                 .arg(failedCommands.size()).arg(queueSize)
                 .arg(m_consecutiveFailRounds).arg(MAX_CONSECUTIVE_FAILURES)
                 .arg(summarizeFailedCommands(failedCommands)));
+    }
+
+    // 将本轮失败的指令逐条转发为完成事件，便于上层统一处理
+    for (const auto& cmd : failedCommands) {
+        emit commandCompleted(cmd, m_masterId);
     }
 
     if (m_consecutiveFailRounds >= MAX_CONSECUTIVE_FAILURES) {

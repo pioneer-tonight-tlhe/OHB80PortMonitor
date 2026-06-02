@@ -396,22 +396,12 @@ void MonitorDataTask::updateFoupPresenceState(FoupOfOHBInfo* foup, const QString
     // FOUP out -> in：记录 purge 开始时间。
     if (!foup->oldFoupIn() && foup->foupIn()) {
         foup->setStartTime(QTime::currentTime());
-        m_logger->deviceLogger(masterId).info(QString("[MonitorDataTask][QRCode:%1] FOUP 状态变化\n"
-                                                     "原状态: 未在位\n"
-                                                     "新状态: 在位")
-            .arg(masterId)
-            .toStdString());
     }
 
     // FOUP in -> out：清空 purge 计时字段。
     else if (foup->oldFoupIn() && !foup->foupIn()) {
         foup->setStartTime(QTime(0, 0, 0));
         foup->setPurgeTimeSec(0);
-        m_logger->deviceLogger(masterId).info(QString("[MonitorDataTask][QRCode:%1] FOUP 状态变化\n"
-                                                     "原状态: 在位\n"
-                                                     "新状态: 未在位")
-            .arg(masterId)
-            .toStdString());
     }
 }
 

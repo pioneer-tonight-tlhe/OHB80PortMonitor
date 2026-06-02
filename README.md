@@ -9,6 +9,18 @@
 ## 更新日志
 
 ### 2026-06-02 - Simon
+#### MonitorDataTask 设备日志降噪
+- 移除 FOUP 在位状态变化的 INFO 日志，避免 devices.log 产生噪声。
+  - 位置：`scheduler/tasks/monitor_data_task/monitor_data_task.cpp::updateFoupPresenceState`
+  - 行为：仅维护内存状态（开始时间/计时清零），不再输出“FOUP 状态变化”日志
+  - 影响：`scheduler/monitor_data_task/devices.log` 更聚焦于指令帧与解析/失败信息
+
+#### PeriodicCommandSender 失败统一转发 commandCompleted
+- 在一轮结束的 `onRoundComplete(failedCommands)` 中，逐条 `emit commandCompleted(cmd, masterId)` 转发失败指令，便于上层统一处理成功与失败。
+  - 位置：`data/modbustcpmastermanager/modbustcpmaster/periodiccommandsender.cpp`
+  - 之前：仅成功即时转发；失败仅在 roundFinished 中汇总，未逐条上报给上层
+  - 现在：失败将在本轮结束时逐条转发，上层如 `MonitorDataTask::onCommandCompleted` 能记录失败日志（含 ReadFoupStatus 超时等）
+
 #### AlarmDispatchTask Summary 周期输出
 - 新增 `scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.{h,cpp}` 周期汇总输出功能：
   - 成员：`QTimer* m_summaryTimer`
@@ -61,7 +73,6 @@
 - 日志：`config/loggerconfig.{h,cpp}`、`scheduler/tasks/monitor_data_task/monitor_data_task.cpp`
 - 指令：`bin/config/ModbusTcpMasterConfig.xml`
 - 数据结构：`classes/vefcmonitorinfo.{h,cpp}`、`classes/foupofohbinfo.{h,cpp}`、`app/shareddata.h`
-
 ---
 
 ## Scheduler 任务模块与专属日志接口
