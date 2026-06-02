@@ -9,6 +9,26 @@
 ## 更新日志
 
 ### 2026-06-02 - Simon
+
+#### NetworkStatusTask 重构与日志规范
+- 重构 `start()` 为更清晰的私有方法：`startInitCheckTask()`、`startAutoReconnect()`、`processInitialStatusAndConnectSignals()`；并补充方法/成员中文注释。
+- 新增二维码专用日志类 `QRCodeWriteLogger`：
+  - 位置：`scheduler/tasks/network_status_task/network_status_task_qrcode_logger.{h,cpp}`
+  - 能力：对 WriteQRCode 指令成功/失败输出多行结构化日志（含 TX/RX 原始帧、结果/诊断、时间戳、重试次数）。
+  - 日志路径：`scheduler/network_status_task/qrcode/devices.log`
+- 集成与精简：
+  - `onWriteQRCodeFinished()` 中以 `QRCodeWriteLogger` 统一多行日志输出，`NetworkStatusTaskLogger` 的设备日志不再重复详细二维码结果，仅保留“开始/完成”等简要信息。
+  - 继续使用通用 `NetworkStatusTaskLogger` 写入 summary/devices 常规日志。
+- 连接状态变更日志（`onStatusChanged`）统一为：
+  - 新状态为“已连接”时：INFO 级别，消息仅为“上一次状态->当前状态”（例：`已断开->已连接`）。
+  - 新状态非“已连接”时：WARN 级别，消息仅为“上一次状态->当前状态”（例：`连接中->错误`）。
+  - 去除额外 IP/提示性文字；抑制重复离线/连接中产生的噪声日志；仅在 Disconnected/Error 时提交离线告警。
+- 构建集成：`scheduler/scheduler.pri` 已加入二维码专用日志类文件。
+- 相关文件：
+  - 修改：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/network_status_task/network_status_task.{h,cpp}`
+  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/network_status_task/network_status_task_qrcode_logger.{h,cpp}`
+  - 修改：`OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+
 #### MonitorDataTask 设备日志降噪
 - 移除 FOUP 在位状态变化的 INFO 日志，避免 devices.log 产生噪声。
   - 位置：`scheduler/tasks/monitor_data_task/monitor_data_task.cpp::updateFoupPresenceState`
@@ -116,6 +136,7 @@
   - 目标：监控设备网络连接与状态变更
   - 建议日志：`scheduler/network_status_task/summary`、`scheduler/network_status_task/<QRCode>`
   - 开关（可按需在 INI 中补充）：`network_status_task.summary` / `network_status_task.devices`
+  - 专用二维码日志：`scheduler/network_status_task/qrcode/devices.log`（多行结构化，含 TX/RX、结果、诊断、重试、时间戳）
 
 - **sh85selfchecktask**
   - 目标：定期并行执行 SH85 自检，汇总每轮结果

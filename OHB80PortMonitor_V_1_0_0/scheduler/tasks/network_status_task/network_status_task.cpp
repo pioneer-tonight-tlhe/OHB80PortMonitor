@@ -8,6 +8,7 @@
 #include "app/alarmtype.h"
 #include "classes/foupofohbinfo.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/network_status_task/network_status_task_qrcode_logger.h"
 #include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
@@ -38,6 +39,7 @@ NetworkStatusTask::NetworkStatusTask(QObject *parent)
     : SchedulerTask(parent)
 {
     m_logger = new NetworkStatusTaskLogger(true, true);
+    m_qrcodeLogger = new QRCodeWriteLogger(true, true);
 }
 
 NetworkStatusTask::~NetworkStatusTask()
@@ -46,139 +48,39 @@ NetworkStatusTask::~NetworkStatusTask()
         delete m_logger;
         m_logger = nullptr;
     }
+    if (m_qrcodeLogger) {
+        delete m_qrcodeLogger;
+        m_qrcodeLogger = nullptr;
+    }
 }
 
 void NetworkStatusTask::start()
 {
-    setState(Running);
-    m_stopped = false;
-    m_totalCount = 0;
-    m_lastStatusMap.clear();
-    m_offlineReportedMap.clear();
-    m_connections.clear();
+    setState(Running);                 // 设置任务状态为运行中
+    m_stopped = false;                 // 复位停止标记
+    m_totalCount = 0;                  // 重置监听设备计数
+    m_lastStatusMap.clear();           // 清空设备上一次连接状态缓存
+    m_offlineReportedMap.clear();      // 清空“已上报离线”的标记，避免重复上报
+    m_connections.clear();             // 清空已保存的信号连接句柄（本次启动将重新建立）
+    m_statusConnCount = 0;
+    m_qrConnCount = 0;
 
     ModbusTcpMasterManager &manager = ModbusTcpMasterManager::instance();
     const QStringList ids = manager.masterIds();
     m_logger->summaryInfo("start", QString("网络状态任务启动，设备总数=%1").arg(ids.size()));
 
-    // 在启动设备前，先创建并启动初始化检查任务
-    m_initCheckTask = new InitCheckTask(this);
-    connect(m_initCheckTask, &InitCheckTask::allFinished,
-            this, &NetworkStatusTask::onInitCheckFinished,
-            Qt::QueuedConnection);
-    m_initCheckTask->start();
-    m_logger->summaryInfo("start", "初始化检查任务已启动");
-
-    // 启动所有 ModbusTcpMaster
-    int autoReconnectStartedCount = 0;
-    QStringList autoReconnectFailedIds;
-    for (const QString &id : ids) {
-        ModbusTcpMaster *master = manager.getMaster(id);
-        if (manager.startMaster(id, ModbusConnecter::ConnectionMode::AutoReconnect)) {
-            ++autoReconnectStartedCount;
-        } else {
-            autoReconnectFailedIds << QString("%1(%2)").arg(id, masterEndpoint(master));
-        }
-    }
-    m_logger->summaryInfo("start",
-        QString("已批量启动自动重连，成功=%1/%2，失败=%3")
-            .arg(autoReconnectStartedCount)
-            .arg(ids.size())
-            .arg(autoReconnectFailedIds.size()));
-    if (!autoReconnectFailedIds.isEmpty()) {
-        m_logger->summaryWarn("start",
-            QString("自动重连启动失败设备=%1").arg(autoReconnectFailedIds.join(",")));
-    }
+    startInitCheckTask();
+    startAutoReconnect(ids);
 
     int initialConnectedCount = 0;
     int initialConnectingCount = 0;
     int initialDisconnectedCount = 0;
     int initialErrorCount = 0;
-    for (const QString &id : ids) {
-        ModbusTcpMaster *master = manager.getMaster(id);
-        if (!master) {
-            m_logger->deviceWarn(id, "start", "ModbusTcpMaster 为空，跳过监听");
-            continue;
-        }
-
-        const QString ipPortStr = masterEndpoint(master);
-
-        ModbusConnecter *connecter = master->connector();
-        if (!connecter) {
-            m_logger->deviceWarn(id, "start",
-                QString("ModbusConnecter 为空，跳过监听，IP端口=%1").arg(ipPortStr));
-            continue;
-        }
-
-        // 记录初始状态，并立即根据当前状态同步告警
-        // （部分设备可能在信号连接之前就已完成连接，需在此初始化，避免信号丢失）
-        ModbusConnecter::ConnectionStatus currentStatus = connecter->getStatus();
-        m_lastStatusMap[id] = currentStatus;
-        m_offlineReportedMap[id] =
-            (currentStatus == ModbusConnecter::ConnectionStatus::Disconnected
-             || currentStatus == ModbusConnecter::ConnectionStatus::Error);
-
-        switch (currentStatus) {
-            case ModbusConnecter::ConnectionStatus::Connected:
-                ++initialConnectedCount;
-                break;
-            case ModbusConnecter::ConnectionStatus::Connecting:
-                ++initialConnectingCount;
-                break;
-            case ModbusConnecter::ConnectionStatus::Disconnected:
-                ++initialDisconnectedCount;
-                break;
-            case ModbusConnecter::ConnectionStatus::Error:
-                ++initialErrorCount;
-                break;
-        }
-
-        // NetworkStatusTask 只负责上报/恢复离线告警，不直接写 foup->hasAlarm/alarmId。
-        // 设备最终是否标红由 AlarmDispatchTask 根据所有 active 告警统一判断。
-        QString initialConnectedLogContext;
-        if (AlarmDispatchTask* dispatcher = SharedData::getAlarmDispatchTask()) {
-            const int alarmType = static_cast<int>(AlarmType::DeviceOffline);
-            const int alarmSource = static_cast<int>(AlarmSource::Device);
-            if (currentStatus == ModbusConnecter::ConnectionStatus::Connected) {
-                dispatcher->submitResolve(alarmType, alarmSource, id);
-                initialConnectedLogContext =
-                    QString("初始状态=已连接，IP端口=%1，离线告警恢复=已提交 alarmType=%2 alarmSource=%3")
-                        .arg(ipPortStr)
-                        .arg(alarmType)
-                        .arg(alarmSource);
-            } else if (currentStatus == ModbusConnecter::ConnectionStatus::Disconnected
-                       || currentStatus == ModbusConnecter::ConnectionStatus::Error) {
-                const QString qrCodePrefix = QStringLiteral("[qrcode: %1] ").arg(id);
-                dispatcher->submitAlarm(alarmType, alarmSource, id, qrCodePrefix + QStringLiteral("Device Offline"));
-                m_logger->deviceWarn(id, "start",
-                    QString("初始状态异常，提交离线告警，状态=%1 alarmType=%2 alarmSource=%3")
-                        .arg(statusToString(currentStatus)).arg(alarmType).arg(alarmSource));
-            }
-        } else {
-            m_logger->summaryWarn("start", "AlarmDispatchTask 为空，无法同步初始离线告警状态");
-            if (currentStatus == ModbusConnecter::ConnectionStatus::Connected) {
-                initialConnectedLogContext =
-                    QString("初始状态=已连接，IP端口=%1，离线告警恢复=未提交 AlarmDispatchTask为空")
-                        .arg(ipPortStr);
-            }
-        }
-
-        // 监听连接状态变更信号
-        auto conn = connect(connecter, &ModbusConnecter::statusChanged,
-                            this, &NetworkStatusTask::onStatusChanged,
-                            Qt::QueuedConnection);
-        m_connections.append(conn);
-        m_totalCount++;
-
-        // 设备在信号挂接前可能已经完成连接（异步连接竞态），此时不会再触发 statusChanged 信号
-        // 需要主动触发 WriteQRCode 下发，避免初始已连接设备的指令丢失
-        if (currentStatus == ModbusConnecter::ConnectionStatus::Connected) {
-            QMetaObject::invokeMethod(this, [this, id, initialConnectedLogContext]() {
-                if (m_stopped) return;
-                submitWriteQRCode(id, initialConnectedLogContext);
-            }, Qt::QueuedConnection);
-        }
-    }
+    processInitialStatusAndConnectSignals(ids,
+                                         initialConnectedCount,
+                                         initialConnectingCount,
+                                         initialDisconnectedCount,
+                                         initialErrorCount);
 
     if (m_totalCount == 0) {
         setState(Failed);
@@ -221,9 +123,11 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
     // 发射状态变更信号供外部使用
     emit statusChanged(status, masterId);
 
+    // 离线类状态标志（Disconnected 或 Error）
     const bool isOfflineStatus =
         (status == ModbusConnecter::ConnectionStatus::Disconnected
          || status == ModbusConnecter::ConnectionStatus::Error);
+    // 该设备是否已上报离线会话（用于抑制重连过程中的重复日志/告警）
     const bool offlineAlreadyReported = m_offlineReportedMap.value(masterId, false);
 
     // 自动重连期间会反复出现 Error -> Connecting -> Error。
@@ -246,7 +150,12 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
     }
 
     if (status == ModbusConnecter::ConnectionStatus::Connected) {
+        // 状态变化日志：连接成功 -> info，仅输出“上一次状态->当前状态”
+        m_logger->deviceInfo(masterId, "onStatusChanged",
+            QString("%1->%2，IP端口=%3").arg(statusToString(lastStatus), statusToString(status), ipPortStr));
+
         m_offlineReportedMap[masterId] = false;
+
         QString connectedLogContext =
             QString("连接状态变化: %1 -> %2，IP端口=%3")
                 .arg(statusToString(lastStatus), statusToString(status), ipPortStr);
@@ -266,9 +175,9 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
         // 连接成功后下发 WriteQRCode 指令
         submitWriteQRCode(masterId, connectedLogContext);
     } else {
-        m_logger->deviceInfo(masterId, "onStatusChanged",
-            QString("连接状态变化: %1 -> %2，IP端口=%3")
-                .arg(statusToString(lastStatus), statusToString(status), ipPortStr));
+        // 状态变化日志：非连接成功 -> warn，仅输出“上一次状态->当前状态”
+        m_logger->deviceWarn(masterId, "onStatusChanged",
+            QString("%1->%2，IP端口=%3").arg(statusToString(lastStatus), statusToString(status), ipPortStr));
 
         if (foup) {
             foup->setStartTime(QTime(0, 0, 0));
@@ -287,19 +196,7 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
                     static_cast<int>(AlarmSource::Device),
                     masterId,
                     qrCodePrefix + QStringLiteral("Device Offline"));
-                m_logger->deviceWarn(masterId, "onStatusChanged",
-                    QString("连接异常，提交离线告警，状态=%1 alarmType=%2 alarmSource=%3")
-                        .arg(statusToString(status))
-                        .arg(static_cast<int>(AlarmType::DeviceOffline))
-                        .arg(static_cast<int>(AlarmSource::Device)));
-            } else {
-                m_logger->deviceWarn(masterId, "onStatusChanged",
-                    QString("连接异常，但 AlarmDispatchTask 为空，无法提交离线告警，状态=%1")
-                        .arg(statusToString(status)));
             }
-        } else {
-            m_logger->deviceInfo(masterId, "onStatusChanged",
-                QString("连接处于过渡状态，暂不上报离线告警，状态=%1").arg(statusToString(status)));
         }
     }
 }
@@ -331,7 +228,12 @@ void NetworkStatusTask::disconnectAll()
         QObject::disconnect(conn);
     m_connections.clear();
     m_logger->summaryInfo("disconnectAll",
-        QString("断开所有连接状态监听，连接数=%1").arg(connectionCount));
+        QString("断开所有信号连接（statusChanged=%1, commandFinished=%2），总数=%3")
+            .arg(m_statusConnCount)
+            .arg(m_qrConnCount)
+            .arg(connectionCount));
+    m_statusConnCount = 0;
+    m_qrConnCount = 0;
 }
 
 void NetworkStatusTask::submitWriteQRCode(const QString &masterId, const QString &connectedLogContext)
@@ -400,6 +302,7 @@ void NetworkStatusTask::submitWriteQRCode(const QString &masterId, const QString
                         this, &NetworkStatusTask::onWriteQRCodeFinished,
                         Qt::QueuedConnection);
     m_connections.append(conn);
+    ++m_qrConnCount;
 
     QMetaObject::invokeMethod(sender, [sender, cmd]() {
         sender->submit(cmd);
@@ -413,7 +316,9 @@ void NetworkStatusTask::logWriteQRCodeSubmitFailure(const QString &masterId,
     const QString message = connectedLogContext.isEmpty()
         ? QString("WriteQRCode 下发失败，原因=%1").arg(reason)
         : QString("%1，WriteQRCode 下发失败，原因=%2").arg(connectedLogContext, reason);
-    m_logger->deviceWarn(masterId, "onConnected", message);
+    if (m_qrcodeLogger) {
+        m_qrcodeLogger->deviceWarn(masterId, "submitWriteQRCode", message);
+    }
 }
 
 void NetworkStatusTask::onWriteQRCodeFinished(ModbusCommand cmd, const QString &masterId)
@@ -423,19 +328,21 @@ void NetworkStatusTask::onWriteQRCodeFinished(ModbusCommand cmd, const QString &
     // 检查是否是我们关注的 WriteQRCode 指令
     if (!m_writeQRCodePendingMap.contains(cmd.uuid)) return;
 
-    const QString pendingMasterId = m_writeQRCodePendingMap.take(cmd.uuid);
-    const QString logMasterId = pendingMasterId.isEmpty() ? masterId : pendingMasterId;
+    const QString logMasterId = m_writeQRCodePendingMap.take(cmd.uuid);
     const QString connectedLogContext = m_writeQRCodeContextMap.take(cmd.uuid);
 
+    // 统一判定执行结果
+    const bool ok = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
+
     // 写入通讯日志
-    {
+    auto writeCommunicateLog = [&]() {
         const QString sentTimeStr = cmd.sentMs > 0
             ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
             : QStringLiteral("-");
         int execStatus = 3;
-        if (cmd.received)          execStatus = 0;
-        else if (cmd.timedOut)     execStatus = 1;
-        else if (cmd.sendCount > 1) execStatus = 2;
+        if (cmd.received)           execStatus = 0; // 0=成功
+        else if (cmd.timedOut)      execStatus = 1; // 1=超时
+        else if (cmd.sendCount > 1) execStatus = 2; // 2=发生重试（未收到但未判定超时）
         const int retryCount = qMax(0, cmd.sendCount - 1);
         QString description;
         if (execStatus != 0) {
@@ -449,9 +356,8 @@ void NetworkStatusTask::onWriteQRCodeFinished(ModbusCommand cmd, const QString &
                 description = parts.join(", ");
             }
         }
-        if (description.isEmpty()) {
-            description = QStringLiteral("OK");
-        }
+        if (description.isEmpty()) description = QStringLiteral("OK");
+
         if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
             const QString respTimeStr = cmd.responseMs > 0
                 ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
@@ -464,38 +370,153 @@ void NetworkStatusTask::onWriteQRCodeFinished(ModbusCommand cmd, const QString &
             m_logger->deviceWarn(logMasterId, "onWriteQRCodeFinished",
                 QString("通讯日志数据库连接为空，未写入 WriteQRCode 记录，uuid=%1").arg(cmd.uuid));
         }
-    }
+    };
 
     // 写入运行日志
-    auto* opTask = SharedData::getOperationDispatchTask();
-    if (opTask) {
-        const QString desc = QString("[QRCode: %1]WriteQRCode command %2")
-            .arg(logMasterId)
-            .arg((cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy) ? "succeeded" : "failed");
-        opTask->log((cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy)
-                        ? OperationDispatchTask::MsgType::Message
-                        : OperationDispatchTask::MsgType::Error,
-                    desc, 0);
+    auto writeOperationLog = [&]() {
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            const QString desc = QString("[QRCode: %1]WriteQRCode command %2")
+                .arg(logMasterId)
+                .arg(ok ? "succeeded" : "failed");
+            opTask->log(ok ? OperationDispatchTask::MsgType::Message
+                           : OperationDispatchTask::MsgType::Error,
+                        desc, 0);
+        }
+    };
+
+    // 写入专用 QR 日志（不再写入通用设备日志，避免连接上下文以 WARN 级别刷入 devices_warn.log）
+    auto writeDeviceLogs = [&]() {
+        if (ok) {
+            if (m_qrcodeLogger) m_qrcodeLogger->logWriteQRCodeSuccess(logMasterId, cmd);
+        } else {
+            if (m_qrcodeLogger) m_qrcodeLogger->logWriteQRCodeFailure(logMasterId, cmd);
+        }
+    };
+
+    // 执行分段日志写入
+    writeCommunicateLog();
+    writeOperationLog();
+    writeDeviceLogs();
+}
+
+void NetworkStatusTask::startInitCheckTask()
+{
+    m_initCheckTask = new InitCheckTask(this);
+    connect(m_initCheckTask, &InitCheckTask::allFinished,
+            this, &NetworkStatusTask::onInitCheckFinished,
+            Qt::QueuedConnection);
+    m_initCheckTask->start();
+    m_logger->summaryInfo("start", "初始化检查任务已启动");
+}
+
+void NetworkStatusTask::startAutoReconnect(const QStringList &ids)
+{
+    ModbusTcpMasterManager &manager = ModbusTcpMasterManager::instance();
+    int autoReconnectStartedCount = 0;
+    QStringList autoReconnectFailedIds;
+    for (const QString &id : ids) {
+        ModbusTcpMaster *master = manager.getMaster(id);
+        if (manager.startMaster(id, ModbusConnecter::ConnectionMode::AutoReconnect)) {
+            ++autoReconnectStartedCount;
+        } else {
+            autoReconnectFailedIds << QString("%1(%2)").arg(id, masterEndpoint(master));
+        }
     }
+    m_logger->summaryInfo("start",
+        QString("已批量启动自动重连，成功=%1/%2，失败=%3")
+            .arg(autoReconnectStartedCount)
+            .arg(ids.size())
+            .arg(autoReconnectFailedIds.size()));
+    if (!autoReconnectFailedIds.isEmpty()) {
+        m_logger->summaryWarn("start",
+            QString("自动重连启动失败设备=%1").arg(autoReconnectFailedIds.join(",")));
+    }
+}
 
-    const bool ok = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
+void NetworkStatusTask::processInitialStatusAndConnectSignals(const QStringList &ids,
+                                                             int &initialConnectedCount,
+                                                             int &initialConnectingCount,
+                                                             int &initialDisconnectedCount,
+                                                             int &initialErrorCount)
+{
+    ModbusTcpMasterManager &manager = ModbusTcpMasterManager::instance();
+    for (const QString &id : ids) {
+        ModbusTcpMaster *master = manager.getMaster(id);
+        if (!master) { 
+            m_logger->deviceWarn(id, "start", "ModbusTcpMaster 为空，跳过监听");
+            continue;
+        }
 
-    const QString resultMessage = ok
-        ? QString("WriteQRCode=成功 uuid=%1").arg(cmd.uuid)
-        : QString("WriteQRCode=失败 uuid=%1 received=%2 timedOut=%3 checksumError=%4 deviceBusy=%5 error=%6")
-              .arg(cmd.uuid)
-              .arg(cmd.received)
-              .arg(cmd.timedOut)
-              .arg(cmd.checksumError)
-              .arg(cmd.deviceBusy)
-              .arg(cmd.errorMessage);
-    const QString mergedMessage = connectedLogContext.isEmpty()
-        ? resultMessage
-        : QString("%1，%2").arg(connectedLogContext, resultMessage);
+        const QString ipPortStr = masterEndpoint(master); // 记录 IP:Port 文本，便于日志
 
-    if (ok) {
-        m_logger->deviceInfo(logMasterId, "onConnected", mergedMessage);
-    } else {
-        m_logger->deviceWarn(logMasterId, "onConnected", mergedMessage);
+        ModbusConnecter *connecter = master->connector(); // 取出连接器对象
+        if (!connecter) { // 连接器缺失：无法监听状态变化
+            m_logger->deviceWarn(id, "start",
+                QString("ModbusConnecter 为空，跳过监听，IP端口=%1").arg(ipPortStr));
+            continue;
+        }
+
+        ModbusConnecter::ConnectionStatus currentStatus = connecter->getStatus(); // 读取当前连接状态
+        m_lastStatusMap[id] = currentStatus; // 初始化“上一次状态”缓存
+        m_offlineReportedMap[id] = // 标记初始离线会话为“已上报”，避免后续重复告警
+            (currentStatus == ModbusConnecter::ConnectionStatus::Disconnected
+             || currentStatus == ModbusConnecter::ConnectionStatus::Error);
+
+        switch (currentStatus) {
+            case ModbusConnecter::ConnectionStatus::Connected: // 统计各初始状态数量
+                ++initialConnectedCount;
+                break;
+            case ModbusConnecter::ConnectionStatus::Connecting:
+                ++initialConnectingCount;
+                break;
+            case ModbusConnecter::ConnectionStatus::Disconnected:
+                ++initialDisconnectedCount;
+                break;
+            case ModbusConnecter::ConnectionStatus::Error:
+                ++initialErrorCount;
+                break;
+        }
+
+        QString initialConnectedLogContext; // 连接成功场景的上下文日志（用于拼接 WriteQRCode 结果）
+        if (AlarmDispatchTask* dispatcher = SharedData::getAlarmDispatchTask()) {
+            const int alarmType = static_cast<int>(AlarmType::DeviceOffline);
+            const int alarmSource = static_cast<int>(AlarmSource::Device);
+            if (currentStatus == ModbusConnecter::ConnectionStatus::Connected) { // 初始即已连接：提交离线告警恢复
+                dispatcher->submitResolve(alarmType, alarmSource, id);
+                initialConnectedLogContext =
+                    QString("初始状态=已连接，IP端口=%1，离线告警恢复=已提交 alarmType=%2 alarmSource=%3")
+                        .arg(ipPortStr)
+                        .arg(alarmType)
+                        .arg(alarmSource);
+            } else if (currentStatus == ModbusConnecter::ConnectionStatus::Disconnected
+                       || currentStatus == ModbusConnecter::ConnectionStatus::Error) { // 初始离线/错误：提交离线告警
+                const QString qrCodePrefix = QStringLiteral("[qrcode: %1] ").arg(id);
+                dispatcher->submitAlarm(alarmType, alarmSource, id, qrCodePrefix + QStringLiteral("Device Offline"));
+                m_logger->deviceWarn(id, "start",
+                    QString("初始状态异常，提交离线告警，状态=%1 alarmType=%2 alarmSource=%3")
+                        .arg(statusToString(currentStatus)).arg(alarmType).arg(alarmSource));
+            }
+        } else {
+            m_logger->summaryWarn("start", "AlarmDispatchTask 为空，无法同步初始离线告警状态"); // 告警分发器缺失，仅记录日志
+            if (currentStatus == ModbusConnecter::ConnectionStatus::Connected) {
+                initialConnectedLogContext =
+                    QString("初始状态=已连接，IP端口=%1，离线告警恢复=未提交 AlarmDispatchTask为空")
+                        .arg(ipPortStr);
+            }
+        }
+
+        auto conn = connect(connecter, &ModbusConnecter::statusChanged, // 挂接连接状态变更信号（Queued）
+                            this, &NetworkStatusTask::onStatusChanged,
+                            Qt::QueuedConnection);
+        m_connections.append(conn); // 保存连接句柄，便于 stop() 统一断开
+        ++m_statusConnCount;
+        m_totalCount++; // 统计已监听的设备数
+
+        if (currentStatus == ModbusConnecter::ConnectionStatus::Connected) { // 初始即连接：异步下发 WriteQRCode，避免竞态丢失
+            QMetaObject::invokeMethod(this, [this, id, initialConnectedLogContext]() {
+                if (m_stopped) return;
+                submitWriteQRCode(id, initialConnectedLogContext);
+            }, Qt::QueuedConnection);
+        }
     }
 }
