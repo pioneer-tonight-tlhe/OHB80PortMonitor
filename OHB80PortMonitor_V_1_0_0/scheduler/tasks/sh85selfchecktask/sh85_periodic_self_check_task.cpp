@@ -54,6 +54,13 @@ SH85PeriodicSelfCheckTask::SH85PeriodicSelfCheckTask(QObject *parent)
     m_tickTimer->setInterval(1000);
     connect(m_tickTimer, &QTimer::timeout, this, &SH85PeriodicSelfCheckTask::onIntervalTick);
 
+    // 启动延时控制器
+    m_bootDelay = new BootDelayTimer(this);
+    connect(m_bootDelay, &BootDelayTimer::countdown,
+            this, &SH85PeriodicSelfCheckTask::bootDelayCountdown);
+    connect(m_bootDelay, &BootDelayTimer::timeout,
+            this, &SH85PeriodicSelfCheckTask::onBootDelayTimeout);
+
     qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 创建任务";
 }
 
@@ -62,6 +69,14 @@ SH85PeriodicSelfCheckTask::~SH85PeriodicSelfCheckTask()
     if (m_tickTimer) m_tickTimer->stop();
     disconnectAllCheckers();
     qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] 任务销毁";
+}
+void SH85PeriodicSelfCheckTask::onBootDelayTimeout()
+{
+    if (m_enabled) {
+        enterChecking();
+    } else {
+        enterStopped();
+    }
 }
 
 // ============================================================
@@ -83,13 +98,13 @@ void SH85PeriodicSelfCheckTask::setEnabled(bool enabled)
     }
 
     if (enabled) {
-        // 启用：立即执行一轮自检
-        // - Stopped → 直接进入 Checking
-        // - Checking / WaitingNext → 已在运行；让其自然推进即可
         if (m_state == State::Stopped) {
-            enterChecking();
+            // 启用时，若当前不在启动延时内，则立即进入首轮 Checking
+            if (!m_bootDelay || !m_bootDelay->isActive()) {
+                enterChecking();
+            }
         }
-    } else {
+    }else {
         // 停用：
         // - Checking → 不打断本轮，本轮结束后由 tryEndRound() 进入 Stopped
         // - WaitingNext → 立即停止
@@ -156,13 +171,15 @@ void SH85PeriodicSelfCheckTask::start()
 
     qDebug() << "[Scheduler][SH85PeriodicSelfCheckTask] start() period=" << m_periodSec << "s";
 
-    // 常驻任务启动后立即执行第一轮自检，后续轮次再按周期等待。
-    m_enabled = true;
-    enterChecking();
+    // 启动延时倒计时（单位：秒）
+    if (m_bootDelay) m_bootDelay->startSeconds(10);
 }
 
 void SH85PeriodicSelfCheckTask::stop()
 {
+    if (m_bootDelay) m_bootDelay->stop();
+    enterStopped();
+
     if (m_finishedEmitted) return;
     m_finishedEmitted = true;
 
@@ -181,6 +198,7 @@ void SH85PeriodicSelfCheckTask::stop()
 void SH85PeriodicSelfCheckTask::enterStopped()
 {
     if (m_tickTimer) m_tickTimer->stop();
+    if (m_bootDelay) m_bootDelay->stop();
 
     // 取消所有进行中的 checker
     disconnectAllCheckers();
@@ -221,6 +239,8 @@ void SH85PeriodicSelfCheckTask::enterWaitingNext()
 
 void SH85PeriodicSelfCheckTask::enterChecking()
 {
+    if (m_bootDelay && m_bootDelay->isActive()) return;
+
     if (!m_enabled) {
         enterStopped();
         return;

@@ -4,6 +4,7 @@
 #include "scheduler_task.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 #include "tasks/record/sh85selfchecktaskrecord.h"
+#include "tasks/sh85selfchecktask/boot_delay_timer.h"
 
 #include <QDateTime>
 #include <QHash>
@@ -169,6 +170,8 @@ signals:
      */
     void intervalCountdown(int remainingSeconds);
 
+    void bootDelayCountdown(int remainingSeconds);
+
 private slots:
     void onIntervalTick();                            // 1Hz：等待下次倒计时 / 自检中已执行计时
     void onCheckerFinished(bool success,
@@ -212,8 +215,16 @@ private:
     int       m_intervalRemaining  = 0; // WaitingNext 剩余秒数
     int       m_elapsedSeconds     = 0; // Checking 已执行秒数
 
+private:
     // ---- 1Hz 定时器（仅 WaitingNext 启用；Checking 时复用计时已执行秒数）----
     QTimer*   m_tickTimer = nullptr;
+
+    // 启动延时封装：在任务 start() 后先等待 N 秒（由 BootDelayTimer 以 1Hz 发出倒计时信号 bootDelayCountdown），
+    // 超时后触发 onBootDelayTimeout() 决定是否进入首轮自检；用于避免应用刚启动阶段（设备启用状态、FOUP in、网络连接）尚未稳定时就开始自检。
+private slots:
+    void onBootDelayTimeout();   // BootDelayTimer::timeout() 回调：若 enabled=true，则进入 enterChecking()
+private:
+    BootDelayTimer* m_bootDelay = nullptr; // 持有启动延时控制器（构造时建立信号连接）
 
     // ---- 一轮上下文 ----
     QString                       m_roundStartTime;

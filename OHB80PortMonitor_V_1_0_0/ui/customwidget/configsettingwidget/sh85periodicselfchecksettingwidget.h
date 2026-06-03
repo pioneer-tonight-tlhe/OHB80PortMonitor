@@ -45,6 +45,7 @@ private slots:
     void onTaskStateChanged(SH85PeriodicSelfCheckTask::State state);    // 任务状态改变
     void onTaskElapsedTick(int elapsedSeconds);                          // 自检计时器
     void onTaskIntervalCountdown(int remainingSeconds);                   // 间隔倒计时
+    void onTaskBootDelayCountdown(int remainingSeconds);
 
 private:
     void initUI();           // 初始化界面
@@ -85,6 +86,7 @@ private:
     SH85PeriodicSelfCheckTask::State m_currentTaskState = SH85PeriodicSelfCheckTask::State::Stopped;  // 当前任务状态
     int m_elapsedSec             = 0;      // 自检已运行秒数
     int m_intervalRemainSec      = 0;      // 间隔剩余秒数
+    int m_bootDelayRemainSec     = 0;
 
     // SharedData 持有的常驻任务
     QPointer<SH85PeriodicSelfCheckTask> m_task;

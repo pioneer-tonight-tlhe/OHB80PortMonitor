@@ -23,32 +23,40 @@ class SH85SelfCheckLogHelper
 {
 public:
     enum class Mode {
-        Manual,
-        Periodic
+        Manual,   // 手动自检模式
+        Periodic  // 周期自检模式
     };
 
     struct RoundSummary {
-        QString roundId;
-        QString startTime;
-        QString endTime;
-        int totalDevices = 0;
-        int participatedCount = 0;
-        int successCount = 0;
-        int failureCount = 0;
-        int skippedCount = 0;
-        QStringList failedDevices;
-        QStringList skippedDevices;
+        QString roundId;            // 轮次唯一标识
+        QString startTime;          // 开始时间（本地时区，格式化后字符串）
+        QString endTime;            // 结束时间（本地时区，格式化后字符串）
+        int totalDevices = 0;       // 参与统计的设备总数
+        int participatedCount = 0;  // 实际参与自检的设备数
+        int successCount = 0;       // 成功设备数
+        int failureCount = 0;       // 失败设备数
+        int skippedCount = 0;       // 跳过设备数（未参与）
+        QStringList failedDevices;  // 失败设备列表（二维码/ID）
+        QStringList skippedDevices; // 跳过设备列表（二维码/ID）
     };
 
+    // 生成一条新的轮次ID（时间+随机片段），用于轮次聚合
     static QString createRoundId();
+    // 模式转中文文本（手动/周期）
     static QString modeToText(Mode mode);
+    // 自检状态转中文文本（用于日志展示）
     static QString stateToChineseText(SH85SelfChecker::State state);
+    // 结果枚举转结果码（供数据库/日志使用）
     static QString resultToCode(SH85SelfChecker::Result result);
+    // 结果枚举转中文文本（用户可读）
     static QString resultToChineseText(SH85SelfChecker::Result result);
+    // 根据 success 与 result 生成简洁结果文案
     static QString resultText(bool success, SH85SelfChecker::Result result);
+    // 将底层英文/技术描述转换为中文可读描述
     static QString descriptionToChinese(SH85SelfChecker::Result result,
                                         const QString& description);
 
+    // 初始化一条设备自检记录的通用字段（模式/设备/轮次ID等）
     static void initRecord(SH85SelfCheckTaskRecord& record,
                            Mode mode,
                            const QString& qrCode,

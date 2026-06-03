@@ -187,6 +187,9 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
     connect(task, &SH85PeriodicSelfCheckTask::intervalCountdown,
             this, &SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown,
             Qt::QueuedConnection);
+    connect(task, &SH85PeriodicSelfCheckTask::bootDelayCountdown,
+            this, &SH85PeriodicSelfCheckSettingWidget::onTaskBootDelayCountdown,
+            Qt::QueuedConnection);
 
     // —— Report Dialog：构造时即创建并订阅信号，让 History Log 从首轮开始累计 ——
     m_reportDialog = new SH85SelfCheckReportDialog(this);
@@ -351,6 +354,16 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown(int remainingSe
     }
 }
 
+void SH85PeriodicSelfCheckSettingWidget::onTaskBootDelayCountdown(int remainingSeconds)
+{
+    m_bootDelayRemainSec = remainingSeconds;
+    if (m_currentTaskState == SH85PeriodicSelfCheckTask::State::Stopped) {
+        if (m_statusEdit) {
+            m_statusEdit->setText(QString("Boot delay (countdown: %1s)").arg(m_bootDelayRemainSec));
+        }
+    }
+}
+
 void SH85PeriodicSelfCheckSettingWidget::refreshStatusText()
 {
     // 刷新状态文本：根据当前任务状态显示不同文案
@@ -359,7 +372,11 @@ void SH85PeriodicSelfCheckSettingWidget::refreshStatusText()
     QString text;
     switch (m_currentTaskState) {
     case SH85PeriodicSelfCheckTask::State::Stopped:
-        text = QStringLiteral("Self-check disabled");
+        if (m_bootDelayRemainSec > 0) {
+            text = QString("Boot delay (countdown: %1s)").arg(m_bootDelayRemainSec);
+        } else {
+            text = QStringLiteral("Self-check disabled");
+        }
         break;
     case SH85PeriodicSelfCheckTask::State::Checking:
         text = QStringLiteral("Self-checking (elapsed: %1s)").arg(m_elapsedSec);

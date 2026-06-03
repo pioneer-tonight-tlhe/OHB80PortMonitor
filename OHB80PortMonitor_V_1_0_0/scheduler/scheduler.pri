@@ -21,6 +21,8 @@ HEADERS += \
     $$PWD/tasks/set_pneumatic_valve_pressure_task.h \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_task.h \
     $$PWD/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h \
+    $$PWD/tasks/sh85selfchecktask/sh85_periodic_self_check_task2.h \
+    $$PWD/tasks/sh85selfchecktask/boot_delay_timer.h \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_log_helper.h \
     $$PWD/tasks/set_humidity_offset_task.h \
     $$PWD/tasks/set_purge_flow_task.h \
@@ -52,6 +54,8 @@ SOURCES += \
     $$PWD/tasks/set_pneumatic_valve_pressure_task.cpp \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_task.cpp \
     $$PWD/tasks/sh85selfchecktask/sh85_periodic_self_check_task.cpp \
+    $$PWD/tasks/sh85selfchecktask/sh85_periodic_self_check_task2.cpp \
+    $$PWD/tasks/sh85selfchecktask/boot_delay_timer.cpp \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_log_helper.cpp \
     $$PWD/tasks/set_humidity_offset_task.cpp \
     $$PWD/tasks/set_purge_flow_task.cpp \
