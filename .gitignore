@@ -31,6 +31,9 @@ CMakeLists.txt.user*
 
 # ====== 日志与截图 ======
 OHB80PortMonitor_V_1_0_0/bin/log/
+OHB80PortMonitor_V_1_0_0/bin/x64/databases/
+OHB80PortMonitor_V_1_0_0/bin/x32/databases/
+*.db
 
 # ====== 大文件压缩包 ======
 *.zip
