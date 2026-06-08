@@ -1,6 +1,8 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
+**当前版本：V0.1.2**
+
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
 
@@ -8,9 +10,33 @@
 
 ## 更新日志
 
-### 2026-06-08 - Simon
+### V0.1.2 - 2026-06-08 - Simon
 
-#### 85 自检重构完成
+#### 警报屏蔽配置功能 [V0.1.2]
+- 新增 `AlarmConfig` 类用于管理可屏蔽的警报类型配置
+- 新增 `alarm.ini` 配置文件，支持配置需要屏蔽的警报类型（如 VEFCAbnormal、VEEPAbnormal）
+- 提供读取被屏蔽警报集合、设置警报屏蔽状态、检查警报是否被屏蔽等方法
+- 相关文件：
+  - 新增：`OHB80PortMonitor_V_1_0_0/bin/config/alarm.ini`
+  - 新增：`OHB80PortMonitor_V_1_0_0/config/alarmconfig.{h,cpp}`
+
+---
+
+### V0.1.1 - 2026-06-08 - Simon
+
+#### SH85 自检报告对话框 UI 优化 [V0.1.1]
+- `SH85SelfCheckReportDialog` 中的 Live Log 和 History Log 表格设置为不可选中（鼠标点击无法选中行或单元格）
+- History Log 的 Description 字段根据自检结果设置背景色：成功为绿色（#32CD32），失败为红色（#cd143c）
+- UI 界面显示内容改为英文：将 `SH85SelfChecker` 中的所有中文描述改为英文（包括自检成功、失败、超时等状态描述）
+- 相关文件：
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
+  - 修改：`OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.cpp`
+
+---
+
+### V0.1.0 - 2026-06-08 - Simon
+
+#### 85 自检重构完成 [V0.1.0]
 - 新增 `SH85PeriodicSelfCheckTask3` 作为第三版周期自检调度任务，替代原 `SH85PeriodicSelfCheckTask`
 - 设计目标：
   - 保持 Task2 风格的外部接口和 UI 信号，方便后续平滑替换

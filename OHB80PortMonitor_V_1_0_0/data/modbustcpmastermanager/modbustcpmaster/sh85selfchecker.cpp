@@ -104,7 +104,7 @@ bool SH85SelfChecker::start()
     // 下发 StartSelfCheck
     if (!submitStartSelfCheck()) {
         cleanup();
-        emitErrorAndFinish(Result::StartCommandFailed, "提交启动自检指令失败");
+        emitErrorAndFinish(Result::StartCommandFailed, "Failed to submit start self-check command");
         return false;
     }
 
@@ -122,7 +122,7 @@ void SH85SelfChecker::stop()
 {
     if (!isRunning()) return;
     qDebug() << "[data][SH85SelfChecker] stop() 被调用 masterId=" << (m_master ? m_master->ID : QString());
-    finishOnly(false, Result::Cancelled, "用户取消");
+    finishOnly(false, Result::Cancelled, "Cancelled by user");
 }
 
 QString SH85SelfChecker::stateToString(State s)
@@ -256,7 +256,7 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     case State::StartingSelfCheck: {
         if (!ok) {
             emitErrorAndFinish(Result::StartCommandFailed,
-                QString("启动自检指令下发失败: %1").arg(cmd.errorMessage));
+                QString("Start self-check command failed: %1").arg(cmd.errorMessage));
             return;
         }
         // 进入阶段 1 等待
@@ -269,19 +269,19 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     case State::ReadingStatusEarly: {
         if (!ok) {
             emitErrorAndFinish(Result::ReadEarlyCommandFailed,
-                QString("阶段1读取自检状态指令失败: %1").arg(cmd.errorMessage));
+                QString("Phase 1 read status command failed: %1").arg(cmd.errorMessage));
             return;
         }
         const quint16 v = parseStatusValue(cmd);
         if (v == kStatusIdle) {
             // CH_1 == 0：未进入自检功能
-            emitErrorAndFinish(Result::DeviceNotEntered, "设备未进入自检状态 (CH_1=0)");
+            emitErrorAndFinish(Result::DeviceNotEntered, "Device not entered self-check state (CH_1=0)");
             return;
         }
         if (v != kStatusInProgress) {
             // CH_1 != 0 && != 1：底层固件异常
             emitErrorAndFinish(Result::FirmwareAbnormal,
-                QString("阶段1固件状态异常, CH_1=%1").arg(v));
+                QString("Phase 1 firmware status abnormal, CH_1=%1").arg(v));
             return;
         }
         // CH_1 == 1：进入阶段 2 等待 55s
@@ -294,7 +294,7 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
     case State::PollingStatus: {
         if (!ok) {
             emitErrorAndFinish(Result::ReadPollCommandFailed,
-                QString("阶段2读取自检状态指令失败: %1").arg(cmd.errorMessage));
+                QString("Phase 2 read status command failed: %1").arg(cmd.errorMessage));
             return;
         }
         const quint16 v = parseStatusValue(cmd);
@@ -302,34 +302,34 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
         case kStatusIdle:
             // CH_1 == 0：自检中却返回空闲，固件异常
             emitErrorAndFinish(Result::FirmwareAbnormal,
-                "轮询阶段固件状态异常, CH_1=0");
+                "Firmware status abnormal during polling, CH_1=0");
             return;
         case kStatusInProgress:
             // 仍在自检中：若 10s 窗口未超时，继续轮询
             if (!m_pollWindowTimer->isActive()) {
-                emitErrorAndFinish(Result::Timeout, "自检功能超时");
+                emitErrorAndFinish(Result::Timeout, "Self-check timeout");
                 return;
             }
             if (!submitReadStatus()) {
-                emitErrorAndFinish(Result::ReadPollCommandFailed, "提交读取自检状态指令失败");
+                emitErrorAndFinish(Result::ReadPollCommandFailed, "Failed to submit read status command");
             }
             return;
         case kStatusSuccess:
             // CH_1 == 2：自检成功
-            finishOnly(true, Result::Success, "自检成功");
+            finishOnly(true, Result::Success, "Self-check passed");
             return;
         case kStatusHumidityFail:
-            emitErrorAndFinish(Result::HumidityExceeded, "湿度超标 (CH_1=3)");
+            emitErrorAndFinish(Result::HumidityExceeded, "Humidity exceeded (CH_1=3)");
             return;
         case kStatusSensorCommFail:
-            emitErrorAndFinish(Result::SensorCommError, "SH85传感器通讯故障 (CH_1=4)");
+            emitErrorAndFinish(Result::SensorCommError, "SH85 sensor communication error (CH_1=4)");
             return;
         case kStatusThresholdParam:
-            emitErrorAndFinish(Result::ThresholdParamError, "阈值参数错误 (CH_1=5)");
+            emitErrorAndFinish(Result::ThresholdParamError, "Threshold parameter error (CH_1=5)");
             return;
         default:
             emitErrorAndFinish(Result::FirmwareAbnormal,
-                QString("轮询阶段固件状态异常, 未知 CH_1=%1").arg(v));
+                QString("Firmware status abnormal during polling, unknown CH_1=%1").arg(v));
             return;
         }
     }
@@ -364,7 +364,7 @@ void SH85SelfChecker::onPhase1WaitElapsed()
     enterState(State::ReadingStatusEarly);
     if (!submitReadStatus()) {
         emitErrorAndFinish(Result::ReadEarlyCommandFailed,
-            "提交阶段1读取自检状态指令失败");
+            "Failed to submit phase 1 read status command");
     }
 }
 
@@ -381,7 +381,7 @@ void SH85SelfChecker::onPhase2WaitElapsed()
     m_pollWindowTimer->start();
     if (!submitReadStatus()) {
         emitErrorAndFinish(Result::ReadPollCommandFailed,
-            "提交阶段2读取自检状态指令失败");
+            "Failed to submit phase 2 read status command");
     }
 }
 
@@ -397,10 +397,10 @@ void SH85SelfChecker::onPollWindowElapsed()
     // 注：若此刻刚好有响应未回，可在 onCommandFinished 中检查 m_pollWindowTimer->isActive() 判定
     if (m_pendingUuid != 0) {
         // 已下发但还未回响应：以超时收尾
-        emitErrorAndFinish(Result::Timeout, "自检功能超时（10秒窗口内无响应）");
+        emitErrorAndFinish(Result::Timeout, "Self-check timeout (no response within 10s window)");
         return;
     }
-    emitErrorAndFinish(Result::Timeout, "自检功能超时");
+    emitErrorAndFinish(Result::Timeout, "Self-check timeout");
 }
 
 // ============================================================

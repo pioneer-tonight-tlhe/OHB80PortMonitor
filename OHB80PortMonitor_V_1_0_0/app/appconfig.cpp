@@ -72,7 +72,7 @@ QString AppConfig::getAppName() const
 
 QString AppConfig::getAppVersion() const
 {
-    return getValue("Application/AppVersion", "1.0.0").toString();
+    return getValue("Application/AppVersion", "V0.1.0").toString();
 }
 
 QString AppConfig::getOSType() const

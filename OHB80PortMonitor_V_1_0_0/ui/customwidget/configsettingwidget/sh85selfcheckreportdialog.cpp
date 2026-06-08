@@ -110,6 +110,7 @@ void SH85SelfCheckReportDialog::initLiveLogTab()
 
     m_liveTable = new QTableView(this);
     m_liveTable->setModel(m_liveModel);
+    m_liveTable->setSelectionMode(QAbstractItemView::NoSelection);
     m_liveTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_liveTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_liveTable->verticalHeader()->setVisible(false);
@@ -130,6 +131,7 @@ void SH85SelfCheckReportDialog::initHistoryLogTab()
 
     m_historyTable = new QTableView(this);
     m_historyTable->setModel(m_historyModel);
+    m_historyTable->setSelectionMode(QAbstractItemView::NoSelection);
     m_historyTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_historyTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_historyTable->verticalHeader()->setVisible(false);
@@ -302,7 +304,16 @@ void SH85SelfCheckReportDialog::onAllFinished(const SH85PeriodicSelfCheckTask3::
             it->setText(QString::number(stat.failureCount));
         if (auto *it = m_historyModel->item(row, HistColParticipated))
             it->setText(stat.lastParticipated ? QStringLiteral("Yes") : QStringLiteral("No"));
-        if (auto *it = m_historyModel->item(row, HistColDescription))
+        if (auto *it = m_historyModel->item(row, HistColDescription)) {
             it->setText(stat.lastDescription);
+            // 根据 success 状态设置背景色：失败为红色，成功为绿色
+            if (dr.success) {
+                it->setBackground(QColor("#32CD32")); // Lime Green
+                it->setForeground(Qt::black);
+            } else {
+                it->setBackground(QColor("#cd143c")); // Crimson red
+                it->setForeground(Qt::white);
+            }
+        }
     }
 }
