@@ -1,0 +1,9 @@
+[2026-06-02 15:20:45] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12068 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 15:20:45] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12071 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 15:30:47] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12080 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 15:34:09] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12079 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 15:34:09] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12080 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 15:36:28] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12080 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 16:44:52] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12061 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 16:44:52] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12067 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1
+[2026-06-02 16:44:52] [WARN] [scheduler][NetworkStatusTask][Device][start]：设备ID=12080 初始状态异常，提交离线告警，状态=已断开 alarmType=2001 alarmSource=1

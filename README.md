@@ -8,6 +8,42 @@
 
 ## 更新日志
 
+### 2026-06-08 - Simon
+
+#### 85 自检重构完成
+- 新增 `SH85PeriodicSelfCheckTask3` 作为第三版周期自检调度任务，替代原 `SH85PeriodicSelfCheckTask`
+- 设计目标：
+  - 保持 Task2 风格的外部接口和 UI 信号，方便后续平滑替换
+  - Task3 只做调度编排；轮次状态、设备筛选、checker 执行、日志落库分别拆到独立模块
+  - 后续扩展报告弹窗、每设备日志、单次自检复用时，尽量不再膨胀调度类
+- 核心功能：
+  - 周期调度：支持周期秒数配置、单设备模式、启动延时（10 秒）、轮次计数控制
+  - 轮次管理：每轮生成唯一轮次 ID，并行启动设备自检，防止轮次重叠
+  - 设备筛选：过滤未启用设备、FOUP in 状态设备、未连接设备
+  - 日志聚合：设备过程先聚合到内存 record，设备结束时写一条明细，整轮结束时写汇总与告警
+- 拆分模块：
+  - `SH85SelfCheckRoundContext` - 轮次上下文管理（轮次 ID、设备结果、pending 状态）
+  - `SH85SelfCheckDeviceSelector` - 设备筛选（启用状态、FOUP 状态、连接状态）
+  - `SH85SelfCheckLogService` - 日志服务（任务/轮次/设备日志、通信日志）
+  - `SH85SelfCheckRoundRunner` - 轮次执行器（checker 信号连接与中继）
+- 信号体系：
+  - 任务整体状态：`taskStateChanged`、`elapsedTick`、`intervalCountdown`、`bootDelayCountdown`
+  - 单设备自检：`countdownTick`、`selfCheckerStateChanged`、`oneFinished`
+  - 命令/错误：`commandCompleted`、`commandRetrying`、`errorOccurred`
+  - 轮次汇总：`roundStarted`、`roundFinished`、`allDevicesFinished`、`allFinished`、`deviceParticipated`
+- UI 对接：`SH85PeriodicSelfCheckSettingWidget` 更新为使用 `SH85PeriodicSelfCheckTask3`
+- 相关文件：
+  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.{h,cpp}`
+  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_context.{h,cpp}`
+  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_device_selector.{h,cpp}`
+  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_service.{h,cpp}`
+  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_runner.{h,cpp}`
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.{h,cpp}`
+  - 删除：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task2.{h,cpp}`
+  - 删除：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_helper.{h,cpp}`
+
+---
+
 ### 2026-06-02 - Simon
 
 #### SH85 周期自检：配置化与 UI 对接

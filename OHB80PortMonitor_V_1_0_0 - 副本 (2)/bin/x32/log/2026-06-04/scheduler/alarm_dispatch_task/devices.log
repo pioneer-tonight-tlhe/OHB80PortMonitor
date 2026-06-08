@@ -1,0 +1,1600 @@
+[2026-06-04 09:18:17] [WARN] [submitAlarm] 提交警报
+警报ID: 2120802001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12080
+描述: [qrcode: 12080] Device Offline
+[2026-06-04 09:18:17] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120802001
+设备标识: 12080
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120162001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12016
+描述: [qrcode: 12016] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120162001
+设备标识: 12016
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120152001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12015
+描述: [qrcode: 12015] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120152001
+设备标识: 12015
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120142001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12014
+描述: [qrcode: 12014] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120142001
+设备标识: 12014
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120132001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12013
+描述: [qrcode: 12013] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120132001
+设备标识: 12013
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120122001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12012
+描述: [qrcode: 12012] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120122001
+设备标识: 12012
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120012001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12001
+描述: [qrcode: 12001] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120012001
+设备标识: 12001
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120112001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12011
+描述: [qrcode: 12011] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120112001
+设备标识: 12011
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120092001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12009
+描述: [qrcode: 12009] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120092001
+设备标识: 12009
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120082001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12008
+描述: [qrcode: 12008] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120082001
+设备标识: 12008
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120102001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12010
+描述: [qrcode: 12010] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120102001
+设备标识: 12010
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120072001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12007
+描述: [qrcode: 12007] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120072001
+设备标识: 12007
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120052001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12005
+描述: [qrcode: 12005] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120052001
+设备标识: 12005
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120022001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12002
+描述: [qrcode: 12002] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120022001
+设备标识: 12002
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120042001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12004
+描述: [qrcode: 12004] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120042001
+设备标识: 12004
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120032001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12003
+描述: [qrcode: 12003] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120032001
+设备标识: 12003
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120062001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12006
+描述: [qrcode: 12006] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120062001
+设备标识: 12006
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120402001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12040
+描述: [qrcode: 12040] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120402001
+设备标识: 12040
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120422001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12042
+描述: [qrcode: 12042] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120422001
+设备标识: 12042
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120412001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12041
+描述: [qrcode: 12041] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120412001
+设备标识: 12041
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120392001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12039
+描述: [qrcode: 12039] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120392001
+设备标识: 12039
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120222001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12022
+描述: [qrcode: 12022] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120222001
+设备标识: 12022
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120212001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12021
+描述: [qrcode: 12021] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120212001
+设备标识: 12021
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120282001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12028
+描述: [qrcode: 12028] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120282001
+设备标识: 12028
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120372001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12037
+描述: [qrcode: 12037] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120372001
+设备标识: 12037
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120352001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12035
+描述: [qrcode: 12035] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120352001
+设备标识: 12035
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120232001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12023
+描述: [qrcode: 12023] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120232001
+设备标识: 12023
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120312001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12031
+描述: [qrcode: 12031] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120312001
+设备标识: 12031
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120322001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12032
+描述: [qrcode: 12032] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120322001
+设备标识: 12032
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120272001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12027
+描述: [qrcode: 12027] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120272001
+设备标识: 12027
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120382001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12038
+描述: [qrcode: 12038] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120382001
+设备标识: 12038
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120262001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12026
+描述: [qrcode: 12026] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120262001
+设备标识: 12026
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120362001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12036
+描述: [qrcode: 12036] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120362001
+设备标识: 12036
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120332001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12033
+描述: [qrcode: 12033] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120332001
+设备标识: 12033
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120292001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12029
+描述: [qrcode: 12029] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120292001
+设备标识: 12029
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120242001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12024
+描述: [qrcode: 12024] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120242001
+设备标识: 12024
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120182001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12018
+描述: [qrcode: 12018] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120182001
+设备标识: 12018
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120252001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12025
+描述: [qrcode: 12025] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120252001
+设备标识: 12025
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120342001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12034
+描述: [qrcode: 12034] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120342001
+设备标识: 12034
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120172001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12017
+描述: [qrcode: 12017] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120172001
+设备标识: 12017
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120202001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12020
+描述: [qrcode: 12020] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120202001
+设备标识: 12020
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120592001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12059
+描述: [qrcode: 12059] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120592001
+设备标识: 12059
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120192001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12019
+描述: [qrcode: 12019] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120192001
+设备标识: 12019
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120652001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12065
+描述: [qrcode: 12065] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120652001
+设备标识: 12065
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120722001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12072
+描述: [qrcode: 12072] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120722001
+设备标识: 12072
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120662001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12066
+描述: [qrcode: 12066] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120662001
+设备标识: 12066
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120302001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12030
+描述: [qrcode: 12030] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120302001
+设备标识: 12030
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120572001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12057
+描述: [qrcode: 12057] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120572001
+设备标识: 12057
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120672001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12067
+描述: [qrcode: 12067] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120672001
+设备标识: 12067
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120532001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12053
+描述: [qrcode: 12053] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120532001
+设备标识: 12053
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120542001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12054
+描述: [qrcode: 12054] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120542001
+设备标识: 12054
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120712001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12071
+描述: [qrcode: 12071] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120712001
+设备标识: 12071
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120602001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12060
+描述: [qrcode: 12060] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120602001
+设备标识: 12060
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120702001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12070
+描述: [qrcode: 12070] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120702001
+设备标识: 12070
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120582001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12058
+描述: [qrcode: 12058] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120582001
+设备标识: 12058
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120552001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12055
+描述: [qrcode: 12055] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120552001
+设备标识: 12055
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120512001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12051
+描述: [qrcode: 12051] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120512001
+设备标识: 12051
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120682001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12068
+描述: [qrcode: 12068] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120682001
+设备标识: 12068
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120622001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12062
+描述: [qrcode: 12062] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120622001
+设备标识: 12062
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120562001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12056
+描述: [qrcode: 12056] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120562001
+设备标识: 12056
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120692001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12069
+描述: [qrcode: 12069] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120692001
+设备标识: 12069
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120432001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12043
+描述: [qrcode: 12043] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120432001
+设备标识: 12043
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120612001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12061
+描述: [qrcode: 12061] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120612001
+设备标识: 12061
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120632001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12063
+描述: [qrcode: 12063] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120632001
+设备标识: 12063
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120642001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12064
+描述: [qrcode: 12064] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120642001
+设备标识: 12064
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120442001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12044
+描述: [qrcode: 12044] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120442001
+设备标识: 12044
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120522001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12052
+描述: [qrcode: 12052] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120522001
+设备标识: 12052
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120762001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12076
+描述: [qrcode: 12076] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120762001
+设备标识: 12076
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120502001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12050
+描述: [qrcode: 12050] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120502001
+设备标识: 12050
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120792001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12079
+描述: [qrcode: 12079] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120792001
+设备标识: 12079
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120492001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12049
+描述: [qrcode: 12049] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120492001
+设备标识: 12049
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120752001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12075
+描述: [qrcode: 12075] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120752001
+设备标识: 12075
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120452001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12045
+描述: [qrcode: 12045] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120452001
+设备标识: 12045
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120482001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12048
+描述: [qrcode: 12048] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120482001
+设备标识: 12048
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120782001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12078
+描述: [qrcode: 12078] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120782001
+设备标识: 12078
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120772001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12077
+描述: [qrcode: 12077] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120772001
+设备标识: 12077
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120462001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12046
+描述: [qrcode: 12046] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120462001
+设备标识: 12046
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120732001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12073
+描述: [qrcode: 12073] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120732001
+设备标识: 12073
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120472001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12047
+描述: [qrcode: 12047] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120472001
+设备标识: 12047
+告警类型: 2001(Device Offline)
+[2026-06-04 09:18:20] [WARN] [submitAlarm] 提交警报
+警报ID: 2120742001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12074
+描述: [qrcode: 12074] Device Offline
+[2026-06-04 09:18:20] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120742001
+设备标识: 12074
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120052001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12005
+描述: [qrcode: 12005] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120052001
+设备标识: 12005
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120122001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12012
+描述: [qrcode: 12012] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120122001
+设备标识: 12012
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120022001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12002
+描述: [qrcode: 12002] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120022001
+设备标识: 12002
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120102001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12010
+描述: [qrcode: 12010] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120102001
+设备标识: 12010
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120112001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12011
+描述: [qrcode: 12011] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120112001
+设备标识: 12011
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120042001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12004
+描述: [qrcode: 12004] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120042001
+设备标识: 12004
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120032001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12003
+描述: [qrcode: 12003] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120032001
+设备标识: 12003
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120012001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12001
+描述: [qrcode: 12001] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120012001
+设备标识: 12001
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120082001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12008
+描述: [qrcode: 12008] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120062001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12006
+描述: [qrcode: 12006] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120062001
+设备标识: 12006
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120092001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12009
+描述: [qrcode: 12009] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120092001
+设备标识: 12009
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120072001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12007
+描述: [qrcode: 12007] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120072001
+设备标识: 12007
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120082001
+设备标识: 12008
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120342001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12034
+描述: [qrcode: 12034] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120342001
+设备标识: 12034
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120252001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12025
+描述: [qrcode: 12025] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120252001
+设备标识: 12025
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120272001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12027
+描述: [qrcode: 12027] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120272001
+设备标识: 12027
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120332001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12033
+描述: [qrcode: 12033] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120332001
+设备标识: 12033
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120282001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12028
+描述: [qrcode: 12028] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120282001
+设备标识: 12028
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120312001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12031
+描述: [qrcode: 12031] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120312001
+设备标识: 12031
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120402001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12040
+描述: [qrcode: 12040] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120402001
+设备标识: 12040
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120242001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12024
+描述: [qrcode: 12024] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120242001
+设备标识: 12024
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120362001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12036
+描述: [qrcode: 12036] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120362001
+设备标识: 12036
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120352001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12035
+描述: [qrcode: 12035] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120352001
+设备标识: 12035
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120322001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12032
+描述: [qrcode: 12032] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120322001
+设备标识: 12032
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120292001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12029
+描述: [qrcode: 12029] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120292001
+设备标识: 12029
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120452001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12045
+描述: [qrcode: 12045] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120452001
+设备标识: 12045
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120382001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12038
+描述: [qrcode: 12038] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120382001
+设备标识: 12038
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120302001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12030
+描述: [qrcode: 12030] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120302001
+设备标识: 12030
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120432001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12043
+描述: [qrcode: 12043] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120432001
+设备标识: 12043
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120422001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12042
+描述: [qrcode: 12042] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120422001
+设备标识: 12042
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120442001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12044
+描述: [qrcode: 12044] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120442001
+设备标识: 12044
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120392001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12039
+描述: [qrcode: 12039] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120392001
+设备标识: 12039
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120412001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12041
+描述: [qrcode: 12041] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120412001
+设备标识: 12041
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120262001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12026
+描述: [qrcode: 12026] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120262001
+设备标识: 12026
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120372001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12037
+描述: [qrcode: 12037] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120372001
+设备标识: 12037
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120132001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12013
+描述: [qrcode: 12013] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120132001
+设备标识: 12013
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120212001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12021
+描述: [qrcode: 12021] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120212001
+设备标识: 12021
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120222001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12022
+描述: [qrcode: 12022] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120222001
+设备标识: 12022
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120192001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12019
+描述: [qrcode: 12019] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120192001
+设备标识: 12019
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120152001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12015
+描述: [qrcode: 12015] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120152001
+设备标识: 12015
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120172001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12017
+描述: [qrcode: 12017] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120172001
+设备标识: 12017
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120182001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12018
+描述: [qrcode: 12018] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120142001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12014
+描述: [qrcode: 12014] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120182001
+设备标识: 12018
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120142001
+设备标识: 12014
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120702001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12070
+描述: [qrcode: 12070] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120702001
+设备标识: 12070
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120722001
+设备标识: 12072
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120232001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12023
+描述: [qrcode: 12023] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120722001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12072
+描述: [qrcode: 12072] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120232001
+设备标识: 12023
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120772001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12077
+描述: [qrcode: 12077] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120772001
+设备标识: 12077
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120592001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12059
+描述: [qrcode: 12059] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120592001
+设备标识: 12059
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120712001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12071
+描述: [qrcode: 12071] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120712001
+设备标识: 12071
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120792001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12079
+描述: [qrcode: 12079] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120792001
+设备标识: 12079
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120762001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12076
+描述: [qrcode: 12076] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120762001
+设备标识: 12076
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120692001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12069
+描述: [qrcode: 12069] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120692001
+设备标识: 12069
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120732001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12073
+描述: [qrcode: 12073] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120732001
+设备标识: 12073
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120682001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12068
+描述: [qrcode: 12068] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120682001
+设备标识: 12068
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120652001
+设备标识: 12065
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120652001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12065
+描述: [qrcode: 12065] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120782001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12078
+描述: [qrcode: 12078] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120782001
+设备标识: 12078
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120752001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12075
+描述: [qrcode: 12075] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120752001
+设备标识: 12075
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120662001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12066
+描述: [qrcode: 12066] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120662001
+设备标识: 12066
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120202001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12020
+描述: [qrcode: 12020] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120202001
+设备标识: 12020
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120612001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12061
+描述: [qrcode: 12061] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120612001
+设备标识: 12061
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120162001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12016
+描述: [qrcode: 12016] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120162001
+设备标识: 12016
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120502001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12050
+描述: [qrcode: 12050] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120502001
+设备标识: 12050
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120632001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12063
+描述: [qrcode: 12063] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120632001
+设备标识: 12063
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120742001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12074
+描述: [qrcode: 12074] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120742001
+设备标识: 12074
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120542001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12054
+描述: [qrcode: 12054] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120542001
+设备标识: 12054
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120582001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12058
+描述: [qrcode: 12058] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120582001
+设备标识: 12058
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120512001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12051
+描述: [qrcode: 12051] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120622001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12062
+描述: [qrcode: 12062] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120512001
+设备标识: 12051
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120622001
+设备标识: 12062
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120572001
+设备标识: 12057
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120462001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12046
+描述: [qrcode: 12046] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120572001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12057
+描述: [qrcode: 12057] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120462001
+设备标识: 12046
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120522001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12052
+描述: [qrcode: 12052] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120522001
+设备标识: 12052
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120532001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12053
+描述: [qrcode: 12053] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120532001
+设备标识: 12053
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120602001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12060
+描述: [qrcode: 12060] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120492001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12049
+描述: [qrcode: 12049] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120602001
+设备标识: 12060
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120492001
+设备标识: 12049
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120552001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12055
+描述: [qrcode: 12055] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120552001
+设备标识: 12055
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120482001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12048
+描述: [qrcode: 12048] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120482001
+设备标识: 12048
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120672001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12067
+描述: [qrcode: 12067] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120672001
+设备标识: 12067
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120802001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12080
+描述: [qrcode: 12080] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120802001
+设备标识: 12080
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120472001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12047
+描述: [qrcode: 12047] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120472001
+设备标识: 12047
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120642001
+设备标识: 12064
+告警类型: 2001(Device Offline)
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120642001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12064
+描述: [qrcode: 12064] Device Offline
+[2026-06-04 18:58:23] [WARN] [submitAlarm] 提交警报
+警报ID: 2120562001
+告警类型: 2001(Device Offline)
+警报级别: 2(错误/Error)
+设备标识: 12056
+描述: [qrcode: 12056] Device Offline
+[2026-06-04 18:58:23] [ERROR] [persistInsert] 警报日志数据库不可用，丢弃警报
+警报ID: 2120562001
+设备标识: 12056
+告警类型: 2001(Device Offline)

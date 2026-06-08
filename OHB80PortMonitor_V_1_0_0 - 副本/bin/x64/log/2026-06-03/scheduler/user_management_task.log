@@ -1,0 +1,12 @@
+[2026-06-03 08:45:28] [INFO] [UserManagementTask][start] 任务开始，操作=Login
+[2026-06-03 08:45:28] [INFO] [UserManagementTask][executeLogin] 登录成功 user=cytc perm=Engineer
+[2026-06-03 09:00:27] [INFO] [UserManagementTask][start] 任务开始，操作=Login
+[2026-06-03 09:00:27] [INFO] [UserManagementTask][executeLogin] 登录成功 user=cytc perm=Engineer
+[2026-06-03 09:02:25] [INFO] [UserManagementTask][start] 任务开始，操作=Login
+[2026-06-03 09:02:25] [INFO] [UserManagementTask][executeLogin] 登录成功 user=cytc perm=Engineer
+[2026-06-03 09:11:03] [INFO] [UserManagementTask][start] 任务开始，操作=Login
+[2026-06-03 09:11:03] [INFO] [UserManagementTask][executeLogin] 登录成功 user=cytc perm=Engineer
+[2026-06-03 14:55:34] [INFO] [UserManagementTask][start] 任务开始，操作=Login
+[2026-06-03 14:55:34] [INFO] [UserManagementTask][executeLogin] 登录成功 user=cytc perm=Engineer
+[2026-06-03 17:44:42] [INFO] [UserManagementTask][start] 任务开始，操作=Login
+[2026-06-03 17:44:42] [INFO] [UserManagementTask][executeLogin] 登录成功 user=cytc perm=Engineer

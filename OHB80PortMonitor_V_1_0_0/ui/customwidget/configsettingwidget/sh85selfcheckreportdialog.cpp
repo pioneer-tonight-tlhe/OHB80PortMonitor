@@ -264,7 +264,7 @@ void SH85SelfCheckReportDialog::onDeviceParticipated(const QString &qrcode, bool
 // 槽：History Log 累计
 // ============================================================
 
-void SH85SelfCheckReportDialog::onAllFinished(const SH85PeriodicSelfCheckTask::SelfCheckSummary &summary)
+void SH85SelfCheckReportDialog::onAllFinished(const SH85PeriodicSelfCheckTask3::SelfCheckSummary &summary)
 {
     // 一轮结束后，把 Live Log 的倒计时列全部清零
     for (int row = 0; row < m_liveModel->rowCount(); ++row) {

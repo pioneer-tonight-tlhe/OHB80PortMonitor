@@ -1,0 +1,1418 @@
+[2026-06-03 08:42:28] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 08:42:28] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 08:42:28] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 08:42:28] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 08:44:59] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 08:44:59] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 08:44:59] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 08:44:59] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 08:45:18] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 08:45:18] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 08:45:18] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 08:45:18] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 08:45:29] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 08:45:29] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 08:45:29] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12012, 12002, 12005, 12015, 12006, 12016, 12011, 12001, 12004, 12042, 12017, 12018, 12019, 12009, 12013, 12014, 12021, 12008, 12007, 12027, 12045, 12038, 12033, 12020, 12041, 12040, 12039, 12036, 12035, 12031, 12030, 12043, 12037, 12028, 12034, 12046, 12026, 12003, 12032, 12022, 12029, 12049, 12023, 12078, 12059, 12048, 12068, 12051, 12061, 12067, 12010, 12064, 12069, 12057, 12044, 12074, 12050, 12080, 12071, 12060, 12053, 12062, 12063, 12055, 12065, 12047, 12066, 12056, 12052, 12072, 12073, 12058, 12070, 12075, 12076, 12077, 12024, 12079, 12025, 12054）
+[2026-06-03 08:45:29] [INFO] =============================InitCheckTask 调度任务结束=============================
+[2026-06-03 09:00:21] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 09:00:21] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 09:00:21] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 09:00:21] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 09:00:29] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 09:00:29] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 09:00:29] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12013, 12005, 12006, 12007, 12001, 12014, 12008, 12024, 12030, 12015, 12012, 12010, 12011, 12009, 12003, 12021, 12017, 12022, 12016, 12023, 12019, 12020, 12004, 12018, 12002, 12040, 12051, 12053, 12055, 12044, 12079, 12061, 12072, 12069, 12060, 12076, 12063, 12036, 12048, 12068, 12064, 12071, 12065, 12067, 12059, 12074, 12056, 12062, 12073, 12031, 12077, 12035, 12066, 12039, 12028, 12047, 12038, 12032, 12058, 12041, 12042, 12070, 12046, 12045, 12027, 12037, 12043, 12052, 12034, 12029, 12075, 12033, 12057, 12050, 12025, 12054, 12080, 12026, 12049, 12078）
+[2026-06-03 09:00:29] [INFO] =============================InitCheckTask 调度任务结束=============================
+[2026-06-03 09:02:17] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 09:02:17] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 09:02:17] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 09:02:17] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 09:02:25] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 09:02:25] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 09:02:25] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12003, 12007, 12006, 12001, 12005, 12021, 12015, 12002, 12025, 12027, 12038, 12039, 12034, 12036, 12032, 12041, 12033, 12026, 12037, 12023, 12029, 12043, 12024, 12018, 12022, 12030, 12020, 12035, 12028, 12031, 12016, 12017, 12012, 12014, 12010, 12019, 12011, 12004, 12008, 12013, 12009, 12040, 12047, 12044, 12042, 12051, 12050, 12049, 12046, 12048, 12060, 12064, 12063, 12055, 12053, 12057, 12056, 12061, 12059, 12054, 12065, 12066, 12062, 12058, 12045, 12069, 12052, 12073, 12072, 12071, 12068, 12070, 12079, 12075, 12077, 12078, 12076, 12080, 12067, 12074）
+[2026-06-03 09:02:25] [INFO] =============================InitCheckTask 调度任务结束=============================
+[2026-06-03 09:10:55] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 09:10:55] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 09:10:55] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 09:10:55] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 09:11:03] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 09:11:03] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 09:11:03] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12016, 12004, 12005, 12006, 12002, 12017, 12011, 12007, 12015, 12003, 12012, 12014, 12001, 12008, 12018, 12020, 12021, 12026, 12019, 12023, 12033, 12027, 12042, 12028, 12025, 12039, 12022, 12030, 12029, 12024, 12031, 12032, 12035, 12050, 12036, 12040, 12013, 12038, 12010, 12041, 12045, 12043, 12009, 12049, 12044, 12055, 12037, 12034, 12057, 12061, 12058, 12062, 12052, 12054, 12064, 12046, 12047, 12048, 12066, 12053, 12071, 12070, 12074, 12075, 12080, 12076, 12069, 12072, 12073, 12077, 12060, 12056, 12067, 12079, 12065, 12059, 12063, 12068, 12051, 12078）
+[2026-06-03 09:11:03] [INFO] =============================InitCheckTask 调度任务结束=============================
+[2026-06-03 09:46:06] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 09:46:06] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 09:46:06] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 09:46:06] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 14:55:24] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 14:55:24] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 14:55:24] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 14:55:24] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 14:55:32] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 14:55:33] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 14:55:33] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 14:55:33] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12019, 12068, 12010, 12001, 12008, 12009, 12059, 12006, 12071, 12013, 12041, 12018, 12004, 12042, 12007, 12012, 12014, 12016, 12022, 12011, 12037, 12050, 12005, 12015, 12064, 12049, 12044, 12039, 12024, 12003, 12056, 12070, 12021, 12060, 12073, 12063, 12020, 12027, 12066, 12017, 12046, 12043, 12002, 12067, 12075, 12034, 12038, 12061, 12029, 12032, 12077, 12080, 12057, 12026, 12028, 12062, 12078, 12065, 12025, 12045, 12074, 12053, 12076, 12052, 12031, 12036, 12051, 12079, 12048, 12047, 12023, 12072, 12055, 12054, 12040, 12030, 12058, 12035, 12069, 12033）
+[2026-06-03 14:55:33] [INFO] =============================InitCheckTask 调度任务结束=============================
+[2026-06-03 16:56:37] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 16:56:37] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 16:56:37] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 16:56:37] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 16:56:45] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 16:56:45] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 16:56:45] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12003, 12021, 12001, 12016, 12035, 12037, 12036, 12024, 12027, 12019, 12026, 12022, 12028, 12017, 12025, 12018, 12020, 12029, 12031, 12032, 12030, 12023, 12012, 12011, 12013, 12015, 12014, 12002, 12043, 12005, 12004, 12038, 12039, 12006, 12041, 12047, 12040, 12044, 12007, 12042, 12009, 12010, 12008, 12034, 12033, 12048, 12049, 12051, 12058, 12057, 12059, 12045, 12046, 12060, 12054, 12061, 12050, 12062, 12052, 12053, 12056, 12055, 12064, 12063, 12065, 12072, 12071, 12070, 12073, 12069, 12066, 12080, 12067, 12076, 12077, 12078, 12068, 12075, 12074, 12079）
+[2026-06-03 16:56:45] [INFO] =============================InitCheckTask 调度任务结束=============================
+[2026-06-03 17:44:34] [INFO] =============================InitCheckTask 调度任务开始=============================
+[2026-06-03 17:44:34] [INFO] [Scheduler][InitCheckTask][start] 发现 80 个已注册的设备: 12001, 12002, 12003, 12004, 12005, 12006, 12007, 12008, 12009, 12010, 12011, 12012, 12013, 12014, 12015, 12016, 12017, 12018, 12019, 12020, 12021, 12022, 12023, 12024, 12025, 12026, 12027, 12028, 12029, 12030, 12031, 12032, 12033, 12034, 12035, 12036, 12037, 12038, 12039, 12040, 12041, 12042, 12043, 12044, 12045, 12046, 12047, 12048, 12049, 12050, 12051, 12052, 12053, 12054, 12055, 12056, 12057, 12058, 12059, 12060, 12061, 12062, 12063, 12064, 12065, 12066, 12067, 12068, 12069, 12070, 12071, 12072, 12073, 12074, 12075, 12076, 12077, 12078, 12079, 12080
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12001 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12002 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12003 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12004 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12005 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12006 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12007 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12008 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12009 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12010 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12011 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12012 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12013 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12014 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12015 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12016 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12017 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12018 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12019 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12020 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12021 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12022 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12023 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12024 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12025 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12026 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12027 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12028 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12029 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12030 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12031 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12032 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12033 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12034 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12035 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12036 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12037 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12038 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12039 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12040 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12041 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12042 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12043 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12044 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12045 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12046 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12047 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12048 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12049 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12050 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12051 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12052 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12053 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12054 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12055 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12056 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12057 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12058 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12059 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12060 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12061 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12062 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12063 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12064 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12065 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12066 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12067 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12068 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12069 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12070 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12071 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12072 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12073 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12074 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12075 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12076 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12077 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12078 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12079 的初始化完成信号
+[2026-06-03 17:44:34] [DEBUG] [Scheduler][InitCheckTask][start] 已连接设备 12080 的初始化完成信号
+[2026-06-03 17:44:34] [INFO] [Scheduler][InitCheckTask][start] 启动，等待 80 个设备完成初始化
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12002 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (1/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12029 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (2/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12022 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (3/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12011 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (4/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12001 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (5/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12016 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (6/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12030 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (7/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12015 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (8/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12005 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (9/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12031 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (10/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12013 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (11/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12025 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (12/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12018 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (13/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12032 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (14/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12014 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (15/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12019 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (16/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12020 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (17/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12006 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (18/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12024 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (19/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12033 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (20/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12023 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (21/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12027 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (22/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12048 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (23/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12012 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (24/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12039 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (25/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12003 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (26/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12004 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (27/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12009 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (28/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12037 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (29/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12010 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (30/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12038 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (31/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12045 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (32/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12041 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (33/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12008 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (34/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12035 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (35/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12028 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (36/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12055 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (37/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12040 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (38/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12042 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (39/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12049 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (40/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12046 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (41/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12036 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (42/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12007 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (43/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12043 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (44/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12044 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (45/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12056 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (46/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12017 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (47/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12047 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (48/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12026 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (49/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12053 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (50/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12059 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (51/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12067 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (52/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12054 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (53/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12060 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (54/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12063 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (55/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12052 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (56/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12050 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (57/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12057 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (58/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12077 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (59/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12062 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (60/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12064 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (61/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12071 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (62/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12068 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (63/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12058 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (64/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12051 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (65/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12021 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (66/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12066 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (67/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12078 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (68/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12069 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (69/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12070 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (70/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12061 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (71/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12075 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (72/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12074 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (73/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12076 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (74/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12072 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (75/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12079 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (76/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12080 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (77/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12073 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (78/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12065 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (79/80)
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][onInitialFinished] 设备 12034 初始化存在 2 条失败指令: ReadVersion, WriteVEFCGasType (80/80)
+[2026-06-03 17:44:43] [INFO] [Scheduler][InitCheckTask][checkAllFinished] 全部设备初始化检查完成，汇总结果: 总设备数=80, 成功=0, 失败=80
+[2026-06-03 17:44:43] [DEBUG] [Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: 80
+[2026-06-03 17:44:43] [WARN] [Scheduler][InitCheckTask][checkAllFinished] 初始化完成：0 台成功，80 台存在失败指令（12002, 12029, 12022, 12011, 12001, 12016, 12030, 12015, 12005, 12031, 12013, 12025, 12018, 12032, 12014, 12019, 12020, 12006, 12024, 12033, 12023, 12027, 12048, 12012, 12039, 12003, 12004, 12009, 12037, 12010, 12038, 12045, 12041, 12008, 12035, 12028, 12055, 12040, 12042, 12049, 12046, 12036, 12007, 12043, 12044, 12056, 12017, 12047, 12026, 12053, 12059, 12067, 12054, 12060, 12063, 12052, 12050, 12057, 12077, 12062, 12064, 12071, 12068, 12058, 12051, 12021, 12066, 12078, 12069, 12070, 12061, 12075, 12074, 12076, 12072, 12079, 12080, 12073, 12065, 12034）
+[2026-06-03 17:44:43] [INFO] =============================InitCheckTask 调度任务结束=============================

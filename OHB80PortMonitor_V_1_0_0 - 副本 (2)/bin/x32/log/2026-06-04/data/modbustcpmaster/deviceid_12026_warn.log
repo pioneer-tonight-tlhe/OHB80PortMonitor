@@ -1,0 +1,9 @@
+[2026-06-04 09:18:20] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=1
+[2026-06-04 09:18:20] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12026 连接阶段错误: Connection timeout (non-blocking)
+[2026-06-04 09:18:32] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=3
+[2026-06-04 09:19:14] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=10
+[2026-06-04 09:20:14] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=20
+[2026-06-04 09:21:14] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=30
+[2026-06-04 18:58:23] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=1
+[2026-06-04 18:58:23] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12026 连接阶段错误: Connection timeout (non-blocking)
+[2026-06-04 18:58:35] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12026 自动重连超时，连续失败次数=3

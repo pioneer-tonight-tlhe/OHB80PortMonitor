@@ -2,7 +2,7 @@
 #define SH85PERIODICSELFCHECKSETTINGWIDGET_H
 
 #include "settingwidget.h"
-#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 
 #include <QComboBox>
 #include <QLineEdit>
@@ -42,7 +42,7 @@ private slots:
     void onReportBtnClicked();                  // 报告按钮点击
 
     // 任务回调槽函数
-    void onTaskStateChanged(SH85PeriodicSelfCheckTask::State state);    // 任务状态改变
+    void onTaskStateChanged(SH85PeriodicSelfCheckTask3::State state);    // 任务状态改变
     void onTaskElapsedTick(int elapsedSeconds);                          // 自检计时器
     void onTaskIntervalCountdown(int remainingSeconds);                   // 间隔倒计时
     void onTaskBootDelayCountdown(int remainingSeconds);
@@ -59,7 +59,7 @@ private:
     void refreshActionControlsState();    // 刷新操作控件状态
 
     // 从下拉框索引转换为时间单位
-    static SH85PeriodicSelfCheckTask::TimeUnit unitFromIndex(int idx);
+    static SH85PeriodicSelfCheckTask3::TimeUnit unitFromIndex(int idx);
 
 private:
     // 项 1：启用开关
@@ -83,13 +83,13 @@ private:
     // 内部状态
     bool m_isEnabled             = false;  // 是否启用周期性自检
     bool m_periodicActionEnabled = true;   // 周期性操作控件是否启用
-    SH85PeriodicSelfCheckTask::State m_currentTaskState = SH85PeriodicSelfCheckTask::State::Stopped;  // 当前任务状态
+    SH85PeriodicSelfCheckTask3::State m_currentTaskState = SH85PeriodicSelfCheckTask3::State::Stopped;  // 当前任务状态
     int m_elapsedSec             = 0;      // 自检已运行秒数
     int m_intervalRemainSec      = 0;      // 间隔剩余秒数
     int m_bootDelayRemainSec     = 0;
 
     // SharedData 持有的常驻任务
-    QPointer<SH85PeriodicSelfCheckTask> m_task;
+    QPointer<SH85PeriodicSelfCheckTask3> m_task;
 
     // 懒加载复用的报告对话框
     QPointer<SH85SelfCheckReportDialog> m_reportDialog;

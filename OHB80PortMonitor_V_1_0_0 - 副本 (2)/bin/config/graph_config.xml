@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GraphConfig>
+    <!-- 图的基本配置 -->
+    <GraphSettings>
+        <IsUndirected>true</IsUndirected>  <!-- true: 无向图, false: 有向图 -->
+        <DeviceSize>
+            <Size>120</Size>
+            <Spacing>20</Spacing>
+        </DeviceSize>
+    </GraphSettings>
+
+    <!-- 边和节点组合定义 -->
+    <!-- 
+        边的偏移值标签（可选）：
+        FoupLevelOffset 和 SetLevelOffset 分别用于 FoupLevel 和 SetLevel 视图
+        
+        - FoupLevelOffset：FoupLevel 视图下边长度的偏移值（像素）
+        - SetLevelOffset：SetLevel 视图下边长度的偏移值（像素）
+        - 正值：在计算出的边长度基础上增加像素
+        - 负值：在计算出的边长度基础上减少像素
+        - 如果不设置，默认为 0
+        
+        示例：
+        <FoupLevelOffset>48</FoupLevelOffset>   FoupLevel 视图增加 48 像素
+        <SetLevelOffset>-10</SetLevelOffset>   SetLevel 视图减少 10 像素 
+    -->
+    <Edges>
+        <!-- <1,6> 1：TRACK，start；6：SET；STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>6</Size>
+            <Node type="TRACK" id="1" start="true"></Node>
+            <Node type="SET" id="6">
+                <FirstFoupQRCode>11005</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <6,7> 6：SET；7：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="6">
+                <FirstFoupQRCode>11005</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="7">
+                <FirstFoupQRCode>11006</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <7,8> 7：SET；8：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>3</Size>
+            <Node type="SET" id="7">
+                <FirstFoupQRCode>11006</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="8">
+                <FirstFoupQRCode>11007</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <8,9> 8：SET；9：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="8">
+                <FirstFoupQRCode>11007</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="9">
+                <FirstFoupQRCode>11008</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <9,10> 9：SET；10：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="9">
+                <FirstFoupQRCode>11008</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="10">
+                <FirstFoupQRCode>11009</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="10">
+                <FirstFoupQRCode>11009</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="11">
+                <FirstFoupQRCode>11010</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <11,12> 11：SET；12：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="11">
+                <FirstFoupQRCode>11010</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="12">
+                <FirstFoupQRCode>11011</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <12,13> 12：SET；13：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="12">
+                <FirstFoupQRCode>11011</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="SET" id="13">
+                <FirstFoupQRCode>11012</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+        </Edge>
+
+        <!-- <13,14> 13：SET；14：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>0.5</Size>
+            <FoupLevelOffset>416</FoupLevelOffset>
+            <SetLevelOffset>118</SetLevelOffset>
+            <Node type="SET" id="13">
+                <FirstFoupQRCode>11012</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>ABOVE</Position>
+            </Node>
+            <Node type="TRACK" id="14"></Node>
+        </Edge>
+
+        <!-- <1,15> 1：TRACK；15：TRACK；size：100，VERTICAL_VIRTUAL_LINE -->
+        <Edge type="VERTICAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="1"></Node>
+            <Node type="TRACK" id="15"></Node>
+        </Edge>
+
+        <!-- <15,16> 15：TRACK；16：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>4</Size>
+            <Node type="TRACK" id="15"></Node>
+            <Node type="TRACK" id="16"></Node>
+        </Edge>
+
+        <!-- <16,17> 16：TRACK；17：TRACK；size：10，HORIZONTAL_VIRTUAL_LINE -->
+        <Edge type="HORIZONTAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="16"></Node>
+            <Node type="TRACK" id="17"></Node>
+        </Edge>
+
+        <!-- <17,18> 17：TRACK；18：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>12.3</Size>
+            <FoupLevelOffset>194</FoupLevelOffset>
+            <Node type="TRACK" id="17"></Node>
+            <Node type="TRACK" id="18"></Node>
+        </Edge>
+
+        <!-- <15,19> 15：TRACK；19：TRACK；size：100，VERTICAL_VIRTUAL_LINE -->
+        <Edge type="VERTICAL_VIRTUAL_LINE">
+            <Size>1</Size>
+            <Node type="TRACK" id="15"></Node>
+            <Node type="TRACK" id="19"></Node>
+        </Edge>
+
+        <!-- <19,20> 19：TRACK；20：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>5</Size>
+            <Node type="TRACK" id="19"></Node>
+            <Node type="TRACK" id="20"></Node>
+        </Edge>
+
+        <!-- <20,21> 20：TRACK；21：TRACK；size：10，HORIZONTAL_VIRTUAL_LINE -->
+        <Edge type="HORIZONTAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="20"></Node>
+            <Node type="TRACK" id="21"></Node>
+        </Edge>
+
+        <!-- <21,22> 21：TRACK；22：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>11.3</Size>
+            <FoupLevelOffset>190</FoupLevelOffset>
+            <SetLevelOffset>10</SetLevelOffset>
+            <Node type="TRACK" id="21"></Node>
+            <Node type="TRACK" id="22"></Node>
+        </Edge>
+
+        <!-- <16,20> 16：TRACK；20：TRACK，反向S曲线 -->
+        <Edge type="REVERSE_S_CURVE">
+            <Size>1</Size>
+            <Node type="TRACK" id="16"></Node>
+            <Node type="TRACK" id="20"></Node>
+        </Edge>
+
+        <!-- <17,21> 17：TRACK；21：TRACK；size：100，REVERSE_S_CURVE -->
+        <Edge type="REVERSE_S_CURVE">
+            <Size>1</Size>
+            <Node type="TRACK" id="17"></Node>
+            <Node type="TRACK" id="21"></Node>
+        </Edge>
+
+        <Edge type="VERTICAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="19"></Node>
+            <Node type="TRACK" id="23"></Node>
+        </Edge>
+
+        <!-- <23,34> 23：TRACK；34：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>8.5</Size>
+            <Node type="TRACK" id="23"></Node>
+            <Node type="TRACK" id="24"></Node>
+        </Edge>
+
+        <Edge type="HORIZONTAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="24"></Node>
+            <Node type="TRACK" id="25"></Node>
+        </Edge>
+
+        <!-- <25,26> 25：TRACK；26：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="TRACK" id="25"></Node>
+            <Node type="TRACK" id="26"></Node>
+        </Edge>
+
+        <!-- <26,27> 26：TRACK；27：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="HORIZONTAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="26"></Node>
+            <Node type="TRACK" id="27"></Node>
+        </Edge>
+
+        <!-- <27,28> 27：TRACK；28：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <FoupLevelOffset>86</FoupLevelOffset>
+            <SetLevelOffset>-24</SetLevelOffset>
+            <Size>7</Size>
+            <Node type="TRACK" id="27"></Node>
+            <Node type="TRACK" id="28"></Node>
+        </Edge>
+
+        <!-- <23,29> 23：TRACK；29：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="VERTICAL_VIRTUAL_LINE">
+            <Size>1.5</Size>
+            <Node type="TRACK" id="23"></Node>
+            <Node type="TRACK" id="29"></Node>
+        </Edge>
+
+        <!-- <29,30> 29：TRACK；30：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>8.5</Size>
+            <Node type="TRACK" id="29"></Node>
+            <Node type="TRACK" id="30"></Node>
+        </Edge>
+
+        <!-- <30,31> 30：TRACK；31：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="HORIZONTAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="30"></Node>
+            <Node type="TRACK" id="31"></Node>
+        </Edge>
+
+        <!-- <31,32> 31：TRACK；32：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="TRACK" id="31"></Node>
+            <Node type="TRACK" id="32"></Node>
+        </Edge>
+
+        <!-- <32,33> 32：TRACK；33：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="HORIZONTAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="32"></Node>
+            <Node type="TRACK" id="33"></Node>
+        </Edge>
+
+        <!-- <33,34> 33：TRACK；34：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>5.5   </Size>
+            <FoupLevelOffset>828</FoupLevelOffset>
+            <SetLevelOffset>190</SetLevelOffset>
+            <Node type="TRACK" id="33"></Node>
+            <Node type="TRACK" id="34"></Node>
+        </Edge>
+
+        <!-- <24,30> 24：TRACK；30：TRACK；size：100，RIGHT_SEMICIRCLE_ARC -->
+        <Edge type="RIGHT_SEMICIRCLE_ARC">
+            <Size>1.5</Size>
+            <Node type="TRACK" id="24"></Node>
+            <Node type="TRACK" id="30"></Node>
+        </Edge>
+
+        <!-- <25,31> 25：TRACK；31：TRACK；size：100，RIGHT_SEMICIRCLE_ARC -->
+        <Edge type="RIGHT_SEMICIRCLE_ARC">
+            <Size>1.5</Size>
+            <Node type="TRACK" id="25"></Node>
+            <Node type="TRACK" id="31"></Node>
+        </Edge>
+
+        <!-- <26,32> 26：TRACK；32：TRACK；size：100，LEFT_SEMICIRCLE_ARC -->
+        <Edge type="LEFT_SEMICIRCLE_ARC">
+            <Size>1.5</Size>
+            <Node type="TRACK" id="26"></Node>
+            <Node type="TRACK" id="32"></Node>
+        </Edge>
+
+        <!-- <27,33> 27：TRACK；33：TRACK；size：100，LEFT_SEMICIRCLE_ARC -->
+        <Edge type="LEFT_SEMICIRCLE_ARC">
+            <Size>1.5</Size>
+            <Node type="TRACK" id="27"></Node>
+            <Node type="TRACK" id="33"></Node>
+        </Edge>
+
+        <!-- <29,35> 29：TRACK；35：TRACK；size：100，STRAIGHT_LINE -->
+        <Edge type="VERTICAL_VIRTUAL_LINE">
+            <Size>FixSpcaing</Size>
+            <Node type="TRACK" id="29"></Node>
+            <Node type="TRACK" id="35"></Node>
+        </Edge>
+
+        <!-- <35,36> 35：TRACK；36：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>0.5</Size>
+            <Node type="TRACK" id="35"></Node>
+            <Node type="SET" id="36">
+                <FirstFoupQRCode>11036</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <36,37> 36：SET；37：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="36">
+                <FirstFoupQRCode>11036</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="37">
+                <FirstFoupQRCode>11037</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <37,38> 37：SET；38：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="37">
+                <FirstFoupQRCode>11037</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="38">
+                <FirstFoupQRCode>11038</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <38,39> 38：SET；39：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="38">
+                <FirstFoupQRCode>11038</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="39">
+                <FirstFoupQRCode>11039</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <39,40> 39：SET；40：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="39">
+                <FirstFoupQRCode>11039</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="40">
+                <FirstFoupQRCode>11040</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <40,41> 40：SET；41：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="40">
+                <FirstFoupQRCode>11040</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="41">
+                <FirstFoupQRCode>11041</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <41,42> 41：SET；42：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="41">
+                <FirstFoupQRCode>11041</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="42">
+                <FirstFoupQRCode>11042</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <42,43> 42：SET；43：SET；size：100，STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="42">
+                <FirstFoupQRCode>11042</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="43">
+                <FirstFoupQRCode>11043</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <43,2> 43：SET；2：SET；STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>2.3</Size>
+            <!-- <FoupLevelOffset>700</FoupLevelOffset> -->
+            <SetLevelOffset>22</SetLevelOffset>
+            <Node type="SET" id="43">
+                <FirstFoupQRCode>11043</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="2">
+                <FirstFoupQRCode>11001</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <2,3> 2：SET；3：SET；STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="2">
+                <FirstFoupQRCode>11001</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="3">
+                <FirstFoupQRCode>11002</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <3,4> 3：SET；4：SET；STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="3">
+                <FirstFoupQRCode>11002</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="4">
+                <FirstFoupQRCode>11003</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <4,5> 4：SET；5：SET；STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>1</Size>
+            <Node type="SET" id="4">
+                <FirstFoupQRCode>11003</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="SET" id="5">
+                <FirstFoupQRCode>11004</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+        </Edge>
+
+        <!-- <5,44> 5：SET；44：TRACK；STRAIGHT_LINE -->
+        <Edge type="STRAIGHT_LINE">
+            <Size>2.5</Size>
+            <FoupLevelOffset>450</FoupLevelOffset>
+            <SetLevelOffset>140</SetLevelOffset>
+            <Node type="SET" id="5">
+                <FirstFoupQRCode>11004</FirstFoupQRCode>
+                <FoupCount>4</FoupCount>
+                <Position>BELOW</Position>
+            </Node>
+            <Node type="TRACK" id="44"></Node>
+        </Edge>
+
+    </Edges>
+</GraphConfig>

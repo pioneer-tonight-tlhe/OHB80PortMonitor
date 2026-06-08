@@ -1,0 +1,361 @@
+[2026-06-02 14:43:15] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 14:43:15] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 14:43:16] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 14:43:16] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 14:43:17] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 14:43:17] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 14:43:18] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 14:43:18] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 14:43:19] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 14:43:19] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 14:43:20] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 14:43:20] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 14:43:21] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 14:43:21] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 14:43:22] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 14:43:22] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 14:43:23] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 14:43:23] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 14:43:24] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 14:43:24] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 14:43:25] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 14:43:25] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 14:43:26] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开，准备自动重连
+[2026-06-02 14:43:26] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 远端主机关闭了这个连接
+[2026-06-02 14:43:28] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=Cancelled msg=用户取消
+[2026-06-02 15:06:42] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:06:42] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:06:43] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:06:43] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:06:44] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:06:44] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:06:45] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:06:45] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:06:46] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:06:46] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:06:47] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:06:47] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:06:48] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:06:48] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:06:49] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:06:49] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:06:50] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:06:50] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:06:51] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:06:51] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:06:52] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:06:52] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 15:06:53] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:06:53] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 15:06:54] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:06:54] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 15:06:55] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:06:55] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:06:56] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=414 timeout=1000ms
+[2026-06-02 15:06:56] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=414 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:06:56] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=414 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 15:06:56] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:06:56] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:07:03] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:07:03] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:20:45] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:20:45] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:20:46] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:20:46] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:20:47] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:20:47] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:20:48] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:20:48] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:20:49] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:20:49] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:20:50] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:20:50] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:20:51] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:20:51] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:20:52] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:20:52] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:20:53] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:20:53] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:20:54] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:20:54] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:20:55] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:20:55] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 15:20:56] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:20:56] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 15:20:57] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:20:57] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 15:20:58] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:20:58] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:20:59] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=Cancelled msg=用户取消
+[2026-06-02 15:20:59] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:20:59] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:30:05] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:05] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:30:06] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:06] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:30:07] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:07] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:30:08] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:08] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:30:09] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:09] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:30:10] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:10] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:30:11] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:11] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:30:12] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:12] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:30:13] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:13] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:30:14] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:14] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:30:15] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:15] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 15:30:16] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:16] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 15:30:17] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:17] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 15:30:18] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:18] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:30:19] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=413 timeout=1000ms
+[2026-06-02 15:30:19] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=413 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:30:19] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=413 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 15:30:19] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:30:19] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:30:29] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:30:29] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:30:48] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:48] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:30:49] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:49] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:30:50] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:50] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:30:51] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:30:51] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:30:52] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:52] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:30:53] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:53] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:30:54] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:54] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:30:55] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:30:55] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:30:56] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:56] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:30:57] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:57] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:30:58] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:58] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 15:30:59] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:30:59] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 15:31:00] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:00] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 15:31:01] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:01] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:31:02] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=411 timeout=1000ms
+[2026-06-02 15:31:02] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=411 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:31:02] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=411 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 15:31:02] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:31:02] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:31:35] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:31:35] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:31:38] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:31:38] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:31:39] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:31:39] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:31:40] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:31:40] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:31:41] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:31:41] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:31:42] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:31:42] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:31:43] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:31:43] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:31:44] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:31:44] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:31:45] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:31:45] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:31:46] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:46] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:31:47] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:47] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:31:48] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:48] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 15:31:49] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:49] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 15:31:50] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:50] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 15:31:51] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:31:51] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:31:52] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=414 timeout=1000ms
+[2026-06-02 15:31:52] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=414 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:31:52] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=414 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 15:31:52] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:31:52] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:31:57] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:31:57] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:34:09] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:34:09] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:34:10] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:34:10] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:34:11] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:34:11] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:34:12] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:34:12] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:34:13] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:34:13] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:34:14] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:34:14] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:34:15] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:34:15] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:34:16] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:34:16] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:34:18] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:34:18] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:34:18] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:34:18] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:34:19] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=Cancelled msg=用户取消
+[2026-06-02 15:34:19] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:34:19] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:36:29] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:36:29] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:36:30] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:36:30] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:36:31] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:36:31] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:36:32] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:36:32] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:36:33] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:36:33] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:36:34] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:36:34] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:36:35] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:36:35] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:36:36] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:36:36] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:36:37] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:36:37] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:36:38] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:36:38] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:36:39] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:36:39] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 15:36:40] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:36:40] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 15:36:41] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:36:41] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 15:36:42] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:36:42] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:36:43] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=411 timeout=1000ms
+[2026-06-02 15:36:43] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=411 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:36:43] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=411 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 15:36:43] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:36:43] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 15:36:56] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:36:56] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 15:37:13] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:37:13] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:37:14] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:37:14] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:37:15] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:37:15] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:37:16] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 15:37:16] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:37:17] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:37:17] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 15:37:18] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:37:18] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 15:37:19] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:37:19] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 15:37:20] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 15:37:20] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 15:37:21] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:37:21] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 15:37:22] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 15:37:22] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 15:37:23] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=Cancelled msg=用户取消
+[2026-06-02 15:37:23] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 15:37:23] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 16:05:21] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:05:21] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 16:05:22] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:05:22] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 16:05:23] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:05:23] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 16:05:24] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:05:24] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:05:25] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:05:25] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 16:05:26] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:05:26] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 16:05:27] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:05:27] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 16:05:28] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:05:28] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:05:29] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:05:29] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 16:05:30] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:05:30] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 16:05:31] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:05:31] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 16:05:32] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:05:32] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 16:05:33] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:05:33] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 16:05:34] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:05:34] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:05:35] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=414 timeout=1000ms
+[2026-06-02 16:05:35] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=414 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:05:35] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=414 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 16:05:35] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 16:05:35] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 16:23:19] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 16:23:19] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误
+[2026-06-02 16:44:53] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:44:53] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 16:44:54] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:44:54] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 16:44:55] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:44:55] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 16:44:56] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=ReadVersion uuid=53 timeout=1000ms
+[2026-06-02 16:44:56] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=ReadVersion uuid=53 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:44:57] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:44:57] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=1/4
+[2026-06-02 16:44:58] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:44:58] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=2/4
+[2026-06-02 16:44:59] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:44:59] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=3/4
+[2026-06-02 16:45:00] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=INITIAL id=WriteVEFCGasType uuid=54 timeout=1000ms
+[2026-06-02 16:45:00] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=INITIAL id=WriteVEFCGasType uuid=54 error=等待RTU响应超时 sendCount=4/4 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:45:01] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:45:01] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=1/6
+[2026-06-02 16:45:02] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:45:02] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=2/6
+[2026-06-02 16:45:03] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:45:03] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=3/6
+[2026-06-02 16:45:04] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:45:04] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=4/6
+[2026-06-02 16:45:05] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:45:05] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败，准备重发 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=5/6
+[2026-06-02 16:45:06] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=WriteQRCode uuid=334 timeout=1000ms
+[2026-06-02 16:45:06] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=WriteQRCode uuid=334 error=等待RTU响应超时 sendCount=6/6 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:45:07] [WARN] [data][ModbusTcpMaster][ModbusCommandReceiver][onResponseTimeout]：设备ID=12014 响应超时 module=BUSINESS id=StartSelfCheck uuid=414 timeout=1000ms
+[2026-06-02 16:45:07] [WARN] [data][ModbusTcpMaster][ModbusCommandSender][handleFailedCommand]：设备ID=12014 指令失败 module=BUSINESS id=StartSelfCheck uuid=414 error=等待RTU响应超时 sendCount=1/1 timedOut=1 checksumError=0 deviceBusy=0
+[2026-06-02 16:45:08] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][onCommandFinished]：设备ID=12014 响应 state=下发自检指令中 ok=0 id=StartSelfCheck uuid=414 error=等待RTU响应超时
+TX：01 06 00 17 00 A5 F9 B5
+RX：01 06 00 17 00 A5
+[2026-06-02 16:45:08] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][emitErrorAndFinish]：设备ID=12014 自检失败 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 16:45:08] [WARN] [data][ModbusTcpMaster][SH85SelfChecker][finishOnly]：设备ID=12014 自检完成 success=0 result=StartCommandFailed msg=启动自检指令下发失败: 等待RTU响应超时
+[2026-06-02 17:16:35] [WARN] [data][ModbusTcpMaster][ModbusConnecter][disconnected]：设备ID=12014 TCP连接断开
+[2026-06-02 17:16:35] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12014 连接阶段错误: Connection lost: 未知的错误

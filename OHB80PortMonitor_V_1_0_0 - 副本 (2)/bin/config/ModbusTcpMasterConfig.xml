@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ModbusTcpMasterConfig version="1.0">
+
+    <!-- ==================== 初始化指令集 ==================== -->
+    <InitialCommands>
+        <CommandInterval>100</CommandInterval>
+        <CommandTimeout>1000</CommandTimeout>
+        <RetryCount>3</RetryCount>
+        <CommandSet>
+            <Command ref="ReadVersion"/>
+            <Command ref="WriteVEFCGasType"/>
+        </CommandSet>
+    </InitialCommands>
+
+    <!-- ==================== 周期轮询指令集 ==================== -->
+    <PeriodicCommands>
+        <CommandInterval>300</CommandInterval>
+        <CommandTimeout>1000</CommandTimeout>
+        <RetryCount>0</RetryCount>
+        <CommandSet>
+            <Command ref="ReadFoupStatus"/>
+            <Command ref="ReadIdlePurgeAll"/>
+        </CommandSet>
+    </PeriodicCommands>
+
+    <!-- ==================== 业务指令集 ==================== -->
+    <BusinessCommands>
+        <CommandTimeout>1000</CommandTimeout>
+        <RetryCount>5</RetryCount>
+    </BusinessCommands>
+
+    <!-- ==================== 指令定义 ==================== -->
+    <CommandDefinitions>
+
+        <!-- ========================================
+             1. 功能码 04 — 读输入寄存器（单寄存器）
+             设备版本号查询
+             请求帧: 01 04 00 15 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte)
+             ======================================== -->
+        <Command id="ReadVersion">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 15</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             21. 功能码 04 — 读输入寄存器（单寄存器）
+             读取 VEFC 流量单位以及介质配置状态
+             请求帧: 01 04 00 11 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte)
+             CH_1:
+                 hi_byte: 0=单位配置成功，1=单位配置失败（默认：L/Min）
+                 lo_byte: 0=介质配置成功，1=配置失败（默认：CDA）
+             ======================================== -->
+        <Command id="ReadVEFCFlowUnitAndMediumStatus">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 11</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             2. 功能码 04 — 读输入寄存器（多寄存器）
+             FOUP 属性查询指令
+             读取 FOUP 属性：进气压力、负压、流量、湿度、温度、FOUP IN 充气时间等
+             请求帧: 01 04 00 00 00 09
+             响应帧: 01 04 12 XX×18
+             
+             CH_1: 进气主路气压值 (0~10Bar)     = (256*hi + lo) / 10000
+             CH_2: 负压值                        = (256*hi + lo) / 10000
+             CH_3: 进气主路流量值 (4~200L/Min)  = (256*hi + lo) / 100
+             CH_4: 真空回路相对湿度 (0~100%)    = (256*hi + lo) / 100
+             CH_5: 真空回路气体温度 (0~100℃)   = (256*hi + lo) / 100
+             CH_6: FOUP 在位状态 (1=in, 0=out)
+             CH_7: FOUP IN 充气秒数 (高16位)    = (256*hi + lo)
+             CH_8: FOUP IN 充气秒数 (低16位)    = (256*hi + lo)
+             CH_9: 设备状态（2byte）
+                  bit0: VEFC状态（0=OK，1=NG）
+                  bit1: 温湿度传感器（0=OK，1=NG）
+                  bit2: FOUP IN充气30min湿度是否达标（0=OK，1=NG）
+             ======================================== -->
+        <Command id="ReadFoupStatus">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 00</StartAddr>
+                <RegisterCount>00 09</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>12</ByteCount>
+                <RegisterValue>00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</RegisterValue>
+            </respond>
+        </Command>
+        
+        <!-- ========================================
+             6. 功能码 04 — 读输入寄存器（三寄存器合并帧）
+             合并查询 idle purge 使能 / 状态 / 工作计时时间
+             Request : 01 04 00 1D 00 03 CRC
+             Response: 01 04 06 CH1_H CH1_L CH2_H CH2_L CH3_H CH3_L CRC
+               CH_1 (0x001D): Idle Purge 使能 (1=开启, 0=关闭)
+               CH_2 (0x001E): Idle Purge 状态
+               CH_3 (0x001F): Idle Purge 工作计时时间
+             ======================================== -->
+        <Command id="ReadIdlePurgeAll">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 1D</StartAddr>
+                <RegisterCount>00 03</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>06</ByteCount>
+                <RegisterValue>00 00 00 00 00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             6a. 功能码 04 — 读输入寄存器（单寄存器，保留备用）
+             查询 idle purge 使能
+             请求帧: 01 04 00 1D 00 01 A1 CC
+             响应帧: 01 04 02 XX XX
+             ======================================== -->
+        <Command id="ReadIdlePurgeEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 1D</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             7. 功能码 04 — 读输入寄存器（单寄存器，保留备用）
+             查询 idle purge 状态
+             请求帧: 01 04 00 1E 00 01 51 CC
+             响应帧: 01 04 02 XX XX
+             ======================================== -->
+        <Command id="ReadIdlePurgeStatus">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 1E</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             8. 功能码 04 — 读输入寄存器（单寄存器，保留备用）
+             idle purge 工作计时时间查询
+             请求帧: 01 04 00 1F 00 01 00 0C
+             响应帧: 01 04 02 XX XX
+             ======================================== -->
+        <Command id="ReadIdlePurgeWorkingTime">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 1F</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             9. 功能码 06 — 写单个保持寄存器
+             写入 idle purge 使能（1=开启，0=关闭）
+             请求帧: 01 06 00 14 XX XX
+             响应帧: 01 06 00 14 XX XX（镜像）
+             ======================================== -->
+        <Command id="WriteIdlePurgeEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 14</StartAddr>
+                <!-- 写入值，固定2字节：1=开启，0=关闭 -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 14</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             10. 功能码 06 — 写单个保持寄存器
+             写入 idle purge 充气时间（秒）
+             请求帧: 01 06 00 15 XX XX
+             响应帧: 01 06 00 15 XX XX（镜像）
+             ======================================== -->
+        <Command id="WriteIdlePurgeTime">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 15</StartAddr>
+                <!-- 写入值，固定2字节：计时时长（s） -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 15</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             11. 功能码 10 — 写多个保持寄存器
+             写入 QRCode/设备ID
+             请求帧: 01 10 00 02 00 02 04 XX XX XX XX CRC
+             响应帧: 01 10 00 02 00 02 CRC
+             ======================================== -->
+        <Command id="WriteQRCode">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>10</Function>
+                <StartAddr>00 02</StartAddr>
+                <RegisterCount>00 02</RegisterCount>
+                <!-- 数据长度：4字节（2个寄存器 × 2字节/寄存器） -->
+                <ByteCount>04</ByteCount>
+                <!-- 写入值：QRCode/设备ID（4字节） -->
+                <RegisterValue>00 00 00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>10</Function>
+                <StartAddr>00 02</StartAddr>
+                <RegisterCount>00 02</RegisterCount>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             12. 功能码 06 — 写单个保持寄存器
+             写入 idle purge 充气间隔（秒）
+             请求帧: 01 06 00 16 XX XX
+             响应帧: 01 06 00 16 XX XX（镜像）
+             ======================================== -->
+        <Command id="WriteIdlePurgeInterval">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 16</StartAddr>
+                <!-- 写入值，固定2字节：计时时长（s） -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 16</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             12. 功能码 06 — 写单个保持寄存器
+             设置气控阀压力
+             请求帧: 01 06 00 02 XX XX CRC
+             响应帧: 01 06 00 02 XX XX CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             ======================================== -->
+        <Command id="WritePneumaticValvePressure">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 02</StartAddr>
+                <!-- 写入值，固定2字节：气控阀压力值 -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 02</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             13. 功能码 04 — 读输入寄存器（单寄存器）
+             自检反馈状态查询
+             请求帧: 01 04 00 12 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte)
+             CH_1: 自检状态
+                 0 = 无报警/空闲
+                 1 = 自检进行中（不能进行充气操作）
+                 2 = 自检成功
+                 3 = 湿度超标失败
+                 4 = 85传感器通讯故障
+                 5 = 阈值参数错误（湿度下限阈值 <= 0）
+             ======================================== -->
+        <Command id="ReadSelfCheckStatus">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 12</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             14. 功能码 04 — 读输入寄存器（单寄存器）
+             读取湿度 offset 触发下限数值
+             请求帧: 01 04 00 14 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte)
+             CH_1: 湿度校准触发阈值
+             ======================================== -->
+        <Command id="ReadHumidityOffsetThreshold">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 14</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             15. 功能码 06 — 写单个保持寄存器
+             启动 SH85 自检流程
+             请求帧: 01 06 00 17 00 A5 CRC
+             响应帧: 01 06 00 17 00 A5 CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             备注：返回值和写入值相同
+             ======================================== -->
+        <Command id="StartSelfCheck">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 17</StartAddr>
+                <!-- 写入值：00 A5 启动自检 -->
+                <RegisterValue>00 A5</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 17</StartAddr>
+                <RegisterValue>00 A5</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             16. 功能码 06 — 写单个保持寄存器
+             写入湿度 offset 触发下限数值
+             请求帧: 01 06 00 19 XX XX CRC
+             响应帧: 01 06 00 19 XX XX CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             CH_1: 湿度校准触发阈值
+             备注：默认参数 5% 写 18%，需要写入 1800
+             返回值和写入值相同
+             ======================================== -->
+        <Command id="WriteHumidityOffsetThreshold">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 19</StartAddr>
+                <!-- 写入值，固定2字节：湿度 offset 触发下限数值 -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 19</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             17. 功能码 06 — 写单个保持寄存器
+             写入湿度 offset 参数
+             请求帧: 01 06 00 18 XX XX CRC
+             响应帧: 01 06 00 18 XX XX CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             CH_1: 湿度 offset 参数
+             备注：默认参数 0 写 18%，需要写入 1800
+             返回值和写入值相同
+             ======================================== -->
+        <Command id="WriteHumidityOffset">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 18</StartAddr>
+                <!-- 写入值，固定2字节：湿度 offset 参数 -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 18</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             18. 功能码 06 — 写单个保持寄存器
+             设置 Purge 流量大小（VEFC 流量）
+             请求帧: 01 06 00 00 XX XX CRC
+             响应帧: 01 06 00 00 XX XX CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             备注：写流量 35（slm/sccm），按 35×100 写入，对应 3500
+                   仅 FOUP IN 时有效，FOUP OUT 状态 VEFC 流量值固定为 0
+             ======================================== -->
+        <Command id="WritePurgeFlow">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 00</StartAddr>
+                <!-- 写入值，固定2字节：流量 × 100 -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 00</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             19. 功能码 06 — 写单个保持寄存器
+             写入 VEFC 气体介质类型（掉电保持）
+             请求帧: 01 06 00 01 XX XX CRC
+             响应帧: 01 06 00 01 XX XX CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             介质类型枚举：
+                 0x0000 = CDA（上电初始默认设置）
+                 0x0001 = N2
+                 0x0002 = Ar
+                 0x0003 = CO2
+                 0x0004 = O2
+             备注：放到初始下发器中
+             ======================================== -->
+        <Command id="WriteVEFCGasType">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 01</StartAddr>
+                <!-- 写入值，固定2字节：气体介质枚举值 -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 01</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             20. 功能码 06 — 写单个保持寄存器
+             板卡状态禁用使能
+             请求帧: 01 06 00 FF XX XX CRC
+             响应帧: 01 06 00 FF XX XX CRC
+             数据：2 字节
+               CH_1 (2B) 板卡状态：1=禁用，0=正常
+             Note：
+               - 板卡禁用后关于 FOUP IN/OUT 切换产生的逻辑都会失效：
+                 1. 阀状态切换失效（气路均不导通）
+                 2. FOUP IN 30min 湿度检测失效（不执行）
+                 3. VEFC 流量下发为 0（但此时可直接配置 VEFC 气体介质；可下发 FOUP IN VEFC 流量设置，内部保存，注意不会生效，除非板卡禁用失能）
+               - 该禁用标志位会掉电保持
+             ======================================== -->
+        <Command id="SetBoardEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 FF</StartAddr>
+                <!-- 写入值：板卡状态（2字节，1=禁用，0=正常） -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 FF</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             21. 功能码 04 — 读输入寄存器（单寄存器）
+             读取板卡禁用状态
+             请求帧: 01 04 00 FF 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             数据：2 字节
+               CH_1 (2B) 板卡状态：1=禁用，0=正常
+             ======================================== -->
+        <Command id="ReadBoardEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 FF</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             22. 功能码 10 — 写多个保持寄存器
+             设置 UI 页面刷新时间
+             请求帧: 01 10 00 04 00 03 06 XX XX XX XX XX XX CRC
+             响应帧: 01 10 00 04 00 03 CRC
+             数据：6 字节（3 个寄存器）
+               CH_1 (2B) logo 界面展示时间
+               CH_2 (2B) 参数界面展示总时间
+               CH_3 (2B) 参数界面切换时间
+             ======================================== -->
+        <Command id="WriteUIRefreshTime">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>10</Function>
+                <StartAddr>00 04</StartAddr>
+                <RegisterCount>00 03</RegisterCount>
+                <!-- 数据长度：6字节（3个寄存器 × 2字节/寄存器） -->
+                <ByteCount>06</ByteCount>
+                <!-- 写入值：UI 页面刷新时间（6字节） -->
+                <RegisterValue>00 00 00 00 00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>10</Function>
+                <StartAddr>00 04</StartAddr>
+                <RegisterCount>00 03</RegisterCount>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             23. 功能码 04 — 读输入寄存器（单寄存器）
+             读取 VEFC 当前输出压力值
+             请求帧: 01 04 00 16 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte) / 10
+             单位：Kpa
+             ======================================== -->
+        <Command id="ReadVEFCPressure">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 16</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             24. 功能码 04 — 读输入寄存器（单寄存器）
+             读取 VEFC 压力传感器平均温度值
+             请求帧: 01 04 00 17 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte) / 100
+             单位：℃
+             ======================================== -->
+        <Command id="ReadVEFCTemperature">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 17</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+    </CommandDefinitions>
+
+</ModbusTcpMasterConfig>

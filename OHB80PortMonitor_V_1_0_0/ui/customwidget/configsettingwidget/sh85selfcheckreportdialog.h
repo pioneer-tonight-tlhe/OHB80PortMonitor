@@ -1,7 +1,7 @@
 #ifndef SH85SELFCHECKREPORTDIALOG_H
 #define SH85SELFCHECKREPORTDIALOG_H
 
-#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 
 #include <QDialog>
@@ -55,7 +55,7 @@ public slots:
     void onOneFinished(const QString &masterId, bool success, const QString &description);
 
     /// 一轮自检结束（来自 task::allFinished）
-    void onAllFinished(const SH85PeriodicSelfCheckTask::SelfCheckSummary &summary);
+    void onAllFinished(const SH85PeriodicSelfCheckTask3::SelfCheckSummary &summary);
 
     /// 设备参与状态变化（来自 task::deviceParticipated）
     void onDeviceParticipated(const QString &qrcode, bool participated);

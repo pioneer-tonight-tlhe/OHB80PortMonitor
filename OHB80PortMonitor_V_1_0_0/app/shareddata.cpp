@@ -7,7 +7,7 @@
 #include "scheduler/tasks/monitor_data_task/monitor_data_task.h"
 #include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
-#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h"
 #include "setofohbinfo.h"
 #include <QDebug>
@@ -19,7 +19,7 @@ NetworkStatusTask* SharedData::s_networkStatusTask = nullptr;
 MonitorDataTask* SharedData::s_monitorDataTask = nullptr;
 AlarmDispatchTask* SharedData::s_alarmDispatchTask = nullptr;
 OperationDispatchTask* SharedData::s_operationDispatchTask = nullptr;
-SH85PeriodicSelfCheckTask* SharedData::s_sh85PeriodicSelfCheckTask = nullptr;
+SH85PeriodicSelfCheckTask3* SharedData::s_sh85PeriodicSelfCheckTask3 = nullptr;
 VEFCSensorMonitorTask* SharedData::s_vefcSensorMonitorTask = nullptr;
 
 SharedData::SharedData() {
@@ -166,9 +166,9 @@ void SharedData::initScheduler()
     }
 
     // 创建并提交 SH85 周期自检任务（长驻任务）
-    if (!s_sh85PeriodicSelfCheckTask) {
-        s_sh85PeriodicSelfCheckTask = new SH85PeriodicSelfCheckTask();
-        QString id = scheduler->submitTask(s_sh85PeriodicSelfCheckTask);
+    if (!s_sh85PeriodicSelfCheckTask3) {
+        s_sh85PeriodicSelfCheckTask3 = new SH85PeriodicSelfCheckTask3();
+        QString id = scheduler->submitTask(s_sh85PeriodicSelfCheckTask3);
         qDebug() << "[SharedData] 已提交 SH85 周期自检任务, TaskID:" << id;
 
         // 应用配置：从 ohb_device.ini 读取 [sh85selfchecktask] 段
@@ -177,12 +177,12 @@ void SharedData::initScheduler()
         const int  period_s = cfg.readSH85SelfCheckPeriodSeconds();
 
         // 先设置周期（单位：秒），再设置启用状态
-        QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask, "setPeriod",
+        QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask3, "setPeriod",
                                   Qt::QueuedConnection,
                                   Q_ARG(int, period_s),
-                                  Q_ARG(SH85PeriodicSelfCheckTask::TimeUnit,
-                                        SH85PeriodicSelfCheckTask::TimeUnit::Second));
-        QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask, "setEnabled",
+                                  Q_ARG(SH85PeriodicSelfCheckTask3::TimeUnit,
+                                        SH85PeriodicSelfCheckTask3::TimeUnit::Second));
+        QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask3, "setEnabled",
                                   Qt::QueuedConnection,
                                   Q_ARG(bool, enabled));
     }
@@ -217,9 +217,9 @@ OperationDispatchTask* SharedData::getOperationDispatchTask()
     return s_operationDispatchTask;
 }
 
-SH85PeriodicSelfCheckTask* SharedData::getSH85PeriodicSelfCheckTask()
+SH85PeriodicSelfCheckTask3* SharedData::getSH85PeriodicSelfCheckTask3()
 {
-    return s_sh85PeriodicSelfCheckTask;
+    return s_sh85PeriodicSelfCheckTask3;
 }
 
 VEFCSensorMonitorTask* SharedData::getVEFCSensorMonitorTask()

@@ -1,0 +1,882 @@
+[2026-06-04 09:18:17] [INFO] [ui][SetLevelGraphBuilder][setStartNodePosition] 设置起始节点坐标: (20, 120)
+[2026-06-04 09:18:17] [INFO] [ui][FoupLevelGraphBuilder][setStartNodePosition]设置起始节点坐标: (20, 120)
+[2026-06-04 09:18:17] [INFO] ====================天车轨道布局图配置文件解析 开始====================
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parse]解析阶段(1): 解析GraphConfig标签开始
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseGraphSettings]图类型: 无向图
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseGraphSettings]设备控件尺寸: 120, 间距: 20
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parse]解析阶段(1): 解析GraphConfig标签完成
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(2): 解析Edges标签
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]找到49条边数据
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#0: 设置 setOfOHBInfoList[0].uiId = 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=1
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=6, QRCode=11005, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 1 -> 6，类型: STRAIGHT_LINE，大小: 840
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#1: 设置 setOfOHBInfoList[1].uiId = 7
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=7, QRCode=11006, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 6 -> 7，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#2: 设置 setOfOHBInfoList[2].uiId = 8
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=8, QRCode=11007, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 7 -> 8，类型: STRAIGHT_LINE，大小: 420
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#3: 设置 setOfOHBInfoList[3].uiId = 9
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=9, QRCode=11008, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 8 -> 9，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#4: 设置 setOfOHBInfoList[4].uiId = 10
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=10, QRCode=11009, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 9 -> 10，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#5: 设置 setOfOHBInfoList[5].uiId = 11
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=11, QRCode=11010, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 10 -> 11，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#6: 设置 setOfOHBInfoList[6].uiId = 12
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=12, QRCode=11011, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 11 -> 12，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#7: 设置 setOfOHBInfoList[7].uiId = 13
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=13, QRCode=11012, Count=4, Position=ABOVE
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 12 -> 13，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=14
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 13 -> 14，类型: STRAIGHT_LINE，大小: 70，FoupLevel偏移: 416，SetLevel偏移: 118
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=15
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 1 -> 15，类型: VERTICAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=16
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 15 -> 16，类型: STRAIGHT_LINE，大小: 560
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=17
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=18
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 17 -> 18，类型: STRAIGHT_LINE，大小: 1722，FoupLevel偏移: 194，SetLevel偏移: 0
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=19
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 15 -> 19，类型: VERTICAL_VIRTUAL_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=20
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 16 -> 17，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 19 -> 20，类型: STRAIGHT_LINE，大小: 700
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=21
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 20 -> 21，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=22
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 21 -> 22，类型: STRAIGHT_LINE，大小: 1582，FoupLevel偏移: 190，SetLevel偏移: 10
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 16 -> 20，类型: REVERSE_S_CURVE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 17 -> 21，类型: REVERSE_S_CURVE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=23
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 19 -> 23，类型: VERTICAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=24
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 23 -> 24，类型: STRAIGHT_LINE，大小: 1190
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=25
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 24 -> 25，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=26
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 25 -> 26，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=27
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 26 -> 27，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=28
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 27 -> 28，类型: STRAIGHT_LINE，大小: 980，FoupLevel偏移: 86，SetLevel偏移: -24
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=29
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 23 -> 29，类型: VERTICAL_VIRTUAL_LINE，大小: 210
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=30
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 29 -> 30，类型: STRAIGHT_LINE，大小: 1190
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=31
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 30 -> 31，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=32
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 31 -> 32，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=33
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 32 -> 33，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=34
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 33 -> 34，类型: STRAIGHT_LINE，大小: 770，FoupLevel偏移: 828，SetLevel偏移: 190
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 24 -> 30，类型: RIGHT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 25 -> 31，类型: RIGHT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 26 -> 32，类型: LEFT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 27 -> 33，类型: LEFT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=35
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 29 -> 35，类型: VERTICAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#8: 设置 setOfOHBInfoList[8].uiId = 36
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=36, QRCode=11036, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 35 -> 36，类型: STRAIGHT_LINE，大小: 70
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#9: 设置 setOfOHBInfoList[9].uiId = 37
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=37, QRCode=11037, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 36 -> 37，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#10: 设置 setOfOHBInfoList[10].uiId = 38
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=38, QRCode=11038, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 37 -> 38，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#11: 设置 setOfOHBInfoList[11].uiId = 39
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=39, QRCode=11039, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 38 -> 39，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#12: 设置 setOfOHBInfoList[12].uiId = 40
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=40, QRCode=11040, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 39 -> 40，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#13: 设置 setOfOHBInfoList[13].uiId = 41
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=41, QRCode=11041, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 40 -> 41，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#14: 设置 setOfOHBInfoList[14].uiId = 42
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=42, QRCode=11042, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 41 -> 42，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#15: 设置 setOfOHBInfoList[15].uiId = 43
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=43, QRCode=11043, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 42 -> 43，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#16: 设置 setOfOHBInfoList[16].uiId = 2
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=2, QRCode=11001, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 43 -> 2，类型: STRAIGHT_LINE，大小: 322，FoupLevel偏移: 0，SetLevel偏移: 22
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#17: 设置 setOfOHBInfoList[17].uiId = 3
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=3, QRCode=11002, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 2 -> 3，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#18: 设置 setOfOHBInfoList[18].uiId = 4
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=4, QRCode=11003, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 3 -> 4，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#19: 设置 setOfOHBInfoList[19].uiId = 5
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=5, QRCode=11004, Count=4, Position=BELOW
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 4 -> 5，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=44
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 5 -> 44，类型: STRAIGHT_LINE，大小: 350，FoupLevel偏移: 450，SetLevel偏移: 140
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parse]解析阶段(5): 配置文件解析完毕
+[2026-06-04 09:18:17] [INFO] [ui][GraphConfig][parse]配置文件解析完成，节点数: 44，边数: 49
+[2026-06-04 09:18:17] [INFO] ====================天车轨道布局图配置文件解析 结束====================
+[2026-06-04 09:18:19] [INFO] ====================Set视图天车轨道布局图重构  开始====================
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 开始构建图，节点数: 44，边数: 49
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 1
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 2
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 3
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 4
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 5
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 6
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 7
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 8
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 9
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 10
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 11
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 12
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 13
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 14
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 15
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 16
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 17
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 18
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 19
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 20
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 21
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 22
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 23
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 24
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 25
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 26
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 27
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 28
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 29
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 30
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 31
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 32
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 33
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 34
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 35
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 36
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 37
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 38
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 39
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 40
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 41
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 42
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 43
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 添加顶点 44
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 1 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 6 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (1,6)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 6 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 7 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (6,7)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 7 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 8 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (7,8)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 8 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 9 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (8,9)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 9 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 10 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (9,10)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 11 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 10 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 11 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (11,12)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 12 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 13 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 12 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (12,13)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (10,11)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 13 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 14 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (13,14)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 1 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 15 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (1,15)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 15 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 16 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (15,16)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 16 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 17 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (16,17)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 17 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 18 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (17,18)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 15 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 19 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (15,19)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 19 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 20 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (19,20)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 20 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 21 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (20,21)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 21 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 22 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (21,22)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 16 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 20 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (16,20)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 17 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 21 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (17,21)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 19 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 23 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (19,23)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 23 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 24 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (23,24)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 24 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 25 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (24,25)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 25 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 26 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (25,26)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 26 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 27 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (26,27)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 27 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 28 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (27,28)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 23 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 29 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (23,29)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 29 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 30 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (29,30)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 30 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 31 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (30,31)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 31 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 32 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (31,32)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 32 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 33 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (32,33)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 33 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 34 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (33,34)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 24 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 30 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (24,30)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 25 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 31 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (25,31)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 26 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 32 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (26,32)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 27 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 33 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (27,33)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 29 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 35 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (29,35)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 35 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 36 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (35,36)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 36 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 37 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (36,37)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 37 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 38 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (37,38)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 38 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 39 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (38,39)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 39 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 40 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (39,40)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 40 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 41 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (40,41)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 41 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 42 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (41,42)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 42 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 43 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (42,43)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 43 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 2 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (43,2)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 2 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 3 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (2,3)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 3 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 4 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (3,4)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 4 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 5 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (4,5)
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 5 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addVertex] 顶点 44 已存在，跳过
+[2026-06-04 09:18:19] [DEBUG] [ui][Graph][addEdge] 添加边 (5,44)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][buildMultilist]邻接多重表构建完成
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 阶段(1): 重建邻接多重表完成
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][layoutAndDraw]起始节点ID: 1, 坐标: (20, 120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 1 -> 6, 长度: 840, 起点(20,120), 终点(860,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=6设置Set信息: uiId=6, setId=12001~12004, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=6, 轨道坐标=(860, 120), 实际坐标=(800, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=6
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 6 -> 7, 长度: 140, 起点(860,120), 终点(1000,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=7设置Set信息: uiId=7, setId=12005~12008, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=7, 轨道坐标=(1000, 120), 实际坐标=(940, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=7
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 7 -> 8, 长度: 420, 起点(1000,120), 终点(1420,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=8设置Set信息: uiId=8, setId=12009~12012, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=8, 轨道坐标=(1420, 120), 实际坐标=(1360, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=8
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 8 -> 9, 长度: 140, 起点(1420,120), 终点(1560,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=9设置Set信息: uiId=9, setId=12013~12016, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=9, 轨道坐标=(1560, 120), 实际坐标=(1500, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=9
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 9 -> 10, 长度: 140, 起点(1560,120), 终点(1700,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=10设置Set信息: uiId=10, setId=12017~12020, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=10, 轨道坐标=(1700, 120), 实际坐标=(1640, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=10
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 10 -> 11, 长度: 140, 起点(1700,120), 终点(1840,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=11设置Set信息: uiId=11, setId=12021~12024, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=11, 轨道坐标=(1840, 120), 实际坐标=(1780, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=11
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 11 -> 12, 长度: 140, 起点(1840,120), 终点(1980,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=12设置Set信息: uiId=12, setId=12025~12028, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=12, 轨道坐标=(1980, 120), 实际坐标=(1920, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=12
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 12 -> 13, 长度: 140, 起点(1980,120), 终点(2120,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=13设置Set信息: uiId=13, setId=12029~12032, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=13, 轨道坐标=(2120, 120), 实际坐标=(2060, 14), 位置=ABOVE
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=13
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 13 -> 14, 长度: 70 + 偏移: 118 = 188, 起点(2120,120), 终点(2308,120)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 1 -> 15, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,120), 终点(20,126)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 15 -> 16, 长度: 560, 起点(20,126), 终点(580,126)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 16 -> 17, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(580,126), 终点(586,126)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 17 -> 18, 长度: 1722, 起点(586,126), 终点(2308,126)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 15 -> 19, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,126), 终点(20,266)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 19 -> 20, 长度: 700, 起点(20,266), 终点(720,266)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 20 -> 21, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(720,266), 终点(726,266)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 21 -> 22, 长度: 1582 + 偏移: 10 = 1592, 起点(726,266), 终点(2318,266)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSCurve]S曲线: 16 -> 20, 目标节点已有坐标，使用已有坐标
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSCurve]绘制曲线 16 -> 20, 类型: REVERSE_S_CURVE, 起点(580,126), 终点(720,266), 控制点1(650,126), 控制点2(650,266)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSCurve]S曲线: 17 -> 21, 目标节点已有坐标，使用已有坐标
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSCurve]绘制曲线 17 -> 21, 类型: REVERSE_S_CURVE, 起点(586,126), 终点(726,266), 控制点1(656,126), 控制点2(656,266)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 19 -> 23, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,266), 终点(20,272)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 23 -> 24, 长度: 1190, 起点(20,272), 终点(1210,272)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 24 -> 25, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1210,272), 终点(1216,272)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 25 -> 26, 长度: 140, 起点(1216,272), 终点(1356,272)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 26 -> 27, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1356,272), 终点(1362,272)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 27 -> 28, 长度: 980 + 偏移: -24 = 956, 起点(1362,272), 终点(2318,272)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 23 -> 29, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,272), 终点(20,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 29 -> 30, 长度: 1190, 起点(20,482), 终点(1210,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 30 -> 31, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1210,482), 终点(1216,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 31 -> 32, 长度: 140, 起点(1216,482), 终点(1356,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 32 -> 33, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1356,482), 终点(1362,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 33 -> 34, 长度: 770 + 偏移: 190 = 960, 起点(1362,482), 终点(2322,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 24 -> 30, 类型: RIGHT_SEMICIRCLE_ARC, 起点(1210,272), 终点(1210,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 24 -> 30, 类型: RIGHT_SEMICIRCLE_ARC
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 25 -> 31, 类型: RIGHT_SEMICIRCLE_ARC, 起点(1216,272), 终点(1216,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 25 -> 31, 类型: RIGHT_SEMICIRCLE_ARC
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 26 -> 32, 类型: LEFT_SEMICIRCLE_ARC, 起点(1356,272), 终点(1356,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 26 -> 32, 类型: LEFT_SEMICIRCLE_ARC
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 27 -> 33, 类型: LEFT_SEMICIRCLE_ARC, 起点(1362,272), 终点(1362,482)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 29 -> 35, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,482), 终点(20,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 27 -> 33, 类型: LEFT_SEMICIRCLE_ARC
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 35 -> 36, 长度: 70, 起点(20,488), 终点(90,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=36设置Set信息: uiId=36, setId=12033~12036, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=36, 轨道坐标=(90, 488), 实际坐标=(30, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=36
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 36 -> 37, 长度: 140, 起点(90,488), 终点(230,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=37设置Set信息: uiId=37, setId=12037~12040, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=37, 轨道坐标=(230, 488), 实际坐标=(170, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=37
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 37 -> 38, 长度: 140, 起点(230,488), 终点(370,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=38设置Set信息: uiId=38, setId=12041~12044, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=38, 轨道坐标=(370, 488), 实际坐标=(310, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=38
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 38 -> 39, 长度: 140, 起点(370,488), 终点(510,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=39设置Set信息: uiId=39, setId=12045~12048, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=39, 轨道坐标=(510, 488), 实际坐标=(450, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=39
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 39 -> 40, 长度: 140, 起点(510,488), 终点(650,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=40设置Set信息: uiId=40, setId=12049~12052, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=40, 轨道坐标=(650, 488), 实际坐标=(590, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=40
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 40 -> 41, 长度: 140, 起点(650,488), 终点(790,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=41设置Set信息: uiId=41, setId=12053~12056, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=41, 轨道坐标=(790, 488), 实际坐标=(730, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=41
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 41 -> 42, 长度: 140, 起点(790,488), 终点(930,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=42设置Set信息: uiId=42, setId=12057~12060, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=42, 轨道坐标=(930, 488), 实际坐标=(870, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=42
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 42 -> 43, 长度: 140, 起点(930,488), 终点(1070,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=43设置Set信息: uiId=43, setId=12061~12064, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=43, 轨道坐标=(1070, 488), 实际坐标=(1010, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=43
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 43 -> 2, 长度: 322 + 偏移: 22 = 344, 起点(1070,488), 终点(1414,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=2设置Set信息: uiId=2, setId=12065~12068, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=2, 轨道坐标=(1414, 488), 实际坐标=(1354, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=2
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 2 -> 3, 长度: 140, 起点(1414,488), 终点(1554,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=3设置Set信息: uiId=3, setId=12069~12072, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=3, 轨道坐标=(1554, 488), 实际坐标=(1494, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=3
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 3 -> 4, 长度: 140, 起点(1554,488), 终点(1694,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=4设置Set信息: uiId=4, setId=12073~12076, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=4, 轨道坐标=(1694, 488), 实际坐标=(1634, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=4
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 4 -> 5, 长度: 140, 起点(1694,488), 终点(1834,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=5设置Set信息: uiId=5, setId=12077~12080, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=5, 轨道坐标=(1834, 488), 实际坐标=(1774, 496), 位置=BELOW
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=5
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 5 -> 44, 长度: 350 + 偏移: 140 = 490, 起点(1834,488), 终点(2324,488)
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][layoutAndDraw]布局和绘制完成
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 阶段(2): 绘制图像界面完成
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 阶段(3): 布局图重构完毕
+[2026-06-04 09:18:19] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 图构建完成
+[2026-06-04 09:18:19] [INFO] ====================Set视图天车轨道布局图重构  结束====================
+[2026-06-04 18:58:20] [INFO] [ui][SetLevelGraphBuilder][setStartNodePosition] 设置起始节点坐标: (20, 120)
+[2026-06-04 18:58:20] [INFO] [ui][FoupLevelGraphBuilder][setStartNodePosition]设置起始节点坐标: (20, 120)
+[2026-06-04 18:58:20] [INFO] ====================天车轨道布局图配置文件解析 开始====================
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parse]解析阶段(1): 解析GraphConfig标签开始
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseGraphSettings]图类型: 无向图
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseGraphSettings]设备控件尺寸: 120, 间距: 20
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parse]解析阶段(1): 解析GraphConfig标签完成
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(2): 解析Edges标签
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]找到49条边数据
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#0: 设置 setOfOHBInfoList[0].uiId = 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=1
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=6, QRCode=11005, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 1 -> 6，类型: STRAIGHT_LINE，大小: 840
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#1: 设置 setOfOHBInfoList[1].uiId = 7
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=7, QRCode=11006, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 6 -> 7，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#2: 设置 setOfOHBInfoList[2].uiId = 8
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=8, QRCode=11007, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 7 -> 8，类型: STRAIGHT_LINE，大小: 420
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#3: 设置 setOfOHBInfoList[3].uiId = 9
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=9, QRCode=11008, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 8 -> 9，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#4: 设置 setOfOHBInfoList[4].uiId = 10
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=10, QRCode=11009, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 9 -> 10，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#5: 设置 setOfOHBInfoList[5].uiId = 11
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=11, QRCode=11010, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 10 -> 11，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#6: 设置 setOfOHBInfoList[6].uiId = 12
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=12, QRCode=11011, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 11 -> 12，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#7: 设置 setOfOHBInfoList[7].uiId = 13
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=13, QRCode=11012, Count=4, Position=ABOVE
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 12 -> 13，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 1 -> 15，类型: VERTICAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=16
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 15 -> 16，类型: STRAIGHT_LINE，大小: 560
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=17
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 16 -> 17，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=14
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=18
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 17 -> 18，类型: STRAIGHT_LINE，大小: 1722，FoupLevel偏移: 194，SetLevel偏移: 0
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=19
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 15 -> 19，类型: VERTICAL_VIRTUAL_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=20
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 19 -> 20，类型: STRAIGHT_LINE，大小: 700
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=21
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 13 -> 14，类型: STRAIGHT_LINE，大小: 70，FoupLevel偏移: 416，SetLevel偏移: 118
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=15
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 20 -> 21，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=22
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 21 -> 22，类型: STRAIGHT_LINE，大小: 1582，FoupLevel偏移: 190，SetLevel偏移: 10
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 16 -> 20，类型: REVERSE_S_CURVE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 17 -> 21，类型: REVERSE_S_CURVE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=23
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 19 -> 23，类型: VERTICAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=24
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 23 -> 24，类型: STRAIGHT_LINE，大小: 1190
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=25
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 24 -> 25，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=26
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 25 -> 26，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=27
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 26 -> 27，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=28
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 27 -> 28，类型: STRAIGHT_LINE，大小: 980，FoupLevel偏移: 86，SetLevel偏移: -24
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=29
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 23 -> 29，类型: VERTICAL_VIRTUAL_LINE，大小: 210
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=30
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=31
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 29 -> 30，类型: STRAIGHT_LINE，大小: 1190
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 30 -> 31，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=32
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 31 -> 32，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=33
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 32 -> 33，类型: HORIZONTAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=34
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 33 -> 34，类型: STRAIGHT_LINE，大小: 770，FoupLevel偏移: 828，SetLevel偏移: 190
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 24 -> 30，类型: RIGHT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 25 -> 31，类型: RIGHT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 26 -> 32，类型: LEFT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 27 -> 33，类型: LEFT_SEMICIRCLE_ARC，大小: 210
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=35
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 29 -> 35，类型: VERTICAL_VIRTUAL_LINE，大小: 6
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#8: 设置 setOfOHBInfoList[8].uiId = 36
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=36, QRCode=11036, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 35 -> 36，类型: STRAIGHT_LINE，大小: 70
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#9: 设置 setOfOHBInfoList[9].uiId = 37
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=37, QRCode=11037, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 36 -> 37，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#10: 设置 setOfOHBInfoList[10].uiId = 38
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=38, QRCode=11038, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 37 -> 38，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#11: 设置 setOfOHBInfoList[11].uiId = 39
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=39, QRCode=11039, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 38 -> 39，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#12: 设置 setOfOHBInfoList[12].uiId = 40
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=40, QRCode=11040, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 39 -> 40，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#13: 设置 setOfOHBInfoList[13].uiId = 41
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=41, QRCode=11041, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 40 -> 41，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#14: 设置 setOfOHBInfoList[14].uiId = 42
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=42, QRCode=11042, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 41 -> 42，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#15: 设置 setOfOHBInfoList[15].uiId = 43
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=43, QRCode=11043, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 42 -> 43，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#16: 设置 setOfOHBInfoList[16].uiId = 2
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=2, QRCode=11001, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 43 -> 2，类型: STRAIGHT_LINE，大小: 322，FoupLevel偏移: 0，SetLevel偏移: 22
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#17: 设置 setOfOHBInfoList[17].uiId = 3
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=3, QRCode=11002, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 2 -> 3，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#18: 设置 setOfOHBInfoList[18].uiId = 4
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=4, QRCode=11003, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 3 -> 4，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][processNode]SET节点文档顺序#19: 设置 setOfOHBInfoList[19].uiId = 5
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集SET节点: ID=5, QRCode=11004, Count=4, Position=BELOW
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 4 -> 5，类型: STRAIGHT_LINE，大小: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(3):收集TRACK节点: ID=44
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parseEdges]解析阶段(4):成功解析边: 5 -> 44，类型: STRAIGHT_LINE，大小: 350，FoupLevel偏移: 450，SetLevel偏移: 140
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parse]解析阶段(5): 配置文件解析完毕
+[2026-06-04 18:58:20] [INFO] [ui][GraphConfig][parse]配置文件解析完成，节点数: 44，边数: 49
+[2026-06-04 18:58:20] [INFO] ====================天车轨道布局图配置文件解析 结束====================
+[2026-06-04 18:58:22] [INFO] ====================Set视图天车轨道布局图重构  开始====================
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 开始构建图，节点数: 44，边数: 49
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 1
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 2
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 3
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 6
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 4
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 7
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 8
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 9
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 10
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 5
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 12
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 13
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 14
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 11
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 15
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 16
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 17
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 18
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 19
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 20
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 21
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 22
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 23
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 24
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 25
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 26
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 27
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 28
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 29
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 30
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 31
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 32
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 33
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 34
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 35
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 36
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 37
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 38
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 39
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 40
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 41
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 42
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 43
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 添加顶点 44
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 1 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 6 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (1,6)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 6 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 7 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (6,7)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 7 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 8 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (7,8)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 8 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 9 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (8,9)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 9 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 10 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (9,10)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 10 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 11 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (10,11)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 11 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 12 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (11,12)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 12 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 13 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (12,13)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 13 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 14 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (13,14)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 1 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 15 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (1,15)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 15 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 16 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (15,16)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 16 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 17 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (16,17)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 17 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 18 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (17,18)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 15 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 19 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (15,19)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 19 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 20 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (19,20)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 20 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 21 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (20,21)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 21 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 22 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (21,22)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 16 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 20 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (16,20)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 17 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 21 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (17,21)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 19 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 23 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (19,23)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 23 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 24 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (23,24)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 24 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 25 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (24,25)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 25 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (25,26)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 26 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 27 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 26 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (26,27)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 27 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 28 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (27,28)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 23 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 29 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (23,29)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 29 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 30 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (29,30)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 30 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 31 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (30,31)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 31 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 32 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (31,32)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 32 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 33 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (32,33)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 33 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 34 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (33,34)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 24 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 30 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (24,30)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 25 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 31 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (25,31)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 26 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 32 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (26,32)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 27 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 33 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (27,33)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 29 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 35 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (29,35)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 35 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 36 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (35,36)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 36 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 37 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (36,37)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 37 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 38 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (37,38)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 38 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 39 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (38,39)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 39 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 40 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (39,40)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 40 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 41 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (40,41)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 41 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 42 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (41,42)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 42 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 43 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (42,43)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 43 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 2 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (43,2)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 2 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 3 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (2,3)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 3 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 4 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (3,4)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 4 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 5 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (4,5)
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 5 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addVertex] 顶点 44 已存在，跳过
+[2026-06-04 18:58:22] [DEBUG] [ui][Graph][addEdge] 添加边 (5,44)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][buildMultilist]邻接多重表构建完成
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 阶段(1): 重建邻接多重表完成
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][layoutAndDraw]起始节点ID: 1, 坐标: (20, 120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 1 -> 6, 长度: 840, 起点(20,120), 终点(860,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=6设置Set信息: uiId=6, setId=12001~12004, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=6, 轨道坐标=(860, 120), 实际坐标=(800, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=6
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 6 -> 7, 长度: 140, 起点(860,120), 终点(1000,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=7设置Set信息: uiId=7, setId=12005~12008, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=7, 轨道坐标=(1000, 120), 实际坐标=(940, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=7
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 7 -> 8, 长度: 420, 起点(1000,120), 终点(1420,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=8设置Set信息: uiId=8, setId=12009~12012, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=8, 轨道坐标=(1420, 120), 实际坐标=(1360, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=8
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 8 -> 9, 长度: 140, 起点(1420,120), 终点(1560,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=9设置Set信息: uiId=9, setId=12013~12016, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=9, 轨道坐标=(1560, 120), 实际坐标=(1500, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=9
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 9 -> 10, 长度: 140, 起点(1560,120), 终点(1700,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=10设置Set信息: uiId=10, setId=12017~12020, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=10, 轨道坐标=(1700, 120), 实际坐标=(1640, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=10
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 10 -> 11, 长度: 140, 起点(1700,120), 终点(1840,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=11设置Set信息: uiId=11, setId=12021~12024, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=11, 轨道坐标=(1840, 120), 实际坐标=(1780, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=11
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 11 -> 12, 长度: 140, 起点(1840,120), 终点(1980,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=12设置Set信息: uiId=12, setId=12025~12028, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=12, 轨道坐标=(1980, 120), 实际坐标=(1920, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=12
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 12 -> 13, 长度: 140, 起点(1980,120), 终点(2120,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=13设置Set信息: uiId=13, setId=12029~12032, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=13, 轨道坐标=(2120, 120), 实际坐标=(2060, 14), 位置=ABOVE
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=13
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 13 -> 14, 长度: 70 + 偏移: 118 = 188, 起点(2120,120), 终点(2308,120)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 1 -> 15, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,120), 终点(20,126)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 15 -> 16, 长度: 560, 起点(20,126), 终点(580,126)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 16 -> 17, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(580,126), 终点(586,126)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 17 -> 18, 长度: 1722, 起点(586,126), 终点(2308,126)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 15 -> 19, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,126), 终点(20,266)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 19 -> 20, 长度: 700, 起点(20,266), 终点(720,266)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 20 -> 21, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(720,266), 终点(726,266)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 21 -> 22, 长度: 1582 + 偏移: 10 = 1592, 起点(726,266), 终点(2318,266)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSCurve]S曲线: 16 -> 20, 目标节点已有坐标，使用已有坐标
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSCurve]绘制曲线 16 -> 20, 类型: REVERSE_S_CURVE, 起点(580,126), 终点(720,266), 控制点1(650,126), 控制点2(650,266)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSCurve]S曲线: 17 -> 21, 目标节点已有坐标，使用已有坐标
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSCurve]绘制曲线 17 -> 21, 类型: REVERSE_S_CURVE, 起点(586,126), 终点(726,266), 控制点1(656,126), 控制点2(656,266)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 19 -> 23, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,266), 终点(20,272)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 23 -> 24, 长度: 1190, 起点(20,272), 终点(1210,272)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 24 -> 25, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1210,272), 终点(1216,272)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 25 -> 26, 长度: 140, 起点(1216,272), 终点(1356,272)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 26 -> 27, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1356,272), 终点(1362,272)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 27 -> 28, 长度: 980 + 偏移: -24 = 956, 起点(1362,272), 终点(2318,272)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 23 -> 29, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,272), 终点(20,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 29 -> 30, 长度: 1190, 起点(20,482), 终点(1210,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 30 -> 31, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1210,482), 终点(1216,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 31 -> 32, 长度: 140, 起点(1216,482), 终点(1356,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 32 -> 33, 类型: HORIZONTAL_VIRTUAL_LINE, 起点(1356,482), 终点(1362,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 33 -> 34, 长度: 770 + 偏移: 190 = 960, 起点(1362,482), 终点(2322,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 24 -> 30, 类型: RIGHT_SEMICIRCLE_ARC, 起点(1210,272), 终点(1210,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 24 -> 30, 类型: RIGHT_SEMICIRCLE_ARC
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 25 -> 31, 类型: RIGHT_SEMICIRCLE_ARC, 起点(1216,272), 终点(1216,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 25 -> 31, 类型: RIGHT_SEMICIRCLE_ARC
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 26 -> 32, 类型: LEFT_SEMICIRCLE_ARC, 起点(1356,272), 终点(1356,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 26 -> 32, 类型: LEFT_SEMICIRCLE_ARC
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]绘制半圆弧 27 -> 33, 类型: LEFT_SEMICIRCLE_ARC, 起点(1362,272), 终点(1362,482)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processSemicircleArc]半圆弧: 27 -> 33, 类型: LEFT_SEMICIRCLE_ARC
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processVirtualLine]虚线: 29 -> 35, 类型: VERTICAL_VIRTUAL_LINE, 起点(20,482), 终点(20,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 35 -> 36, 长度: 70, 起点(20,488), 终点(90,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=36设置Set信息: uiId=36, setId=12033~12036, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=36, 轨道坐标=(90, 488), 实际坐标=(30, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=36
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 36 -> 37, 长度: 140, 起点(90,488), 终点(230,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=37设置Set信息: uiId=37, setId=12037~12040, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=37, 轨道坐标=(230, 488), 实际坐标=(170, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=37
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 37 -> 38, 长度: 140, 起点(230,488), 终点(370,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=38设置Set信息: uiId=38, setId=12041~12044, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=38, 轨道坐标=(370, 488), 实际坐标=(310, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=38
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 38 -> 39, 长度: 140, 起点(370,488), 终点(510,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=39设置Set信息: uiId=39, setId=12045~12048, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=39, 轨道坐标=(510, 488), 实际坐标=(450, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=39
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 39 -> 40, 长度: 140, 起点(510,488), 终点(650,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=40设置Set信息: uiId=40, setId=12049~12052, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=40, 轨道坐标=(650, 488), 实际坐标=(590, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=40
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 40 -> 41, 长度: 140, 起点(650,488), 终点(790,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=41设置Set信息: uiId=41, setId=12053~12056, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=41, 轨道坐标=(790, 488), 实际坐标=(730, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=41
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 41 -> 42, 长度: 140, 起点(790,488), 终点(930,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=42设置Set信息: uiId=42, setId=12057~12060, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=42, 轨道坐标=(930, 488), 实际坐标=(870, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=42
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 42 -> 43, 长度: 140, 起点(930,488), 终点(1070,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=43设置Set信息: uiId=43, setId=12061~12064, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=43, 轨道坐标=(1070, 488), 实际坐标=(1010, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=43
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 43 -> 2, 长度: 322 + 偏移: 22 = 344, 起点(1070,488), 终点(1414,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=2设置Set信息: uiId=2, setId=12065~12068, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=2, 轨道坐标=(1414, 488), 实际坐标=(1354, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=2
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 2 -> 3, 长度: 140, 起点(1414,488), 终点(1554,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=3设置Set信息: uiId=3, setId=12069~12072, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=3, 轨道坐标=(1554, 488), 实际坐标=(1494, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=3
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 3 -> 4, 长度: 140, 起点(1554,488), 终点(1694,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=4设置Set信息: uiId=4, setId=12073~12076, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=4, 轨道坐标=(1694, 488), 实际坐标=(1634, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=4
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 4 -> 5, 长度: 140, 起点(1694,488), 终点(1834,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]成功为节点ID=5设置Set信息: uiId=5, setId=12077~12080, 压力范围=0.00~0.00Mpa, 流量平均值=0.00L/Min, 湿度范围=0.00~0.00%
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][createFrameDevice]创建FrameDevice: ID=5, 轨道坐标=(1834, 488), 实际坐标=(1774, 496), 位置=BELOW
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processNode]创建SET节点: ID=5
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][processStraightLine]直线: 5 -> 44, 长度: 350 + 偏移: 140 = 490, 起点(1834,488), 终点(2324,488)
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][layoutAndDraw]布局和绘制完成
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 阶段(2): 绘制图像界面完成
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 阶段(3): 布局图重构完毕
+[2026-06-04 18:58:22] [INFO] [ui][SetLevelGraphBuilder][buildGraph] 图构建完成
+[2026-06-04 18:58:22] [INFO] ====================Set视图天车轨道布局图重构  结束====================

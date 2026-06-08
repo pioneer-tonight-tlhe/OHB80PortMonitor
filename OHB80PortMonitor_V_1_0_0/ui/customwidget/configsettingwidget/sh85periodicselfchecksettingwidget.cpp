@@ -3,7 +3,7 @@
 #include "sh85selfcheckreportdialog.h"
 
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task.h"
+#include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "app/applogger.h"
 #include "app/shareddata.h"
 #include "app/ohbdeviceconfig.h"
@@ -135,12 +135,12 @@ void SH85PeriodicSelfCheckSettingWidget::initReportItem()
 void SH85PeriodicSelfCheckSettingWidget::bindTask()
 {
     // 绑定 SharedData 持有的常驻任务
-    auto *task = SharedData::getSH85PeriodicSelfCheckTask();
+    auto *task = SharedData::getSH85PeriodicSelfCheckTask3();
     if (!task) {
-        qWarning() << "[SH85PeriodicSelfCheckSettingWidget] SharedData::getSH85PeriodicSelfCheckTask() 返回空，"
+        qWarning() << "[SH85PeriodicSelfCheckSettingWidget] SharedData::getSH85PeriodicSelfCheckTask3() 返回空，"
                       "请确认 SharedData::initScheduler() 已调用";
         LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::WARN,
-            QString("[ui][SH85PeriodicSelfCheckSettingWidget] SharedData::getSH85PeriodicSelfCheckTask() returns null").toStdString());
+            QString("[ui][SH85PeriodicSelfCheckSettingWidget] SharedData::getSH85PeriodicSelfCheckTask3() returns null").toStdString());
         return;
     }
     m_task = task;
@@ -178,16 +178,16 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
     m_currentTaskState = task->currentState();
 
     // 连接 UI 关心的整体状态信号
-    connect(task, &SH85PeriodicSelfCheckTask::taskStateChanged,
+    connect(task, &SH85PeriodicSelfCheckTask3::taskStateChanged,
             this, &SH85PeriodicSelfCheckSettingWidget::onTaskStateChanged,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::elapsedTick,
+    connect(task, &SH85PeriodicSelfCheckTask3::elapsedTick,
             this, &SH85PeriodicSelfCheckSettingWidget::onTaskElapsedTick,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::intervalCountdown,
+    connect(task, &SH85PeriodicSelfCheckTask3::intervalCountdown,
             this, &SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::bootDelayCountdown,
+    connect(task, &SH85PeriodicSelfCheckTask3::bootDelayCountdown,
             this, &SH85PeriodicSelfCheckSettingWidget::onTaskBootDelayCountdown,
             Qt::QueuedConnection);
 
@@ -198,32 +198,32 @@ void SH85PeriodicSelfCheckSettingWidget::bindTask()
     m_reportDialog->setQrcodes(SharedData::getAllQrcodes());
 
     // 连接任务信号到报告对话框
-    connect(task, &SH85PeriodicSelfCheckTask::countdownTick,
+    connect(task, &SH85PeriodicSelfCheckTask3::countdownTick,
             m_reportDialog.data(), &SH85SelfCheckReportDialog::onCheckerCountdown,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::selfCheckerStateChanged,
+    connect(task, &SH85PeriodicSelfCheckTask3::selfCheckerStateChanged,
             m_reportDialog.data(), &SH85SelfCheckReportDialog::onCheckerStateChanged,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::oneFinished,
+    connect(task, &SH85PeriodicSelfCheckTask3::oneFinished,
             m_reportDialog.data(), &SH85SelfCheckReportDialog::onOneFinished,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::allFinished,
+    connect(task, &SH85PeriodicSelfCheckTask3::allFinished,
             m_reportDialog.data(), &SH85SelfCheckReportDialog::onAllFinished,
             Qt::QueuedConnection);
-    connect(task, &SH85PeriodicSelfCheckTask::deviceParticipated,
+    connect(task, &SH85PeriodicSelfCheckTask3::deviceParticipated,
             m_reportDialog.data(), &SH85SelfCheckReportDialog::onDeviceParticipated,
             Qt::QueuedConnection);
     // 进入 Checking 时，自动重置 Live Log
-    connect(task, &SH85PeriodicSelfCheckTask::taskStateChanged,
-            this, [this](SH85PeriodicSelfCheckTask::State s) {
-                if (s == SH85PeriodicSelfCheckTask::State::Checking && m_reportDialog) {
+    connect(task, &SH85PeriodicSelfCheckTask3::taskStateChanged,
+            this, [this](SH85PeriodicSelfCheckTask3::State s) {
+                if (s == SH85PeriodicSelfCheckTask3::State::Checking && m_reportDialog) {
                     m_reportDialog->onRoundStarted();
                 }
             },
             Qt::QueuedConnection);
 
     LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[ui][SH85PeriodicSelfCheckSettingWidget] bound to resident SH85PeriodicSelfCheckTask").toStdString());
+        QString("[ui][SH85PeriodicSelfCheckSettingWidget] bound to resident SH85PeriodicSelfCheckTask3").toStdString());
 }
 
 // ============================================================
@@ -255,7 +255,7 @@ void SH85PeriodicSelfCheckSettingWidget::onEnableComboChanged(int index)
     // 启用：立即提示「自检中（执行：0s）」；
     // 停用：若当前正在 Checking，不修改状态文案（继续显示自检中，直到本轮完成）。
     if (enable) {
-        m_currentTaskState = SH85PeriodicSelfCheckTask::State::Checking;
+        m_currentTaskState = SH85PeriodicSelfCheckTask3::State::Checking;
         m_elapsedSec = 0;
         refreshStatusText();
     }
@@ -275,7 +275,7 @@ void SH85PeriodicSelfCheckSettingWidget::onSetBtnClicked()
     // 设置按钮点击事件处理
     const int value = m_periodSpinBox->value();
     const auto unit = unitFromIndex(m_unitCombo->currentIndex());
-    const QString unitStr = SH85PeriodicSelfCheckTask::timeUnitToString(unit);
+    const QString unitStr = SH85PeriodicSelfCheckTask3::timeUnitToString(unit);
 
     qDebug() << "[SH85PeriodicSelfCheckSettingWidget] period set:" << value << unitStr;
     LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
@@ -285,9 +285,9 @@ void SH85PeriodicSelfCheckSettingWidget::onSetBtnClicked()
     // 计算周期秒数并写入配置
     int seconds = value;
     switch (unit) {
-    case SH85PeriodicSelfCheckTask::TimeUnit::Second: seconds = value; break;
-    case SH85PeriodicSelfCheckTask::TimeUnit::Minute: seconds = value * 60; break;
-    case SH85PeriodicSelfCheckTask::TimeUnit::Hour:   seconds = value * 3600; break;
+    case SH85PeriodicSelfCheckTask3::TimeUnit::Second: seconds = value; break;
+    case SH85PeriodicSelfCheckTask3::TimeUnit::Minute: seconds = value * 60; break;
+    case SH85PeriodicSelfCheckTask3::TimeUnit::Hour:   seconds = value * 3600; break;
     }
     OHBDeviceConfig::getInstance().setSH85SelfCheckPeriodSeconds(seconds);
 
@@ -296,7 +296,7 @@ void SH85PeriodicSelfCheckSettingWidget::onSetBtnClicked()
         QMetaObject::invokeMethod(m_task.data(), "setPeriod",
                                   Qt::QueuedConnection,
                                   Q_ARG(int, value),
-                                  Q_ARG(SH85PeriodicSelfCheckTask::TimeUnit, unit));
+                                  Q_ARG(SH85PeriodicSelfCheckTask3::TimeUnit, unit));
         if (m_periodItem) {
             m_periodItem->setStatusOK(QString("Set OK: %1 %2").arg(value).arg(unitStr));
         }
@@ -324,13 +324,13 @@ void SH85PeriodicSelfCheckSettingWidget::onReportBtnClicked()
 // task 回调
 // ============================================================
 
-void SH85PeriodicSelfCheckSettingWidget::onTaskStateChanged(SH85PeriodicSelfCheckTask::State state)
+void SH85PeriodicSelfCheckSettingWidget::onTaskStateChanged(SH85PeriodicSelfCheckTask3::State state)
 {
     // 任务状态改变回调
     m_currentTaskState = state;
-    if (state == SH85PeriodicSelfCheckTask::State::Checking) {
+    if (state == SH85PeriodicSelfCheckTask3::State::Checking) {
         m_elapsedSec = 0;
-    } else if (state == SH85PeriodicSelfCheckTask::State::WaitingNext) {
+    } else if (state == SH85PeriodicSelfCheckTask3::State::WaitingNext) {
         m_intervalRemainSec = m_task ? m_task->periodSeconds() : 0;
     }
     refreshStatusText();
@@ -340,7 +340,7 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskElapsedTick(int elapsedSeconds)
 {
     // 自检计时器回调
     m_elapsedSec = elapsedSeconds;
-    if (m_currentTaskState == SH85PeriodicSelfCheckTask::State::Checking) {
+    if (m_currentTaskState == SH85PeriodicSelfCheckTask3::State::Checking) {
         refreshStatusText();
     }
 }
@@ -349,7 +349,7 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown(int remainingSe
 {
     // 间隔倒计时回调
     m_intervalRemainSec = remainingSeconds;
-    if (m_currentTaskState == SH85PeriodicSelfCheckTask::State::WaitingNext) {
+    if (m_currentTaskState == SH85PeriodicSelfCheckTask3::State::WaitingNext) {
         refreshStatusText();
     }
 }
@@ -357,7 +357,7 @@ void SH85PeriodicSelfCheckSettingWidget::onTaskIntervalCountdown(int remainingSe
 void SH85PeriodicSelfCheckSettingWidget::onTaskBootDelayCountdown(int remainingSeconds)
 {
     m_bootDelayRemainSec = remainingSeconds;
-    if (m_currentTaskState == SH85PeriodicSelfCheckTask::State::Stopped) {
+    if (m_currentTaskState == SH85PeriodicSelfCheckTask3::State::Stopped) {
         if (m_statusEdit) {
             m_statusEdit->setText(QString("Boot delay (countdown: %1s)").arg(m_bootDelayRemainSec));
         }
@@ -371,17 +371,17 @@ void SH85PeriodicSelfCheckSettingWidget::refreshStatusText()
 
     QString text;
     switch (m_currentTaskState) {
-    case SH85PeriodicSelfCheckTask::State::Stopped:
+    case SH85PeriodicSelfCheckTask3::State::Stopped:
         if (m_bootDelayRemainSec > 0) {
             text = QString("Boot delay (countdown: %1s)").arg(m_bootDelayRemainSec);
         } else {
             text = QStringLiteral("Self-check disabled");
         }
         break;
-    case SH85PeriodicSelfCheckTask::State::Checking:
+    case SH85PeriodicSelfCheckTask3::State::Checking:
         text = QStringLiteral("Self-checking (elapsed: %1s)").arg(m_elapsedSec);
         break;
-    case SH85PeriodicSelfCheckTask::State::WaitingNext:
+    case SH85PeriodicSelfCheckTask3::State::WaitingNext:
         text = QStringLiteral("Waiting for next check (countdown: %1s)").arg(m_intervalRemainSec);
         break;
     }
@@ -392,14 +392,14 @@ void SH85PeriodicSelfCheckSettingWidget::refreshStatusText()
 // 工具
 // ============================================================
 
-SH85PeriodicSelfCheckTask::TimeUnit SH85PeriodicSelfCheckSettingWidget::unitFromIndex(int idx)
+SH85PeriodicSelfCheckTask3::TimeUnit SH85PeriodicSelfCheckSettingWidget::unitFromIndex(int idx)
 {
     // 从下拉框索引转换为时间单位
     switch (idx) {
-    case 0: return SH85PeriodicSelfCheckTask::TimeUnit::Second;
-    case 1: return SH85PeriodicSelfCheckTask::TimeUnit::Minute;
-    case 2: return SH85PeriodicSelfCheckTask::TimeUnit::Hour;
-    default: return SH85PeriodicSelfCheckTask::TimeUnit::Minute;
+    case 0: return SH85PeriodicSelfCheckTask3::TimeUnit::Second;
+    case 1: return SH85PeriodicSelfCheckTask3::TimeUnit::Minute;
+    case 2: return SH85PeriodicSelfCheckTask3::TimeUnit::Hour;
+    default: return SH85PeriodicSelfCheckTask3::TimeUnit::Minute;
     }
 }
 

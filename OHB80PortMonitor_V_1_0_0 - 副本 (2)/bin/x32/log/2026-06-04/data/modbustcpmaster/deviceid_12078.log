@@ -1,0 +1,36 @@
+[2026-06-04 09:18:17] [INFO] [data][ModbusTcpMaster][start]：设备ID=12078 开始启动设备连接，连接模式=AutoReconnect
+[2026-06-04 09:18:17] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 空闲 -> 连接中
+[2026-06-04 09:18:17] [INFO] [data][ModbusTcpMaster][ModbusConnecter][connectDevice]：设备ID=12078 开始连接设备 IP=127.0.0.1 Port=577 模式=AutoReconnect
+[2026-06-04 09:18:20] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=1
+[2026-06-04 09:18:20] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12078 连接阶段错误: Connection timeout (non-blocking)
+[2026-06-04 09:18:20] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 连接中 -> 错误状态
+[2026-06-04 09:18:20] [INFO] [data][ModbusTcpMaster][ModbusConnecter][startAutoReconnect]：设备ID=12078 开始自动重连，间隔=3000ms
+[2026-06-04 09:18:32] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=3
+[2026-06-04 09:19:14] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=10
+[2026-06-04 09:20:14] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=20
+[2026-06-04 09:21:14] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=30
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][stop]：设备ID=12078 停止设备，连接模式=AutoReconnect
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][pauseChildren]：设备ID=12078 暂停普通收发子模块
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][ModbusCommandSender][stop]：设备ID=12078 指令发送器停止
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][ModbusConnecter][onConnectionStatusChanged]：设备ID=12078 连接状态变化: Disconnected
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][ModbusCommandSender][stop]：设备ID=12078 指令发送器停止
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 错误状态 -> 连接中
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][ModbusConnecter][disconnectDevice]：设备ID=12078 完全断开连接，已停止自动重连
+[2026-06-04 09:22:01] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 连接中 -> 空闲
+[2026-06-04 18:58:20] [INFO] [data][ModbusTcpMaster][start]：设备ID=12078 开始启动设备连接，连接模式=AutoReconnect
+[2026-06-04 18:58:20] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 空闲 -> 连接中
+[2026-06-04 18:58:20] [INFO] [data][ModbusTcpMaster][ModbusConnecter][connectDevice]：设备ID=12078 开始连接设备 IP=127.0.0.1 Port=577 模式=AutoReconnect
+[2026-06-04 18:58:23] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=1
+[2026-06-04 18:58:23] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onConnectionError]：设备ID=12078 连接阶段错误: Connection timeout (non-blocking)
+[2026-06-04 18:58:23] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 连接中 -> 错误状态
+[2026-06-04 18:58:23] [INFO] [data][ModbusTcpMaster][ModbusConnecter][startAutoReconnect]：设备ID=12078 开始自动重连，间隔=3000ms
+[2026-06-04 18:58:35] [WARN] [data][ModbusTcpMaster][ModbusConnecter][onAsyncReconnectTimeout]：设备ID=12078 自动重连超时，连续失败次数=3
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][stop]：设备ID=12078 停止设备，连接模式=AutoReconnect
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][pauseChildren]：设备ID=12078 暂停普通收发子模块
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][ModbusCommandSender][stop]：设备ID=12078 指令发送器停止
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][ModbusConnecter][stopAutoReconnect]：设备ID=12078 停止自动重连
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][ModbusConnecter][onConnectionStatusChanged]：设备ID=12078 连接状态变化: Disconnected
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][ModbusCommandSender][stop]：设备ID=12078 指令发送器停止
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 错误状态 -> 连接中
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][ModbusConnecter][disconnectDevice]：设备ID=12078 完全断开连接，已停止自动重连
+[2026-06-04 18:59:12] [INFO] [data][ModbusTcpMaster][enterState]：设备ID=12078 状态切换: 连接中 -> 空闲

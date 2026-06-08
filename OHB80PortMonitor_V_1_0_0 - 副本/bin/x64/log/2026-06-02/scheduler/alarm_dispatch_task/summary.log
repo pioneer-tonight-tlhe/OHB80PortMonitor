@@ -1,0 +1,88 @@
+[2026-06-02 14:43:14] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 14:43:14] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 14:43:14] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 14:43:14] [INFO] [loadActiveFromDb] 从数据库恢复 1 条未解决警报
+[2026-06-02 14:43:14] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 14:43:14] [INFO] [start] 警报调度任务已启动，活跃警报数=1
+[2026-06-02 14:43:28] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 14:43:28] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:06:41] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:06:41] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:06:41] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:06:41] [INFO] [loadActiveFromDb] 从数据库恢复 80 条未解决警报
+[2026-06-02 15:06:41] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:06:41] [INFO] [start] 警报调度任务已启动，活跃警报数=80
+[2026-06-02 15:07:03] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:07:03] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:20:44] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:20:44] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:20:44] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:20:44] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 15:20:44] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:20:44] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 15:20:59] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:20:59] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:30:04] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:30:04] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:30:04] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:30:04] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 15:30:04] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:30:04] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 15:30:29] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:30:29] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:30:47] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:30:47] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:30:47] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:30:47] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 15:30:47] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:30:47] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 15:31:35] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:31:35] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:31:37] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:31:37] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:31:37] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:31:37] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 15:31:37] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:31:37] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 15:31:57] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:31:57] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:34:08] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:34:08] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:34:08] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:34:08] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 15:34:08] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:34:08] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 15:34:19] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:34:19] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:36:28] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:36:28] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:36:28] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:36:28] [INFO] [loadActiveFromDb] 从数据库恢复 1 条未解决警报
+[2026-06-02 15:36:28] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:36:28] [INFO] [start] 警报调度任务已启动，活跃警报数=1
+[2026-06-02 15:36:56] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:36:56] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 15:37:12] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 15:37:12] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 15:37:12] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 15:37:12] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 15:37:12] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 15:37:12] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 15:37:23] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 15:37:23] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 16:05:20] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 16:05:20] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 16:05:20] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 16:05:20] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 16:05:20] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 16:05:20] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 16:23:19] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 16:23:19] [INFO] [stop] 警报调度任务已停止
+[2026-06-02 16:44:52] [INFO] 汇总计时器AlarmSummaryTimer开启。。。
+[2026-06-02 16:44:52] [INFO] [startSummaryTimer] Summary timer started, interval=60000 ms
+[2026-06-02 16:44:52] [INFO] [AlarmDispatchTask] 警报调度任务已构造
+[2026-06-02 16:44:52] [INFO] [loadActiveFromDb] 从数据库恢复 0 条未解决警报
+[2026-06-02 16:44:52] [INFO] [startFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已启动，interval=50 ms
+[2026-06-02 16:44:52] [INFO] [start] 警报调度任务已启动，活跃警报数=0
+[2026-06-02 17:16:34] [INFO] [stopFoupAlarmSyncTimer] FOUP 告警状态刷新定时器已停止
+[2026-06-02 17:16:34] [INFO] [stop] 警报调度任务已停止

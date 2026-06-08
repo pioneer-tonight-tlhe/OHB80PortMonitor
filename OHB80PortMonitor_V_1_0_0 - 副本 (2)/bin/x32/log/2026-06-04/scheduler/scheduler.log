@@ -1,0 +1,28 @@
+[2026-06-04 09:18:17] [INFO] =============================Scheduler 调度器开始=============================
+[2026-06-04 09:18:17] [INFO] [Scheduler][start] 调度器线程已启动
+[2026-06-04 09:18:17] [INFO] [Scheduler][submitTask] 提交长驻任务: OperationDispatchTask taskId: 0bfa67f0-b23b-4864-9d2a-76138a002854
+[2026-06-04 09:18:17] [INFO] [Scheduler][submitTask] 提交长驻任务: AlarmDispatchTask taskId: b9b46567-1e28-4c78-9b24-ab42990346f6
+[2026-06-04 09:18:17] [INFO] [Scheduler][submitTask] 提交长驻任务: NetworkStatusTask taskId: 8132eb4f-3e82-4585-bf61-300fc5156851
+[2026-06-04 09:18:17] [INFO] [Scheduler][submitTask] 提交长驻任务: MonitorDataTask taskId: a90c31cc-5fb7-4891-adff-a68a09daa477
+[2026-06-04 09:18:17] [INFO] [Scheduler][submitTask] 提交普通任务: SH85PeriodicSelfCheckTask taskId: 6fa066ef-a62e-4726-8dac-ff8d4d3fe256
+[2026-06-04 09:18:17] [INFO] [Scheduler][scheduleNext] 启动任务: SH85PeriodicSelfCheckTask taskId: 6fa066ef-a62e-4726-8dac-ff8d4d3fe256
+[2026-06-04 09:22:01] [WARN] [Scheduler][onTaskFinished] 任务完成: NetworkStatusTask taskId: 8132eb4f-3e82-4585-bf61-300fc5156851 成功: 0 网络状态监控任务被取消
+[2026-06-04 09:22:01] [WARN] [Scheduler][onTaskFinished] 任务完成: MonitorDataTask taskId: a90c31cc-5fb7-4891-adff-a68a09daa477 成功: 0 监控任务被取消
+[2026-06-04 09:22:01] [WARN] [Scheduler][onTaskFinished] 任务完成: OperationDispatchTask taskId: 0bfa67f0-b23b-4864-9d2a-76138a002854 成功: 0 Operation log dispatcher stopped
+[2026-06-04 09:22:01] [WARN] [Scheduler][onTaskFinished] 任务完成: AlarmDispatchTask taskId: b9b46567-1e28-4c78-9b24-ab42990346f6 成功: 0 Alarm dispatcher stopped
+[2026-06-04 09:22:01] [INFO] [Scheduler][onTaskFinished] 任务完成: SH85PeriodicSelfCheckTask taskId: 6fa066ef-a62e-4726-8dac-ff8d4d3fe256 成功: 1 SH85PeriodicSelfCheckTask stopped
+[2026-06-04 09:22:01] [INFO] [Scheduler][stop] 调度器线程已停止
+[2026-06-04 18:58:20] [INFO] =============================Scheduler 调度器开始=============================
+[2026-06-04 18:58:20] [INFO] [Scheduler][start] 调度器线程已启动
+[2026-06-04 18:58:20] [INFO] [Scheduler][submitTask] 提交长驻任务: OperationDispatchTask taskId: 45254c9a-c7af-4df7-a38d-fc9e40d15fd8
+[2026-06-04 18:58:20] [INFO] [Scheduler][submitTask] 提交长驻任务: AlarmDispatchTask taskId: 629236e7-f510-41a5-91a7-a90e477034fd
+[2026-06-04 18:58:20] [INFO] [Scheduler][submitTask] 提交长驻任务: NetworkStatusTask taskId: 025d6257-55e7-4b37-a1d1-049b7394875e
+[2026-06-04 18:58:20] [INFO] [Scheduler][submitTask] 提交长驻任务: MonitorDataTask taskId: 6bc70c46-6633-4e35-bbec-f6c52b80556a
+[2026-06-04 18:58:20] [INFO] [Scheduler][submitTask] 提交普通任务: SH85PeriodicSelfCheckTask taskId: 5c276a33-06fc-4fae-a47a-c0c5f860a557
+[2026-06-04 18:58:20] [INFO] [Scheduler][scheduleNext] 启动任务: SH85PeriodicSelfCheckTask taskId: 5c276a33-06fc-4fae-a47a-c0c5f860a557
+[2026-06-04 18:59:12] [WARN] [Scheduler][onTaskFinished] 任务完成: MonitorDataTask taskId: 6bc70c46-6633-4e35-bbec-f6c52b80556a 成功: 0 监控任务被取消
+[2026-06-04 18:59:12] [WARN] [Scheduler][onTaskFinished] 任务完成: NetworkStatusTask taskId: 025d6257-55e7-4b37-a1d1-049b7394875e 成功: 0 网络状态监控任务被取消
+[2026-06-04 18:59:12] [WARN] [Scheduler][onTaskFinished] 任务完成: AlarmDispatchTask taskId: 629236e7-f510-41a5-91a7-a90e477034fd 成功: 0 Alarm dispatcher stopped
+[2026-06-04 18:59:12] [WARN] [Scheduler][onTaskFinished] 任务完成: OperationDispatchTask taskId: 45254c9a-c7af-4df7-a38d-fc9e40d15fd8 成功: 0 Operation log dispatcher stopped
+[2026-06-04 18:59:12] [INFO] [Scheduler][onTaskFinished] 任务完成: SH85PeriodicSelfCheckTask taskId: 5c276a33-06fc-4fae-a47a-c0c5f860a557 成功: 1 SH85PeriodicSelfCheckTask stopped
+[2026-06-04 18:59:12] [INFO] [Scheduler][stop] 调度器线程已停止
