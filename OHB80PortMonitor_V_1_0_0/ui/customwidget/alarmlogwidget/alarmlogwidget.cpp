@@ -67,6 +67,8 @@ AlarmLogWidget::AlarmLogWidget(QWidget *parent)
     ui->tableViewHistoryLog->horizontalHeader()->setStretchLastSection(true);
     ui->tableViewHistoryLog->verticalHeader()->setVisible(false);
     ui->tableViewHistoryLog->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableViewHistoryLog->setSelectionMode(QAbstractItemView::NoSelection);
+    ui->tableViewHistoryLog->setFocusPolicy(Qt::NoFocus);
 
     // 启用触摸/鼠标拖动滚动手势（支持触屏滑动表格）同时设置滚动条默认 hover 色
     auto enableTouchScroll = [](QAbstractItemView* view) {
@@ -106,6 +108,8 @@ void AlarmLogWidget::initLiveLog()
     ui->tableViewLiveLog->horizontalHeader()->setStretchLastSection(true);
     ui->tableViewLiveLog->verticalHeader()->setVisible(false);
     ui->tableViewLiveLog->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableViewLiveLog->setSelectionMode(QAbstractItemView::NoSelection);
+    ui->tableViewLiveLog->setFocusPolicy(Qt::NoFocus);
 
     // 设置列宽：确保时间字段和其他字段完整显示
     ui->tableViewLiveLog->setColumnWidth(1, 180);  // Occur Time
@@ -177,9 +181,10 @@ void AlarmLogWidget::onRecordResolved(const QString& qrCode,
             if (auto* it = model->item(r, kColResolveTime)) it->setText(resolveTime);
 
             // 仅更新 Is Resolved 字段（第 4 列）背景色为绿色（已解决）
-            const QColor resolvedColor(200, 255, 200);
+            const QColor resolvedColor("#32CD32");
             if (auto* it = model->item(r, kColIsResolved)) {
                 it->setBackground(resolvedColor);
+                it->setForeground(QBrush(Qt::white));
             }
             return;
         }
@@ -223,12 +228,15 @@ void AlarmLogWidget::onRecordInserted(const AlarmRecord& record)
     // 仅对 Is Resolved 字段（第 4 列）设置背景色和字体颜色
     constexpr int kColIsResolved = 4;
     QColor resolvedColor;
+    QColor resolvedTextColor(Qt::black);
     switch (record.isResolved) {
         case static_cast<int>(AlarmResolvedStatus::Unresolved):
-            resolvedColor = QColor(255, 100, 100);  // 鲜艳红色
+            resolvedColor = QColor("#DC143C");  // Crimson
+            resolvedTextColor = QColor(Qt::white);
             break;
         case static_cast<int>(AlarmResolvedStatus::Resolved):
-            resolvedColor = QColor(200, 255, 200);  // 绿色
+            resolvedColor = QColor("#32CD32");  // Lime Green
+            resolvedTextColor = QColor(Qt::white);
             break;
         case static_cast<int>(AlarmResolvedStatus::NoNeed):
             resolvedColor = QColor(255, 255, 200);  // 黄色
@@ -239,6 +247,7 @@ void AlarmLogWidget::onRecordInserted(const AlarmRecord& record)
     }
     if (kColIsResolved < items.size()) {
         items[kColIsResolved]->setBackground(resolvedColor);
+        items[kColIsResolved]->setForeground(QBrush(resolvedTextColor));
     }
 
     model->insertRow(0, items);
@@ -484,12 +493,15 @@ void AlarmLogWidget::setHistoryLogData(const QList<AlarmRecord>& data)
         // 为 Is Resolved 字段（第 5 列）设置背景色
         constexpr int kColIsResolved = 5;
         QColor resolvedColor;
+        QColor resolvedTextColor(Qt::black);
         switch (r.isResolved) {
             case static_cast<int>(AlarmResolvedStatus::Unresolved):
-                resolvedColor = QColor(255, 100, 100);  // 鲜艳红色
+                resolvedColor = QColor("#DC143C");  // Crimson
+                resolvedTextColor = QColor(Qt::white);
                 break;
             case static_cast<int>(AlarmResolvedStatus::Resolved):
-                resolvedColor = QColor(200, 255, 200);  // 绿色
+                resolvedColor = QColor("#32CD32");  // Lime Green
+                resolvedTextColor = QColor(Qt::white);
                 break;
             case static_cast<int>(AlarmResolvedStatus::NoNeed):
                 resolvedColor = QColor(255, 255, 200);  // 黄色
@@ -500,6 +512,7 @@ void AlarmLogWidget::setHistoryLogData(const QList<AlarmRecord>& data)
         }
         if (auto* it = model->item(row, kColIsResolved)) {
             it->setBackground(resolvedColor);
+            it->setForeground(QBrush(resolvedTextColor));
         }
     }
 

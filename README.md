@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.2.2**
+**当前版本：V0.2.3**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,21 @@
 ---
 
 ## 更新日志
+
+### V0.2.3 - 2026-06-08 - Simon
+
+#### AlarmPage 警报颜色调整 [V0.2.3]
+- `AlarmPage` 中 `AlarmLogWidget` 的 `Live Log` 和 `History Log` 统一调整 `Is Resolved` 字段背景色
+- 未解决警报（`Unresolved`）背景色调整为 `#DC143C`
+- 已解决警报（`Resolved`）背景色调整为 `#32CD32`
+- `Unresolved` 和 `Resolved` 状态文字统一使用白色字体，提升可读性
+- `NoNeed` 状态维持原有黄色背景不变
+- `Live Log` 和 `History Log` 表格点击后不进入选中状态
+- 相关文件：
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - 修改：`README.md`
+
+---
 
 ### V0.2.2 - 2026-06-08 - Simon
 
@@ -626,8 +641,8 @@
 
 **4. AlarmLogWidget 历史日志 "Is Resolved" 背景色**
 - `setHistoryLogData()` 中对 "Is Resolved" 字段（第 5 列）按枚举值染色，与 live log 配色保持一致：
-  - `Unresolved` (0) → `QColor(255, 100, 100)` 红色
-  - `Resolved` (1) → `QColor(200, 255, 200)` 绿色
+  - `Unresolved` (0) → `QColor("#DC143C")` 红色，字体白色
+  - `Resolved` (1) → `QColor("#32CD32")` 绿色，字体白色
   - `NoNeed` (2) → `QColor(255, 255, 200)` 黄色
 
 **5. ComunicateLogWidget 历史日志 Request/Response 字段 Hex 显示**
@@ -743,8 +758,8 @@
 
 #### 修改内容
 - `onRecordInserted()` 方法：根据 `isResolved` 枚举值仅对第 4 列（Is Resolved 字段）设置背景色
-  - `Unresolved` (0): 鲜艳红色背景 `QColor(255, 100, 100)`
-  - `Resolved` (1): 绿色背景 `QColor(200, 255, 200)`
+  - `Unresolved` (0): 鲜艳红色背景 `QColor("#DC143C")`，字体白色
+  - `Resolved` (1): 绿色背景 `QColor("#32CD32")`，字体白色
   - `NoNeed` (2): 黄色背景 `QColor(255, 255, 200)`
 - `onRecordResolved()` 方法：当记录被标记为已解决时，仅更新第 4 列背景色为绿色
 - `loadUnresolvedToLiveLog()` 方法：通过调用 `onRecordInserted()` 自动继承背景色设置功能
