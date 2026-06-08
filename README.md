@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.1.2**
+**当前版本：V0.2.3**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -10,9 +10,21 @@
 
 ## 更新日志
 
-### V0.1.2 - 2026-06-08 - Simon
+### V0.2.3 - 2026-06-08 - Simon
 
-#### 警报屏蔽配置功能 [V0.1.2]
+#### 警报屏蔽功能集成 [V0.2.3]
+- 在 `AlarmDispatchTask` 中集成 `AlarmConfig`，判断哪些警报可以屏蔽
+- 如果警报类型被屏蔽，则该警报不会参与 `FoupOfOHBInfo::hasAlarm/alarmId` 的选择，不再驱动 FOUP 设备显示为报警状态
+- 被屏蔽的警报仍会正常落库，并继续参与活跃告警跟踪与去重
+- 相关文件：
+  - 修改：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h`
+  - 修改：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp`
+
+---
+
+### V0.2.2 - 2026-06-08 - Simon
+
+#### 警报屏蔽配置功能 [V0.2.2]
 - 新增 `AlarmConfig` 类用于管理可屏蔽的警报类型配置
 - 新增 `alarm.ini` 配置文件，支持配置需要屏蔽的警报类型（如 VEFCAbnormal、VEEPAbnormal）
 - 提供读取被屏蔽警报集合、设置警报屏蔽状态、检查警报是否被屏蔽等方法

@@ -5,6 +5,7 @@
 #include "alarm_dispatch_task_logger.h"
 #include "alarminfo.h"
 #include "alarmtype.h"
+#include "config/alarmconfig.h"
 
 #include <QHash>
 #include <QMutex>
@@ -178,12 +179,14 @@ private:
     //
     // 根据当前 active 告警集合，统一同步指定设备的 FoupOfOHBInfo::hasAlarm/alarmId。
     void syncFoupAlarmState(const QString& qrCode);
+    void syncFoupAlarmState(const QString& qrCode, const QSet<QString>& blockedAlarmTypes);
 
     // 启动恢复、批量重置后使用：按 m_active 全量刷新所有设备的告警显示状态。
     void syncAllFoupAlarmStates();
 
     // 从 m_active 中选择指定设备当前最需要展示的告警 ID；优先级按 alarmLevel 从高到低。
     QString selectedActiveAlarmIdForQrCode(const QString& qrCode) const;
+    QString selectedActiveAlarmIdForQrCode(const QString& qrCode, const QSet<QString>& blockedAlarmTypes) const;
 
     QHash<QString, AlarmInfo> m_active;
     mutable QMutex            m_mutex;

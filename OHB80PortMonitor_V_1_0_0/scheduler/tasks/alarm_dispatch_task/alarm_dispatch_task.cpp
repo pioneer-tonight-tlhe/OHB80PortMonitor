@@ -35,6 +35,11 @@ QString alarmTypeDisplayText(int type)
     return QStringLiteral("%1(%2)").arg(type).arg(alarmTypeName(type));
 }
 
+bool isBlockedForFoup(const AlarmInfo& info, const QSet<QString>& blockedAlarmTypes)
+{
+    return blockedAlarmTypes.contains(alarmTypeName(info.record.alarmType));
+}
+
 } // namespace
 
 AlarmDispatchTask::AlarmDispatchTask(QObject* parent)
@@ -123,6 +128,12 @@ void AlarmDispatchTask::normalize(AlarmInfo& info) const
 // =====================================================================
 QString AlarmDispatchTask::selectedActiveAlarmIdForQrCode(const QString& qrCode) const
 {
+    return selectedActiveAlarmIdForQrCode(qrCode, AlarmConfig::getInstance().readBlockedAlarms());
+}
+
+QString AlarmDispatchTask::selectedActiveAlarmIdForQrCode(const QString& qrCode,
+                                                          const QSet<QString>& blockedAlarmTypes) const
+{
     const QString normalizedQrCode = qrCode.trimmed();
     if (normalizedQrCode.isEmpty()) {
         return QString();
@@ -137,6 +148,9 @@ QString AlarmDispatchTask::selectedActiveAlarmIdForQrCode(const QString& qrCode)
     for (auto it = m_active.constBegin(); it != m_active.constEnd(); ++it) {
         const AlarmInfo& info = it.value();
         if (info.record.qrCode.trimmed() != normalizedQrCode) {
+            continue;
+        }
+        if (isBlockedForFoup(info, blockedAlarmTypes)) {
             continue;
         }
 
@@ -244,6 +258,12 @@ void AlarmDispatchTask::stopFoupAlarmSyncTimer()
 
 void AlarmDispatchTask::syncFoupAlarmState(const QString& qrCode)
 {
+    syncFoupAlarmState(qrCode, AlarmConfig::getInstance().readBlockedAlarms());
+}
+
+void AlarmDispatchTask::syncFoupAlarmState(const QString& qrCode,
+                                           const QSet<QString>& blockedAlarmTypes)
+{
     const QString normalizedQrCode = qrCode.trimmed();
     if (normalizedQrCode.isEmpty()) {
         return;
@@ -254,9 +274,8 @@ void AlarmDispatchTask::syncFoupAlarmState(const QString& qrCode)
         return;
     }
 
-    // 没有 active 告警时 alarmId 为空，UI 对应设备恢复为非告警状态。
-    // 这里是唯一运行期写入 FoupOfOHBInfo::hasAlarm/alarmId 的位置。
-    const QString alarmId = selectedActiveAlarmIdForQrCode(normalizedQrCode);
+    // 没有未屏蔽的 active 告警时，alarmId 为空，UI 对应设备恢复为非告警状态。
+    const QString alarmId = selectedActiveAlarmIdForQrCode(normalizedQrCode, blockedAlarmTypes);
     foup->setHasAlarm(!alarmId.isEmpty());
     foup->setAlarmId(alarmId);
 }
@@ -264,9 +283,10 @@ void AlarmDispatchTask::syncFoupAlarmState(const QString& qrCode)
 void AlarmDispatchTask::syncAllFoupAlarmStates()
 {
     // 全量同步用于启动恢复和批量清空，避免部分设备保留旧的 UI 告警状态。
+    const QSet<QString> blockedAlarmTypes = AlarmConfig::getInstance().readBlockedAlarms();
     const QStringList qrCodes = SharedData::getAllQrcodes();
     for (const QString& qrCode : qrCodes) {
-        syncFoupAlarmState(qrCode);
+        syncFoupAlarmState(qrCode, blockedAlarmTypes);
     }
 }
 
