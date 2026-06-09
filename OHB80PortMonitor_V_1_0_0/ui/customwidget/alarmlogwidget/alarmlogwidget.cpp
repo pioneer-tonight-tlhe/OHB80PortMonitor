@@ -144,11 +144,67 @@ void AlarmLogWidget::loadUnresolvedToLiveLog()
         /*pageSize*/ kLiveLogMaxRows,
         /*pageNumber*/ 1);
 
-    // onRecordInserted 采用 insertRow(0)（最新在顶），
-    // 需逆序递交才能让最新一条最后插入、位于 row 0
+    // Feed older rows first so records with the same QRCode keep chronological order.
     for (auto it = rows.crbegin(); it != rows.crend(); ++it) {
         onRecordInserted(*it);
     }
+}
+
+void AlarmLogWidget::trimLiveLogRows()
+{
+    auto* model = qobject_cast<QStandardItemModel*>(ui->tableViewLiveLog->model());
+    if (!model || model->rowCount() <= kLiveLogMaxRows) {
+        return;
+    }
+
+    constexpr int kColIsResolved = 4;
+    const QString resolvedText =
+        alarmResolvedStatusName(static_cast<int>(AlarmResolvedStatus::Resolved));
+    const QString noNeedText =
+        alarmResolvedStatusName(static_cast<int>(AlarmResolvedStatus::NoNeed));
+
+    for (int r = model->rowCount() - 1; r >= 0; --r) {
+        QStandardItem* it = model->item(r, kColIsResolved);
+        if (!it) continue;
+
+        const QString status = it->text();
+        if (status == resolvedText || status == noNeedText) {
+            model->removeRow(r);
+        }
+    }
+}
+
+int AlarmLogWidget::liveLogInsertRowForQRCode(const QStandardItemModel* model, const QString& qrCode) const
+{
+    if (!model) {
+        return 0;
+    }
+
+    constexpr int kColQrCode = 2;
+    bool newQrOk = false;
+    const QString newQrText = qrCode.trimmed();
+    const int newQrValue = newQrText.toInt(&newQrOk);
+
+    for (int row = 0; row < model->rowCount(); ++row) {
+        const QStandardItem* rowQrItem = model->item(row, kColQrCode);
+        const QString rowQrText = rowQrItem ? rowQrItem->text().trimmed() : QString();
+
+        bool rowQrOk = false;
+        const int rowQrValue = rowQrText.toInt(&rowQrOk);
+
+        if (newQrOk && rowQrOk) {
+            if (rowQrValue > newQrValue) {
+                return row;
+            }
+            continue;
+        }
+
+        if (rowQrText > newQrText) {
+            return row;
+        }
+    }
+
+    return model->rowCount();
 }
 
 void AlarmLogWidget::onRecordResolved(const QString& qrCode,
@@ -162,7 +218,10 @@ void AlarmLogWidget::onRecordResolved(const QString& qrCode,
     bool typeOk = false;
     const int typeVal = alarmType.toInt(&typeOk);
     const QString typeText = typeOk ? alarmTypeName(typeVal) : alarmType;
-    const QString resolvedText = alarmResolvedStatusName(1);
+    const QString resolvedText =
+        alarmResolvedStatusName(static_cast<int>(AlarmResolvedStatus::Resolved));
+    const QString unresolvedText =
+        alarmResolvedStatusName(static_cast<int>(AlarmResolvedStatus::Unresolved));
 
     // 列顺序：0=Level 1=OccurTime 2=QRCode 3=AlarmType 4=IsResolved 5=ResolveTime ...
     constexpr int kColQrCode      = 2;
@@ -170,13 +229,13 @@ void AlarmLogWidget::onRecordResolved(const QString& qrCode,
     constexpr int kColIsResolved  = 4;
     constexpr int kColResolveTime = 5;
 
-    // 从顶部（最新）向下查找首个未解决且 (qrCode, alarmType) 匹配的行
+    // Update every unresolved row matching the same (qrCode, alarmType).
     const int rows = model->rowCount();
     for (int r = 0; r < rows; ++r) {
         const QString rowQr   = model->item(r, kColQrCode)   ? model->item(r, kColQrCode)->text()   : QString();
         const QString rowType = model->item(r, kColAlarmType)? model->item(r, kColAlarmType)->text(): QString();
         const QString rowRes  = model->item(r, kColIsResolved)? model->item(r, kColIsResolved)->text(): QString();
-        if (rowQr == qrCode && rowType == typeText && rowRes != resolvedText) {
+        if (rowQr == qrCode && rowType == typeText && rowRes == unresolvedText) {
             if (auto* it = model->item(r, kColIsResolved))  it->setText(resolvedText);
             if (auto* it = model->item(r, kColResolveTime)) it->setText(resolveTime);
 
@@ -186,9 +245,10 @@ void AlarmLogWidget::onRecordResolved(const QString& qrCode,
                 it->setBackground(resolvedColor);
                 it->setForeground(QBrush(Qt::white));
             }
-            return;
         }
     }
+
+    trimLiveLogRows();
 }
 
 void AlarmLogWidget::onRecordInserted(const AlarmRecord& record)
@@ -250,25 +310,13 @@ void AlarmLogWidget::onRecordInserted(const AlarmRecord& record)
         items[kColIsResolved]->setForeground(QBrush(resolvedTextColor));
     }
 
-    model->insertRow(0, items);
+    const int insertRow = liveLogInsertRowForQRCode(model, record.qrCode);
+    model->insertRow(insertRow, items);
 
     // 行数超过上限时，清除所有已解决（Resolved）和无需解决（NoNeed）的记录
     // 仅保留未解决（Unresolved）告警
     // 列 4 = Is Resolved，文本由 alarmResolvedStatusName 映射
-    if (model->rowCount() > kLiveLogMaxRows) {
-        constexpr int kColIsResolved = 4;
-        const QString resolvedText = alarmResolvedStatusName(static_cast<int>(AlarmResolvedStatus::Resolved));
-        const QString noNeedText   = alarmResolvedStatusName(static_cast<int>(AlarmResolvedStatus::NoNeed));
-        // 从底部向上删除，避免行号偏移
-        for (int r = model->rowCount() - 1; r >= 0; --r) {
-            QStandardItem* it = model->item(r, kColIsResolved);
-            if (!it) continue;
-            const QString s = it->text();
-            if (s == resolvedText || s == noNeedText) {
-                model->removeRow(r);
-            }
-        }
-    }
+    trimLiveLogRows();
 }
 
 void AlarmLogWidget::initUi()

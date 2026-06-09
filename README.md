@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.2.3**
+**当前版本：V0.3.4**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,31 @@
 ---
 
 ## 更新日志
+
+### V0.3.4 - 2026-06-09 - Simon
+
+#### AlarmPage LiveLog 排序功能 [V0.3.4]
+- `AlarmPage` 的 `Live Log` 新增排序插入逻辑，记录按数字型 `QRCode` 升序排列（如 `12001` 到 `12080`）
+- 当 `QRCode` 相同时，按记录到达顺序排列，同一设备的旧记录在前、新记录在后
+- 保持超过 100 条后的清理规则不变：只清理 `Resolved` / `No Need`，不会删除 `Unresolved` 未解决警报
+- 相关文件：
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - 修改：`README.md`
+
+---
+
+### V0.2.4 - 2026-06-08 - Simon
+
+#### AlarmPage LiveLog 清理异常修复 [V0.2.4]
+- 修复 `Live Log` 在连接断开警报恢复后只更新为 `Resolved`、但不触发清理，导致已恢复的 `Device Offline` 记录长期占用明细的问题
+- `Live Log` 超过 100 条后，在警报插入和警报恢复时都会清理 `Resolved` / `No Need` 记录，并确保不会删除 `Unresolved` 未解决警报
+- 相关文件：
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
+  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - 修改：`README.md`
+
+---
 
 ### V0.2.3 - 2026-06-08 - Simon
 

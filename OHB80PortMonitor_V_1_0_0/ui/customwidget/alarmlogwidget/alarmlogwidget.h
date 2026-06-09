@@ -8,6 +8,8 @@ namespace Ui {
 class AlarmLogWidget;
 }
 
+class QStandardItemModel;
+
 class AlarmLogWidget : public QWidget
 {
     Q_OBJECT
@@ -62,6 +64,9 @@ private:
     void loadUnresolvedToLiveLog();
 
     // live log 行数上限（超过后清除所有已解决记录）
+    void trimLiveLogRows();
+    int liveLogInsertRowForQRCode(const QStandardItemModel* model, const QString& qrCode) const;
+
     static constexpr int kLiveLogMaxRows = 100;
 };
 
