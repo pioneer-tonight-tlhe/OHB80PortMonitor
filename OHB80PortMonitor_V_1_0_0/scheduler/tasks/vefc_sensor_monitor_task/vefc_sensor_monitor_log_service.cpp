@@ -5,6 +5,13 @@
 
 #include <QStringList>
 
+// ====================================================================
+// VEFCSensorMonitorLogService - 日志服务实现
+//
+// 说明：
+//   1. 这里集中定义 VEFC 监控的任务、轮次、设备三层日志输出格式。
+//   2. Task 只传入必要上下文和结果，本类负责格式化为最终日志文本。
+// ====================================================================
 VEFCSensorMonitorLogService::VEFCSensorMonitorLogService()
     : m_logger(LoggerConfig::getInstance()->isVEFCSensorMonitorTaskSummaryEnabled(),
                LoggerConfig::getInstance()->isVEFCSensorMonitorTaskDevicesEnabled())
@@ -219,6 +226,8 @@ void VEFCSensorMonitorLogService::writeRecordPersisted(const QString& roundId,
 QString VEFCSensorMonitorLogService::commandFailureReason(const ModbusCommand& cmd)
 {
     QStringList reasons;
+
+    // 统一收口底层命令失败原因，保证日志描述风格一致。
     if (cmd.timedOut) {
         reasons << QStringLiteral("timed out");
     }
@@ -238,6 +247,8 @@ QString VEFCSensorMonitorLogService::commandRequestFrame(const ModbusCommand& cm
 {
     QByteArray frame = cmd.request.rawBytes;
     frame.append(cmd.request.crc);
+
+    // 将请求帧展开为十六进制字符串，便于排查通信问题。
     return frame.isEmpty() ? QStringLiteral("none") : QString(frame.toHex(' ').toUpper());
 }
 
@@ -249,6 +260,8 @@ QString VEFCSensorMonitorLogService::commandResponseFrame(const ModbusCommand& c
     if (cmd.received) {
         return frameText;
     }
+
+    // 未收到有效响应时，日志中同时保留失败原因与原始响应帧（如果有）。
     const QString reason = commandFailureReason(cmd);
     return frame.isEmpty() ? reason : QStringLiteral("%1, %2").arg(reason, frameText);
 }

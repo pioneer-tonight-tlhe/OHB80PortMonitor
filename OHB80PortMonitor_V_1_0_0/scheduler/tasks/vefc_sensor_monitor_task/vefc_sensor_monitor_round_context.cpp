@@ -1,5 +1,12 @@
 ﻿#include "vefc_sensor_monitor_round_context.h"
 
+// ====================================================================
+// VEFCSensorMonitorRoundContext - 轮次上下文实现
+//
+// 说明：
+//   1. Task 只负责驱动轮次流程，具体状态读写统一收口到这里。
+//   2. 汇总时始终按目标设备顺序输出，避免 QHash 无序带来的展示抖动。
+// ====================================================================
 void VEFCSensorMonitorRoundContext::beginRound(const QString& roundId,
                                                qint64 recordTimestamp,
                                                const QString& startTime,
@@ -7,6 +14,7 @@ void VEFCSensorMonitorRoundContext::beginRound(const QString& roundId,
 {
     clear();
 
+    // 进入新轮次后，先缓存元数据，再为每个目标设备创建默认状态。
     m_active = true;
     m_roundId = roundId;
     m_recordTimestamp = recordTimestamp;
@@ -24,6 +32,7 @@ void VEFCSensorMonitorRoundContext::beginRound(const QString& roundId,
 
 void VEFCSensorMonitorRoundContext::completeRound()
 {
+    // completeRound() 只结束 active 状态，不主动清除本轮结果。
     m_active = false;
 }
 
@@ -65,6 +74,8 @@ QList<VEFCSensorMonitor::DeviceRoundState> VEFCSensorMonitorRoundContext::ordere
 {
     QList<VEFCSensorMonitor::DeviceRoundState> states;
     states.reserve(m_orderedQrcodes.size());
+
+    // 按 beginRound() 记录的目标顺序导出，方便日志和 UI 稳定展示。
     for (const QString& qrCode : m_orderedQrcodes) {
         states.append(m_states.value(qrCode));
     }
@@ -80,6 +91,7 @@ VEFCSensorMonitor::RoundSummary VEFCSensorMonitorRoundContext::buildSummary(cons
     summary.totalCount = m_orderedQrcodes.size();
     summary.details = orderedStates();
 
+    // 汇总统计统一基于 orderedStates() 结果，保证设备顺序与目标顺序一致。
     for (const VEFCSensorMonitor::DeviceRoundState& state : summary.details) {
         if (state.skipped) {
             ++summary.skippedCount;

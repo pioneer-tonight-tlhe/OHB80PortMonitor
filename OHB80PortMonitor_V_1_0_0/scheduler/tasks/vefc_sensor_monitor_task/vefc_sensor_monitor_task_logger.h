@@ -1,25 +1,25 @@
-#ifndef VEFC_SENSOR_MONITOR_TASK_LOGGER_H
+﻿#ifndef VEFC_SENSOR_MONITOR_TASK_LOGGER_H
 #define VEFC_SENSOR_MONITOR_TASK_LOGGER_H
 
 #include "ilogger.h"
 
 #include <QString>
 
-/**
- * @brief VEFCSensorMonitorTask 专属日志管理类。
- *
- * 日志文件约定：
- * - summary：scheduler/vefc_sensor_monitor_task/summary.log，记录任务启动、轮次开始/结束、失败摘要。
- * - devices：scheduler/vefc_sensor_monitor_task/devices.log，记录所有子设备的指令帧和记录生成明细。
- *
- * 子设备日志统一写入 devices.log，不再按 QRCode 拆分文件。
- * 具体设备通过日志正文中的 [QRCode:xxxxx] 字段区分。
- */
+// ====================================================================
+// VEFCSensorMonitorTaskLogger - VEFC 监控任务专属日志管理器
+//
+// 设计目标：
+//   1. 统一管理 summary.log 与 devices.log 两类日志对象。
+//   2. 子设备日志统一写入 devices.log，不再按 QRCode 拆分文件。
+//   3. 具体设备通过日志正文中的 [QRCode:xxxxx] 字段区分。
+// ====================================================================
 class VEFCSensorMonitorTaskLogger
 {
 public:
+    // 按配置开关初始化任务汇总日志和设备明细日志。
     VEFCSensorMonitorTaskLogger(bool summaryEnable, bool devicesEnable);
 
+    // 返回汇总日志对象，供日志服务输出任务/轮次级信息。
     ILogger& summaryLogger();
 
     void setSummaryEnabled(bool enable);
@@ -28,9 +28,11 @@ public:
     void setDeviceLogsEnabled(bool enable);
     bool isDeviceLogsEnabled() const;
 
+    // 返回设备日志对象；当前实现统一复用 devices.log。
     ILogger& deviceLogger(const QString& qrCode);
 
 private:
+    // ---- 日志对象与开关状态 ----
     ILogger m_summaryLogger;
     ILogger m_deviceLogger;
     bool m_deviceLogsEnabled = true;

@@ -5,6 +5,13 @@
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 
+// ====================================================================
+// VEFCSensorMonitorRoundRunner - 执行器实现
+//
+// 说明：
+//   1. 本类不关心“业务上是否成功”，只负责 sender 连接、提交命令和保留 pending。
+//   2. 具体解析和落库逻辑仍由 Task 在收到中继信号后完成。
+// ====================================================================
 VEFCSensorMonitorRoundRunner::VEFCSensorMonitorRoundRunner(QObject* parent)
     : QObject(parent)
 {
@@ -19,6 +26,7 @@ void VEFCSensorMonitorRoundRunner::connectAllSenders()
 {
     disconnectAllSenders();
 
+    // 按 MasterManager 当前已有设备列表建立中继连接。
     ModbusTcpMasterManager& manager = ModbusTcpMasterManager::instance();
     const QStringList ids = manager.masterIds();
     for (const QString& id : ids) {
@@ -27,6 +35,7 @@ void VEFCSensorMonitorRoundRunner::connectAllSenders()
             continue;
         }
 
+        // 跨线程统一使用 QueuedConnection，避免 sender 所在线程与 Task 线程直接耦合。
         ModbusCommandSender* sender = master->sender();
         m_connections.append(connect(sender, &ModbusCommandSender::commandFinished,
                                      this, &VEFCSensorMonitorRoundRunner::commandFinished,
@@ -49,6 +58,7 @@ bool VEFCSensorMonitorRoundRunner::submitCommand(const QString& qrCode,
                                                  VEFCSensorMonitor::SensorCommandType type,
                                                  const char* commandId)
 {
+    // 提交前只检查必要依赖是否可用；业务成败由后续 commandFinished 决定。
     ModbusTcpMasterManager& manager = ModbusTcpMasterManager::instance();
     ModbusTcpMaster* master = manager.getMaster(qrCode);
     CommandPool* pool = manager.commandPool();

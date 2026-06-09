@@ -1,7 +1,14 @@
-#include "vefc_sensor_monitor_task_logger.h"
+﻿#include "vefc_sensor_monitor_task_logger.h"
 
 #include <QtGlobal>
 
+// ====================================================================
+// VEFCSensorMonitorTaskLogger - 日志管理器实现
+//
+// 说明：
+//   1. 本类本身很轻，只负责封装两个 ILogger 对象及其开关状态。
+//   2. 真正的日志文本格式由 VEFCSensorMonitorLogService 统一组织。
+// ====================================================================
 VEFCSensorMonitorTaskLogger::VEFCSensorMonitorTaskLogger(bool summaryEnable, bool devicesEnable)
     : m_summaryLogger("scheduler/vefc_sensor_monitor_task/summary")
     , m_deviceLogger("scheduler/vefc_sensor_monitor_task/devices")

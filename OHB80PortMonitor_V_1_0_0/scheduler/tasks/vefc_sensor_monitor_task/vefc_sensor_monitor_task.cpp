@@ -9,6 +9,13 @@
 #include <QDateTime>
 #include <QTimer>
 
+// ====================================================================
+// VEFCSensorMonitorTask - 调度任务实现
+//
+// 说明：
+//   1. 本文件只保留调度壳职责：周期触发、轮次开始/结束、状态切换和对外信号转发。
+//   2. 设备筛选、执行器、轮次上下文和日志格式化均已拆分到独立文件。
+// ====================================================================
 VEFCSensorMonitorTask::VEFCSensorMonitorTask(QObject* parent)
     : SchedulerTask(parent)
 {
@@ -28,6 +35,7 @@ VEFCSensorMonitorTask::~VEFCSensorMonitorTask()
 
 void VEFCSensorMonitorTask::start()
 {
+    // start() 负责重置任务级状态，并立即触发首轮 VEFC 监控。
     m_stopped = false;
     m_startedMs = QDateTime::currentMSecsSinceEpoch();
     m_nextTriggerDeadlineMs = m_startedMs + kIntervalMs;
@@ -55,6 +63,7 @@ void VEFCSensorMonitorTask::start()
 
 void VEFCSensorMonitorTask::stop()
 {
+    // stop() 统一停止定时器、断开执行器并清空轮次上下文。
     const bool wasRunning = (state() == Running)
         || (m_periodTimer && m_periodTimer->isActive())
         || m_roundContext.isActive();
@@ -115,6 +124,7 @@ void VEFCSensorMonitorTask::onPeriodTimeout()
         return;
     }
 
+    // 当前轮次未收口时，本次触发只记录日志并重新进入倒计时，不强行并发开启新轮次。
     m_nextTriggerDeadlineMs = QDateTime::currentMSecsSinceEpoch() + kIntervalMs;
     stopIntervalCountdown();
 
@@ -213,6 +223,7 @@ void VEFCSensorMonitorTask::startMonitorRound()
         return;
     }
 
+    // 每轮统一生成 roundId / recordTimestamp，并由 RoundContext 建立默认状态。
     ++m_roundIndex;
     const qint64 roundTimestamp = QDateTime::currentMSecsSinceEpoch();
     const QString roundId = roundIdFromTimestamp(roundTimestamp);
@@ -233,6 +244,7 @@ void VEFCSensorMonitorTask::startMonitorRound()
         return;
     }
 
+    // 设备前置条件检查统一交给 Selector；Task 只消费检查结果。
     const QList<VEFCSensorMonitor::DeviceInspection> inspections = m_deviceSelector.inspectTargets();
     for (const VEFCSensorMonitor::DeviceInspection& inspection : inspections) {
         processDeviceInspection(inspection);
@@ -248,11 +260,13 @@ void VEFCSensorMonitorTask::processDeviceInspection(const VEFCSensorMonitor::Dev
         return;
     }
 
+    // 本轮固定记录 FoupOfOHBInfo 中的进气压力和实际流量。
     state->record.qrCode = inspection.qrCode;
     state->record.recordTimestamp = m_roundContext.recordTimestamp();
     state->record.gasPressure = inspection.gasPressure;
     state->record.actualFlow = inspection.actualFlow;
 
+    // 前置条件不满足时，直接将该设备标记为 skipped。
     if (!inspection.canSubmitCommands()) {
         state->skipped = true;
         state->pressureFinished = true;
@@ -265,6 +279,7 @@ void VEFCSensorMonitorTask::processDeviceInspection(const VEFCSensorMonitor::Dev
         return;
     }
 
+    // 正常情况下，每台设备提交两条业务指令：压力与温度。
     const bool pressureSubmitted = m_roundRunner->submitCommand(inspection.qrCode,
                                                                 VEFCSensorMonitor::SensorCommandType::Pressure,
                                                                 kReadPressureCmdId);
@@ -293,6 +308,7 @@ void VEFCSensorMonitorTask::completeDeviceCommand(const QString& qrCode,
         return;
     }
 
+    // 成功收到响应后，统一通过 CommandResponseParser 提取传感器值。
     const QVariantMap data = CommandResponseParser::instance().parse(cmd);
     if (type == VEFCSensorMonitor::SensorCommandType::Pressure) {
         state->pressureFinished = true;
@@ -320,6 +336,7 @@ void VEFCSensorMonitorTask::completeDeviceCommand(const QString& qrCode,
         }
     }
 
+    // 只有压力和温度两条业务指令都成功后，才允许立刻落库。
     if (state->pressureOk && state->temperatureOk && !state->persisted) {
         persistDeviceRecord(*state);
     }
@@ -373,6 +390,7 @@ void VEFCSensorMonitorTask::persistDeviceRecord(VEFCSensorMonitor::DeviceRoundSt
         return;
     }
 
+    // 数据库连接不可用时只记录失败原因，不把该设备误判为成功。
     LogDB::VEFCSensorMonitorDBCon* db = LogDB::DatabaseManager::instance().vefcSensorMonitorCon();
     if (!db) {
         appendFailureReason(state, QStringLiteral("VEFC monitor database is unavailable"));
@@ -392,6 +410,7 @@ void VEFCSensorMonitorTask::tryFinishRound()
         return;
     }
 
+    // 只有当本轮 pending command 全部收口后，才生成整轮汇总并切换为等待下轮状态。
     const VEFCSensorMonitor::RoundSummary summary = m_roundContext.buildSummary(currentTimestamp());
     m_logService.writeRoundFinished(summary);
 
@@ -424,6 +443,7 @@ void VEFCSensorMonitorTask::startIntervalCountdown()
         return;
     }
 
+    // 倒计时基于“下一次理论触发时间”计算，而不是基于当前时间重新固定 60 秒。
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     const qint64 remainingMs = qMax<qint64>(0, m_nextTriggerDeadlineMs - now);
     m_intervalRemainingSeconds = static_cast<int>((remainingMs + 999) / 1000);
