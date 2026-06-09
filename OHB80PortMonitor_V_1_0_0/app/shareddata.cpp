@@ -187,12 +187,12 @@ void SharedData::initScheduler()
                                   Q_ARG(bool, enabled));
     }
 
-    // // 创建并提交 VEFC 传感器监控任务（长驻任务）
-    // if (!s_vefcSensorMonitorTask) {
-    //     s_vefcSensorMonitorTask = new VEFCSensorMonitorTask();
-    //     QString id = scheduler->submitTask(s_vefcSensorMonitorTask);
-    //     qDebug() << "[SharedData] 已提交 VEFC 传感器监控任务, TaskID:" << id;
-    // }
+    // 创建并提交 VEFC 传感器监控任务（长驻任务）
+    if (!s_vefcSensorMonitorTask) {
+        s_vefcSensorMonitorTask = new VEFCSensorMonitorTask();
+        QString id = scheduler->submitTask(s_vefcSensorMonitorTask);
+        qDebug() << "[SharedData] 已提交 VEFC 传感器监控任务, TaskID:" << id;
+    }
 
     qDebug() << "[SharedData] 调度器已启动，所有常驻任务已提交";
 }

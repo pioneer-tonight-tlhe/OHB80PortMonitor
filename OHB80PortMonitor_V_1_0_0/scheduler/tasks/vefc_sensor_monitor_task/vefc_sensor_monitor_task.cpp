@@ -1,524 +1,485 @@
-#include "vefc_sensor_monitor_task.h"
+﻿#include "vefc_sensor_monitor_task.h"
 
-#include "app/shareddata.h"
-#include "classes/foupofohbinfo.h"
-#include "config/loggerconfig.h"
-#include "logdatabases/databasemanager.h"
-#include "logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.h"
-#include "modbustcpmastermanager/modbuscommand/commandpool.h"
-#include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
-#include "modbustcpmastermanager/modbustcpmaster/modbuscommandsender.h"
-#include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
-#include "modbustcpmastermanager/modbustcpmastermanager.h"
+#include "data/logdatabases/databasemanager.h"
+#include "data/logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.h"
+#include "data/modbustcpmastermanager/modbuscommand/commandpool.h"
+#include "data/modbustcpmastermanager/modbuscommand/commandresponseparser.h"
+#include "data/modbustcpmastermanager/modbustcpmastermanager.h"
 
 #include <QDateTime>
-#include <QStringList>
+#include <QTimer>
 
 VEFCSensorMonitorTask::VEFCSensorMonitorTask(QObject* parent)
     : SchedulerTask(parent)
-    , m_timer(new QTimer(this))
 {
-    initLogger();
-    m_timer->setInterval(kIntervalMs);
-    connect(m_timer, &QTimer::timeout, this, &VEFCSensorMonitorTask::onIntervalTick);
+    qRegisterMetaType<VEFCSensorMonitorTask::State>("VEFCSensorMonitorTask::State");
+    qRegisterMetaType<VEFCSensorMonitorRecord>("VEFCSensorMonitorRecord");
+    qRegisterMetaType<VEFCSensorMonitor::RoundSummary>("VEFCSensorMonitor::RoundSummary");
 
-    m_logger->summaryLogger().info("[VEFCSensorMonitorTask] 对象创建");
+    initPeriodTimer();
+    initRoundRunner();
+    m_logService.writeTaskConstructed();
 }
 
 VEFCSensorMonitorTask::~VEFCSensorMonitorTask()
 {
-    if (m_logger) {
-        m_logger->summaryLogger().info("[VEFCSensorMonitorTask] 对象销毁");
-        delete m_logger;
-        m_logger = nullptr;
-    }
+    stop();
 }
 
 void VEFCSensorMonitorTask::start()
 {
-    setState(Running);
     m_stopped = false;
-    m_roundActive = false;
     m_startedMs = QDateTime::currentMSecsSinceEpoch();
+    m_nextTriggerDeadlineMs = m_startedMs + kIntervalMs;
+    m_elapsedSeconds = 0;
+    m_intervalRemainingSeconds = 0;
     m_roundIndex = 0;
 
-    connectAllSenders();
-    m_timer->start();
+    setState(Running);
+    enterTaskState(State::Monitoring);
 
-    m_logger->summaryLogger().info(QString("============================= VEFCSensorMonitorTask 启动 =============================\n"
-                                           "周期: %1 ms\n"
-                                           "启动时间: %2\n"
-                                           "日志目录: scheduler/vefc_sensor_monitor_task")
-        .arg(kIntervalMs)
-        .arg(QDateTime::fromMSecsSinceEpoch(m_startedMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz")))
-        .toStdString());
+    m_roundContext.clear();
+    m_roundRunner->connectAllSenders();
+    m_roundRunner->clearPendingCommands();
 
-    startRound();
+    if (m_elapsedTimer) {
+        m_elapsedTimer->start();
+    }
+    if (m_periodTimer) {
+        m_periodTimer->start();
+    }
+
+    m_logService.writeTaskStarted(kIntervalMs, currentTimestamp());
+    startMonitorRound();
 }
 
 void VEFCSensorMonitorTask::stop()
 {
+    const bool wasRunning = (state() == Running)
+        || (m_periodTimer && m_periodTimer->isActive())
+        || m_roundContext.isActive();
+
     m_stopped = true;
-    if (m_timer) {
-        m_timer->stop();
+
+    if (m_periodTimer) {
+        m_periodTimer->stop();
     }
+    if (m_elapsedTimer) {
+        m_elapsedTimer->stop();
+    }
+    stopIntervalCountdown();
 
-    disconnectAllSenders();
-    m_pendingCommands.clear();
-    m_deviceStates.clear();
-    m_roundActive = false;
+    if (m_roundRunner) {
+        m_roundRunner->clearPendingCommands();
+        m_roundRunner->disconnectAllSenders();
+    }
+    m_roundContext.clear();
 
-    setState(Cancelled);
-    emit finished(false, QStringLiteral("VEFC 传感器监控任务已停止"));
+    enterTaskState(State::Stopped);
 
-    const qint64 stoppedMs = QDateTime::currentMSecsSinceEpoch();
-    m_logger->summaryLogger().info(QString("============================= VEFCSensorMonitorTask 停止 =============================\n"
-                                           "运行时长: %1 ms\n"
-                                           "停止时间: %2")
-        .arg(m_startedMs > 0 ? stoppedMs - m_startedMs : 0)
-        .arg(QDateTime::fromMSecsSinceEpoch(stoppedMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz")))
-        .toStdString());
+    if (wasRunning) {
+        setState(Cancelled);
+        emit finished(false, QStringLiteral("VEFC sensor monitor task stopped"));
+        const qint64 stoppedMs = QDateTime::currentMSecsSinceEpoch();
+        m_logService.writeTaskStopped(m_startedMs > 0 ? stoppedMs - m_startedMs : 0,
+                                      QDateTime::fromMSecsSinceEpoch(stoppedMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz")));
+    }
 }
 
-void VEFCSensorMonitorTask::onIntervalTick()
+QString VEFCSensorMonitorTask::currentStateText() const
+{
+    return stateToString(m_taskState);
+}
+
+QString VEFCSensorMonitorTask::stateToString(State state)
+{
+    switch (state) {
+    case State::Stopped:
+        return QStringLiteral("Stopped");
+    case State::Monitoring:
+        return QStringLiteral("Monitoring");
+    case State::WaitingNext:
+        return QStringLiteral("WaitingNext");
+    }
+    return QStringLiteral("Unknown");
+}
+
+QStringList VEFCSensorMonitorTask::filterAvailableDevices() const
+{
+    return m_deviceSelector.filterAvailableDevices();
+}
+
+void VEFCSensorMonitorTask::onPeriodTimeout()
 {
     if (m_stopped) {
         return;
     }
 
-    if (m_roundActive) {
-        m_logger->summaryLogger().warn(QString("[VEFCSensorMonitorTask] 上一轮尚未完成，跳过本次触发\n"
-                                               "轮次ID: %1\n"
-                                               "待完成指令数: %2")
-            .arg(m_roundId)
-            .arg(m_pendingCommands.size())
-            .toStdString());
+    m_nextTriggerDeadlineMs = QDateTime::currentMSecsSinceEpoch() + kIntervalMs;
+    stopIntervalCountdown();
+
+    if (m_roundContext.isActive() || m_roundRunner->hasPendingCommands()) {
+        m_logService.writeTriggerSkipped(m_roundContext.roundId(), m_roundRunner->pendingCount());
+        startIntervalCountdown();
         return;
     }
 
-    startRound();
+    startMonitorRound();
 }
 
-void VEFCSensorMonitorTask::onCommandFinished(ModbusCommand cmd, const QString& masterId)
+void VEFCSensorMonitorTask::onElapsedTimerTick()
 {
-    Q_UNUSED(masterId)
+    ++m_elapsedSeconds;
+    emit elapsedTick(m_elapsedSeconds);
+}
 
-    if (m_stopped || !m_roundActive) {
+void VEFCSensorMonitorTask::onIntervalCountdownTick()
+{
+    if (m_intervalRemainingSeconds <= 0) {
+        stopIntervalCountdown();
+        emit intervalCountdown(0);
         return;
     }
-    if (!m_pendingCommands.contains(cmd.uuid)) {
+
+    --m_intervalRemainingSeconds;
+    emit intervalCountdown(m_intervalRemainingSeconds);
+}
+
+void VEFCSensorMonitorTask::onRunnerCommandFinished(ModbusCommand cmd, const QString& masterId)
+{
+    emit commandCompleted(cmd, masterId);
+
+    if (m_stopped || !m_roundContext.isActive()) {
+        return;
+    }
+    if (!m_roundRunner->containsPendingCommand(cmd.uuid)) {
         return;
     }
 
-    const PendingCommand pending = m_pendingCommands.take(cmd.uuid);
-    const QString qrCode = pending.qrCode;
+    const VEFCSensorMonitor::PendingCommand pending = m_roundRunner->takePendingCommand(cmd.uuid);
     const bool commandOk = cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy;
     if (!commandOk) {
-        failCommand(qrCode, pending.type, cmd, commandFailureReason(cmd));
-        finishRoundIfReady();
+        failDeviceCommand(pending.qrCode, pending.type, cmd, commandFailureReason(cmd));
+        tryFinishRound();
         return;
     }
 
-    completeCommand(qrCode, pending.type, cmd);
-    finishRoundIfReady();
+    completeDeviceCommand(pending.qrCode, pending.type, cmd);
+    tryFinishRound();
 }
 
-void VEFCSensorMonitorTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString& masterId)
+void VEFCSensorMonitorTask::onRunnerCommandRetrying(ModbusCommand cmd, const QString& masterId)
 {
+    emit commandRetrying(cmd, masterId);
     Q_UNUSED(masterId)
 
-    if (!m_pendingCommands.contains(cmd.uuid)) {
+    if (!m_roundRunner->containsPendingCommand(cmd.uuid)) {
         return;
     }
 
-    const PendingCommand pending = m_pendingCommands.value(cmd.uuid);
-    m_logger->deviceLogger(pending.qrCode).info(QString("[VEFCSensorMonitorTask][QRCode:%1] 指令超时重试\n"
-                                                       "轮次ID: %2\n"
-                                                       "指令: %3\n"
-                                                       "发送次数: %4/%5")
-        .arg(pending.qrCode)
-        .arg(m_roundId)
-        .arg(cmd.id)
-        .arg(cmd.sendCount)
-        .arg(cmd.maxRetryCount + 1)
-        .toStdString());
+    const VEFCSensorMonitor::PendingCommand pending = m_roundRunner->pendingCommand(cmd.uuid);
+    m_logService.writeCommandRetrying(m_roundContext.roundId(), pending.qrCode, cmd);
 }
 
-void VEFCSensorMonitorTask::initLogger()
+void VEFCSensorMonitorTask::initPeriodTimer()
 {
-    const bool summary = LoggerConfig::getInstance()->isVEFCSensorMonitorTaskSummaryEnabled();
-    const bool devices = LoggerConfig::getInstance()->isVEFCSensorMonitorTaskDevicesEnabled();
-    m_logger = new VEFCSensorMonitorTaskLogger(summary, devices);
+    m_periodTimer = new QTimer(this);
+    m_periodTimer->setInterval(kIntervalMs);
+    connect(m_periodTimer, &QTimer::timeout, this, &VEFCSensorMonitorTask::onPeriodTimeout);
+
+    m_elapsedTimer = new QTimer(this);
+    m_elapsedTimer->setInterval(1000);
+    connect(m_elapsedTimer, &QTimer::timeout, this, &VEFCSensorMonitorTask::onElapsedTimerTick);
+
+    m_intervalCountdownTimer = new QTimer(this);
+    m_intervalCountdownTimer->setInterval(1000);
+    connect(m_intervalCountdownTimer, &QTimer::timeout, this, &VEFCSensorMonitorTask::onIntervalCountdownTick);
 }
 
-void VEFCSensorMonitorTask::connectAllSenders()
+void VEFCSensorMonitorTask::initRoundRunner()
 {
-    disconnectAllSenders();
-
-    ModbusTcpMasterManager& manager = ModbusTcpMasterManager::instance();
-    const QStringList ids = manager.masterIds();
-    for (const QString& id : ids) {
-        ModbusTcpMaster* master = manager.getMaster(id);
-        if (!master || !master->sender()) {
-            continue;
-        }
-
-        ModbusCommandSender* sender = master->sender();
-        m_connections.append(connect(sender, &ModbusCommandSender::commandFinished,
-                                     this, &VEFCSensorMonitorTask::onCommandFinished,
-                                     Qt::QueuedConnection));
-        m_connections.append(connect(sender, &ModbusCommandSender::commandTimeoutRetry,
-                                     this, &VEFCSensorMonitorTask::onCommandTimeoutRetry,
-                                     Qt::QueuedConnection));
-    }
+    m_roundRunner = new VEFCSensorMonitorRoundRunner(this);
+    connect(m_roundRunner, &VEFCSensorMonitorRoundRunner::commandFinished,
+            this, &VEFCSensorMonitorTask::onRunnerCommandFinished,
+            Qt::QueuedConnection);
+    connect(m_roundRunner, &VEFCSensorMonitorRoundRunner::commandRetrying,
+            this, &VEFCSensorMonitorTask::onRunnerCommandRetrying,
+            Qt::QueuedConnection);
 }
 
-void VEFCSensorMonitorTask::disconnectAllSenders()
-{
-    for (const QMetaObject::Connection& connection : qAsConst(m_connections)) {
-        disconnect(connection);
-    }
-    m_connections.clear();
-}
-
-void VEFCSensorMonitorTask::startRound()
+void VEFCSensorMonitorTask::startMonitorRound()
 {
     if (m_stopped) {
         return;
     }
 
     ++m_roundIndex;
-    m_roundActive = true;
-    m_roundTimestamp = QDateTime::currentMSecsSinceEpoch();
-    m_roundId = roundIdFromTimestamp(m_roundTimestamp);
-    m_pendingCommands.clear();
-    m_deviceStates.clear();
+    const qint64 roundTimestamp = QDateTime::currentMSecsSinceEpoch();
+    const QString roundId = roundIdFromTimestamp(roundTimestamp);
+    const QString startTime = currentTimestamp();
+    const QStringList qrcodes = m_deviceSelector.targetQrcodes();
 
-    const QStringList qrCodes = SharedData::getAllQrcodes();
-    m_logger->summaryLogger().info(QString("============================= VEFC 传感器监控轮次开始 =============================\n"
-                                           "轮次ID: %1\n"
-                                           "轮次序号: %2\n"
-                                           "记录时间戳: %3\n"
-                                           "记录时间: %4\n"
-                                           "目标设备数: %5")
-        .arg(m_roundId)
-        .arg(m_roundIndex)
-        .arg(m_roundTimestamp)
-        .arg(QDateTime::fromMSecsSinceEpoch(m_roundTimestamp).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz")))
-        .arg(qrCodes.size())
-        .toStdString());
+    enterTaskState(State::Monitoring);
+    m_roundContext.beginRound(roundId, roundTimestamp, startTime, qrcodes);
+    emit roundStarted(roundId, qrcodes.size());
+    m_logService.writeRoundStarted(roundId, startTime, roundTimestamp, qrcodes.size());
 
     CommandPool* pool = ModbusTcpMasterManager::instance().commandPool();
     if (!pool || !pool->contains(kReadPressureCmdId) || !pool->contains(kReadTemperatureCmdId)) {
-        m_logger->summaryLogger().error(QString("[VEFCSensorMonitorTask] VEFC 传感器监控指令不存在，轮次取消\n"
-                                                "轮次ID: %1\n"
-                                                "ReadVEFCPressure: %2\n"
-                                                "ReadVEFCTemperature: %3")
-            .arg(m_roundId)
-            .arg(pool && pool->contains(kReadPressureCmdId) ? QStringLiteral("存在") : QStringLiteral("不存在"))
-            .arg(pool && pool->contains(kReadTemperatureCmdId) ? QStringLiteral("存在") : QStringLiteral("不存在"))
-            .toStdString());
-        m_roundActive = false;
+        m_logService.writeRoundCancelled(roundId, QStringLiteral("VEFC monitor commands are missing in CommandPool"));
+        m_roundContext.clear();
+        enterTaskState(State::WaitingNext);
+        startIntervalCountdown();
         return;
     }
 
-    for (const QString& qrCode : qrCodes) {
-        submitDeviceCommands(qrCode);
+    const QList<VEFCSensorMonitor::DeviceInspection> inspections = m_deviceSelector.inspectTargets();
+    for (const VEFCSensorMonitor::DeviceInspection& inspection : inspections) {
+        processDeviceInspection(inspection);
     }
 
-    finishRoundIfReady();
+    tryFinishRound();
 }
 
-void VEFCSensorMonitorTask::submitDeviceCommands(const QString& qrCode)
+void VEFCSensorMonitorTask::processDeviceInspection(const VEFCSensorMonitor::DeviceInspection& inspection)
 {
-    FoupOfOHBInfo* foup = SharedData::getFoupByQRCode(qrCode);
-    if (!foup) {
-        skipDevice(qrCode, QStringLiteral("未找到 FoupOfOHBInfo"));
+    VEFCSensorMonitor::DeviceRoundState* state = m_roundContext.mutableState(inspection.qrCode);
+    if (!state) {
         return;
     }
 
-    DeviceRoundState state;
-    state.qrCode = qrCode;
-    state.record.qrCode = qrCode;
-    state.record.recordTimestamp = m_roundTimestamp;
-    state.record.gasPressure = foup->inletPressure();
-    state.record.actualFlow = foup->inletFlow();
-    m_deviceStates.insert(qrCode, state);
+    state->record.qrCode = inspection.qrCode;
+    state->record.recordTimestamp = m_roundContext.recordTimestamp();
+    state->record.gasPressure = inspection.gasPressure;
+    state->record.actualFlow = inspection.actualFlow;
 
-    ModbusTcpMaster* master = ModbusTcpMasterManager::instance().getMaster(qrCode);
-    if (!master) {
-        skipDevice(qrCode, QStringLiteral("Master 不存在"));
-        return;
-    }
-    if (!master->isConnected()) {
-        skipDevice(qrCode, QStringLiteral("设备未连接"));
-        return;
-    }
-    if (!master->sender()) {
-        skipDevice(qrCode, QStringLiteral("Sender 为空"));
+    if (!inspection.canSubmitCommands()) {
+        state->skipped = true;
+        state->pressureFinished = true;
+        state->temperatureFinished = true;
+        state->failReason = inspection.unavailableReason;
+        m_logService.writeDeviceSkipped(m_roundContext.roundId(),
+                                        inspection.qrCode,
+                                        inspection.unavailableReason,
+                                        state->record.recordTimeString());
         return;
     }
 
-    DeviceRoundState& current = m_deviceStates[qrCode];
-    if (!submitCommand(qrCode, SensorCommandType::Pressure, kReadPressureCmdId)) {
-        current.pressureFinished = true;
-        current.pressureOk = false;
-        current.failReason = QStringLiteral("ReadVEFCPressure 提交失败");
+    const bool pressureSubmitted = m_roundRunner->submitCommand(inspection.qrCode,
+                                                                VEFCSensorMonitor::SensorCommandType::Pressure,
+                                                                kReadPressureCmdId);
+    if (!pressureSubmitted) {
+        markSubmitFailure(inspection.qrCode,
+                          VEFCSensorMonitor::SensorCommandType::Pressure,
+                          QStringLiteral("ReadVEFCPressure submit failed"));
     }
-    if (!submitCommand(qrCode, SensorCommandType::Temperature, kReadTemperatureCmdId)) {
-        current.temperatureFinished = true;
-        current.temperatureOk = false;
-        if (!current.failReason.isEmpty()) {
-            current.failReason += QStringLiteral("; ");
-        }
-        current.failReason += QStringLiteral("ReadVEFCTemperature 提交失败");
+
+    const bool temperatureSubmitted = m_roundRunner->submitCommand(inspection.qrCode,
+                                                                   VEFCSensorMonitor::SensorCommandType::Temperature,
+                                                                   kReadTemperatureCmdId);
+    if (!temperatureSubmitted) {
+        markSubmitFailure(inspection.qrCode,
+                          VEFCSensorMonitor::SensorCommandType::Temperature,
+                          QStringLiteral("ReadVEFCTemperature submit failed"));
     }
 }
 
-bool VEFCSensorMonitorTask::submitCommand(const QString& qrCode, SensorCommandType type, const char* commandId)
+void VEFCSensorMonitorTask::completeDeviceCommand(const QString& qrCode,
+                                                  VEFCSensorMonitor::SensorCommandType type,
+                                                  const ModbusCommand& cmd)
 {
-    ModbusTcpMasterManager& manager = ModbusTcpMasterManager::instance();
-    ModbusTcpMaster* master = manager.getMaster(qrCode);
-    CommandPool* pool = manager.commandPool();
-    if (!master || !master->sender() || !pool || !pool->contains(commandId)) {
-        return false;
+    VEFCSensorMonitor::DeviceRoundState* state = m_roundContext.mutableState(qrCode);
+    if (!state) {
+        return;
     }
 
-    ModbusCommand cmd = pool->clone(commandId);
-    if (!cmd.isValid()) {
-        return false;
-    }
-
-    cmd.module = CommandModule::BusinessCommandIssuer;
-    m_pendingCommands.insert(cmd.uuid, PendingCommand{qrCode, type});
-
-    ModbusCommandSender* sender = master->sender();
-    QMetaObject::invokeMethod(sender, [sender, cmd]() {
-        sender->submit(cmd);
-    }, Qt::QueuedConnection);
-
-    return true;
-}
-
-void VEFCSensorMonitorTask::skipDevice(const QString& qrCode, const QString& reason)
-{
-    DeviceRoundState& state = m_deviceStates[qrCode];
-    state.qrCode = qrCode;
-    state.skipped = true;
-    state.failReason = reason;
-    state.pressureFinished = true;
-    state.temperatureFinished = true;
-
-    m_logger->deviceLogger(qrCode).info(QString("[VEFCSensorMonitorTask][QRCode:%1] 跳过本轮记录\n"
-                                                "轮次ID: %2\n"
-                                                "记录时间: %3\n"
-                                                "原因: %4")
-        .arg(qrCode)
-        .arg(m_roundId)
-        .arg(QDateTime::fromMSecsSinceEpoch(m_roundTimestamp).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz")))
-        .arg(reason)
-        .toStdString());
-}
-
-void VEFCSensorMonitorTask::completeCommand(const QString& qrCode, SensorCommandType type, const ModbusCommand& cmd)
-{
-    DeviceRoundState& state = m_deviceStates[qrCode];
     const QVariantMap data = CommandResponseParser::instance().parse(cmd);
-
-    if (type == SensorCommandType::Pressure) {
-        state.pressureFinished = true;
+    if (type == VEFCSensorMonitor::SensorCommandType::Pressure) {
+        state->pressureFinished = true;
         if (data.contains(QStringLiteral("sensorPressure"))) {
-            state.pressureOk = true;
-            state.record.sensorPressure = data.value(QStringLiteral("sensorPressure")).toDouble();
+            state->pressureOk = true;
+            state->record.sensorPressure = data.value(QStringLiteral("sensorPressure")).toDouble();
+            m_logService.writeCommandSucceeded(m_roundContext.roundId(), qrCode, cmd);
         } else {
-            state.pressureOk = false;
-            state.failReason = QStringLiteral("ReadVEFCPressure 解析失败");
+            state->pressureOk = false;
+            appendFailureReason(*state, QStringLiteral("ReadVEFCPressure parse failed"));
+            m_logService.writeCommandFailed(m_roundContext.roundId(), qrCode, cmd,
+                                            QStringLiteral("ReadVEFCPressure parse failed"));
         }
     } else {
-        state.temperatureFinished = true;
+        state->temperatureFinished = true;
         if (data.contains(QStringLiteral("sensorTemperature"))) {
-            state.temperatureOk = true;
-            state.record.sensorTemperature = data.value(QStringLiteral("sensorTemperature")).toDouble();
+            state->temperatureOk = true;
+            state->record.sensorTemperature = data.value(QStringLiteral("sensorTemperature")).toDouble();
+            m_logService.writeCommandSucceeded(m_roundContext.roundId(), qrCode, cmd);
         } else {
-            state.temperatureOk = false;
-            if (!state.failReason.isEmpty()) {
-                state.failReason += QStringLiteral("; ");
-            }
-            state.failReason += QStringLiteral("ReadVEFCTemperature 解析失败");
+            state->temperatureOk = false;
+            appendFailureReason(*state, QStringLiteral("ReadVEFCTemperature parse failed"));
+            m_logService.writeCommandFailed(m_roundContext.roundId(), qrCode, cmd,
+                                            QStringLiteral("ReadVEFCTemperature parse failed"));
         }
     }
 
-    m_logger->deviceLogger(qrCode).info(QString("[VEFCSensorMonitorTask][QRCode:%1] 指令完成\n"
-                                               "轮次ID: %2\n"
-                                               "指令: %3\n"
-                                               "请求帧: %4\n"
-                                               "响应帧: %5\n"
-                                               "处理结果: 成功")
-        .arg(qrCode)
-        .arg(m_roundId)
-        .arg(cmd.id)
-        .arg(commandRequestFrame(cmd))
-        .arg(commandResponseFrame(cmd))
-        .toStdString());
+    if (state->pressureOk && state->temperatureOk && !state->persisted) {
+        persistDeviceRecord(*state);
+    }
 }
 
-void VEFCSensorMonitorTask::failCommand(const QString& qrCode,
-                                        SensorCommandType type,
-                                        const ModbusCommand& cmd,
-                                        const QString& reason)
+void VEFCSensorMonitorTask::failDeviceCommand(const QString& qrCode,
+                                              VEFCSensorMonitor::SensorCommandType type,
+                                              const ModbusCommand& cmd,
+                                              const QString& reason)
 {
-    DeviceRoundState& state = m_deviceStates[qrCode];
-    if (type == SensorCommandType::Pressure) {
-        state.pressureFinished = true;
-        state.pressureOk = false;
-    } else {
-        state.temperatureFinished = true;
-        state.temperatureOk = false;
-    }
-
-    if (!state.failReason.isEmpty()) {
-        state.failReason += QStringLiteral("; ");
-    }
-    state.failReason += QStringLiteral("%1: %2").arg(cmd.id, reason);
-
-    m_logger->deviceLogger(qrCode).warn(QString("[VEFCSensorMonitorTask][QRCode:%1] 指令完成\n"
-                                               "轮次ID: %2\n"
-                                               "指令: %3\n"
-                                               "请求帧: %4\n"
-                                               "响应帧: %5\n"
-                                               "处理结果: 失败\n"
-                                               "原因: %6")
-        .arg(qrCode)
-        .arg(m_roundId)
-        .arg(cmd.id)
-        .arg(commandRequestFrame(cmd))
-        .arg(commandResponseFrame(cmd))
-        .arg(reason)
-        .toStdString());
-}
-
-void VEFCSensorMonitorTask::finishRoundIfReady()
-{
-    if (!m_roundActive || !m_pendingCommands.isEmpty()) {
+    VEFCSensorMonitor::DeviceRoundState* state = m_roundContext.mutableState(qrCode);
+    if (!state) {
         return;
     }
 
-    QVector<VEFCSensorMonitorRecord> records;
-    QStringList failedDevices;
-    QStringList skippedDevices;
-    records.reserve(m_deviceStates.size());
-
-    for (auto it = m_deviceStates.begin(); it != m_deviceStates.end(); ++it) {
-        const DeviceRoundState& state = it.value();
-        if (state.skipped) {
-            skippedDevices << state.qrCode;
-            continue;
-        }
-        // 数据库记录必须同时包含全局采集值和两条实时传感器指令结果。
-        // 任一指令失败、超时或解析失败时，本轮该设备只进入失败摘要，不写入数据库。
-        if (state.pressureOk && state.temperatureOk) {
-            records.append(state.record);
-            m_logger->deviceLogger(state.qrCode).info(QString("[VEFCSensorMonitorTask][QRCode:%1] 生成监控记录\n"
-                                                              "轮次ID: %2\n"
-                                                              "记录时间: %3\n"
-                                                              "气体压力: %4\n"
-                                                              "实际流量: %5\n"
-                                                              "传感器压力: %6\n"
-                                                              "传感器温度: %7")
-                .arg(state.qrCode)
-                .arg(m_roundId)
-                .arg(state.record.recordTimeString())
-                .arg(state.record.gasPressure)
-                .arg(state.record.actualFlow)
-                .arg(state.record.sensorPressure)
-                .arg(state.record.sensorTemperature)
-                .toStdString());
-        } else {
-            failedDevices << QStringLiteral("%1(%2)").arg(state.qrCode, state.failReason);
-        }
+    if (type == VEFCSensorMonitor::SensorCommandType::Pressure) {
+        state->pressureFinished = true;
+        state->pressureOk = false;
+    } else {
+        state->temperatureFinished = true;
+        state->temperatureOk = false;
     }
 
-    if (!records.isEmpty()) {
-        if (LogDB::VEFCSensorMonitorDBCon* db = LogDB::DatabaseManager::instance().vefcSensorMonitorCon()) {
-            db->insertRecords(records);
-        } else {
-            m_logger->summaryLogger().error(QString("[VEFCSensorMonitorTask] 数据库连接不可用，丢弃本轮记录\n"
-                                                    "轮次ID: %1\n"
-                                                    "记录数: %2")
-                .arg(m_roundId)
-                .arg(records.size())
-                .toStdString());
-        }
-    }
-
-    m_logger->summaryLogger().info(QString("============================= VEFC 传感器监控轮次结束 =============================\n"
-                                           "轮次ID: %1\n"
-                                           "目标设备数: %2\n"
-                                           "写入记录数: %3\n"
-                                           "失败设备数: %4\n"
-                                           "跳过设备数: %5\n"
-                                           "失败设备: %6\n"
-                                           "跳过设备: %7")
-        .arg(m_roundId)
-        .arg(m_deviceStates.size())
-        .arg(records.size())
-        .arg(failedDevices.size())
-        .arg(skippedDevices.size())
-        .arg(failedDevices.isEmpty() ? QStringLiteral("无") : failedDevices.join(QStringLiteral(", ")))
-        .arg(skippedDevices.isEmpty() ? QStringLiteral("无") : skippedDevices.join(QStringLiteral(", ")))
-        .toStdString());
-
-    m_roundActive = false;
-    m_pendingCommands.clear();
-    m_deviceStates.clear();
+    appendFailureReason(*state, QStringLiteral("%1: %2").arg(cmd.id, reason));
+    m_logService.writeCommandFailed(m_roundContext.roundId(), qrCode, cmd, reason);
 }
 
-QString VEFCSensorMonitorTask::commandTypeName(SensorCommandType type) const
+void VEFCSensorMonitorTask::markSubmitFailure(const QString& qrCode,
+                                              VEFCSensorMonitor::SensorCommandType type,
+                                              const QString& reason)
 {
-    return type == SensorCommandType::Pressure
-        ? QStringLiteral("传感器压力")
-        : QStringLiteral("传感器温度");
+    VEFCSensorMonitor::DeviceRoundState* state = m_roundContext.mutableState(qrCode);
+    if (!state) {
+        return;
+    }
+
+    if (type == VEFCSensorMonitor::SensorCommandType::Pressure) {
+        state->pressureFinished = true;
+        state->pressureOk = false;
+    } else {
+        state->temperatureFinished = true;
+        state->temperatureOk = false;
+    }
+
+    appendFailureReason(*state, reason);
 }
 
-QString VEFCSensorMonitorTask::commandFailureReason(const ModbusCommand& cmd) const
+void VEFCSensorMonitorTask::persistDeviceRecord(VEFCSensorMonitor::DeviceRoundState& state)
+{
+    if (state.persisted) {
+        return;
+    }
+
+    LogDB::VEFCSensorMonitorDBCon* db = LogDB::DatabaseManager::instance().vefcSensorMonitorCon();
+    if (!db) {
+        appendFailureReason(state, QStringLiteral("VEFC monitor database is unavailable"));
+        m_logService.writePersistFailed(m_roundContext.roundId(), state, state.failReason);
+        return;
+    }
+
+    db->insertRecord(state.record);
+    state.persisted = true;
+    emit recordPersisted(state.qrCode, state.record);
+    m_logService.writeRecordPersisted(m_roundContext.roundId(), state);
+}
+
+void VEFCSensorMonitorTask::tryFinishRound()
+{
+    if (!m_roundContext.isActive() || m_roundRunner->hasPendingCommands()) {
+        return;
+    }
+
+    const VEFCSensorMonitor::RoundSummary summary = m_roundContext.buildSummary(currentTimestamp());
+    m_logService.writeRoundFinished(summary);
+
+    emit roundFinished(summary.roundId,
+                       summary.totalCount,
+                       summary.persistedCount,
+                       summary.failedCount,
+                       summary.skippedCount);
+    emit allFinished(summary);
+
+    m_roundContext.completeRound();
+    m_roundRunner->clearPendingCommands();
+    enterTaskState(State::WaitingNext);
+    startIntervalCountdown();
+}
+
+void VEFCSensorMonitorTask::enterTaskState(State state)
+{
+    if (m_taskState == state) {
+        return;
+    }
+
+    m_taskState = state;
+    emit taskStateChanged(m_taskState);
+}
+
+void VEFCSensorMonitorTask::startIntervalCountdown()
+{
+    if (!m_intervalCountdownTimer) {
+        return;
+    }
+
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const qint64 remainingMs = qMax<qint64>(0, m_nextTriggerDeadlineMs - now);
+    m_intervalRemainingSeconds = static_cast<int>((remainingMs + 999) / 1000);
+    emit intervalCountdown(m_intervalRemainingSeconds);
+    if (m_intervalRemainingSeconds > 0) {
+        m_intervalCountdownTimer->start();
+    }
+}
+
+void VEFCSensorMonitorTask::stopIntervalCountdown()
+{
+    if (m_intervalCountdownTimer) {
+        m_intervalCountdownTimer->stop();
+    }
+    m_intervalRemainingSeconds = 0;
+}
+
+QString VEFCSensorMonitorTask::currentTimestamp()
+{
+    return QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz"));
+}
+
+QString VEFCSensorMonitorTask::roundIdFromTimestamp(qint64 timestamp)
+{
+    return QDateTime::fromMSecsSinceEpoch(timestamp).toString(QStringLiteral("yyyyMMdd_HHmmss_zzz"));
+}
+
+QString VEFCSensorMonitorTask::commandTypeName(VEFCSensorMonitor::SensorCommandType type)
+{
+    return type == VEFCSensorMonitor::SensorCommandType::Pressure
+        ? QStringLiteral("ReadVEFCPressure")
+        : QStringLiteral("ReadVEFCTemperature");
+}
+
+QString VEFCSensorMonitorTask::commandFailureReason(const ModbusCommand& cmd)
 {
     QStringList reasons;
     if (cmd.timedOut) {
-        reasons << QStringLiteral("超时");
+        reasons << QStringLiteral("timed out");
     }
     if (cmd.checksumError) {
-        reasons << QStringLiteral("校验错误");
+        reasons << QStringLiteral("checksum error");
     }
     if (cmd.deviceBusy) {
-        reasons << QStringLiteral("设备忙");
+        reasons << QStringLiteral("device busy");
     }
     if (!cmd.errorMessage.trimmed().isEmpty()) {
         reasons << cmd.errorMessage.trimmed();
     }
-    return reasons.isEmpty() ? QStringLiteral("未收到响应") : reasons.join(QStringLiteral(", "));
+    return reasons.isEmpty() ? QStringLiteral("no response") : reasons.join(QStringLiteral(", "));
 }
 
-QString VEFCSensorMonitorTask::commandRequestFrame(const ModbusCommand& cmd) const
+void VEFCSensorMonitorTask::appendFailureReason(VEFCSensorMonitor::DeviceRoundState& state, const QString& reason)
 {
-    QByteArray frame = cmd.request.rawBytes;
-    frame.append(cmd.request.crc);
-    return frame.isEmpty() ? QStringLiteral("无") : QString(frame.toHex(' ').toUpper());
-}
-
-QString VEFCSensorMonitorTask::commandResponseFrame(const ModbusCommand& cmd) const
-{
-    QByteArray frame = cmd.response.rawBytes;
-    frame.append(cmd.response.crc);
-    const QString frameText = frame.isEmpty() ? QStringLiteral("无") : QString(frame.toHex(' ').toUpper());
-    if (cmd.received) {
-        return frameText;
+    if (!state.failReason.isEmpty()) {
+        state.failReason += QStringLiteral("; ");
     }
-
-    const QString reason = commandFailureReason(cmd);
-    return frame.isEmpty() ? reason : QStringLiteral("%1, %2").arg(reason, frameText);
-}
-
-QString VEFCSensorMonitorTask::roundIdFromTimestamp(qint64 timestamp) const
-{
-    return QDateTime::fromMSecsSinceEpoch(timestamp).toString(QStringLiteral("yyyyMMdd_HHmmss_zzz"));
+    state.failReason += reason;
 }

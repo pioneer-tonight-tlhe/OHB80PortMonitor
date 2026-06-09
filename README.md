@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.3.4**
+**当前版本：V0.4.0**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -10,115 +10,261 @@
 
 ## 更新日志
 
-### V0.3.4 - 2026-06-09 - Simon
+## v0.4.0
 
-#### AlarmPage LiveLog 排序功能 [V0.3.4]
-- `AlarmPage` 的 `Live Log` 新增排序插入逻辑，记录按数字型 `QRCode` 升序排列（如 `12001` 到 `12080`）
-- 当 `QRCode` 相同时，按记录到达顺序排列，同一设备的旧记录在前、新记录在后
-- 保持超过 100 条后的清理规则不变：只清理 `Resolved` / `No Need`，不会删除 `Unresolved` 未解决警报
-- 相关文件：
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
-  - 修改：`README.md`
+- 发布日期：2026-06-09
 
----
+### VEFCSensorMonitor 监控业务框架
 
-### V0.2.4 - 2026-06-08 - Simon
+- 修改时间：2026-06-09
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增 `VEFCSensorMonitorTask` 监控业务框架，用于采集 80 台设备的 VEFC 压力、VEFC 温度、气体气压和实际流量。
+- 功能点明细：
+  - 每台设备通过 `ReadVEFCPressure` 和 `ReadVEFCTemperature` 两条业务指令读取传感器数据。
+  - 从 `FoupOfOHBInfo` 读取对应设备的进气压力和进气流量，组合生成 `VEFCSensorMonitorRecord`。
+  - 当同一设备的两条指令都成功返回后，立即写入数据库，不再等待整轮设备全部完成后再批量落库。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.cpp`
+  - `README.md`
+- 兼容性影响：变更了 `VEFCSensorMonitorTask` 的落库时机，由整轮批量写入改为单设备即时写入；数据库表结构不变。
+- 备注：当前保留原有轮次汇总日志，用于继续观察每轮成功、失败和跳过设备情况。
 
-#### AlarmPage LiveLog 清理异常修复 [V0.2.4]
-- 修复 `Live Log` 在连接断开警报恢复后只更新为 `Resolved`、但不触发清理，导致已恢复的 `Device Offline` 记录长期占用明细的问题
-- `Live Log` 超过 100 条后，在警报插入和警报恢复时都会清理 `Resolved` / `No Need` 记录，并确保不会删除 `Unresolved` 未解决警报
-- 相关文件：
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
-  - 修改：`README.md`
+### VEFCSensorMonitorTask 结构重构
 
----
-
-### V0.2.3 - 2026-06-08 - Simon
-
-#### AlarmPage 警报颜色调整 [V0.2.3]
-- `AlarmPage` 中 `AlarmLogWidget` 的 `Live Log` 和 `History Log` 统一调整 `Is Resolved` 字段背景色
-- 未解决警报（`Unresolved`）背景色调整为 `#DC143C`
-- 已解决警报（`Resolved`）背景色调整为 `#32CD32`
-- `Unresolved` 和 `Resolved` 状态文字统一使用白色字体，提升可读性
-- `NoNeed` 状态维持原有黄色背景不变
-- `Live Log` 和 `History Log` 表格点击后不进入选中状态
-- 相关文件：
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
-  - 修改：`README.md`
-
----
-
-### V0.2.2 - 2026-06-08 - Simon
-
-#### 警报屏蔽功能集成 [V0.2.2]
-- 在 `AlarmDispatchTask` 中集成 `AlarmConfig`，判断哪些警报可以屏蔽
-- 如果警报类型被屏蔽，则该警报不会参与 `FoupOfOHBInfo::hasAlarm/alarmId` 的选择，不再驱动 FOUP 设备显示为报警状态
-- 被屏蔽的警报仍会正常落库，并继续参与活跃告警跟踪与去重
-- 相关文件：
-  - 修改：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h`
-  - 修改：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp`
-
----
-
-### V0.2.1 - 2026-06-08 - Simon
-
-#### 警报屏蔽配置功能 [V0.2.1]
-- 新增 `AlarmConfig` 类用于管理可屏蔽的警报类型配置
-- 新增 `alarm.ini` 配置文件，支持配置需要屏蔽的警报类型（如 VEFCAbnormal、VEEPAbnormal）
-- 提供读取被屏蔽警报集合、设置警报屏蔽状态、检查警报是否被屏蔽等方法
-- 相关文件：
-  - 新增：`OHB80PortMonitor_V_1_0_0/bin/config/alarm.ini`
-  - 新增：`OHB80PortMonitor_V_1_0_0/config/alarmconfig.{h,cpp}`
+- 修改时间：2026-06-09
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：参考 `SH85PeriodicSelfCheckTask3` 的头文件模板和职责拆分方式，重构 `VEFCSensorMonitorTask` 的类结构。
+- 功能点明细：
+  - 将公共类型定义拆分到 `VEFCSensorMonitorTypes`。
+  - 将设备筛选职责拆分到 `VEFCSensorMonitorDeviceSelector`。
+  - 将轮次上下文和汇总职责拆分到 `VEFCSensorMonitorRoundContext`。
+  - 将日志输出职责拆分到 `VEFCSensorMonitorLogService`。
+  - 将 sender 连接、指令提交和 pending command 跟踪拆分到 `VEFCSensorMonitorRoundRunner`。
+  - 将 `VEFCSensorMonitorTask` 本体收敛为调度壳，仅保留周期触发、状态切换、信号转发和轮次收口。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_types.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_device_selector.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_device_selector.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_context.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_context.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_log_service.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_log_service.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_runner.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_runner.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `README.md`
+- 兼容性影响：
+  - 不改变 `VEFCSensorMonitorTask` 的任务类型。
+  - 不改变周期执行方式。
+  - 不改变“单设备两条指令成功后立即落库”的对外语义。
+  - 变化主要在内部结构分层。
+- 备注：本次调整的目标是与 `SH85PeriodicSelfCheckTask3` 保持一致的设计风格，便于后续扩展更多 VEFC 监控子能力。
 
 ---
 
-### V0.1.1 - 2026-06-08 - Simon
+## v0.3.1
 
-#### SH85 自检报告对话框 UI 优化 [V0.1.1]
-- `SH85SelfCheckReportDialog` 中的 Live Log 和 History Log 表格设置为不可选中（鼠标点击无法选中行或单元格）
-- History Log 的 Description 字段根据自检结果设置背景色：成功为绿色（#32CD32），失败为红色（#cd143c）
-- UI 界面显示内容改为英文：将 `SH85SelfChecker` 中的所有中文描述改为英文（包括自检成功、失败、超时等状态描述）
-- 相关文件：
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
-  - 修改：`OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.cpp`
+- 发布日期：2026-06-09
+
+### VEFCSensorMonitor 数据库脚本恢复
+
+- 修改时间：2026-06-09
+- 变更类型：Fixed
+- 开发人员：Simon（工号：13）
+- 功能概述：恢复 `VEFCSensorMonitorDBCon` 所需的运行时 SQL 脚本，并补回缺失的数据表创建语句。
+- 功能点明细：
+  - 恢复 `vefc_sensor_monitor_queries.sql`，补齐 `insert_record`、按时间删除、日报查询和最旧周数据查询脚本。
+  - 在 `create_operation_log.sql` 中补回 `vefc_sensor_monitor` 建表语句与 `record_timestamp` 索引，确保数据库初始化时可自动创建对应数据表。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/vefc_sensor_monitor_queries.sql`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/create_operation_log.sql`
+  - `README.md`
+- 兼容性影响：下次启动数据库初始化流程时会自动创建缺失的 `vefc_sensor_monitor` 表；现有表结构无需手工迁移。
+- 备注：如果同时使用 `x32` 运行目录，需要同步补齐 `bin/x32/databases` 下的同名 SQL 文件。
 
 ---
 
-### V0.1.0 - 2026-06-08 - Simon
+## v0.3.0
 
-#### 85 自检重构完成 [V0.1.0]
-- 新增 `SH85PeriodicSelfCheckTask3` 作为第三版周期自检调度任务，替代原 `SH85PeriodicSelfCheckTask`
-- 设计目标：
-  - 保持 Task2 风格的外部接口和 UI 信号，方便后续平滑替换
-  - Task3 只做调度编排；轮次状态、设备筛选、checker 执行、日志落库分别拆到独立模块
-  - 后续扩展报告弹窗、每设备日志、单次自检复用时，尽量不再膨胀调度类
-- 核心功能：
-  - 周期调度：支持周期秒数配置、单设备模式、启动延时（10 秒）、轮次计数控制
-  - 轮次管理：每轮生成唯一轮次 ID，并行启动设备自检，防止轮次重叠
-  - 设备筛选：过滤未启用设备、FOUP in 状态设备、未连接设备
-  - 日志聚合：设备过程先聚合到内存 record，设备结束时写一条明细，整轮结束时写汇总与告警
-- 拆分模块：
-  - `SH85SelfCheckRoundContext` - 轮次上下文管理（轮次 ID、设备结果、pending 状态）
-  - `SH85SelfCheckDeviceSelector` - 设备筛选（启用状态、FOUP 状态、连接状态）
-  - `SH85SelfCheckLogService` - 日志服务（任务/轮次/设备日志、通信日志）
-  - `SH85SelfCheckRoundRunner` - 轮次执行器（checker 信号连接与中继）
-- 信号体系：
-  - 任务整体状态：`taskStateChanged`、`elapsedTick`、`intervalCountdown`、`bootDelayCountdown`
-  - 单设备自检：`countdownTick`、`selfCheckerStateChanged`、`oneFinished`
-  - 命令/错误：`commandCompleted`、`commandRetrying`、`errorOccurred`
-  - 轮次汇总：`roundStarted`、`roundFinished`、`allDevicesFinished`、`allFinished`、`deviceParticipated`
-- UI 对接：`SH85PeriodicSelfCheckSettingWidget` 更新为使用 `SH85PeriodicSelfCheckTask3`
-- 相关文件：
-  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.{h,cpp}`
-  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_context.{h,cpp}`
-  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_device_selector.{h,cpp}`
-  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_service.{h,cpp}`
-  - 新增：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_runner.{h,cpp}`
-  - 修改：`OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.{h,cpp}`
-  - 删除：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task2.{h,cpp}`
-  - 删除：`OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_helper.{h,cpp}`
+- 发布日期：2026-06-09
+
+### AlarmPage Live Log 排序
+
+- 修改时间：2026-06-09
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：为 `AlarmPage` 的 `Live Log` 增加按设备 `QRCode` 的稳定排序显示。
+- 功能点明细：
+  - `Live Log` 按数字型 `QRCode` 升序排列，适配 `12001` 到 `12080` 的设备编号范围。
+  - 当 `QRCode` 相同时，按记录到达顺序排序，保证同一设备的旧记录在前、新记录在后。
+  - 保持超过 `100` 条后的清理规则不变，仅清理 `Resolved` 和 `No Need`，不删除 `Unresolved` 记录。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - `README.md`
+- 兼容性影响：仅调整 `Live Log` 展示顺序，不影响数据库记录内容和告警处理逻辑。
+- 备注：该排序逻辑默认依赖 `QRCode` 为数字字符串。
+
+---
+
+## v0.2.3
+
+- 发布日期：2026-06-08
+
+### AlarmPage Live Log 清理修复
+
+- 修改时间：2026-06-08
+- 变更类型：Fixed
+- 开发人员：Simon（工号：13）
+- 功能概述：修复 `AlarmPage` 的 `Live Log` 在连接恢复后未触发清理的问题。
+- 功能点明细：
+  - 修复 `Device Offline` 告警恢复后只更新为 `Resolved`、但不触发清理的异常。
+  - 当 `Live Log` 超过 `100` 条时，在新告警插入和告警恢复两个时机都会尝试清理 `Resolved` 和 `No Need` 记录。
+  - 明确保证清理逻辑不会删除 `Unresolved` 未解决告警。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - `README.md`
+- 兼容性影响：仅修复界面层清理时机，不影响数据库中的历史告警记录。
+- 备注：该修复属于 bug 修复，目的是避免已恢复的绿色记录长期占用 `Live Log` 明细。
+
+---
+
+## v0.2.2
+
+- 发布日期：2026-06-08
+
+### AlarmPage 告警样式调整
+
+- 修改时间：2026-06-08
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：统一调整 `AlarmPage` 中 `Live Log` 和 `History Log` 的状态色与交互表现。
+- 功能点明细：
+  - 未解决告警 `Unresolved` 的背景色调整为 `#DC143C`。
+  - 已解决告警 `Resolved` 的背景色调整为 `#32CD32`。
+  - `Unresolved` 和 `Resolved` 状态文字统一使用白色字体，提升可读性。
+  - `NoNeed` 状态保持原有黄色背景不变。
+  - `Live Log` 和 `History Log` 表格点击后不进入选中状态。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - `README.md`
+- 兼容性影响：仅涉及界面样式与交互调整，不影响告警数据本身。
+- 备注：本次调整重点是提升报警状态在大屏和明细表中的识别度。
+
+---
+
+## v0.2.1
+
+- 发布日期：2026-06-08
+
+### 警报屏蔽逻辑集成
+
+- 修改时间：2026-06-08
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：在 `AlarmDispatchTask` 中集成警报屏蔽逻辑，使被屏蔽告警不再驱动 FOUP 报警显示。
+- 功能点明细：
+  - 在 `AlarmDispatchTask` 中接入 `AlarmConfig`，判断告警类型是否处于屏蔽状态。
+  - 被屏蔽告警不会参与 `FoupOfOHBInfo::hasAlarm` 和 `alarmId` 的选择，不再驱动 FOUP 显示为报警状态。
+  - 被屏蔽告警仍然正常落库，并继续参与活跃告警跟踪与去重。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp`
+  - `README.md`
+- 兼容性影响：会改变 FOUP 报警灯的显示来源，但不会影响告警日志入库和活跃告警集合。
+- 备注：该版本的屏蔽含义是“屏蔽 FOUP 报警展示”，不是“丢弃告警记录”。
+
+---
+
+## v0.2.0
+
+- 发布日期：2026-06-08
+
+### 警报屏蔽配置
+
+- 修改时间：2026-06-08
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增告警屏蔽配置能力，支持通过配置文件管理可屏蔽的警报类型。
+- 功能点明细：
+  - 新增 `AlarmConfig` 类，用于读取、写入和查询警报屏蔽配置。
+  - 新增 `alarm.ini` 配置文件，支持配置如 `VEFCAbnormal`、`VEEPAbnormal` 等屏蔽项。
+  - 提供读取被屏蔽告警集合、设置屏蔽状态、检查是否被屏蔽等接口。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/alarm.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/alarmconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/alarmconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/config.pri`
+  - `README.md`
+- 兼容性影响：默认配置下不会屏蔽任何告警；启用配置后才会影响对应告警的展示行为。
+- 备注：`AlarmConfig` 已纳入工程编译配置，避免运行时调用存在但链接缺失的问题。
+
+---
+
+## v0.1.1
+
+- 发布日期：2026-06-08
+
+### SH85 自检报告 UI 优化
+
+- 修改时间：2026-06-08
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：优化 `SH85SelfCheckReportDialog` 的明细表显示和自检状态文案。
+- 功能点明细：
+  - `Live Log` 和 `History Log` 表格设置为不可选中，避免点击后出现高亮选中态。
+  - `History Log` 的 `Description` 字段根据自检结果设置背景色，成功为 `#32CD32`，失败为 `#CD143C`。
+  - `SH85SelfChecker` 中的自检结果文案统一调整为英文显示。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.cpp`
+  - `README.md`
+- 兼容性影响：仅调整自检报告界面展示与文字，不影响自检流程和数据库内容。
+- 备注：该版本主要提升自检报告在值班场景下的可读性。
+
+---
+
+## v0.1.0
+
+- 发布日期：2026-06-08
+
+### SH85 周期自检任务重构
+
+- 修改时间：2026-06-08
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：完成 `SH85PeriodicSelfCheckTask3` 重构，建立更清晰的 SH85 周期自检调度框架。
+- 功能点明细：
+  - 新增 `SH85PeriodicSelfCheckTask3`，替代原 `SH85PeriodicSelfCheckTask`，保持外部接口和 UI 信号风格一致。
+  - 将轮次上下文、设备筛选、日志服务和轮次执行拆分为独立模块，降低调度类复杂度。
+  - 支持周期调度、单设备模式、启动延时、轮次计数控制、设备筛选、日志聚合与轮次汇总信号。
+  - `SH85PeriodicSelfCheckSettingWidget` 更新为接入新的 Task3 实现。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_context.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_context.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_device_selector.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_device_selector.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_service.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_service.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_runner.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_round_runner.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task2.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task2.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_helper.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_self_check_log_helper.cpp`
+  - `README.md`
+- 兼容性影响：自检调度实现整体升级，旧的 Task2 与日志辅助类被替换；对外功能保持兼容，但内部结构发生较大变化。
+- 备注：该版本是后续自检扩展和报告能力拆分的基础版本。
 
 ---
 
