@@ -1,5 +1,0 @@
-/* HomePage 专用样式 */
-QWidget#HomePage QLabel#label,
-QWidget#HomePage QLabel#label_2 {
-    font: 20pt "Microsoft Yahei";
-}

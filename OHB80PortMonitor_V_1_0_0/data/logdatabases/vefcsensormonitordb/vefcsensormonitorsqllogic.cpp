@@ -1,18 +1,27 @@
 #include "vefcsensormonitorsqllogic.h"
 #include "dbconnectionhelper.h"
-#include <QSqlQuery>
+#include "logcleanupscheduler.h"
+#include <QDateTime>
 #include <QSqlError>
+#include <QSqlQuery>
 #include <QSqlRecord>
 #include <QStringList>
 #include <QDebug>
 
 namespace LogDB {
 
+namespace {
+
+constexpr qint64 kOneSecondMs = 1000;
+
+}
+
 VEFCSensorMonitorSqlLogic::VEFCSensorMonitorSqlLogic(const QString& databasePath, QObject* parent)
     : QObject(parent)
     , m_databasePath(databasePath)
     , m_connectionName("VEFCSensorMonitorSqlLogicConnection")
     , m_sqlMapper(nullptr)
+    , m_cleanupScheduler(nullptr)
 {
     const QString sqlFilePath = QString("%1/vefc_sensor_monitor_queries.sql").arg(databasePath);
     m_sqlMapper = new SqlMapper(sqlFilePath);
@@ -20,6 +29,11 @@ VEFCSensorMonitorSqlLogic::VEFCSensorMonitorSqlLogic(const QString& databasePath
 
 VEFCSensorMonitorSqlLogic::~VEFCSensorMonitorSqlLogic()
 {
+    if (m_cleanupScheduler) {
+        m_cleanupScheduler->stop();
+        delete m_cleanupScheduler;
+        m_cleanupScheduler = nullptr;
+    }
     if (m_database.isOpen()) {
         m_database.close();
     }
@@ -30,7 +44,12 @@ bool VEFCSensorMonitorSqlLogic::initializeDatabase()
 {
     const QString dbFilePath = QString("%1/logdb.db").arg(m_databasePath);
     m_database = DBConnectionHelper::openSqlite(dbFilePath, m_connectionName);
-    return m_database.isOpen();
+    if (!m_database.isOpen()) {
+        return false;
+    }
+
+    initializeCleanupScheduler();
+    return true;
 }
 
 bool VEFCSensorMonitorSqlLogic::insertRecord(const QString& qrCode,
@@ -101,7 +120,10 @@ bool VEFCSensorMonitorSqlLogic::deleteByTimeRange(qint64 startTimestamp, qint64 
     params << startTimestamp
            << endTimestamp;
 
-    emit writeExecuted(makeWriteResult(QStringLiteral("delete_by_time_range"), sql, params));
+    emit writeExecuted(makeWriteResult(QStringLiteral("delete_by_time_range"),
+                                       sql,
+                                       params,
+                                       WriteOp::Delete));
     return true;
 }
 
@@ -140,7 +162,7 @@ QVariantMap VEFCSensorMonitorSqlLogic::queryDailyAverage(qint64 dayStartTimestam
 }
 
 QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorSqlLogic::queryRecordsByTimeRange(qint64 startTimestamp,
-                                                                                    qint64 endTimestamp)
+                                                                                     qint64 endTimestamp)
 {
     QVector<VEFCSensorMonitorRecord> records;
     if (!m_database.isOpen()) {
@@ -212,18 +234,82 @@ QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorSqlLogic::queryOldestWeekRecor
     return records;
 }
 
+QVariantMap VEFCSensorMonitorSqlLogic::queryMonthRange()
+{
+    QVariantMap result;
+    if (!m_database.isOpen()) {
+        return result;
+    }
+
+    const QString sql = m_sqlMapper->getSql("query_month_range");
+    if (sql.isEmpty()) {
+        qWarning() << "[VEFCSensorMonitorSqlLogic] SQL not found: query_month_range";
+        return result;
+    }
+
+    QSqlQuery query(m_database);
+    if (!query.exec(sql)) {
+        qWarning() << "[VEFCSensorMonitorSqlLogic] queryMonthRange failed:"
+                   << query.lastError().text();
+        return result;
+    }
+
+    if (query.next()) {
+        result["earliest_time"] = query.value("earliest_time");
+        result["latest_time"] = query.value("latest_time");
+        result["earliest_date"] = query.value("earliest_date");
+    }
+
+    return result;
+}
+
+void VEFCSensorMonitorSqlLogic::initializeCleanupScheduler()
+{
+    LogCleanupScheduler::Config cleanupConfig;
+    cleanupConfig.checkIntervalMs = 60000;
+    cleanupConfig.retainMonths = 1;
+    cleanupConfig.cleanupMonths = 1;
+    cleanupConfig.logPath = "log_db/vefc_sensor_monitor_db/month_clean";
+
+    m_cleanupScheduler = new LogCleanupScheduler(cleanupConfig, this);
+    m_cleanupScheduler->setMonthRangeProvider([this]() {
+        return queryMonthRange();
+    });
+    m_cleanupScheduler->setDeleteByRangeFn([this](const QString& startTime, const QString& endTime) {
+        deleteByDateTimeRange(startTime, endTime);
+    });
+    m_cleanupScheduler->start();
+}
+
+bool VEFCSensorMonitorSqlLogic::deleteByDateTimeRange(const QString& startTime, const QString& endTime)
+{
+    const QDateTime startDateTime = QDateTime::fromString(startTime, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    const QDateTime endDateTime = QDateTime::fromString(endTime, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+
+    if (!startDateTime.isValid() || !endDateTime.isValid()) {
+        qWarning() << "[VEFCSensorMonitorSqlLogic] Invalid cleanup range:"
+                   << "startTime=" << startTime
+                   << "endTime=" << endTime;
+        return false;
+    }
+
+    const qint64 startTimestamp = startDateTime.toMSecsSinceEpoch();
+    const qint64 endTimestamp = endDateTime.toMSecsSinceEpoch() + kOneSecondMs;
+    return deleteByTimeRange(startTimestamp, endTimestamp);
+}
+
 WriteResult VEFCSensorMonitorSqlLogic::makeWriteResult(const QString& sqlId,
                                                        const QString& sql,
-                                                       const QVariantList& params) const
+                                                       const QVariantList& params,
+                                                       WriteOp opType) const
 {
     WriteResult result;
     result.connectionName = m_connectionName;
     result.sqlStatement = sql;
     result.sqlId = sqlId;
     result.params = params;
-    // VEFC 采样是时序数据，不更新 log_record_count，避免高频写入额外 UPDATE。
     result.tableName = QStringLiteral("vefc_sensor_monitor");
-    result.opType = static_cast<int>(WriteOp::Other);
+    result.opType = static_cast<int>(opType);
     return result;
 }
 

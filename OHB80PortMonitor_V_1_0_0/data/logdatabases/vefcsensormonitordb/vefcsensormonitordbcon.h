@@ -1,3 +1,15 @@
+/*******************************************************************************************
+ * @file vefcsensormonitordbcon.h
+ * @author Simon <工号：13> 2026-06-11
+ *
+ * @class VEFCSensorMonitorDBCon
+ * @brief 负责 VEFC 采集数据库连接线程与上层访问接口的协调。
+ *
+ * 设计目标：
+ *      1. 统一封装 VEFC 采样数据库的跨线程访问入口，减少任务层直接操作 SQL 逻辑对象。
+ *      2. 将查询调用、写入投递和写入结果回传收口到同一连接类，保持上层调用语义稳定。
+ *      3. 复用外部写线程执行实际落库，避免在当前连接类中重复维护写事务能力。
+ *******************************************************************************************/
 #ifndef VEFCSENSORMONITORDBCON_H
 #define VEFCSENSORMONITORDBCON_H
 
@@ -15,59 +27,59 @@ class VEFCSensorMonitorDBCon : public QObject
     Q_OBJECT
 
 public:
-    // 必须传入外部 WriteSqlDBCon，本类不拥有其生命周期。
-    VEFCSensorMonitorDBCon(const QString& databasePath, WriteSqlDBCon* externalWriteCon, QObject* parent = nullptr);
+    // ============================ 构造与析构 ============================
+    VEFCSensorMonitorDBCon(const QString& databasePath,
+                           WriteSqlDBCon* externalWriteCon,
+                           QObject* parent = nullptr);
     ~VEFCSensorMonitorDBCon();
 
     VEFCSensorMonitorDBCon() = delete;
     VEFCSensorMonitorDBCon(const VEFCSensorMonitorDBCon&) = delete;
     VEFCSensorMonitorDBCon& operator=(const VEFCSensorMonitorDBCon&) = delete;
 
+    // ============================ 生命周期管理 ============================
     bool initialize();
     void cleanup();
 
-    // 插入单条 VEFC 传感器监控记录。
+    // ============================ 采样数据写入 ============================
     void insertRecord(const QString& qrCode,
                       qint64 recordTimestamp,
                       double gasPressure,
                       double actualFlow,
                       double sensorPressure,
                       double sensorTemperature);
-
-    // 插入单条 VEFC 传感器监控记录。
     void insertRecord(const VEFCSensorMonitorRecord& record);
-
-    // 批量插入 VEFC 传感器监控记录；适合同一轮 80 台设备一起落库。
     void insertRecords(const QVector<VEFCSensorMonitorRecord>& records);
-
-    // 删除指定时间区间内的记录，区间为 [startTimestamp, endTimestamp)。
     void deleteByTimeRange(qint64 startTimestamp, qint64 endTimestamp);
 
-    // 查询某一天所有字段平均值，区间为 [dayStartTimestamp, nextDayStartTimestamp)。
+    // ============================ 采样数据查询 ============================
     QVariantMap queryDailyAverage(qint64 dayStartTimestamp, qint64 nextDayStartTimestamp);
-
-    // 查询指定时间区间内的原始记录，区间为 [startTimestamp, endTimestamp)。
     QVector<VEFCSensorMonitorRecord> queryRecordsByTimeRange(qint64 startTimestamp, qint64 endTimestamp);
-
-    // 查询数据库中时间最久的一个星期记录；数据跨度不足 7 天时返回空列表。
     QVector<VEFCSensorMonitorRecord> queryOldestWeekRecords();
 
-signals:
-    // 本 DBCon 提交的单条 INSERT 已成功落库。
-    void recordInserted(const VEFCSensorMonitorRecord& record);
-
-    // 本 DBCon 提交的批量 INSERT 已成功落库。
-    void recordsInserted(const QVector<VEFCSensorMonitorRecord>& records);
-
-private slots:
-    void onWriteTaskCompleted(const WriteResult& result);
-
 private:
+    // ---- 写入结果转换 ----
     static VEFCSensorMonitorRecord recordFromParams(const QVariantList& params, int offset);
     static QVector<VEFCSensorMonitorRecord> recordsFromParams(const QVariantList& params);
 
+signals:
+    // ---- 采样数据写入事件 ----
+    void recordInserted(const VEFCSensorMonitorRecord& record);
+    void recordsInserted(const QVector<VEFCSensorMonitorRecord>& records);
+
+private slots:
+    // ---- 写入结果处理 ----
+    void onWriteTaskCompleted(const WriteResult& result);
+
+private:
+    // ---- 状态成员 ----
+    // 承载 SQL 逻辑对象的工作线程，确保数据库查询与调度逻辑在独立线程中执行。
     QThread* m_workerThread;
+
+    // VEFC 采集库的 SQL 逻辑对象，负责具体查询、写入投递封装和清理调度初始化。
     VEFCSensorMonitorSqlLogic* m_sqlLogic;
+
+    // 外部统一写线程连接对象，仅引用不持有，用于接收写入任务并完成实际落库。
     WriteSqlDBCon* m_writeCon;
 };
 

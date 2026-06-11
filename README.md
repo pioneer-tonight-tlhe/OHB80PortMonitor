@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.5.1**
+**当前版本：V0.5.2**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,51 @@
 ---
 
 ## 更新日志
+
+## v0.5.2
+
+- 发布日期：2026-06-11
+
+### VEFCSensorMonitor 采集数据库定时清理
+
+- 修改时间：2026-06-11
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：在 VEFC 采集数据库逻辑层新增定时清理能力，仅保留最近 1 个月的采样数据。
+- 功能点明细：
+  - 在 `VEFCSensorMonitorSqlLogic` 初始化数据库连接后自动启动清理调度器。
+  - 清理范围只针对 `vefc_sensor_monitor` 采集表，不影响其他日志库或业务表。
+  - 调度器每 `60000ms` 检查一次数据库时间跨度，超过保留范围时删除最早 1 个月数据。
+  - 复用通用 `LogCleanupScheduler`，并通过 `query_month_range` 查询当前采集库的最早、最晚记录时间。
+  - 由于 VEFC 采集表使用毫秒时间戳存储，清理逻辑已适配字符串时间范围到时间戳删除区间的转换。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/vefc_sensor_monitor_queries.sql`
+  - `README.md`
+- 兼容性影响：不修改 VEFC 采集表结构和现有采样写入流程；仅新增逻辑层自动清理行为，运行后历史采样数据将最多保留 1 个月。
+- 备注：本次清理策略仅作用于 VEFC 采集数据库，不扩展到其他日志数据库。
+
+### VEFCSensorMonitor 采集数据库代码规范整理
+
+- 修改时间：2026-06-11
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：按 `Qt C++ 头文件注释规范.md` 和 `Qt C++ 命名规范.md` 整理 VEFC 采集数据库连接层与逻辑层代码。
+- 功能点明细：
+  - 为 `VEFCSensorMonitorDBCon` 和 `VEFCSensorMonitorSqlLogic` 头文件补充标准文件头注释、`@class`、`@brief` 和设计目标。
+  - 按规范重新整理类内分区，明确构造析构、生命周期、写入查询、信号槽和成员变量区域。
+  - 为关键成员变量补充逐项中文职责注释，便于后续维护时快速理解线程、连接和清理调度器边界。
+  - 将局部配置变量命名从 `cfg` 调整为更清晰的 `cleanupConfig`，提升代码可读性。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.cpp`
+  - `README.md`
+- 兼容性影响：仅涉及注释、分区和命名可读性整理，不改变对外接口和运行行为。
+- 备注：本次规范化范围聚焦 VEFC 采集数据库连接层相关文件，后续可按同一规范继续覆盖其他模块。
+
+---
 
 ## v0.5.1
 
