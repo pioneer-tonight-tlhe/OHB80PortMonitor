@@ -2,12 +2,18 @@
 #define VEFC_SENSOR_MONITOR_TASK_H
 
 #include "../../scheduler_task.h"
+#include "vefc_sensor_monitor_daily_stats.h"
 #include "vefc_sensor_monitor_device_selector.h"
 #include "vefc_sensor_monitor_log_service.h"
 #include "vefc_sensor_monitor_round_context.h"
 #include "vefc_sensor_monitor_round_runner.h"
 #include "vefc_sensor_monitor_types.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"
+
+#include <QDate>
+#include <QHash>
+#include <QSet>
+#include <QTime>
 
 class QTimer;
 
@@ -78,17 +84,20 @@ private slots:
     void onPeriodTimeout();
     void onElapsedTimerTick();
     void onIntervalCountdownTick();
+    void onDailyStatsTimerTick();
     void onRunnerCommandFinished(ModbusCommand cmd, const QString& masterId);
     void onRunnerCommandRetrying(ModbusCommand cmd, const QString& masterId);
 
 private:
     // ---- 固定调度参数：当前默认每 60 秒执行一轮 VEFC 监控 ----
     static constexpr int kIntervalMs = 60 * 1000;
+    static constexpr int kDailyStatsCheckIntervalMs = 60 * 1000;
     static constexpr const char* kReadPressureCmdId = "ReadVEFCPressure";
     static constexpr const char* kReadTemperatureCmdId = "ReadVEFCTemperature";
 
     // 初始化任务级定时器与执行器。
     void initPeriodTimer();
+    void initDailyStatsTimer();
     void initRoundRunner();
 
     // 初始化新一轮、筛选设备、提交两条业务指令，并在空轮次时立即收口。
@@ -113,10 +122,16 @@ private:
     void enterTaskState(State state);
     void startIntervalCountdown();
     void stopIntervalCountdown();
+    void logSoftwareFirstOpenRecordIfNeeded(const VEFCSensorMonitor::DeviceRoundState& state);
+
+    // 每天凌晨统计前一天原始记录，并写入同一个寿命日统计日志文件。
+    void tryWriteDailyStats();
+    void writeDailyStatsForDate(const QDate& statDate);
 
     // 轮次辅助方法：生成时间字符串、轮次 ID 与统一失败原因。
     static QString currentTimestamp();
     static QString roundIdFromTimestamp(qint64 timestamp);
+    static QTime dailyStatsTriggerTime();
     static QString commandTypeName(VEFCSensorMonitor::SensorCommandType type);
     static QString commandFailureReason(const ModbusCommand& cmd);
     static void appendFailureReason(VEFCSensorMonitor::DeviceRoundState& state, const QString& reason);
@@ -126,19 +141,24 @@ private:
     QTimer* m_periodTimer = nullptr;
     QTimer* m_elapsedTimer = nullptr;
     QTimer* m_intervalCountdownTimer = nullptr;
+    QTimer* m_dailyStatsTimer = nullptr;
 
     bool m_stopped = true;
     qint64 m_startedMs = 0;
     qint64 m_nextTriggerDeadlineMs = 0;
+    QDate m_lastDailyStatsDate;
     int m_elapsedSeconds = 0;
     int m_intervalRemainingSeconds = 0;
     int m_roundIndex = 0;
     State m_taskState = State::Stopped;
+    QSet<QString> m_softwareFirstOpenLoggedQrcodes;
+    QHash<QString, VEFCSensorMonitorRecord> m_softwareFirstOpenRecords;
 
     // ---- 拆分后的功能模块 ----
     VEFCSensorMonitorRoundContext m_roundContext;
     VEFCSensorMonitorDeviceSelector m_deviceSelector;
     VEFCSensorMonitorLogService m_logService;
+    VEFCSensorMonitorDailyStatsService m_dailyStatsService;
     VEFCSensorMonitorRoundRunner* m_roundRunner = nullptr;
 };
 

@@ -7,6 +7,7 @@
 #include "data/modbustcpmastermanager/modbustcpmastermanager.h"
 
 #include <QDateTime>
+#include <QTime>
 #include <QTimer>
 
 // ====================================================================
@@ -24,6 +25,7 @@ VEFCSensorMonitorTask::VEFCSensorMonitorTask(QObject* parent)
     qRegisterMetaType<VEFCSensorMonitor::RoundSummary>("VEFCSensorMonitor::RoundSummary");
 
     initPeriodTimer();
+    initDailyStatsTimer();
     initRoundRunner();
     m_logService.writeTaskConstructed();
 }
@@ -42,6 +44,14 @@ void VEFCSensorMonitorTask::start()
     m_elapsedSeconds = 0;
     m_intervalRemainingSeconds = 0;
     m_roundIndex = 0;
+    m_softwareFirstOpenLoggedQrcodes.clear();
+    m_softwareFirstOpenRecords.clear();
+    const QDateTime startTime = QDateTime::currentDateTime();
+    if (startTime.time() >= dailyStatsTriggerTime()) {
+        m_lastDailyStatsDate = startTime.date().addDays(-1);
+    } else {
+        m_lastDailyStatsDate = QDate();
+    }
 
     setState(Running);
     enterTaskState(State::Monitoring);
@@ -55,6 +65,9 @@ void VEFCSensorMonitorTask::start()
     }
     if (m_periodTimer) {
         m_periodTimer->start();
+    }
+    if (m_dailyStatsTimer) {
+        m_dailyStatsTimer->start();
     }
 
     m_logService.writeTaskStarted(kIntervalMs, currentTimestamp());
@@ -75,6 +88,9 @@ void VEFCSensorMonitorTask::stop()
     }
     if (m_elapsedTimer) {
         m_elapsedTimer->stop();
+    }
+    if (m_dailyStatsTimer) {
+        m_dailyStatsTimer->stop();
     }
     stopIntervalCountdown();
 
@@ -155,6 +171,11 @@ void VEFCSensorMonitorTask::onIntervalCountdownTick()
     emit intervalCountdown(m_intervalRemainingSeconds);
 }
 
+void VEFCSensorMonitorTask::onDailyStatsTimerTick()
+{
+    tryWriteDailyStats();
+}
+
 void VEFCSensorMonitorTask::onRunnerCommandFinished(ModbusCommand cmd, const QString& masterId)
 {
     emit commandCompleted(cmd, masterId);
@@ -204,6 +225,13 @@ void VEFCSensorMonitorTask::initPeriodTimer()
     m_intervalCountdownTimer = new QTimer(this);
     m_intervalCountdownTimer->setInterval(1000);
     connect(m_intervalCountdownTimer, &QTimer::timeout, this, &VEFCSensorMonitorTask::onIntervalCountdownTick);
+}
+
+void VEFCSensorMonitorTask::initDailyStatsTimer()
+{
+    m_dailyStatsTimer = new QTimer(this);
+    m_dailyStatsTimer->setInterval(kDailyStatsCheckIntervalMs);
+    connect(m_dailyStatsTimer, &QTimer::timeout, this, &VEFCSensorMonitorTask::onDailyStatsTimerTick);
 }
 
 void VEFCSensorMonitorTask::initRoundRunner()
@@ -401,6 +429,7 @@ void VEFCSensorMonitorTask::persistDeviceRecord(VEFCSensorMonitor::DeviceRoundSt
     db->insertRecord(state.record);
     state.persisted = true;
     emit recordPersisted(state.qrCode, state.record);
+    logSoftwareFirstOpenRecordIfNeeded(state);
     m_logService.writeRecordPersisted(m_roundContext.roundId(), state);
 }
 
@@ -461,6 +490,52 @@ void VEFCSensorMonitorTask::stopIntervalCountdown()
     m_intervalRemainingSeconds = 0;
 }
 
+void VEFCSensorMonitorTask::logSoftwareFirstOpenRecordIfNeeded(const VEFCSensorMonitor::DeviceRoundState& state)
+{
+    if (m_softwareFirstOpenLoggedQrcodes.contains(state.qrCode)) {
+        return;
+    }
+
+    m_softwareFirstOpenLoggedQrcodes.insert(state.qrCode);
+    m_softwareFirstOpenRecords.insert(state.qrCode, state.record);
+    m_logService.writeSoftwareFirstOpenRecord(state.qrCode, state.record);
+}
+
+void VEFCSensorMonitorTask::tryWriteDailyStats()
+{
+    const QDateTime now = QDateTime::currentDateTime();
+    if (now.time() < dailyStatsTriggerTime()) {
+        return;
+    }
+
+    const QDate statDate = now.date().addDays(-1);
+    if (!statDate.isValid() || m_lastDailyStatsDate == statDate) {
+        return;
+    }
+
+    writeDailyStatsForDate(statDate);
+    m_lastDailyStatsDate = statDate;
+}
+
+void VEFCSensorMonitorTask::writeDailyStatsForDate(const QDate& statDate)
+{
+    LogDB::VEFCSensorMonitorDBCon* db = LogDB::DatabaseManager::instance().vefcSensorMonitorCon();
+    if (!db) {
+        m_dailyStatsService.writeDailyStatsFailed(statDate, QStringLiteral("VEFC monitor database is unavailable"));
+        return;
+    }
+
+    const QDateTime dayStart(statDate, QTime(0, 0, 0));
+    const QDateTime nextDayStart(statDate.addDays(1), QTime(0, 0, 0));
+    const QVector<VEFCSensorMonitorRecord> records =
+        db->queryRecordsByTimeRange(dayStart.toMSecsSinceEpoch(), nextDayStart.toMSecsSinceEpoch());
+
+    m_dailyStatsService.writeDailyStats(statDate,
+                                        m_deviceSelector.targetQrcodes(),
+                                        records,
+                                        m_softwareFirstOpenRecords);
+}
+
 QString VEFCSensorMonitorTask::currentTimestamp()
 {
     return QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss.zzz"));
@@ -469,6 +544,11 @@ QString VEFCSensorMonitorTask::currentTimestamp()
 QString VEFCSensorMonitorTask::roundIdFromTimestamp(qint64 timestamp)
 {
     return QDateTime::fromMSecsSinceEpoch(timestamp).toString(QStringLiteral("yyyyMMdd_HHmmss_zzz"));
+}
+
+QTime VEFCSensorMonitorTask::dailyStatsTriggerTime()
+{
+    return QTime(0, 5, 0);
 }
 
 QString VEFCSensorMonitorTask::commandTypeName(VEFCSensorMonitor::SensorCommandType type)

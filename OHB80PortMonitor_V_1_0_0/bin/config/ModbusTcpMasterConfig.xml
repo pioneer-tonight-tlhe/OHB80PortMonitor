@@ -580,6 +580,52 @@
             </respond>
         </Command>
 
+        <!-- ========================================
+             23. 功能码 04 — 读输入寄存器（单寄存器）
+             读取 VEFC 当前输出压力值
+             请求帧: 01 04 00 16 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte) / 10
+             单位：Kpa
+             ======================================== -->
+        <Command id="ReadVEFCPressure">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 16</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             24. 功能码 04 — 读输入寄存器（单寄存器）
+             读取 VEFC 压力传感器平均温度值
+             请求帧: 01 04 00 17 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             Value = (256 * hi_byte + lo_byte) / 100
+             单位：℃
+             ======================================== -->
+        <Command id="ReadVEFCTemperature">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 17</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
     </CommandDefinitions>
 
 </ModbusTcpMasterConfig>

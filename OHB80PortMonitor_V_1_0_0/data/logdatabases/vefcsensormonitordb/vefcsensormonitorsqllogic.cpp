@@ -139,6 +139,45 @@ QVariantMap VEFCSensorMonitorSqlLogic::queryDailyAverage(qint64 dayStartTimestam
     return result;
 }
 
+QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorSqlLogic::queryRecordsByTimeRange(qint64 startTimestamp,
+                                                                                    qint64 endTimestamp)
+{
+    QVector<VEFCSensorMonitorRecord> records;
+    if (!m_database.isOpen()) {
+        return records;
+    }
+
+    const QString sql = m_sqlMapper->getSql("query_records_by_time_range");
+    if (sql.isEmpty()) {
+        qWarning() << "[VEFCSensorMonitorSqlLogic] SQL not found: query_records_by_time_range";
+        return records;
+    }
+
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    query.addBindValue(startTimestamp);
+    query.addBindValue(endTimestamp);
+
+    if (!query.exec()) {
+        qWarning() << "[VEFCSensorMonitorSqlLogic] queryRecordsByTimeRange failed:"
+                   << query.lastError().text();
+        return records;
+    }
+
+    while (query.next()) {
+        VEFCSensorMonitorRecord record;
+        record.qrCode = query.value(0).toString();
+        record.recordTimestamp = query.value(1).toLongLong();
+        record.gasPressure = query.value(2).toDouble();
+        record.actualFlow = query.value(3).toDouble();
+        record.sensorPressure = query.value(4).toDouble();
+        record.sensorTemperature = query.value(5).toDouble();
+        records.append(record);
+    }
+
+    return records;
+}
+
 QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorSqlLogic::queryOldestWeekRecords()
 {
     QVector<VEFCSensorMonitorRecord> records;

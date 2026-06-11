@@ -116,7 +116,7 @@ void VEFCSensorMonitorLogService::writeDeviceSkipped(const QString& roundId,
                                                      const QString& reason,
                                                      const QString& recordTime)
 {
-    m_logger.deviceLogger(qrCode).info(QString(
+    m_logger.summaryLogger().info(QString(
         "[VEFCSensorMonitorTask][QRCode:%1] device skipped\n"
         "roundId: %2\n"
         "recordTime: %3\n"
@@ -190,7 +190,7 @@ void VEFCSensorMonitorLogService::writePersistFailed(const QString& roundId,
                                                      const VEFCSensorMonitor::DeviceRoundState& state,
                                                      const QString& reason)
 {
-    m_logger.deviceLogger(state.qrCode).error(QString(
+    m_logger.summaryLogger().error(QString(
         "[VEFCSensorMonitorTask][QRCode:%1] persist failed\n"
         "roundId: %2\n"
         "recordTime: %3\n"
@@ -205,21 +205,21 @@ void VEFCSensorMonitorLogService::writePersistFailed(const QString& roundId,
 void VEFCSensorMonitorLogService::writeRecordPersisted(const QString& roundId,
                                                        const VEFCSensorMonitor::DeviceRoundState& state)
 {
-    m_logger.deviceLogger(state.qrCode).info(QString(
-        "[VEFCSensorMonitorTask][QRCode:%1] record persisted\n"
-        "roundId: %2\n"
-        "recordTime: %3\n"
-        "gasPressure: %4\n"
-        "actualFlow: %5\n"
-        "sensorPressure: %6\n"
-        "sensorTemperature: %7")
-        .arg(state.qrCode)
-        .arg(roundId)
-        .arg(state.record.recordTimeString())
-        .arg(state.record.gasPressure)
-        .arg(state.record.actualFlow)
-        .arg(state.record.sensorPressure)
-        .arg(state.record.sensorTemperature)
+    Q_UNUSED(roundId)
+    Q_UNUSED(state)
+}
+
+void VEFCSensorMonitorLogService::writeSoftwareFirstOpenRecord(const QString& qrCode,
+                                                               const VEFCSensorMonitorRecord& record)
+{
+    m_logger.summaryLogger().info(QString(
+        "\n--------------------------------------------------------------------------------\n"
+        "软件第一次打开记录\n"
+        "二维码：%1\n"
+        "%2\n"
+        "--------------------------------------------------------------------------------")
+        .arg(qrCode)
+        .arg(formatRecordSummary(record))
         .toStdString());
 }
 
@@ -264,4 +264,19 @@ QString VEFCSensorMonitorLogService::commandResponseFrame(const ModbusCommand& c
     // 未收到有效响应时，日志中同时保留失败原因与原始响应帧（如果有）。
     const QString reason = commandFailureReason(cmd);
     return frame.isEmpty() ? reason : QStringLiteral("%1, %2").arg(reason, frameText);
+}
+
+QString VEFCSensorMonitorLogService::formatRecordSummary(const VEFCSensorMonitorRecord& record)
+{
+    return QStringLiteral(
+               "记录时间：%1\n"
+               "气体气压：%2 KPa\n"
+               "实际流量：%3 L/Min\n"
+               "VEFC压力：%4 KPa\n"
+               "VEFC温度：%5 ℃")
+        .arg(record.recordTimeString(QStringLiteral("yyyy-MM-dd HH:mm:ss")))
+        .arg(QString::number(record.gasPressure, 'f', 2))
+        .arg(QString::number(record.actualFlow, 'f', 2))
+        .arg(QString::number(record.sensorPressure, 'f', 2))
+        .arg(QString::number(record.sensorTemperature, 'f', 2));
 }

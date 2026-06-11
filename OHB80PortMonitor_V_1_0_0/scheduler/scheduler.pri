@@ -8,6 +8,7 @@ HEADERS += \
     $$PWD/tasks/monitor_data_task/monitor_data_task.h \
     $$PWD/tasks/monitor_data_task/monitor_data_task_logger.h \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_types.h \
+    $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_daily_stats.h \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_device_selector.h \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_context.h \
@@ -52,6 +53,7 @@ SOURCES += \
     $$PWD/tasks/monitor_data_task/monitor_data_task.cpp \
     $$PWD/tasks/monitor_data_task/monitor_data_task_logger.cpp \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_device_selector.cpp \
+    $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_daily_stats.cpp \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_context.cpp \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_log_service.cpp \
     $$PWD/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_round_runner.cpp \

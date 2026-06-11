@@ -55,12 +55,15 @@ public:
                             const QString& reason);
     void writeRecordPersisted(const QString& roundId,
                               const VEFCSensorMonitor::DeviceRoundState& state);
+    void writeSoftwareFirstOpenRecord(const QString& qrCode,
+                                      const VEFCSensorMonitorRecord& record);
 
 private:
     // ================================ 日志辅助方法 ================================
     static QString commandFailureReason(const ModbusCommand& cmd);
     static QString commandRequestFrame(const ModbusCommand& cmd);
     static QString commandResponseFrame(const ModbusCommand& cmd);
+    static QString formatRecordSummary(const VEFCSensorMonitorRecord& record);
 
 private:
     VEFCSensorMonitorTaskLogger m_logger;

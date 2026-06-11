@@ -107,6 +107,18 @@ QVariantMap VEFCSensorMonitorDBCon::queryDailyAverage(qint64 dayStartTimestamp, 
     return result;
 }
 
+QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorDBCon::queryRecordsByTimeRange(qint64 startTimestamp,
+                                                                                 qint64 endTimestamp)
+{
+    QVector<VEFCSensorMonitorRecord> records;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryRecordsByTimeRange",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(QVector<VEFCSensorMonitorRecord>, records),
+                              Q_ARG(qint64, startTimestamp),
+                              Q_ARG(qint64, endTimestamp));
+    return records;
+}
+
 QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorDBCon::queryOldestWeekRecords()
 {
     QVector<VEFCSensorMonitorRecord> records;

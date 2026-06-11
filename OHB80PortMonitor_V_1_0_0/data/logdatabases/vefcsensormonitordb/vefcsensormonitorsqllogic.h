@@ -40,6 +40,9 @@ public slots:
     // 查询某一天所有字段平均值，区间为 [dayStartTimestamp, nextDayStartTimestamp)。
     QVariantMap queryDailyAverage(qint64 dayStartTimestamp, qint64 nextDayStartTimestamp);
 
+    // 查询指定时间区间内的原始记录，区间为 [startTimestamp, endTimestamp)。
+    QVector<VEFCSensorMonitorRecord> queryRecordsByTimeRange(qint64 startTimestamp, qint64 endTimestamp);
+
     // 查询数据库中时间最久的一个星期记录；数据跨度不足 7 天时返回空列表。
     QVector<VEFCSensorMonitorRecord> queryOldestWeekRecords();
 
