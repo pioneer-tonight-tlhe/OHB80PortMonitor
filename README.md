@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.4.0**
+**当前版本：V0.5.1**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,71 @@
 ---
 
 ## 更新日志
+
+## v0.5.1
+
+- 发布日期：2026-06-11
+
+### VEFCSensorMonitor 寿命日统计日志
+
+- 修改时间：2026-06-11
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：调整 VEFC 传感器寿命日统计日志输出格式与日志分工，方便在 `summary.log` 中直接对比本次开机首条记录与当天统计结果。
+- 功能点明细：
+  - 每天 `00:05` 后自动统计前一天数据，同一次程序运行中同一统计日期只写入一次。
+  - 所有设备统计写入 `scheduler/vefc_sensor_monitor_task/summary.log`，并通过“设备统计开始 / 设备统计结束”区分设备边界。
+  - 设备输出顺序按 `QRCode` 转数字后升序排列，便于和现场设备编号对应。
+  - 统计字段使用中文名称，当前固定输出：`采样总数`、`软件第一次打开记录`、`VEFC压力平均值`、`VEFC温度平均值`、`今日第一次记录`、`今日最后一次记录`。
+  - `软件第一次打开记录` 定义为“本次软件启动后，该设备第一次成功采样到的记录”，作为日报对比项同步打印。
+  - 无数据设备也会写入统计块；没有对应记录时字段显示为 `N/A`。
+  - `devices.log` 仅保留设备指令通讯日志，例如 `command retrying`、`command finished`、`requestFrame`、`responseFrame`，不再记录统计结果。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_daily_stats.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_daily_stats.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.cpp`
+  - `README.md`
+- 兼容性影响：不改变 VEFC 原始采样写入逻辑和数据库表结构；仅调整 VEFC 统计日志输出位置与内容编排。
+- 备注：本次为日志格式与日志职责调整版本，不涉及新增统计口径。
+
+---
+
+## v0.5.0
+
+- 发布日期：2026-06-09
+
+### VEFCSensorMonitor 寿命日统计日志
+
+- 修改时间：2026-06-09
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增 VEFC 传感器寿命日统计日志能力，通过数据库原始采样记录生成每天每台设备的寿命观察指标。
+- 功能点明细：
+  - 新增 `VEFCSensorMonitorDailyStatsService` 与 `DailyStatsCalculator`，负责统计计算和日志格式化。
+  - 每天 `00:05` 后自动统计前一天数据，同一次程序运行中同一统计日期只写入一次。
+  - 所有设备统计写入同一个 `daily_stats.log` 文件，并通过“设备统计开始 / 设备统计结束”区分设备边界。
+  - 设备输出顺序按 `QRCode` 转数字后升序排列，便于和现场设备编号对应。
+  - 统计字段使用中文名称，包括 VEFC 压力平均值、VEFC 压力标准差、VEFC 温度平均值、VEFC 温度最大值、实际流量平均值、实际流量标准差、流量气压比平均值。
+  - 每台设备额外记录“今日第一次记录”和“今日最后一次记录”，用于观察一天内气体气压、实际流量、VEFC 压力、VEFC 温度的变化。
+  - 无数据设备也会写入日志，统计值显示为 `N/A`，避免误判为漏统计。
+  - 为 `VEFCSensorMonitorDBCon` 增加按时间范围查询原始记录的接口，供日统计模块读取数据库数据。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_daily_stats.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_daily_stats.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/vefc_sensor_monitor_queries.sql`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `README.md`
+- 兼容性影响：不改变 VEFC 原始采样写入逻辑和数据库表结构；新增日志文件和只读查询接口。运行时 SQL 文件位于 ignored 的 `bin/x64/databases` 目录，提交和部署时需要单独确认同步。
+- 备注：本版本暂不统计“异常采样占比”，后续如果要做异常率，需要先定义明确的阈值规则。
+
+---
 
 ## v0.4.0
 
@@ -427,7 +492,9 @@
 
 - **vefc_sensor_monitor_task**
   - 目标：采集并落库 VEFC 相关传感器数据（如输出压力/平均温度），提供统计报表输入
-  - 日志：`scheduler/vefc_sensor_monitor_task/summary`、`scheduler/vefc_sensor_monitor_task/<QRCode>`
+  - 日志：`scheduler/vefc_sensor_monitor_task/summary.log`、`scheduler/vefc_sensor_monitor_task/devices.log`
+  - `summary.log`：任务生命周期、轮次汇总、软件第一次打开记录、每日统计块
+  - `devices.log`：设备指令通讯日志（`command retrying` / `command finished` / `requestFrame` / `responseFrame`）
   - 开关：`vefc_sensor_monitor_task.summary` / `vefc_sensor_monitor_task.devices`
 
 
