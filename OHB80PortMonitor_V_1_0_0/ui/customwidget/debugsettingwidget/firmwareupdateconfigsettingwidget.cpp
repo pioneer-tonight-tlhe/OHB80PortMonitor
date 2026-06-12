@@ -3,7 +3,7 @@
 #include "loggermanager.h"
 #include "applogger.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/set_firmware_config_task.h"
+#include "scheduler/tasks/set_firmware_config_task/set_firmware_config_task.h"
 #include "firmwareconfig.h"
 
 #include <QFileDialog>
@@ -301,4 +301,3 @@ void FirmwareUpdateConfigSettingWidget::onPostTransferWaitTimeSetBtnClicked()
                      m_postTransferWaitTimeSpinBox->value(),
                      [&fwConfig](int value) { return fwConfig.setPostTransferWaitMs(value); });
 }
-

@@ -6,7 +6,7 @@
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 #include "app/shareddata.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "usermanager/usermanager.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"

@@ -2,7 +2,7 @@
 #define NETWORK_STATUS_TASK_H
 
 #include "../../scheduler_task.h"
-#include "../init_check_task.h"
+#include "../init_check_task/init_check_task.h"
 #include "network_status_task_logger.h"
 #include "modbustcpmastermanager/modbustcpmaster/modbusconnecter.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"

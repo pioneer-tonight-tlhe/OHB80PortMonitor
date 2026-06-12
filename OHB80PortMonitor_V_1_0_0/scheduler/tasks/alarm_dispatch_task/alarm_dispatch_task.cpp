@@ -3,7 +3,7 @@
 #include <QDateTime>
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/alarmlogdb/alarmlogdbcon.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "app/shareddata.h"
 #include "classes/foupofohbinfo.h"
 #include "loggerconfig.h"

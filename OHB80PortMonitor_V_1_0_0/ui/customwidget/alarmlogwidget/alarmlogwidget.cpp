@@ -3,7 +3,7 @@
 #include "datetimesetdialog.h"
 #include "alarmtype.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/alarmlogquerytask.h"
+#include "scheduler/tasks/alarmlogquerytask/alarmlogquerytask.h"
 #include "paginationwidget.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/alarmlogdb/alarmlogdbcon.h"

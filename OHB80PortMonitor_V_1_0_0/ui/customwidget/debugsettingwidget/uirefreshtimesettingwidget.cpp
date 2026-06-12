@@ -2,7 +2,7 @@
 #include "../settingwidget/settingitemwidget.h"
 #include "../modaltabledialog/modaltabledialog.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/set_ui_refresh_time_task.h"
+#include "scheduler/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"

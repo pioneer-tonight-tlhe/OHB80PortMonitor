@@ -3,7 +3,7 @@
 #include "modaltabledialog.h"
 #include "ohbdeviceconfig.h"
 #include "scheduler/scheduler.h"
-#include "tasks/set_pneumatic_valve_pressure_task.h"
+#include "tasks/set_pneumatic_valve_pressure_task/set_pneumatic_valve_pressure_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"

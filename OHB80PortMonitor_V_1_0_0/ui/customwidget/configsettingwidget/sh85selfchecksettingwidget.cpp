@@ -1,7 +1,7 @@
 #include "sh85selfchecksettingwidget.h"
 #include "../settingwidget/settingitemwidget.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h"
 #include "app/applogger.h"
 #include "loggermanager.h"

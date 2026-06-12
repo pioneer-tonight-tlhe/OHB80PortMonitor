@@ -2,7 +2,7 @@
 #define FIRMWAREUPDATECONFIGSETTINGWIDGET_H
 
 #include "../settingwidget/settingwidget.h"
-#include "tasks/set_firmware_config_task.h"
+#include "tasks/set_firmware_config_task/set_firmware_config_task.h"
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QPushButton>

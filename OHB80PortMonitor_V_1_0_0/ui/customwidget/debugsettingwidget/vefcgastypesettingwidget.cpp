@@ -2,7 +2,7 @@
 #include "../settingwidget/settingitemwidget.h"
 #include "../modaltabledialog/modaltabledialog.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/set_vefc_gas_type_task.h"
+#include "scheduler/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"

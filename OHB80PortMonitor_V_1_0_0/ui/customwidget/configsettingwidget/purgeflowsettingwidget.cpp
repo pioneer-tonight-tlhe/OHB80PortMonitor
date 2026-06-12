@@ -2,9 +2,9 @@
 #include "../settingwidget/settingitemwidget.h"
 #include "modaltabledialog.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/set_purge_flow_task.h"
+#include "scheduler/tasks/set_purge_flow_task/set_purge_flow_task.h"
 #include "app/shareddata.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
 

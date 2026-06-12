@@ -3,7 +3,7 @@
 #include <QStandardItemModel>
 #include <QDebug>
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/communicatelogquerytask.h"
+#include "scheduler/tasks/communicatelogquerytask/communicatelogquerytask.h"
 #include "paginationwidget/paginationwidget.h"
 #include "datetimesetdialog.h"
 #include "logdatabases/databasemanager.h"

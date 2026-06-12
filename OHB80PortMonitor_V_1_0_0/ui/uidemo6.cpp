@@ -6,7 +6,7 @@
 #include "app.h"
 #include "usermanager.h"
 #include "app/shareddata.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "ui/customwidget/scrollingtiplabel/scrollingtiplabel.h"
 #include "ui/customwidget/operationlogwidget/operationlogwidget.h"

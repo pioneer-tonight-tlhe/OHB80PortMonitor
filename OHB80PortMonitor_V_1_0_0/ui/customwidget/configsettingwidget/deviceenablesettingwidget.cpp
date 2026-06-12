@@ -4,7 +4,7 @@
 #include "app/ohbdeviceconfig.h"
 #include "classes/foupofohbinfo.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/send_command_task.h"
+#include "scheduler/tasks/send_command_task/send_command_task.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
 

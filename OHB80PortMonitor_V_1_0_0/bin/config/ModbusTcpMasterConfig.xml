@@ -80,13 +80,15 @@
         </Command>
 
         <!-- ========================================
-            配置Foup IN 抽真空保持使能
-            请求帧: 01 06 00 1B 00 00 CRC
-            响应帧: 01 06 00 1B 00 00 CRC
-            CH_1:
-                0：默认（Foup in 10s后关SW5真空阀）
-                1：保持（Foup in 保持开SW5真空阀）
-        ======================================== -->
+             5. 功能码 06 — 写单个保持寄存器
+             配置 FOUP IN 抽真空保持使能
+             请求帧: 01 06 00 1B 00 00 CRC
+             响应帧: 01 06 00 1B 00 00 CRC（镜像）
+             Value = (256 * hi_byte + lo_byte)
+             CH_1:
+                 0：默认模式（FOUP IN 10s 后关闭 SW5 真空阀）
+                 1：保持模式（FOUP IN 持续开启 SW5 真空阀）
+             ======================================== -->
         <Command id="WriteFoupInVacuumExtractionEnable">
             <request>
                 <SlaveAddr>01</SlaveAddr>

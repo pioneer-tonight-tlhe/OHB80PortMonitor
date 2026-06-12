@@ -1,7 +1,7 @@
 #include "logindialog.h"
 #include "usermanager.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/user_management_task.h"
+#include "scheduler/tasks/user_management_task/user_management_task.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

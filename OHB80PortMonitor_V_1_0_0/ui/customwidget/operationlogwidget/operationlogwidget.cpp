@@ -14,8 +14,8 @@
 #include <QMessageBox>
 
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/operationlogquerytask.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operationlogquerytask/operationlogquerytask.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "app/shareddata.h"
 #include "usermanager.h"
 #include "paginationwidget.h"

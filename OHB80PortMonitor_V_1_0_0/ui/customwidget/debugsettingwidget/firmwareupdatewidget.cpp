@@ -3,7 +3,7 @@
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/firmware_upgrade_task.h"
+#include "scheduler/tasks/firmware_upgrade_task/firmware_upgrade_task.h"
 #include "app/customlogger.h"
 
 #include <QLabel>

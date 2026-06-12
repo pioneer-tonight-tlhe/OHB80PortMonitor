@@ -7,7 +7,7 @@
 #include "app/shareddata.h"
 #include "app/alarmtype.h"
 #include "classes/foupofohbinfo.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "scheduler/tasks/network_status_task/network_status_task_qrcode_logger.h"
 #include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "logdatabases/databasemanager.h"

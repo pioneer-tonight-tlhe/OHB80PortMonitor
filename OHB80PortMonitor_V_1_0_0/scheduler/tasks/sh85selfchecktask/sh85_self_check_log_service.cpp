@@ -4,7 +4,7 @@
 #include "logdatabases/databasemanager.h"
 #include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"
-#include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "app/shareddata.h"
 #include "loggermanager.h"
 #include "usermanager/usermanager.h"

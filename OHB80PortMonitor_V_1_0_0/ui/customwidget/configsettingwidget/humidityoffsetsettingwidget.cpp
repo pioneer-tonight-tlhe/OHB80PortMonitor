@@ -2,7 +2,7 @@
 #include "../settingwidget/settingitemwidget.h"
 #include "modaltabledialog.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/set_humidity_offset_task.h"
+#include "scheduler/tasks/set_humidity_offset_task/set_humidity_offset_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"

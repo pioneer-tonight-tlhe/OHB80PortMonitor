@@ -2,7 +2,7 @@
 #define IDLEPURGESETTINGWIDGET_H
 
 #include "settingwidget.h"
-#include "tasks/set_idle_purge_task.h"
+#include "tasks/set_idle_purge_task/set_idle_purge_task.h"
 
 #include <QComboBox>
 #include <QLineEdit>
