@@ -5,7 +5,8 @@ HEADERS += \
     $$PWD/vefcgastypesettingwidget.h \
     $$PWD/uirefreshtimesettingwidget.h \
     $$PWD/vefcflowunitmediumstatuswidget.h \
-    $$PWD/boardenablestatuswidget.h
+    $$PWD/boardenablestatuswidget.h \
+    $$PWD/foupinvacuumextractionenablewidget.h
 
 SOURCES += \
     $$PWD/firmwareupdateconfigsettingwidget.cpp \
@@ -14,7 +15,8 @@ SOURCES += \
     $$PWD/vefcgastypesettingwidget.cpp \
     $$PWD/uirefreshtimesettingwidget.cpp \
     $$PWD/vefcflowunitmediumstatuswidget.cpp \
-    $$PWD/boardenablestatuswidget.cpp
+    $$PWD/boardenablestatuswidget.cpp \
+    $$PWD/foupinvacuumextractionenablewidget.cpp
 
 FORMS += \
     $$PWD/firmwareupdatewidget.ui

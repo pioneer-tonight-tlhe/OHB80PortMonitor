@@ -10,7 +10,7 @@
 
 namespace {
 
-const std::string DiskPressureCleanupLogPath = "log_db/disk_pressure_cleanup/clean";
+const std::string DiskPressureCleanupLogPath = "scheduler/disk_pressure_cleanup_task/clean";
 
 double bytesToGb(qint64 bytes)
 {

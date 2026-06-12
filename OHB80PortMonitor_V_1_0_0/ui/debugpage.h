@@ -13,6 +13,7 @@ class VEFCGasTypeSettingWidget;
 class UIRefreshTimeSettingWidget;
 class VEFCFlowUnitMediumStatusWidget;
 class BoardEnableStatusWidget;
+class FoupInVacuumExtractionEnableWidget;
 
 class DebugPage : public QWidget
 {
@@ -38,6 +39,7 @@ private:
     UIRefreshTimeSettingWidget        *m_uiRefreshTimeWidget;
     VEFCFlowUnitMediumStatusWidget    *m_vefcFlowUnitMediumStatusWidget;
     BoardEnableStatusWidget            *m_boardEnableStatusWidget;
+    FoupInVacuumExtractionEnableWidget *m_foupInVacuumExtractionEnableWidget;
 };
 
 #endif // DEBUGPAGE_H

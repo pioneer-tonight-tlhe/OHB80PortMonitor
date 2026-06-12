@@ -105,6 +105,22 @@
             </respond>
         </Command>
 
+        <Command id="ReadFoupInVacuumExtractionEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 1B</StartAddr>
+                <!-- 写入值，固定2字节：0=默认（FOUP IN 10s 后关闭 SW5 真空阀），1=保持（FOUP IN 持续开启 SW5 真空阀） -->
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
         <!-- ========================================
             读取Foup IN 抽真空保持使能
             请求帧: 01 04 00 1B 00 01 CRC

@@ -10,7 +10,46 @@
 
 ## 更新日志
 
-## v0.5.4
+## 待发布
+
+### DebugPage 新增 FOUP IN 真空阀保持调试项
+- 修改时间：2026-06-12
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 关联信息：`WriteFoupInVacuumExtractionEnable` / `ReadFoupInVacuumExtractionEnable`
+- 功能概述：在 DebugPage 中新增 FOUP IN 真空阀保持模式调试项，可对单台设备读取和设置 `FoupInVacuumExtractionEnable`。
+- 功能点明细：
+  - 新增 `FoupInVacuumExtractionEnableWidget`，默认选中设备列表中的第一台设备二维码。
+  - 读取时通过 `SendCommandTask` 下发 `ReadFoupInVacuumExtractionEnable` 指令，并将返回寄存器值同步到下拉选项。
+  - 设置时通过 `SendCommandTask` 下发 `WriteFoupInVacuumExtractionEnable` 指令，写入值 `0` 表示默认模式，`1` 表示 FOUP IN 时保持 SW5 真空阀开启。
+  - 新增 `All Devices` 批量操作项，可一次性对全部设备下发读取或设置指令，并通过表格弹窗展示每台设备的执行结果。
+  - DebugPage 顶部新增 `FOUP Vacuum` 导航按钮，可快速定位到该调试项。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `README.md`
+- 兼容性影响：不改变现有调试项和设备通讯流程；新增调试项依赖配置文件中已存在的两条 Modbus 指令。
+- 备注：该功能仅提供调试页面手动读写入口，不自动改变设备参数。
+
+### 磁盘高水位清理日志路径调整
+- 修改时间：2026-06-12
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 关联信息：`DiskPressureCleanupTask`
+- 功能概述：将磁盘高水位清理日志从 `log_db` 分类调整到 scheduler 调度任务分类。
+- 功能点明细：
+  - `DiskPressureCleanupTask` 的统一日志路径调整为 `scheduler/disk_pressure_cleanup_task/clean`。
+  - 路径归属与任务位置保持一致，便于区分数据库月度清理日志和调度层磁盘压力清理日志。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.cpp`
+  - `README.md`
+- 兼容性影响：后续排查磁盘高水位清理记录时，需要查看新的 scheduler 日志目录。
+- 备注：仅调整日志输出路径，不改变磁盘使用率阈值、清理顺序和保留策略。
 
 ### 磁盘高水位清理迁移到调度层
 
@@ -25,7 +64,7 @@
   - 当磁盘使用率 `>= 90%` 时，先清理 LoggerManager 日期日志目录，仅保留最近 2 个月（包含今天所在月份）的日志。
   - LoggerManager 清理后仍未低于阈值时，按优先级提交数据库清理：`communicatelogdb`、`vefcsensormonitordb`、`operationlogdb`、`alarmlogdb`。
   - 高水位数据库清理每次提交最早 1 个月删除请求，并保护每个数据库至少保留最近 6 个月日志。
-  - 高水位清理统一记录到 `log_db/disk_pressure_cleanup/clean`。
+  - 高水位清理统一记录到 `scheduler/disk_pressure_cleanup_task/clean`。
   - `communicatelogdb` 不再写入原磁盘阈值清理日志 `log_db/communicate_log_db/clean`。
 - 改动文件：
   - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/disk_pressure_cleanup_task.h`
@@ -94,7 +133,7 @@
   - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
   - `README.md`
 - 兼容性影响：常规日志数据库的月度清理记录位置发生变化，后续排查常规日志库清理情况需查看 `log_db/database_cleanup/month_clean`。
-- 备注：本版本统一日志仅覆盖月度保留清理；通信日志磁盘阈值清理已在“待发布”记录中迁移到 `log_db/disk_pressure_cleanup/clean`。
+- 备注：本版本统一日志仅覆盖月度保留清理；通信日志磁盘阈值清理已在“待发布”记录中迁移到 `scheduler/disk_pressure_cleanup_task/clean`。
 
 ---
 

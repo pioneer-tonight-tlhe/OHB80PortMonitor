@@ -6,6 +6,7 @@
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
 #include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
+#include "customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.h"
 #include <QScrollBar>
 #include <QScroller>
 #include <QScrollerProperties>
@@ -19,6 +20,7 @@ DebugPage::DebugPage(QWidget *parent)
     , m_uiRefreshTimeWidget(nullptr)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
     , m_boardEnableStatusWidget(nullptr)
+    , m_foupInVacuumExtractionEnableWidget(nullptr)
 {
     ui->setupUi(this);
 
@@ -72,6 +74,9 @@ void DebugPage::initUI()
     // 板卡禁用状态读取 SettingWidget
     m_boardEnableStatusWidget = new BoardEnableStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_boardEnableStatusWidget);
+
+    m_foupInVacuumExtractionEnableWidget = new FoupInVacuumExtractionEnableWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_foupInVacuumExtractionEnableWidget);
     
     ui->scrollAreaWidgetContents->layout()->addItem(
         new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding)
@@ -112,6 +117,8 @@ void DebugPage::navBtnClicked()
         targetWidget = m_vefcFlowUnitMediumStatusWidget;
     } else if (objName == "btnBoardEnable") {
         targetWidget = m_boardEnableStatusWidget;
+    } else if (objName == "btnFoupInVacuumExtraction") {
+        targetWidget = m_foupInVacuumExtractionEnableWidget;
     }
 
     if (targetWidget) {
