@@ -15,6 +15,7 @@ class OperationDispatchTask;
 class SH85PeriodicSelfCheckTask3;
 class VEFCSensorMonitorTask;
 class VEFCMonitorInfo;
+class DiskPressureCleanupTask;
 
 class SharedData
 {
@@ -64,6 +65,7 @@ private:
     static OperationDispatchTask* s_operationDispatchTask;
     static SH85PeriodicSelfCheckTask3* s_sh85PeriodicSelfCheckTask3;
     static VEFCSensorMonitorTask* s_vefcSensorMonitorTask;
+    static DiskPressureCleanupTask* s_diskPressureCleanupTask;
 };
 
 #endif // SHAREDDATA_H

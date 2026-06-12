@@ -51,11 +51,13 @@ public:
     void insertRecord(const VEFCSensorMonitorRecord& record);
     void insertRecords(const QVector<VEFCSensorMonitorRecord>& records);
     void deleteByTimeRange(qint64 startTimestamp, qint64 endTimestamp);
+    bool deleteByDateTimeRange(const QString& startTime, const QString& endTime);
 
     // ============================ 采样数据查询 ============================
     QVariantMap queryDailyAverage(qint64 dayStartTimestamp, qint64 nextDayStartTimestamp);
     QVector<VEFCSensorMonitorRecord> queryRecordsByTimeRange(qint64 startTimestamp, qint64 endTimestamp);
     QVector<VEFCSensorMonitorRecord> queryOldestWeekRecords();
+    void queryTimeBounds(QString& earliestTime, QString& latestTime);
 
 private:
     // ---- 写入结果转换 ----

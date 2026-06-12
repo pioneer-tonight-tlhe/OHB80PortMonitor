@@ -51,15 +51,17 @@ void DeviceParamLogSqlLogic::initializeCleanupScheduler()
 {
     LogCleanupScheduler::Config cfg;
     cfg.checkIntervalMs = 60000;
-    cfg.retainMonths = 7;
+    cfg.retainMonths = 6;
     cfg.cleanupMonths = 1;
-    cfg.logPath = "log_db/device_param_log_db/month_clean";
+    cfg.databaseName = QStringLiteral("设备参数日志数据库");
+    cfg.tableName = QStringLiteral("device_param_log");
+    cfg.logPath = "log_db/database_cleanup/month_clean";
     m_cleanupScheduler = new LogCleanupScheduler(cfg, this);
     m_cleanupScheduler->setMonthRangeProvider([this]() {
         return queryMonthRange();
     });
     m_cleanupScheduler->setDeleteByRangeFn([this](const QString& s, const QString& e) {
-        deleteByTimeRange(s, e);
+        return deleteByTimeRange(s, e);
     });
     m_cleanupScheduler->start();
 }

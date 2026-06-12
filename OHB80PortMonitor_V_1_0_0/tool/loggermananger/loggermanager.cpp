@@ -3,6 +3,7 @@
 #include <ctime>
 #include <cstring>
 #include <algorithm>
+#include <cstdio>
 
 // 跨平台递归删除目录（替代 std::filesystem::remove_all，兼容 MinGW 8.1）
 static bool remove_directory_recursive(const std::string& path)
@@ -159,6 +160,122 @@ void LoggerManager::flush(const std::string& file_name)
     if (it != loggers_.end() && it->second) {
         it->second->flush();
     }
+}
+
+// 清理 LoggerManager 日期目录，仅保留最近 months 个月。
+int LoggerManager::cleanupLogsKeepRecentMonths(int months)
+{
+    if (root_dir_.empty() || months <= 0) {
+        return 0;
+    }
+
+    std::string rootDir = root_dir_;
+    {
+        std::shared_lock<std::shared_mutex> lock(logger_mtx_);
+        for (auto& pair : loggers_) {
+            if (pair.second) {
+                pair.second->flush();
+            }
+        }
+    }
+
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm;
+#ifdef _WIN32
+    localtime_s(&now_tm, &now_t);
+#else
+    localtime_r(&now_tm, &now_t);
+#endif
+
+    const int currentYear = now_tm.tm_year + 1900;
+    const int currentMonth = now_tm.tm_mon + 1;
+    const int cutoffIndex = currentYear * 12 + currentMonth - (months - 1);
+
+    auto isExpiredDateDir = [cutoffIndex](const std::string& name) {
+        if (name.size() != 10 || name[4] != '-' || name[7] != '-') {
+            return false;
+        }
+
+        int year = 0;
+        int month = 0;
+        int day = 0;
+        if (std::sscanf(name.c_str(), "%d-%d-%d", &year, &month, &day) != 3) {
+            return false;
+        }
+        if (year <= 0 || month < 1 || month > 12 || day < 1 || day > 31) {
+            return false;
+        }
+
+        return (year * 12 + month) < cutoffIndex;
+    };
+
+    int removedCount = 0;
+
+#ifdef _WIN32
+    std::string searchPath = rootDir;
+    for (auto& c : searchPath) {
+        if (c == '/') c = '\\';
+    }
+    if (searchPath.back() != '\\') {
+        searchPath += '\\';
+    }
+    searchPath += '*';
+
+    WIN32_FIND_DATAA ffd;
+    HANDLE hFind = FindFirstFileA(searchPath.c_str(), &ffd);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    do {
+        if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            continue;
+        }
+        std::string name = ffd.cFileName;
+        if (name == "." || name == ".." || !isExpiredDateDir(name)) {
+            continue;
+        }
+
+        std::string dirFull = rootDir;
+        for (auto& c : dirFull) {
+            if (c == '/') c = '\\';
+        }
+        if (dirFull.back() != '\\') {
+            dirFull += '\\';
+        }
+        dirFull += name;
+
+        if (remove_directory_recursive(dirFull)) {
+            ++removedCount;
+        }
+    } while (FindNextFileA(hFind, &ffd) != 0);
+    FindClose(hFind);
+#else
+    DIR* dp = opendir(rootDir.c_str());
+    if (!dp) {
+        return 0;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dp)) != nullptr) {
+        if (entry->d_type != DT_DIR) {
+            continue;
+        }
+        std::string name = entry->d_name;
+        if (name == "." || name == ".." || !isExpiredDateDir(name)) {
+            continue;
+        }
+
+        std::string dirFull = rootDir + "/" + name;
+        if (remove_directory_recursive(dirFull)) {
+            ++removedCount;
+        }
+    }
+    closedir(dp);
+#endif
+
+    return removedCount;
 }
 
 // 获取当前日期字符串 yyyy-MM-dd

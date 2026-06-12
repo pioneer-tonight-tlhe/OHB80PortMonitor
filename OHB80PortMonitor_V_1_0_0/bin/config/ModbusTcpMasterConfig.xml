@@ -55,7 +55,7 @@
         </Command>
 
         <!-- ========================================
-             21. 功能码 04 — 读输入寄存器（单寄存器）
+             功能码 04 — 读输入寄存器（单寄存器）
              读取 VEFC 流量单位以及介质配置状态
              请求帧: 01 04 00 11 00 01 CRC
              响应帧: 01 04 02 XX XX CRC
@@ -75,6 +75,53 @@
                 <SlaveAddr>01</SlaveAddr>
                 <Function>04</Function>
                 <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+            配置Foup IN 抽真空保持使能
+            请求帧: 01 06 00 1B 00 00 CRC
+            响应帧: 01 06 00 1B 00 00 CRC
+            CH_1:
+                0：默认（Foup in 10s后关SW5真空阀）
+                1：保持（Foup in 保持开SW5真空阀）
+        ======================================== -->
+        <Command id="WriteFoupInVacuumExtractionEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 1B</StartAddr>
+                <!-- 写入值，固定2字节：0=默认（FOUP IN 10s 后关闭 SW5 真空阀），1=保持（FOUP IN 持续开启 SW5 真空阀） -->
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 1B</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+            读取Foup IN 抽真空保持使能
+            请求帧: 01 04 00 1B 00 01 CRC
+            响应帧: 01 04 02 00 01 CRC
+            CH_1:
+                0：默认（Foup in 10s后关SW5真空阀）
+                1：保持（Foup in 保持开SW5真空阀）
+        ======================================== -->
+        <Command id="ReadFoupStatus">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 1B</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>2</ByteCount>
                 <RegisterValue>00 00</RegisterValue>
             </respond>
         </Command>

@@ -269,6 +269,8 @@ void VEFCSensorMonitorSqlLogic::initializeCleanupScheduler()
     cleanupConfig.checkIntervalMs = 60000;
     cleanupConfig.retainMonths = 1;
     cleanupConfig.cleanupMonths = 1;
+    cleanupConfig.databaseName = QStringLiteral("VEFC采集数据库");
+    cleanupConfig.tableName = QStringLiteral("vefc_sensor_monitor");
     cleanupConfig.logPath = "log_db/vefc_sensor_monitor_db/month_clean";
 
     m_cleanupScheduler = new LogCleanupScheduler(cleanupConfig, this);
@@ -276,7 +278,7 @@ void VEFCSensorMonitorSqlLogic::initializeCleanupScheduler()
         return queryMonthRange();
     });
     m_cleanupScheduler->setDeleteByRangeFn([this](const QString& startTime, const QString& endTime) {
-        deleteByDateTimeRange(startTime, endTime);
+        return deleteByDateTimeRange(startTime, endTime);
     });
     m_cleanupScheduler->start();
 }

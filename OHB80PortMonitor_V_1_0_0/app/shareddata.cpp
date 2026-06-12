@@ -7,6 +7,7 @@
 #include "scheduler/tasks/monitor_data_task/monitor_data_task.h"
 #include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "scheduler/tasks/operation_dispatch_task.h"
+#include "scheduler/tasks/disk_pressure_cleanup_task.h"
 #include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h"
 #include "setofohbinfo.h"
@@ -21,6 +22,7 @@ AlarmDispatchTask* SharedData::s_alarmDispatchTask = nullptr;
 OperationDispatchTask* SharedData::s_operationDispatchTask = nullptr;
 SH85PeriodicSelfCheckTask3* SharedData::s_sh85PeriodicSelfCheckTask3 = nullptr;
 VEFCSensorMonitorTask* SharedData::s_vefcSensorMonitorTask = nullptr;
+DiskPressureCleanupTask* SharedData::s_diskPressureCleanupTask = nullptr;
 
 SharedData::SharedData() {
 
@@ -185,6 +187,13 @@ void SharedData::initScheduler()
         QMetaObject::invokeMethod(s_sh85PeriodicSelfCheckTask3, "setEnabled",
                                   Qt::QueuedConnection,
                                   Q_ARG(bool, enabled));
+    }
+
+    // 创建并提交磁盘高水位清理任务（长驻任务）
+    if (!s_diskPressureCleanupTask) {
+        s_diskPressureCleanupTask = new DiskPressureCleanupTask();
+        QString id = scheduler->submitTask(s_diskPressureCleanupTask);
+        qDebug() << "[SharedData] submitted disk pressure cleanup task, TaskID:" << id;
     }
 
     // 创建并提交 VEFC 传感器监控任务（长驻任务）

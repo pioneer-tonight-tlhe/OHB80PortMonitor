@@ -78,8 +78,8 @@ QVariantMap CommandResponseParser::parseReadFoupStatus(const ModbusCommand& cmd)
     double negativePressureKpa = negativePressureSigned / 100.0;  // -10~10 Kpa
     result["negativePressure"]  = negativePressureKpa;  // 单位 Kpa
 
-    // CH_3 (bytes 4-5): 进气主路流量值 (4~200 L/Min) = raw / 100
-    result["inletFlow"]         = readU16BE(payload, 4) / 100.0;
+    // CH_3 (bytes 4-5): 进气主路流量值 (4~200 L/Min) = raw / 10
+    result["inletFlow"]         = readU16BE(payload, 4) / 10.0;
 
     // CH_4 (bytes 6-7): 真空回路相对湿度 (0~100%) = raw / 100
     result["humidity"]          = readU16BE(payload, 6) / 100.0;

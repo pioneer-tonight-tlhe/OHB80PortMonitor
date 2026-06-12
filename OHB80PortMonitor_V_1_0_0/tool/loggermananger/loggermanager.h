@@ -114,6 +114,8 @@ public:
     // 手动刷新指定文件的 logger（立即写入磁盘）
     void flush(const std::string& file_name);
 
+    int cleanupLogsKeepRecentMonths(int months);
+
 private:
     // 日志目标结构体（用于批量 logger 查找）
     struct LogTarget {

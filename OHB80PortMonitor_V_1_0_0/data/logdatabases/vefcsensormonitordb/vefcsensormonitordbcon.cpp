@@ -1,4 +1,5 @@
 #include "vefcsensormonitordbcon.h"
+#include <QDateTime>
 #include <QDebug>
 
 namespace LogDB {
@@ -96,6 +97,22 @@ void VEFCSensorMonitorDBCon::deleteByTimeRange(qint64 startTimestamp, qint64 end
                               Q_ARG(qint64, endTimestamp));
 }
 
+bool VEFCSensorMonitorDBCon::deleteByDateTimeRange(const QString& startTime, const QString& endTime)
+{
+    const QDateTime startDateTime = QDateTime::fromString(startTime, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    const QDateTime endDateTime = QDateTime::fromString(endTime, QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    if (!startDateTime.isValid() || !endDateTime.isValid()) {
+        qWarning() << "[VEFCSensorMonitorDBCon] Invalid delete range:"
+                   << "startTime=" << startTime
+                   << "endTime=" << endTime;
+        return false;
+    }
+
+    deleteByTimeRange(startDateTime.toMSecsSinceEpoch(),
+                      endDateTime.toMSecsSinceEpoch() + 1000);
+    return true;
+}
+
 QVariantMap VEFCSensorMonitorDBCon::queryDailyAverage(qint64 dayStartTimestamp, qint64 nextDayStartTimestamp)
 {
     QVariantMap result;
@@ -126,6 +143,30 @@ QVector<VEFCSensorMonitorRecord> VEFCSensorMonitorDBCon::queryOldestWeekRecords(
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(QVector<VEFCSensorMonitorRecord>, records));
     return records;
+}
+
+void VEFCSensorMonitorDBCon::queryTimeBounds(QString& earliestTime, QString& latestTime)
+{
+    earliestTime.clear();
+    latestTime.clear();
+
+    QVariantMap result;
+    bool success = QMetaObject::invokeMethod(m_sqlLogic, "queryMonthRange",
+                                             Qt::BlockingQueuedConnection,
+                                             Q_RETURN_ARG(QVariantMap, result));
+    if (!success) {
+        return;
+    }
+
+    const QString earliest = result.value("earliest_time").toString();
+    const QString latest = result.value("latest_time").toString();
+    if (earliest.isEmpty() || latest.isEmpty()
+        || earliest == "NULL" || latest == "NULL") {
+        return;
+    }
+
+    earliestTime = earliest;
+    latestTime = latest;
 }
 
 void VEFCSensorMonitorDBCon::onWriteTaskCompleted(const WriteResult& result)

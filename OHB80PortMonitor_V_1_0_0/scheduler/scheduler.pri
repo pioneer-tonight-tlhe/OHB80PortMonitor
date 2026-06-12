@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/scheduler_task.h \
     $$PWD/scheduler.h \
+    $$PWD/tasks/disk_pressure_cleanup_task.h \
     $$PWD/tasks/alarmlogquerytask.h \
     $$PWD/tasks/communicatelogquerytask.h \
     $$PWD/tasks/monitor_data_task/monitor_data_task.h \
@@ -48,6 +49,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/scheduler.cpp \
+    $$PWD/tasks/disk_pressure_cleanup_task.cpp \
     $$PWD/tasks/alarmlogquerytask.cpp \
     $$PWD/tasks/communicatelogquerytask.cpp \
     $$PWD/tasks/monitor_data_task/monitor_data_task.cpp \

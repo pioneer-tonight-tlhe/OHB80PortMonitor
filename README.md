@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.5.2**
+**当前版本：V0.5.3**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,94 @@
 ---
 
 ## 更新日志
+
+## v0.5.4
+
+### 磁盘高水位清理迁移到调度层
+
+- 修改时间：2026-06-11
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 关联信息：N/A
+- 功能概述：移除 `communicatelogdb` 逻辑层中磁盘使用率 `>= 90%` 时的额外清理机制，改由调度层统一负责磁盘高水位清理。
+- 功能点明细：
+  - 新增 `DiskPressureCleanupTask` 常驻调度任务，每 `60000ms` 检查一次数据库所在磁盘使用率。
+  - 当磁盘使用率 `< 90%` 时不写入清理日志，避免每分钟产生无意义日志。
+  - 当磁盘使用率 `>= 90%` 时，先清理 LoggerManager 日期日志目录，仅保留最近 2 个月（包含今天所在月份）的日志。
+  - LoggerManager 清理后仍未低于阈值时，按优先级提交数据库清理：`communicatelogdb`、`vefcsensormonitordb`、`operationlogdb`、`alarmlogdb`。
+  - 高水位数据库清理每次提交最早 1 个月删除请求，并保护每个数据库至少保留最近 6 个月日志。
+  - 高水位清理统一记录到 `log_db/disk_pressure_cleanup/clean`。
+  - `communicatelogdb` 不再写入原磁盘阈值清理日志 `log_db/communicate_log_db/clean`。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/disk_pressure_cleanup_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/disk_pressure_cleanup_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
+  - `OHB80PortMonitor_V_1_0_0/tool/loggermananger/loggermanager.h`
+  - `OHB80PortMonitor_V_1_0_0/tool/loggermananger/loggermanager.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitordbcon.cpp`
+  - `README.md`
+- 兼容性影响：常规月度清理策略不变；磁盘高水位清理由单库内部机制改为调度层统一机制，清理日志查看路径发生变化。
+- 备注：本记录遵循队友 CHANGELOG 待发布模板，未新增正式版本号。
+
+---
+
+## v0.5.3
+
+- 发布日期：2026-06-11
+
+### 常规日志数据库清理策略统一
+
+- 修改时间：2026-06-11
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：统一常规日志数据库的月度清理策略，并将清理检查调整为每天凌晨执行一次。
+- 功能点明细：
+  - `operationlogdb`、`alarmlogdb`、`deviceparamlogdb`、`communicatelogdb` 统一调整为保留最近 6 个月数据。
+  - 四个常规日志库每次触发清理时删除最早 1 个月的数据。
+  - 通用 `LogCleanupScheduler` 调整为每分钟轮询时间，但仅在每天 `00:05` 所在凌晨小时内最多执行一次数据库清理检查。
+  - 清理任务提交结果由删除回调返回，统一日志中明确记录“已提交删除任务”或“删除任务提交失败”。
+  - `vefcsensormonitordb` 的保留策略不变，仍保留最近 1 个月采集数据。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/logcleanupscheduler.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/logcleanupscheduler.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/deviceparamlogdb/deviceparamlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.cpp`
+  - `README.md`
+- 兼容性影响：常规日志数据库历史数据保留周期由 7 个月缩短为 6 个月；VEFC 采集数据库保留周期不变。
+- 备注：本版本发布时通信日志数据库仍保留原磁盘阈值清理；该机制已在“待发布”记录中迁移到调度层统一处理。
+
+### 常规日志数据库统一清理日志
+
+- 修改时间：2026-06-11
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：四个常规日志数据库的月度清理记录统一写入同一个清理日志文件，便于集中查看清理触发与提交结果。
+- 功能点明细：
+  - `operationlogdb`、`alarmlogdb`、`deviceparamlogdb`、`communicatelogdb` 的月度清理日志统一写入 `log_db/database_cleanup/month_clean`。
+  - 日志块统一记录数据库名称、表名、保留策略、每次清理月份、数据覆盖月份、最早记录、最新记录、清理范围和执行结果。
+  - 未超过保留范围时，每天凌晨检查只记录一次“未触发清理”，避免每分钟刷屏。
+  - 触发清理时记录“数据库定时清理触发”和“数据库定时清理提交完成/失败”两个阶段。
+  - `vefcsensormonitordb` 仍使用独立日志路径 `log_db/vefc_sensor_monitor_db/month_clean`。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/logcleanupscheduler.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/logcleanupscheduler.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/deviceparamlogdb/deviceparamlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
+  - `README.md`
+- 兼容性影响：常规日志数据库的月度清理记录位置发生变化，后续排查常规日志库清理情况需查看 `log_db/database_cleanup/month_clean`。
+- 备注：本版本统一日志仅覆盖月度保留清理；通信日志磁盘阈值清理已在“待发布”记录中迁移到 `log_db/disk_pressure_cleanup/clean`。
+
+---
 
 ## v0.5.2
 
