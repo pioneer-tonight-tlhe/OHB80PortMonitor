@@ -25,6 +25,8 @@ HEADERS += \
     $$PWD/tasks/network_status_task/network_status_task_qrcode_logger.h \
     $$PWD/tasks/set_firmware_config_task/set_firmware_config_task.h \
     $$PWD/tasks/firmware_upgrade_task/firmware_upgrade_task.h \
+    $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_types.h \
+    $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.h \
     $$PWD/tasks/set_idle_purge_task/set_idle_purge_task.h \
     $$PWD/tasks/set_pneumatic_valve_pressure_task/set_pneumatic_valve_pressure_task.h \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_task.h \
@@ -70,6 +72,7 @@ SOURCES += \
     $$PWD/tasks/network_status_task/network_status_task_qrcode_logger.cpp \
     $$PWD/tasks/set_firmware_config_task/set_firmware_config_task.cpp \
     $$PWD/tasks/firmware_upgrade_task/firmware_upgrade_task.cpp \
+    $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.cpp \
     $$PWD/tasks/set_idle_purge_task/set_idle_purge_task.cpp \
     $$PWD/tasks/set_pneumatic_valve_pressure_task/set_pneumatic_valve_pressure_task.cpp \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_task.cpp \

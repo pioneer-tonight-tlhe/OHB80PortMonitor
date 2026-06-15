@@ -10,6 +10,40 @@
 
 ## 更新日志
 
+## 待发布
+
+- 发布日期：2026-06-15
+
+### 新增固件升级测试报表 CSV 数据层
+- 修改时间：2026-06-15
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 关联信息：`FirmwareUpgradeTestReportRepository` / `FirmwareUpgradeTestSessionSummaryRecord` / `FirmwareUpgradeTestRoundSummaryRecord` / `FirmwareUpgradeTestFailureDetailRecord`
+- 功能概述：为固件升级测试功能新增基于 CSV 的报表数据层，用于统一保存测试会话概况、单轮结果和失败明细，为后续调度任务和测试报告 UI 提供稳定的数据契约。
+- 功能点明细：
+  - 新增 `firmware_upgrade_test_report_types.h`，定义测试会话汇总、单轮汇总、失败明细和完整报告四类结构体。
+  - 新增 `FirmwareUpgradeTestReportRepository`，封装测试报表目录初始化、CSV 写入、CSV 读取和完整报告聚合加载逻辑。
+  - 复用项目现有 `CsvIO` 通用能力，不重复实现底层 CSV 解析与转义逻辑，保持项目内 CSV 行为一致。
+  - 统一约定测试报表根目录为 `log/firmware_upgrade/test_reports/<session_id>/`，并在每个会话目录下自动创建 `captures/` 子目录。
+  - 新增 `session_summary.csv`，用于保存某次测试任务的最新会话快照，包括目标轮次、已完成轮次、轮次间隔、设备数、成功轮次、失败轮次和固件文件路径。
+  - 新增 `round_summary.csv`，用于按轮次追加保存单轮测试的开始时间、结束时间、参与设备数、成功设备数、失败设备数、轮次结果和截图路径。
+  - 新增 `failure_detail.csv`，用于按失败设备追加保存 `qrcode`、失败阶段、失败码、失败原因、失败时间和截图路径，作为测试报告弹窗第二行失败明细的主要数据源。
+  - `createSessionId()` 使用时间戳生成 `session_id`，当同名目录已存在时自动追加数字后缀，避免同毫秒测试会话冲突。
+  - `initializeSession()` 负责创建会话目录、截图目录以及三个 CSV 文件表头，保证调度任务在首次写入前无需关心目录和文件准备工作。
+  - `writeSessionSummary()` 采用“重写表头 + 写入一条最新记录”的方式保存会话快照；`appendRoundSummary()` 和 `appendFailureDetail()` 采用追加写入方式保存过程数据。
+  - `loadReport()` 统一加载会话汇总、轮次汇总和失败明细，便于后续报告 UI 一次性读取完整数据。
+  - `loadFailureDetails(sessionId, roundIndex)` 支持按指定轮次筛选失败明细，便于测试报告按轮次展示失败设备、失败原因和图片链接。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_types.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `README.md`
+- 兼容性影响：当前仅新增固件升级测试的数据层，不改变现有 `FirmwareUpgradeTask`、`FirmwareUpgrader` 和手动固件升级 UI 的运行行为。
+- 备注：后续固件升级测试调度任务应按“初始化会话目录 → 写入初始会话快照 → 每轮追加轮次汇总/失败明细 → 轮次结束后刷新会话快照”的顺序使用本数据层。
+
+---
+
 ## v0.5.5
 
 - 发布日期：2026-06-12
