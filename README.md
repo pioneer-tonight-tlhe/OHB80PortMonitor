@@ -10,6 +10,38 @@
 
 ## 更新日志
 
+## v0.5.6
+
+### 调整运行日志权限过滤查询逻辑
+- 修改时间：2026-06-15
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：将运行日志历史查询的用户权限过滤从 UI 层下沉到数据库查询层，保证分页总数、命中总数、表格显示和 Pre/Next 跳转使用同一批可见数据。
+- 功能点明细：
+  - `OperationLogQueryTask` 增加当前用户权限参数，并传递给分页、统计、命中定位和上下条查询。
+  - `OperationLogDBCon` / `OperationLogSqlLogic` 的运行日志查询接口增加 `maxUserPermission` 条件。
+  - `operation_log_queries.sql` 中运行日志分页、统计和命中查询增加 `user_permission <= ?` 条件。
+  - `OperationLogWidget` 移除历史表 UI 二次权限过滤，登录权限变化后自动刷新实时日志和已有历史查询。
+  - `History Log` 查询拆分为“基础条件分页展示”和“keyword 命中统计/导航”，修复模糊查询后 X/Y 分母为 0、Pre/Next 不可用以及首尾命中无法循环跳转的问题。
+  - `History Log` 增加 `Record No.` SpinBox 和 `Jump` 按钮，可输入第 N 条 keyword 命中记录并自动切换到对应页面。
+  - `operation_log_queries.sql` 新增 `query_matched_id_by_position`，按当前权限、时间范围、日志类型和 keyword 直接定位第 N 条命中记录，避免通过多次 Next 逐条跳转。
+  - 按 Qt C++ 命名规范和头文件注释规范整理运行日志控件、查询任务和数据库连接层头文件。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.ui`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/operationlogquerytask/operationlogquerytask.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/operationlogquerytask/operationlogquerytask.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogdbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogdbcon.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/operation_log_queries.sql`
+  - `README.md`
+- 兼容性影响：运行日志历史查询结果会随当前登录权限变化；低权限用户不再计入或跳转到高权限日志记录。
+- 验证情况：已通过受影响的 `operationlogwidget`、`operationlogdbcon`、`operationlogsqllogic` 及对应 moc 目标文件编译；完整链接需关闭正在运行的 `OHB80PortMonitor_V_1_0_0.exe` 后执行。
+- 备注：`operation_log_queries.sql` 位于 `bin/x64`，当前受 `.gitignore` 忽略，发布包需要同步该运行时 SQL 文件。
+
 ## v0.5.5
 
 - 发布日期：2026-06-12

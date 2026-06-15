@@ -9,6 +9,18 @@
 
 namespace LogDB {
 
+namespace {
+
+QVariant buildKeywordLikeValue(const QString& keyword)
+{
+    if (keyword.isEmpty()) {
+        return QVariant();
+    }
+    return QStringLiteral("%") + keyword + QStringLiteral("%");
+}
+
+} // namespace
+
 OperationLogSqlLogic::OperationLogSqlLogic(const QString& databasePath, QObject* parent)
     : QObject(parent)
     , m_databasePath(databasePath)
@@ -30,7 +42,7 @@ OperationLogSqlLogic::~OperationLogSqlLogic()
     if (m_database.isOpen()) {
         m_database.close();
     }
-    // 不手动移除数据库连接，SQLite会自动处理
+    // 不手动移除数据库连接，SQLite 会自动处理。
     if (m_sqlMapper) {
         delete m_sqlMapper;
     }
@@ -38,14 +50,14 @@ OperationLogSqlLogic::~OperationLogSqlLogic()
 
 bool OperationLogSqlLogic::initializeDatabase()
 {
-    // 使用通用模块创建并优化SQLite连接
+    // 使用通用模块创建并优化 SQLite 连接。
     QString dbFilePath = QString("%1/logdb.db").arg(m_databasePath);
     m_database = DBConnectionHelper::openSqlite(dbFilePath, m_connectionName);
     if (!m_database.isOpen()) {
         return false;
     }
 
-    // 向后兼容迁移：若 operation_log 表缺少 user_permission 列则补加
+    // 向后兼容迁移：若 operation_log 表缺少 user_permission 列则补加。
     {
         QSqlQuery pragma(m_database);
         pragma.exec(QStringLiteral("PRAGMA table_info(operation_log)"));
@@ -62,15 +74,13 @@ bool OperationLogSqlLogic::initializeDatabase()
             if (!migrate.exec(QStringLiteral(
                     "ALTER TABLE operation_log "
                     "ADD COLUMN user_permission INTEGER NOT NULL DEFAULT 0"))) {
-                qWarning() << "[OperationLogSqlLogic] 迁移 user_permission 列失败:"
+                qWarning() << "[OperationLogSqlLogic] 迁移 user_permission 列失败"
                            << migrate.lastError().text();
-            } else {
-                qDebug() << "[OperationLogSqlLogic] 迁移完成：已添加 user_permission 列";
             }
         }
     }
 
-    // 初始化清理调度器
+    // 初始化清理调度器。
     initializeCleanupScheduler();
 
     return true;
@@ -104,25 +114,25 @@ bool OperationLogSqlLogic::insertRecord(const QString& occurTime, int logType, c
         return false;
     }
 
-    // 构造WriteResult传递给WriteSqlDBCon
+    // 构造 WriteResult 传递给 WriteSqlDBCon。
     WriteResult result;
     result.connectionName = m_connectionName;
-    result.sqlStatement = sql; // 传递带占位符的SQL语句
+    result.sqlStatement = sql;
     result.sqlId = "insert_record";
-    result.result = ""; // 待WriteSqlDBCon执行后填充
+    result.result = "";
     result.tableName = "operation_log";
     result.opType = static_cast<int>(WriteOp::Insert);
 
-    // 构造参数列表（顺序与 SQL ((occur_time, log_type, description, user_permission)) 严格对齐）
+    // 参数顺序必须与 insert_record SQL 保持一致。
     result.params << occurTime << logType << description << userPermission;
 
-    // 发出信号，传递SQL语句和参数给WriteSqlDBCon
+    // 发出写入请求，由 WriteSqlDBCon 统一执行。
     emit writeExecuted(result);
 
     return true;
 }
 
-QList<QVariantMap> OperationLogSqlLogic::queryPagination(int pageSize, int pageNumber)
+QList<QVariantMap> OperationLogSqlLogic::queryPagination(int pageSize, int pageNumber, int maxUserPermission)
 {
     QList<QVariantMap> results;
 
@@ -140,6 +150,7 @@ QList<QVariantMap> OperationLogSqlLogic::queryPagination(int pageSize, int pageN
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(pageSize);
     query.addBindValue(offset);
 
@@ -160,7 +171,7 @@ QList<QVariantMap> OperationLogSqlLogic::queryPagination(int pageSize, int pageN
     return results;
 }
 
-int OperationLogSqlLogic::queryTotalCount()
+int OperationLogSqlLogic::queryTotalCount(int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -174,6 +185,7 @@ int OperationLogSqlLogic::queryTotalCount()
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -189,7 +201,8 @@ int OperationLogSqlLogic::queryTotalCount()
 }
 
 QList<QVariantMap> OperationLogSqlLogic::queryPaginationInRange(const QString& startTime, const QString& endTime,
-                                                                int pageSize, int pageNumber)
+                                                                int pageSize, int pageNumber,
+                                                                int maxUserPermission)
 {
     QList<QVariantMap> results;
     if (!m_database.isOpen()) {
@@ -204,6 +217,7 @@ QList<QVariantMap> OperationLogSqlLogic::queryPaginationInRange(const QString& s
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
@@ -225,14 +239,60 @@ QList<QVariantMap> OperationLogSqlLogic::queryPaginationInRange(const QString& s
     return results;
 }
 
-int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const QString& endTime)
+QList<QVariantMap> OperationLogSqlLogic::queryPaginationWithBaseConditions(const QString& startTime, const QString& endTime,
+                                                                           int logType, int pageSize, int pageNumber,
+                                                                           int maxUserPermission)
+{
+    QList<QVariantMap> results;
+    if (!m_database.isOpen()) {
+        return results;
+    }
+    QString sql = m_sqlMapper->getSql("query_pagination_with_base_conditions");
+    if (sql.isEmpty()) {
+        qWarning() << "SQL not found: query_pagination_with_base_conditions";
+        return results;
+    }
+
+    int offset = calculateOffset(pageSize, pageNumber);
+    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
+    const QVariant rangeEnd = endTime.isEmpty() ? QVariant() : endTime;
+    const QVariant typeValue = (logType == -1) ? QVariant() : QVariant(logType);
+
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeEnd);
+    query.addBindValue(typeValue);
+    query.addBindValue(typeValue);
+    query.addBindValue(pageSize);
+    query.addBindValue(offset);
+
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return results;
+    }
+    while (query.next()) {
+        QSqlRecord record = query.record();
+        QVariantMap row;
+        for (int i = 0; i < record.count(); ++i) {
+            row[record.fieldName(i)] = record.value(i);
+        }
+        results.append(row);
+    }
+    return results;
+}
+
+int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const QString& endTime,
+                                                 int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
     }
-    // 无范围时直接取缓存表的全表总数
+    // 无范围时直接查询当前权限可见的总数。
     if (startTime.isEmpty()) {
-        return queryTotalCount();
+        return queryTotalCount(maxUserPermission);
     }
     QString sql = m_sqlMapper->getSql("query_total_count_in_range");
     if (sql.isEmpty()) {
@@ -241,6 +301,7 @@ int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const
     }
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime);
     query.addBindValue(startTime);
     query.addBindValue(endTime);
@@ -255,8 +316,43 @@ int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const
     return count;
 }
 
+int OperationLogSqlLogic::queryTotalCountWithBaseConditions(const QString& startTime, const QString& endTime,
+                                                            int logType, int maxUserPermission)
+{
+    if (!m_database.isOpen()) {
+        return 0;
+    }
+    QString sql = m_sqlMapper->getSql("query_total_count_with_base_conditions");
+    if (sql.isEmpty()) {
+        qWarning() << "SQL not found: query_total_count_with_base_conditions";
+        return 0;
+    }
+
+    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
+    const QVariant rangeEnd = endTime.isEmpty() ? QVariant() : endTime;
+    const QVariant typeValue = (logType == -1) ? QVariant() : QVariant(logType);
+
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeEnd);
+    query.addBindValue(typeValue);
+    query.addBindValue(typeValue);
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return 0;
+    }
+    int count = 0;
+    if (query.next()) {
+        count = query.value(0).toInt();
+    }
+    return count;
+}
+
 int OperationLogSqlLogic::queryRecordPageInRange(int recordId, const QString& startTime, const QString& endTime,
-                                                 int pageSize)
+                                                 int pageSize, int maxUserPermission)
 {
     if (!m_database.isOpen() || recordId <= 0 || pageSize <= 0) {
         return 0;
@@ -270,6 +366,7 @@ int OperationLogSqlLogic::queryRecordPageInRange(int recordId, const QString& st
     query.prepare(sql);
     query.addBindValue(pageSize);
     query.addBindValue(pageSize);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
@@ -286,9 +383,49 @@ int OperationLogSqlLogic::queryRecordPageInRange(int recordId, const QString& st
     return 0;
 }
 
+int OperationLogSqlLogic::queryRecordPageWithBaseConditions(int recordId, const QString& startTime, const QString& endTime,
+                                                            int logType, int pageSize, int maxUserPermission)
+{
+    if (!m_database.isOpen() || recordId <= 0 || pageSize <= 0) {
+        return 0;
+    }
+    QString sql = m_sqlMapper->getSql("query_record_page_with_base_conditions");
+    if (sql.isEmpty()) {
+        qWarning() << "SQL not found: query_record_page_with_base_conditions";
+        return 0;
+    }
+
+    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
+    const QVariant rangeEnd = endTime.isEmpty() ? QVariant() : endTime;
+    const QVariant typeValue = (logType == -1) ? QVariant() : QVariant(logType);
+
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    query.addBindValue(pageSize);
+    query.addBindValue(pageSize);
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeEnd);
+    query.addBindValue(typeValue);
+    query.addBindValue(typeValue);
+    query.addBindValue(recordId);
+    query.addBindValue(recordId);
+    query.addBindValue(recordId);
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return 0;
+    }
+    if (query.next()) {
+        return query.value(0).toInt();
+    }
+    return 0;
+}
+
 QList<QVariantMap> OperationLogSqlLogic::queryPageWithConditions(const QString& startTime, const QString& endTime,
                                                        int logType, const QString& keyword,
-                                                       int pageSize, int pageNumber)
+                                                       int pageSize, int pageNumber,
+                                                       int maxUserPermission)
 {
     QList<QVariantMap> results;
 
@@ -303,9 +440,11 @@ QList<QVariantMap> OperationLogSqlLogic::queryPageWithConditions(const QString& 
     }
 
     int offset = calculateOffset(pageSize, pageNumber);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(pageSize);
     query.addBindValue(offset);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
@@ -313,8 +452,8 @@ QList<QVariantMap> OperationLogSqlLogic::queryPageWithConditions(const QString& 
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
     query.addBindValue(logType == -1 ? QVariant() : logType);
     query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -334,7 +473,7 @@ QList<QVariantMap> OperationLogSqlLogic::queryPageWithConditions(const QString& 
 }
 
 int OperationLogSqlLogic::queryTotalCountWithConditions(const QString& startTime, const QString& endTime,
-                                            int logType, const QString& keyword)
+                                            int logType, const QString& keyword, int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -348,13 +487,15 @@ int OperationLogSqlLogic::queryTotalCountWithConditions(const QString& startTime
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
     query.addBindValue(logType == -1 ? QVariant() : logType);
     query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -370,7 +511,7 @@ int OperationLogSqlLogic::queryTotalCountWithConditions(const QString& startTime
 }
 
 int OperationLogSqlLogic::queryRecordPosition(int recordId, const QString& startTime, const QString& endTime,
-                                              int logType, const QString& keyword)
+                                              int logType, const QString& keyword, int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         qWarning() << "Database is not open";
@@ -383,68 +524,48 @@ int OperationLogSqlLogic::queryRecordPosition(int recordId, const QString& start
         return -1;
     }
 
-    qDebug() << "Executing query_record_position for recordId:" << recordId
-             << "startTime:" << startTime << "endTime:" << endTime
-             << "logType:" << logType << "keyword:" << keyword;
-    qDebug() << "SQL:" << sql;
-
     QSqlQuery query(m_database);
     query.prepare(sql);
-    // COUNT检查子查询的参数
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(recordId);
-    // COUNT位置子查询的参数
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+
+    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
+    const QVariant rangeEnd = startTime.isEmpty() ? QVariant() : endTime;
+    const QVariant typeValue = logType == -1 ? QVariant() : logType;
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeEnd);
+    query.addBindValue(typeValue);
+    query.addBindValue(typeValue);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
     query.addBindValue(recordId);
 
-    qDebug() << "Bound values:";
-    qDebug() << "  startTime:" << (startTime.isEmpty() ? "NULL" : startTime);
-    qDebug() << "  endTime:" << (endTime.isEmpty() ? "NULL" : endTime);
-    qDebug() << "  logType:" << (logType == -1 ? "NULL" : QString::number(logType));
-    qDebug() << "  keyword:" << (keyword.isEmpty() ? "NULL" : keyword);
-    qDebug() << "  recordId:" << recordId;
-
-    // 调试：查询该记录的实际log_type
-    QSqlQuery debugQuery(m_database);
-    debugQuery.prepare("SELECT id, log_type FROM operation_log WHERE id = ?");
-    debugQuery.addBindValue(recordId);
-    if (debugQuery.exec() && debugQuery.next()) {
-        qDebug() << "Debug: Record" << recordId << "exists with log_type:" << debugQuery.value(1).toInt();
-    } else {
-        qDebug() << "Debug: Record" << recordId << "does not exist or query failed";
-    }
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeEnd);
+    query.addBindValue(typeValue);
+    query.addBindValue(typeValue);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
+    query.addBindValue(recordId);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
         return -1;
     }
 
-    qDebug() << "Query executed, has rows:" << query.size();
-
     if (query.next()) {
-        int pos = query.value(0).toInt();
-        qDebug() << "Position returned:" << pos;
-        return pos;
+        return query.value(0).toInt();
     }
 
-    qWarning() << "No rows returned from query";
     return -1;
 }
-
 int OperationLogSqlLogic::queryFirstRecordPage(const QString& startTime, const QString& endTime,
-                                               int logType, const QString& keyword, int pageSize)
+                                               int logType, const QString& keyword, int pageSize,
+                                               int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         qWarning() << "Database is not open";
@@ -459,17 +580,22 @@ int OperationLogSqlLogic::queryFirstRecordPage(const QString& startTime, const Q
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    // (first_id + ? - 1) / ? 中的两个 pageSize 占位符
+
+    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
+    const QVariant rangeEnd = startTime.isEmpty() ? QVariant() : endTime;
+    const QVariant typeValue = logType == -1 ? QVariant() : logType;
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+
     query.addBindValue(pageSize);
     query.addBindValue(pageSize);
-    // 条件占位符
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeStart);
+    query.addBindValue(rangeEnd);
+    query.addBindValue(typeValue);
+    query.addBindValue(typeValue);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -479,11 +605,12 @@ int OperationLogSqlLogic::queryFirstRecordPage(const QString& startTime, const Q
     if (query.next()) {
         return query.value(0).toInt();
     }
+
     return 0;
 }
 
 int OperationLogSqlLogic::queryFirstMatchedId(const QString& startTime, const QString& endTime,
-                                              int logType, const QString& keyword)
+                                              int logType, const QString& keyword, int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -495,13 +622,80 @@ int OperationLogSqlLogic::queryFirstMatchedId(const QString& startTime, const QS
     }
     QSqlQuery query(m_database);
     query.prepare(sql);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
     query.addBindValue(logType == -1 ? QVariant() : logType);
     query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return 0;
+    }
+    if (query.next()) {
+        return query.value(0).toInt();
+    }
+    return 0;
+}
+
+int OperationLogSqlLogic::queryLastMatchedId(const QString& startTime, const QString& endTime,
+                                             int logType, const QString& keyword, int maxUserPermission)
+{
+    if (!m_database.isOpen()) {
+        return 0;
+    }
+    QString sql = m_sqlMapper->getSql("query_last_matched_id");
+    if (sql.isEmpty()) {
+        qWarning() << "SQL not found: query_last_matched_id";
+        return 0;
+    }
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
+    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
+    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
+    query.addBindValue(logType == -1 ? QVariant() : logType);
+    query.addBindValue(logType == -1 ? QVariant() : logType);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return 0;
+    }
+    if (query.next()) {
+        return query.value(0).toInt();
+    }
+    return 0;
+}
+
+int OperationLogSqlLogic::queryMatchedIdByPosition(int position, const QString& startTime, const QString& endTime,
+                                                   int logType, const QString& keyword, int maxUserPermission)
+{
+    if (!m_database.isOpen() || position <= 0) {
+        return 0;
+    }
+    QString sql = m_sqlMapper->getSql("query_matched_id_by_position");
+    if (sql.isEmpty()) {
+        qWarning() << "SQL not found: query_matched_id_by_position";
+        return 0;
+    }
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    query.addBindValue(maxUserPermission);
+    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
+    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
+    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
+    query.addBindValue(logType == -1 ? QVariant() : logType);
+    query.addBindValue(logType == -1 ? QVariant() : logType);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
+    query.addBindValue(position - 1);
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
         return 0;
@@ -513,7 +707,7 @@ int OperationLogSqlLogic::queryFirstMatchedId(const QString& startTime, const QS
 }
 
 int OperationLogSqlLogic::queryPrevMatchingId(int anchorId, const QString& startTime, const QString& endTime,
-                                              int logType, const QString& keyword)
+                                              int logType, const QString& keyword, int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -527,14 +721,16 @@ int OperationLogSqlLogic::queryPrevMatchingId(int anchorId, const QString& start
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
     query.addBindValue(anchorId);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
     query.addBindValue(logType == -1 ? QVariant() : logType);
     query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -549,7 +745,7 @@ int OperationLogSqlLogic::queryPrevMatchingId(int anchorId, const QString& start
 }
 
 int OperationLogSqlLogic::queryNextMatchingId(int anchorId, const QString& startTime, const QString& endTime,
-                                              int logType, const QString& keyword)
+                                              int logType, const QString& keyword, int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -563,14 +759,16 @@ int OperationLogSqlLogic::queryNextMatchingId(int anchorId, const QString& start
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    const QVariant keywordValue = buildKeywordLikeValue(keyword);
     query.addBindValue(anchorId);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
     query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
     query.addBindValue(logType == -1 ? QVariant() : logType);
     query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
-    query.addBindValue(keyword.isEmpty() ? QVariant() : keyword);
+    query.addBindValue(keywordValue);
+    query.addBindValue(keywordValue);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -599,24 +797,16 @@ QVariantMap OperationLogSqlLogic::queryMonthRange()
         return result;
     }
 
-    qDebug() << "Executing SQL:" << sql;
-
     QSqlQuery query(m_database);
     if (!query.exec(sql)) {
         qWarning() << "Query failed:" << query.lastError().text();
         return result;
     }
 
-    qDebug() << "Query executed successfully, rows:" << query.size();
-
     if (query.next()) {
         result["earliest_time"] = query.value("earliest_time");
         result["latest_time"] = query.value("latest_time");
         result["earliest_date"] = query.value("earliest_date");
-
-        qDebug() << "earliest_time:" << result["earliest_time"].toString()
-                 << "latest_time:" << result["latest_time"].toString()
-                 << "earliest_date:" << result["earliest_date"].toString();
     } else {
         qWarning() << "No rows returned from query";
     }
@@ -632,19 +822,19 @@ bool OperationLogSqlLogic::deleteByTimeRange(const QString& startTime, const QSt
         return false;
     }
 
-    // 构造WriteResult传递给WriteSqlDBCon
+    // 构造 WriteResult 传递给 WriteSqlDBCon。
     WriteResult result;
     result.connectionName = m_connectionName;
-    result.sqlStatement = sql; // 传递带占位符的SQL语句
+    result.sqlStatement = sql;
     result.sqlId = "delete_by_time_range";
-    result.result = ""; // 待WriteSqlDBCon执行后填充
+    result.result = "";
     result.tableName = "operation_log";
     result.opType = static_cast<int>(WriteOp::Delete);
 
-    // 构造参数列表
+    // 参数顺序必须与 delete_by_time_range SQL 保持一致。
     result.params << startTime << endTime;
 
-    // 发出信号，传递SQL语句和参数给WriteSqlDBCon
+    // 发出写入请求，由 WriteSqlDBCon 统一执行。
     emit writeExecuted(result);
 
     return true;

@@ -15,8 +15,6 @@
 
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/operationlogquerytask/operationlogquerytask.h"
-#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
-#include "app/shareddata.h"
 #include "usermanager.h"
 #include "paginationwidget.h"
 #include "databasemanager.h"
@@ -58,6 +56,7 @@ void applyLogTypeForeground(QStandardItem* itemTime,
 OperationLogWidget::OperationLogWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::OperationLogWidget)
+    , m_waitDialog(nullptr)
     , m_pageSize(500)
     , m_currentPage(1)
     , m_totalPages(0)
@@ -65,8 +64,8 @@ OperationLogWidget::OperationLogWidget(QWidget *parent)
     , m_pendingSelectId(0)
     , m_totalMatchedCount(0)
     , m_firstMatchedPositionOnPage(0)
-    , m_waitDialog(nullptr)
     , m_suppressPaginationSignal(false)
+    , m_hasHistoryQuery(false)
 {
     ui->setupUi(this);
 
@@ -78,6 +77,8 @@ OperationLogWidget::OperationLogWidget(QWidget *parent)
             this, &OperationLogWidget::onPreClicked);
     connect(ui->pushButtonNext, &QPushButton::clicked,
             this, &OperationLogWidget::onNextClicked);
+    connect(ui->pushButtonJumpRecord, &QPushButton::clicked,
+            this, &OperationLogWidget::onJumpRecordClicked);
     connect(ui->pushButtonSetRecordTime, &QPushButton::clicked,
             this, &OperationLogWidget::onSetRecordTimeClicked);
     // 表格列表：禁止编辑、按行选择；用 selectionModel::currentRowChanged 响应用户选中动作
@@ -102,6 +103,11 @@ OperationLogWidget::OperationLogWidget(QWidget *parent)
     }
 
     initLiveLog();
+
+    connect(UserManager::instance(), &UserManager::permissionChanged,
+            this, [this](UserPermission) {
+                refreshByCurrentPermission();
+            });
 
     // history log 表：最后一列拉伸充满剩余宽度
     ui->tableViewHistoryLog->horizontalHeader()->setStretchLastSection(true);
@@ -146,31 +152,24 @@ void OperationLogWidget::initLiveLog()
     // 设置列宽：确保时间字段完整显示
     ui->tableViewLiveLog->setColumnWidth(0, 180);  // Occur Time
 
-    // 订阅 OperationDispatchTask 的即时信号，实现实时显示
-    if (auto* opTask = SharedData::getOperationDispatchTask()) {
-        // 补播：取出本控件订阅信号之前已派发的最近日志，避免启动早期日志（如
-        // NetworkStatusTask::start() 中的 [WriteQRCode] 日志）因时序丢失。
-        // 必须在 connect 之前取，避免在补播与新增信号之间造成重复或漏包。
-        const QList<OperationRecord> backlog = opTask->recentRecords();
-        for (const OperationRecord& rec : backlog) {
-            onRecordInserted(rec);
-        }
-
-        connect(opTask, &OperationDispatchTask::operationLogInserted,
+    // 订阅数据库写入完成信号，实时页始终通过数据库权限条件刷新。
+    reloadLiveLogFromDatabase();
+    if (auto* db = LogDB::DatabaseManager::instance().operationLogCon()) {
+        connect(db, &LogDB::OperationLogDBCon::recordInserted,
                 this, &OperationLogWidget::onRecordInserted, Qt::QueuedConnection);
     }
 }
 
 void OperationLogWidget::onRecordInserted(const OperationRecord& record)
 {
+    Q_UNUSED(record);
+    reloadLiveLogFromDatabase();
+}
+
+void OperationLogWidget::appendLiveLogRecord(const OperationRecord& record, bool scrollToBottom)
+{
     auto* model = qobject_cast<QStandardItemModel*>(ui->tableViewLiveLog->model());
     if (!model) return;
-
-    // 权限过滤：仅允许查看不高于当前用户权限的记录
-    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
-    if (record.userPermission > currentPerm) {
-        return;
-    }
 
     const QString logTypeText = LogDB::operationLogTypeName(record.logType);
 
@@ -179,21 +178,53 @@ void OperationLogWidget::onRecordInserted(const OperationRecord& record)
     auto* itemDesc    = new QStandardItem(record.description);
     applyLogTypeForeground(itemTime, itemLogType, itemDesc, record.logType);
 
-    // 设置文本对齐：除 Description 字段（第 2 列）外，其他字段居中
     itemTime->setTextAlignment(Qt::AlignCenter);
     itemLogType->setTextAlignment(Qt::AlignCenter);
 
     QList<QStandardItem*> items{ itemTime, itemLogType, itemDesc };
-
-    // 按时间顺序追加到末尾（最新在底部）
     model->appendRow(items);
-    // 行数超过上限时，一次性批量裁剪掉最顶部的 kLiveLogTrimBatch 条最旧记录
     if (model->rowCount() > kLiveLogMaxRows) {
         model->removeRows(0, kLiveLogTrimBatch);
     }
 
-    // 自动滚动到底部（最新日志）
+    if (scrollToBottom) {
+        ui->tableViewLiveLog->scrollToBottom();
+    }
+}
+
+void OperationLogWidget::reloadLiveLogFromDatabase()
+{
+    auto* model = qobject_cast<QStandardItemModel*>(ui->tableViewLiveLog->model());
+    if (!model) return;
+
+    model->removeRows(0, model->rowCount());
+
+    auto* db = LogDB::DatabaseManager::instance().operationLogCon();
+    if (!db) return;
+
+    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
+    const QList<OperationRecord> records =
+        db->queryPaginationInRange(QString(), QString(), kLiveLogMaxRows, 1, currentPerm);
+    for (int i = records.size() - 1; i >= 0; --i) {
+        appendLiveLogRecord(records.at(i), false);
+    }
     ui->tableViewLiveLog->scrollToBottom();
+}
+
+void OperationLogWidget::refreshByCurrentPermission()
+{
+    reloadLiveLogFromDatabase();
+    m_selected.reset();
+    m_matchedIdsSet.clear();
+    m_matchedIdsOrdered.clear();
+    m_totalMatchedCount = 0;
+    m_firstMatchedPositionOnPage = 0;
+    updatePageInfoLabel();
+    updatePrevNextButtonsEnabled();
+
+    if (m_hasHistoryQuery) {
+        submitQueryTask(m_currentPage > 0 ? m_currentPage : 1, 0);
+    }
 }
 
 OperationLogWidget::~OperationLogWidget()
@@ -267,11 +298,13 @@ void OperationLogWidget::onSearchClicked()
     updatePageInfoLabel();
 
     // targetPage=0 → 任务自动定位首条命中所在页（无匹配条件时回退到第 1 页）
-    submitQueryTask(0, 0);
+    submitQueryTask(1, 0);
 }
 
 void OperationLogWidget::submitQueryTask(int targetPage, int pendingSelectId)
 {
+    m_hasHistoryQuery = true;
+
     if (!m_waitDialog) {
         m_waitDialog = new WaitDialog(this);
         connect(m_waitDialog, &WaitDialog::cancelRequested,
@@ -284,12 +317,14 @@ void OperationLogWidget::submitQueryTask(int targetPage, int pendingSelectId)
 
     m_matchedIdsSet.clear();
     m_matchedIdsOrdered.clear();
+    m_currentPageRecordIds.clear();
     m_pendingSelect   = (pendingSelectId > 0) ? PSId : PSNone;
     m_pendingSelectId = pendingSelectId;
     updatePrevNextButtonsEnabled();
 
     auto* task = new OperationLogQueryTask();
     task->setPageSize(m_pageSize);
+    task->setMaxUserPermission(static_cast<int>(UserManager::instance()->currentPermission()));
     if (targetPage > 0) {
         task->setTargetPage(targetPage);
     }
@@ -378,6 +413,11 @@ void OperationLogWidget::onPaginationPageChanged(int page)
 
 void OperationLogWidget::onCurrentPageResult(const QList<OperationRecord>& records)
 {
+    m_currentPageRecordIds.clear();
+    m_currentPageRecordIds.reserve(records.size());
+    for (const OperationRecord& record : records) {
+        m_currentPageRecordIds.append(record.id);
+    }
     setHistoryLogData(records);
 }
 
@@ -528,7 +568,7 @@ void OperationLogWidget::onLiveLogClicked(const QModelIndex& index)
 // 跨越页面边界时自动切换到目标记录所在页。
 void OperationLogWidget::jumpToMatchingId(bool next)
 {
-    if (m_conditions.isEmpty()) {
+    if (m_conditions.keyword.isEmpty()) {
         return;
     }
 
@@ -558,23 +598,52 @@ void OperationLogWidget::jumpToMatchingId(bool next)
     int anchorId = m_selected.id;
     if (anchorId <= 0) {
         // 当前未选中：以本页首/末条命中作为 anchor 起点
-        if (m_matchedIdsOrdered.isEmpty()) return;
-        anchorId = next ? m_matchedIdsOrdered.last() : m_matchedIdsOrdered.first();
+        if (!m_matchedIdsOrdered.isEmpty()) {
+            anchorId = m_matchedIdsOrdered.first();
+        } else if (!m_currentPageRecordIds.isEmpty()) {
+            anchorId = next ? m_currentPageRecordIds.last() : m_currentPageRecordIds.first();
+        } else {
+            return;
+        }
     }
 
+    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
+    // The table is ordered by occur_time DESC: UI Next moves to an older row,
+    // while UI Pre moves to a newer row. When an edge is reached, wrap around.
     int matchedId = next
-        ? db->queryNextMatchingId(anchorId, m_range.startTime, m_range.endTime,
-                                   m_conditions.logType, m_conditions.keyword)
-        : db->queryPrevMatchingId(anchorId, m_range.startTime, m_range.endTime,
-                                   m_conditions.logType, m_conditions.keyword);
+        ? db->queryPrevMatchingId(anchorId, m_range.startTime, m_range.endTime,
+                                   m_conditions.logType, m_conditions.keyword, currentPerm)
+        : db->queryNextMatchingId(anchorId, m_range.startTime, m_range.endTime,
+                                   m_conditions.logType, m_conditions.keyword, currentPerm);
     if (matchedId <= 0) {
-        return; // 没有更多命中
+        matchedId = next
+            ? db->queryFirstMatchedId(m_range.startTime, m_range.endTime,
+                                      m_conditions.logType, m_conditions.keyword, currentPerm)
+            : db->queryLastMatchedId(m_range.startTime, m_range.endTime,
+                                     m_conditions.logType, m_conditions.keyword, currentPerm);
+    }
+    if (matchedId <= 0) {
+        return;
+    }
+
+    const int localIdx = m_matchedIdsOrdered.indexOf(matchedId);
+    if (localIdx >= 0) {
+        m_selected.id       = matchedId;
+        m_selected.position = (m_firstMatchedPositionOnPage > 0)
+                                  ? (m_firstMatchedPositionOnPage + localIdx)
+                                  : (localIdx + 1);
+        selectAndScrollRowById(m_selected.id);
+        applyRowBackgrounds();
+        updatePageInfoLabel();
+        updatePrevNextButtonsEnabled();
+        return;
     }
 
     // 3) 算出该 id 在范围内的页号
-    int targetPage = db->queryRecordPageInRange(matchedId,
-                                                 m_range.startTime, m_range.endTime,
-                                                 m_pageSize);
+    int targetPage = db->queryRecordPageWithBaseConditions(matchedId,
+                                                            m_range.startTime, m_range.endTime,
+                                                            m_conditions.logType,
+                                                            m_pageSize, currentPerm);
     if (targetPage <= 0) targetPage = 1;
 
     if (targetPage == m_currentPage) {
@@ -585,6 +654,51 @@ void OperationLogWidget::jumpToMatchingId(bool next)
     }
 }
 
+void OperationLogWidget::jumpToMatchedPosition(int position)
+{
+    if (m_conditions.keyword.isEmpty() || m_totalMatchedCount <= 0) {
+        return;
+    }
+
+    int targetPosition = position;
+    if (targetPosition < 1) {
+        targetPosition = 1;
+    } else if (targetPosition > m_totalMatchedCount) {
+        targetPosition = m_totalMatchedCount;
+    }
+
+    auto* db = LogDB::DatabaseManager::instance().operationLogCon();
+    if (!db) return;
+
+    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
+    const int matchedId = db->queryMatchedIdByPosition(targetPosition,
+                                                       m_range.startTime, m_range.endTime,
+                                                       m_conditions.logType,
+                                                       m_conditions.keyword,
+                                                       currentPerm);
+    if (matchedId <= 0) {
+        return;
+    }
+
+    const int localIdx = m_matchedIdsOrdered.indexOf(matchedId);
+    if (localIdx >= 0) {
+        m_selected.id       = matchedId;
+        m_selected.position = targetPosition;
+        selectAndScrollRowById(m_selected.id);
+        applyRowBackgrounds();
+        updatePageInfoLabel();
+        updatePrevNextButtonsEnabled();
+        return;
+    }
+
+    int targetPage = db->queryRecordPageWithBaseConditions(matchedId,
+                                                            m_range.startTime, m_range.endTime,
+                                                            m_conditions.logType,
+                                                            m_pageSize, currentPerm);
+    if (targetPage <= 0) targetPage = 1;
+    submitQueryTask(targetPage, matchedId);
+}
+
 void OperationLogWidget::onPreClicked()
 {
     jumpToMatchingId(false);
@@ -593,6 +707,11 @@ void OperationLogWidget::onPreClicked()
 void OperationLogWidget::onNextClicked()
 {
     jumpToMatchingId(true);
+}
+
+void OperationLogWidget::onJumpRecordClicked()
+{
+    jumpToMatchedPosition(ui->spinBoxMatchPosition->value());
 }
 
 void OperationLogWidget::onTaskFinished(bool success, const QString& message)
@@ -624,23 +743,26 @@ void OperationLogWidget::updatePageInfoLabel()
 }
 
 // Pre/Next 按钮可用性：
-//   - 无匹配条件                              ：均不可用（"满足条件"概念不存在）
-//   - 总命中数 = 0                            ：均不可用
-//   - 已选中 + position > 1                   ：Pre 可用
-//   - 已选中 + position < totalMatchedCount   ：Next 可用
-//   - 未选中                                   ：只要有命中就都可用（首次跳转选首条）
+//   - 无 keyword 或总命中数 = 0：均不可用
+//   - 有命中：均可用，首尾通过循环跳转衔接
 void OperationLogWidget::updatePrevNextButtonsEnabled()
 {
-    const bool hasConditions = !m_conditions.isEmpty();
-    const bool hasMatches    = (m_totalMatchedCount > 0);
-    const bool hasSelection  = (m_selected.position > 0);
+    const bool canNavigate = !m_conditions.keyword.isEmpty()
+                             && (m_totalMatchedCount > 0);
+    ui->pushButtonPre->setEnabled(canNavigate);
+    ui->pushButtonNext->setEnabled(canNavigate);
 
-    const bool canPre  = hasConditions && hasMatches
-                         && (!hasSelection || m_selected.position > 1);
-    const bool canNext = hasConditions && hasMatches
-                         && (!hasSelection || m_selected.position < m_totalMatchedCount);
-    ui->pushButtonPre->setEnabled(canPre);
-    ui->pushButtonNext->setEnabled(canNext);
+    const int maxPosition = (m_totalMatchedCount > 0) ? m_totalMatchedCount : 1;
+    ui->spinBoxMatchPosition->setRange(1, maxPosition);
+    if (!canNavigate) {
+        ui->spinBoxMatchPosition->setValue(1);
+    } else if (m_selected.position > 0 && m_selected.position <= m_totalMatchedCount) {
+        ui->spinBoxMatchPosition->setValue(m_selected.position);
+    } else if (ui->spinBoxMatchPosition->value() > m_totalMatchedCount) {
+        ui->spinBoxMatchPosition->setValue(m_totalMatchedCount);
+    }
+    ui->spinBoxMatchPosition->setEnabled(canNavigate);
+    ui->pushButtonJumpRecord->setEnabled(canNavigate);
 }
 
 void OperationLogWidget::setHistoryLogData(const QList<OperationRecord>& data)
@@ -657,15 +779,7 @@ void OperationLogWidget::setHistoryLogData(const QList<OperationRecord>& data)
         return;
     }
 
-    // 权限过滤：仅保留 record.userPermission <= currentPerm 的记录
-    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
-    QList<OperationRecord> filtered;
-    filtered.reserve(data.size());
-    for (const OperationRecord& rec : data) {
-        if (rec.userPermission <= currentPerm) {
-            filtered.append(rec);
-        }
-    }
+    const QList<OperationRecord>& filtered = data;
 
     QStringList headers;
     headers << "Occur Time" << "Log Type" << "Description";

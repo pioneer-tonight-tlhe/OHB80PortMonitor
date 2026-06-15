@@ -8,6 +8,7 @@ OperationLogQueryTask::OperationLogQueryTask(QObject *parent)
     : SchedulerTask{parent}
     , m_db(nullptr)
     , m_logType(-1)
+    , m_maxUserPermission(0)
     , m_pageSize(500)
     , m_targetPage(0)
     , m_cancelRequested(0)
@@ -35,6 +36,11 @@ void OperationLogQueryTask::setSearchKey(const QString& keyword)
 void OperationLogQueryTask::setPageSize(int pageSize)
 {
     m_pageSize = pageSize;
+}
+
+void OperationLogQueryTask::setMaxUserPermission(int maxUserPermission)
+{
+    m_maxUserPermission = maxUserPermission;
 }
 
 void OperationLogQueryTask::setTargetPage(int page)
@@ -122,36 +128,24 @@ void OperationLogQueryTask::executeQuery()
             .arg(m_targetPage > 0 ? QString::number(m_targetPage) : QString("自动定位"))
             .toStdString());
 
-    const bool hasMatchConditions = (m_logType != -1 || !m_keyword.isEmpty());
+    const bool hasKeyword = !m_keyword.isEmpty();
 
     // 1. 确定本次查询使用的页号：
-    int targetPage = m_targetPage;
-    if (targetPage <= 0) {
-        if (hasMatchConditions) {
-            // 两步法：先找范围+条件下首条命中 id，再算它在范围内的真实页号
-            const int firstId = m_db->queryFirstMatchedId(
-                m_startTime, m_endTime, m_logType, m_keyword);
-            if (firstId > 0) {
-                targetPage = m_db->queryRecordPageInRange(
-                    firstId, m_startTime, m_endTime, m_pageSize);
-            }
-        }
-        if (targetPage <= 0) {
-            targetPage = 1;
-        }
-    }
+    int targetPage = (m_targetPage > 0) ? m_targetPage : 1;
     emit targetPageResult(targetPage);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 2. 范围内分页：该页全部记录（用于显示）
     QList<OperationRecord> currentPageRecords =
-        m_db->queryPaginationInRange(m_startTime, m_endTime, m_pageSize, targetPage);
+        m_db->queryPaginationWithBaseConditions(m_startTime, m_endTime, m_logType,
+                                                m_pageSize, targetPage,
+                                                m_maxUserPermission);
     emit currentPageResult(currentPageRecords);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 3. 该页中满足匹配条件的记录 id 集合（用于高亮 / Pre/Next 页内跳转）
     QList<int> matchedIds;
-    if (hasMatchConditions) {
+    if (hasKeyword) {
         // queryPageWithConditions 在子查询里 LIMIT/OFFSET 全表，对"范围分页"
         // 不能直接套用——这里改为对当前页记录在内存里按条件过滤。
         const int logType = m_logType;
@@ -168,26 +162,27 @@ void OperationLogQueryTask::executeQuery()
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 4. 范围内总记录数（用于分页总页数）
-    int totalCountInRange = m_db->queryTotalCountInRange(m_startTime, m_endTime);
+    int totalCountInRange = m_db->queryTotalCountWithBaseConditions(
+        m_startTime, m_endTime, m_logType, m_maxUserPermission);
     emit totalCountInRangeResult(totalCountInRange);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 5. 范围 + 条件总命中数（用于 X/Y 显示）
     int totalMatched = 0;
-    if (hasMatchConditions) {
+    if (hasKeyword) {
         totalMatched = m_db->queryTotalCountWithConditions(
-            m_startTime, m_endTime, m_logType, m_keyword);
+            m_startTime, m_endTime, m_logType, m_keyword, m_maxUserPermission);
     }
     emit totalMatchedCountResult(totalMatched);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 6. 该页首条命中记录在范围+条件结果集中的全局顺序号（1-based；0 表示无命中）
     int position = 0;
-    if (hasMatchConditions && !matchedIds.isEmpty()) {
+    if (hasKeyword && !matchedIds.isEmpty()) {
         const int firstId = matchedIds.first();
         if (firstId > 0) {
             position = m_db->queryRecordPosition(
-                firstId, m_startTime, m_endTime, m_logType, m_keyword);
+                firstId, m_startTime, m_endTime, m_logType, m_keyword, m_maxUserPermission);
         }
     }
     emit firstMatchedPositionResult(position);
@@ -196,7 +191,7 @@ void OperationLogQueryTask::executeQuery()
     setState(Finished);
 
     // 记录查询结果
-    if (totalMatched == 0 && hasMatchConditions) {
+    if (totalMatched == 0 && hasKeyword) {
         LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
             QString("[executeQuery] 查询成功但无匹配结果: 总记录数=%1, 匹配数=%2, 当前页=%3, 每页大小=%4")
                 .arg(totalCountInRange)

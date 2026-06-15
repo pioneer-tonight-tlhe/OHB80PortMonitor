@@ -1,4 +1,5 @@
 #include "operationlogdbcon.h"
+#include <QDateTime>
 #include <QDebug>
 
 namespace LogDB {
@@ -88,14 +89,15 @@ void OperationLogDBCon::onWriteTaskCompleted(const WriteResult& result)
     emit recordInserted(record);
 }
 
-QList<OperationRecord> OperationLogDBCon::queryPagination(int pageSize, int pageNumber)
+QList<OperationRecord> OperationLogDBCon::queryPagination(int pageSize, int pageNumber, int maxUserPermission)
 {
     QList<QVariantMap> varResults;
     QMetaObject::invokeMethod(m_sqlLogic, "queryPagination",
                               Qt::BlockingQueuedConnection,
-                              Q_RETURN_ARG(QList<QVariantMap>, varResults),
-                              Q_ARG(int, pageSize),
-                              Q_ARG(int, pageNumber));
+                               Q_RETURN_ARG(QList<QVariantMap>, varResults),
+                               Q_ARG(int, pageSize),
+                               Q_ARG(int, pageNumber),
+                               Q_ARG(int, maxUserPermission));
 
     // 转换 QVariantMap 为 OperationRecord
     QList<OperationRecord> results;
@@ -112,26 +114,28 @@ QList<OperationRecord> OperationLogDBCon::queryPagination(int pageSize, int page
     return results;
 }
 
-int OperationLogDBCon::queryTotalCount()
+int OperationLogDBCon::queryTotalCount(int maxUserPermission)
 {
     int count = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCount",
-                              Qt::BlockingQueuedConnection,
-                              Q_RETURN_ARG(int, count));
+                               Qt::BlockingQueuedConnection,
+                               Q_RETURN_ARG(int, count),
+                               Q_ARG(int, maxUserPermission));
     return count;
 }
 
 QList<OperationRecord> OperationLogDBCon::queryPaginationInRange(const QString& startTime, const QString& endTime,
-                                                              int pageSize, int pageNumber)
+                                                              int pageSize, int pageNumber, int maxUserPermission)
 {
     QList<QVariantMap> varResults;
     QMetaObject::invokeMethod(m_sqlLogic, "queryPaginationInRange",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(QList<QVariantMap>, varResults),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, pageSize),
-                              Q_ARG(int, pageNumber));
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, pageSize),
+                               Q_ARG(int, pageNumber),
+                               Q_ARG(int, maxUserPermission));
 
     QList<OperationRecord> results;
     results.reserve(varResults.size());
@@ -147,34 +151,95 @@ QList<OperationRecord> OperationLogDBCon::queryPaginationInRange(const QString& 
     return results;
 }
 
-int OperationLogDBCon::queryTotalCountInRange(const QString& startTime, const QString& endTime)
+QList<OperationRecord> OperationLogDBCon::queryPaginationWithBaseConditions(const QString& startTime, const QString& endTime,
+                                                                            int logType, int pageSize, int pageNumber,
+                                                                            int maxUserPermission)
+{
+    QList<QVariantMap> varResults;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryPaginationWithBaseConditions",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(QList<QVariantMap>, varResults),
+                              Q_ARG(QString, startTime),
+                              Q_ARG(QString, endTime),
+                              Q_ARG(int, logType),
+                              Q_ARG(int, pageSize),
+                              Q_ARG(int, pageNumber),
+                              Q_ARG(int, maxUserPermission));
+
+    QList<OperationRecord> results;
+    results.reserve(varResults.size());
+    for (const QVariantMap& row : varResults) {
+        OperationRecord rec;
+        rec.id              = row.value(QStringLiteral("id")).toInt();
+        rec.occurTime       = row.value(QStringLiteral("occur_time")).toString();
+        rec.logType         = row.value(QStringLiteral("log_type")).toInt();
+        rec.description     = row.value(QStringLiteral("description")).toString();
+        rec.userPermission  = row.value(QStringLiteral("user_permission")).toInt();
+        results.append(rec);
+    }
+    return results;
+}
+
+int OperationLogDBCon::queryTotalCountInRange(const QString& startTime, const QString& endTime, int maxUserPermission)
 {
     int count = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCountInRange",
                               Qt::BlockingQueuedConnection,
+                               Q_RETURN_ARG(int, count),
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, maxUserPermission));
+    return count;
+}
+
+int OperationLogDBCon::queryTotalCountWithBaseConditions(const QString& startTime, const QString& endTime,
+                                                         int logType, int maxUserPermission)
+{
+    int count = 0;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCountWithBaseConditions",
+                              Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, count),
                               Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime));
+                              Q_ARG(QString, endTime),
+                              Q_ARG(int, logType),
+                              Q_ARG(int, maxUserPermission));
     return count;
 }
 
 int OperationLogDBCon::queryRecordPageInRange(int recordId, const QString& startTime, const QString& endTime,
-                                              int pageSize)
+                                              int pageSize, int maxUserPermission)
 {
     int page = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryRecordPageInRange",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, page),
                               Q_ARG(int, recordId),
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, pageSize),
+                               Q_ARG(int, maxUserPermission));
+    return page;
+}
+
+int OperationLogDBCon::queryRecordPageWithBaseConditions(int recordId, const QString& startTime, const QString& endTime,
+                                                         int logType, int pageSize, int maxUserPermission)
+{
+    int page = 0;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryRecordPageWithBaseConditions",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(int, page),
+                              Q_ARG(int, recordId),
                               Q_ARG(QString, startTime),
                               Q_ARG(QString, endTime),
-                              Q_ARG(int, pageSize));
+                              Q_ARG(int, logType),
+                              Q_ARG(int, pageSize),
+                              Q_ARG(int, maxUserPermission));
     return page;
 }
 
 QList<OperationRecord> OperationLogDBCon::queryPageWithConditions(const QString& startTime, const QString& endTime,
                                                           int logType, const QString& keyword,
-                                                          int pageSize, int pageNumber)
+                                                          int pageSize, int pageNumber, int maxUserPermission)
 {
     QList<QVariantMap> varResults;
     QMetaObject::invokeMethod(m_sqlLogic, "queryPageWithConditions",
@@ -182,10 +247,11 @@ QList<OperationRecord> OperationLogDBCon::queryPageWithConditions(const QString&
                               Q_RETURN_ARG(QList<QVariantMap>, varResults),
                               Q_ARG(QString, startTime),
                               Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword),
-                              Q_ARG(int, pageSize),
-                              Q_ARG(int, pageNumber));
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, pageSize),
+                               Q_ARG(int, pageNumber),
+                               Q_ARG(int, maxUserPermission));
 
     QList<OperationRecord> results;
     results.reserve(varResults.size());
@@ -202,90 +268,128 @@ QList<OperationRecord> OperationLogDBCon::queryPageWithConditions(const QString&
 }
 
 int OperationLogDBCon::queryTotalCountWithConditions(const QString& startTime, const QString& endTime,
-                                                     int logType, const QString& keyword)
+                                                     int logType, const QString& keyword, int maxUserPermission)
 {
     int count = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCountWithConditions",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, count),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword));
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
     return count;
 }
 
 int OperationLogDBCon::queryRecordPosition(int recordId, const QString& startTime, const QString& endTime,
-                                          int logType, const QString& keyword)
+                                          int logType, const QString& keyword, int maxUserPermission)
 {
     int position = -1;
     QMetaObject::invokeMethod(m_sqlLogic, "queryRecordPosition",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, position),
                               Q_ARG(int, recordId),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword));
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
     return position;
 }
 
 int OperationLogDBCon::queryFirstRecordPage(const QString& startTime, const QString& endTime,
-                                            int logType, const QString& keyword, int pageSize)
+                                            int logType, const QString& keyword, int pageSize,
+                                            int maxUserPermission)
 {
     int page = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryFirstRecordPage",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, page),
                               Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword),
-                              Q_ARG(int, pageSize));
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, pageSize),
+                               Q_ARG(int, maxUserPermission));
     return page;
 }
 
 int OperationLogDBCon::queryFirstMatchedId(const QString& startTime, const QString& endTime,
-                                           int logType, const QString& keyword)
+                                           int logType, const QString& keyword, int maxUserPermission)
 {
     int id = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryFirstMatchedId",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, id),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword));
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
+    return id;
+}
+
+int OperationLogDBCon::queryLastMatchedId(const QString& startTime, const QString& endTime,
+                                          int logType, const QString& keyword, int maxUserPermission)
+{
+    int id = 0;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryLastMatchedId",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(int, id),
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
+    return id;
+}
+
+int OperationLogDBCon::queryMatchedIdByPosition(int position, const QString& startTime, const QString& endTime,
+                                                int logType, const QString& keyword, int maxUserPermission)
+{
+    int id = 0;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryMatchedIdByPosition",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(int, id),
+                              Q_ARG(int, position),
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
     return id;
 }
 
 int OperationLogDBCon::queryPrevMatchingId(int anchorId, const QString& startTime, const QString& endTime,
-                                           int logType, const QString& keyword)
+                                           int logType, const QString& keyword, int maxUserPermission)
 {
     int id = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryPrevMatchingId",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, id),
                               Q_ARG(int, anchorId),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword));
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
     return id;
 }
 
 int OperationLogDBCon::queryNextMatchingId(int anchorId, const QString& startTime, const QString& endTime,
-                                           int logType, const QString& keyword)
+                                           int logType, const QString& keyword, int maxUserPermission)
 {
     int id = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryNextMatchingId",
                               Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, id),
                               Q_ARG(int, anchorId),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, logType),
-                              Q_ARG(QString, keyword));
+                               Q_ARG(QString, startTime),
+                               Q_ARG(QString, endTime),
+                               Q_ARG(int, logType),
+                               Q_ARG(QString, keyword),
+                               Q_ARG(int, maxUserPermission));
     return id;
 }
 
