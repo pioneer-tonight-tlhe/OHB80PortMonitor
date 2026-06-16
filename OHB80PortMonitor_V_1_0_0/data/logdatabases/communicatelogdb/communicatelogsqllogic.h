@@ -45,7 +45,8 @@ public slots:
                                                const QString& endTime,
                                                int pageSize,
                                                int pageNumber,
-                                               int sortOrder);
+                                               int sortOrder,
+                                               int maxUserPermission);
 
     int queryTotalCount();
 
@@ -54,7 +55,8 @@ public slots:
                                       int execStatus,
                                       int retryCount,
                                       const QString& startTime,
-                                      const QString& endTime);
+                                      const QString& endTime,
+                                      int maxUserPermission);
 
     QVariantMap queryMonthRange();
 

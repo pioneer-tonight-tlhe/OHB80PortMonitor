@@ -11,6 +11,7 @@ CommunicateLogQueryTask::CommunicateLogQueryTask(QObject *parent)
     , m_pageNumber(0)
     , m_pageSize(500)
     , m_sortOrder(LogDB::SortOrder::Desc)
+    , m_maxUserPermission(0)
 {
     LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[CommunicateLogQueryTask] 通讯日志查询任务已构造");
     LoggerManager::getInstance()->flush(m_taskLogPath);
@@ -89,6 +90,11 @@ void CommunicateLogQueryTask::setSortOrder(LogDB::SortOrder sortOrder)
     m_sortOrder = sortOrder;
 }
 
+void CommunicateLogQueryTask::setMaxUserPermission(int maxUserPermission)
+{
+    m_maxUserPermission = maxUserPermission;
+}
+
 void CommunicateLogQueryTask::executeQuery()
 {
     // 使用 Defer 确保函数退出时刷新日志
@@ -157,7 +163,8 @@ void CommunicateLogQueryTask::executeQuery()
             m_commandId, m_qrCode, m_execStatus, m_retryCount,
             m_startTime, m_endTime,
             m_pageSize, m_pageNumber,
-            m_sortOrder);
+            m_sortOrder,
+            m_maxUserPermission);
         pageRecordCount = pageRecords.size();
         emit pageWithConditionsResult(pageRecords);
     }
@@ -165,7 +172,8 @@ void CommunicateLogQueryTask::executeQuery()
     // 有条件查询：总记录数
     int totalCountWithConditions = m_db->queryTotalCountWithConditions(
         m_commandId, m_qrCode, m_execStatus, m_retryCount,
-        m_startTime, m_endTime);
+        m_startTime, m_endTime,
+        m_maxUserPermission);
     emit totalCountWithConditionsResult(totalCountWithConditions);
 
     setState(Finished);

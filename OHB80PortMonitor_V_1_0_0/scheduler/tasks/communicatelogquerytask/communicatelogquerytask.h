@@ -27,6 +27,7 @@ public:
     void setRetryCount(int retryCount);
     void setSendTimeRange(const QString& startTime, const QString& endTime);
     void setSortOrder(LogDB::SortOrder sortOrder);
+    void setMaxUserPermission(int maxUserPermission);
 
     // 执行查询
     void executeQuery();
@@ -51,6 +52,8 @@ private:
     int m_pageNumber;                   // 1-based，0 表示未设置
     int m_pageSize;                     // 默认500
     LogDB::SortOrder m_sortOrder;       // 按 send_time 的排序方向，默认降序
+
+    int m_maxUserPermission;
 
     const std::string m_taskLogPath = "scheduler/communicatelogquerytask";
 };

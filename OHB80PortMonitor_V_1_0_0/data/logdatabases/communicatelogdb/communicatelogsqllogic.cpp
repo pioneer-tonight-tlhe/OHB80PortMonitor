@@ -113,7 +113,8 @@ QList<QVariantMap> CommunicateLogSqlLogic::queryPageWithConditions(const QString
                                                                    const QString& endTime,
                                                                    int pageSize,
                                                                    int pageNumber,
-                                                                   int sortOrder)
+                                                                   int sortOrder,
+                                                                   int maxUserPermission)
 {
     QList<QVariantMap> results;
     if (!m_database.isOpen()) {
@@ -133,6 +134,7 @@ QList<QVariantMap> CommunicateLogSqlLogic::queryPageWithConditions(const QString
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
     query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
     query.addBindValue(qrCode.isEmpty() ? QVariant() : qrCode);
@@ -191,7 +193,8 @@ int CommunicateLogSqlLogic::queryTotalCountWithConditions(const QString& command
                                                           int execStatus,
                                                           int retryCount,
                                                           const QString& startTime,
-                                                          const QString& endTime)
+                                                          const QString& endTime,
+                                                          int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -205,6 +208,7 @@ int CommunicateLogSqlLogic::queryTotalCountWithConditions(const QString& command
 
     QSqlQuery query(m_database);
     query.prepare(sql);
+    query.addBindValue(maxUserPermission);
     query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
     query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
     query.addBindValue(qrCode.isEmpty() ? QVariant() : qrCode);

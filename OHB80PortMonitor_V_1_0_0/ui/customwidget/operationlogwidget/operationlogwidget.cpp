@@ -144,7 +144,6 @@ void OperationLogWidget::initLiveLog()
     model->setHorizontalHeaderLabels({"Occur Time", "Log Type", "Description"});
 
     ui->tableViewLiveLog->setModel(model);
-    ui->tableViewLiveLog->setModel(model);
     ui->tableViewLiveLog->horizontalHeader()->setStretchLastSection(true);
     ui->tableViewLiveLog->verticalHeader()->setVisible(false);
     ui->tableViewLiveLog->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -162,8 +161,11 @@ void OperationLogWidget::initLiveLog()
 
 void OperationLogWidget::onRecordInserted(const OperationRecord& record)
 {
-    Q_UNUSED(record);
-    reloadLiveLogFromDatabase();
+    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
+    if (record.userPermission > currentPerm) {
+        return;
+    }
+    appendLiveLogRecord(record, true);
 }
 
 void OperationLogWidget::appendLiveLogRecord(const OperationRecord& record, bool scrollToBottom)
@@ -184,7 +186,9 @@ void OperationLogWidget::appendLiveLogRecord(const OperationRecord& record, bool
     QList<QStandardItem*> items{ itemTime, itemLogType, itemDesc };
     model->appendRow(items);
     if (model->rowCount() > kLiveLogMaxRows) {
-        model->removeRows(0, kLiveLogTrimBatch);
+        const int overflow = model->rowCount() - kLiveLogMaxRows;
+        const int removeCount = (overflow > kLiveLogTrimBatch) ? overflow : kLiveLogTrimBatch;
+        model->removeRows(0, removeCount);
     }
 
     if (scrollToBottom) {

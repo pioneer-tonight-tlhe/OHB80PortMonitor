@@ -408,6 +408,7 @@ void ComunicateLogWidget::submitQuery(int page)
     CommunicateLogQueryTask* task = new CommunicateLogQueryTask();
     task->setPageNumber(page);
     task->setPageSize(m_pageSize);
+    task->setMaxUserPermission(static_cast<int>(UserManager::instance()->currentPermission()));
 
     if (!m_lastCommandId.isEmpty())  task->setCommandId(m_lastCommandId);
     if (!m_lastQRCode.isEmpty())     task->setQRCode(m_lastQRCode);
@@ -461,15 +462,7 @@ void ComunicateLogWidget::setHistoryLogData(const QList<CommunicateRecord>& data
         return;
     }
 
-    // 权限过滤：仅保留 record.userPermission <= currentPerm 的记录
-    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
-    QList<CommunicateRecord> filtered;
-    filtered.reserve(data.size());
-    for (const CommunicateRecord& r : data) {
-        if (r.userPermission <= currentPerm) {
-            filtered.append(r);
-        }
-    }
+    const QList<CommunicateRecord>& filtered = data;
 
     QStringList headers;
     headers << "QRCode" << "Send Time" << "Response Time" << "Command ID"

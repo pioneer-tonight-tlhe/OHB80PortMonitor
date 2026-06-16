@@ -93,7 +93,8 @@ QList<CommunicateRecord> CommunicateLogDBCon::queryPageWithConditions(const QStr
                                                                 const QString& endTime,
                                                                 int pageSize,
                                                                 int pageNumber,
-                                                                SortOrder sortOrder)
+                                                                SortOrder sortOrder,
+                                                                int maxUserPermission)
 {
     QList<QVariantMap> varResults;
     QMetaObject::invokeMethod(m_sqlLogic, "queryPageWithConditions",
@@ -107,7 +108,8 @@ QList<CommunicateRecord> CommunicateLogDBCon::queryPageWithConditions(const QStr
                               Q_ARG(QString, endTime),
                               Q_ARG(int, pageSize),
                               Q_ARG(int, pageNumber),
-                              Q_ARG(int, static_cast<int>(sortOrder)));
+                              Q_ARG(int, static_cast<int>(sortOrder)),
+                              Q_ARG(int, maxUserPermission));
 
     // 转换 QVariantMap 为 CommunicateRecord
     QList<CommunicateRecord> results;
@@ -144,7 +146,8 @@ int CommunicateLogDBCon::queryTotalCountWithConditions(const QString& commandId,
                                                        int execStatus,
                                                        int retryCount,
                                                        const QString& startTime,
-                                                       const QString& endTime)
+                                                       const QString& endTime,
+                                                       int maxUserPermission)
 {
     int count = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCountWithConditions",
@@ -155,7 +158,8 @@ int CommunicateLogDBCon::queryTotalCountWithConditions(const QString& commandId,
                               Q_ARG(int, execStatus),
                               Q_ARG(int, retryCount),
                               Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime));
+                              Q_ARG(QString, endTime),
+                              Q_ARG(int, maxUserPermission));
     return count;
 }
 

@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.5.5**
+**当前版本：V0.5.7**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,32 @@
 ---
 
 ## 更新日志
+
+## v0.5.7
+
+### 调整通信日志权限过滤查询逻辑
+- 修改时间：2026-06-16
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：将通信日志 `History Log` 的用户权限过滤从 UI 展示层下沉到 SQL 查询层，保证分页总数和当前页数据都只统计当前登录用户可见的记录。
+- 功能点明细：
+  - `ComunicateLogWidget` 创建历史查询任务时传入当前登录用户权限，不再在 `setHistoryLogData()` 中对 SQL 返回结果做二次过滤。
+  - `CommunicateLogQueryTask` 新增 `maxUserPermission` 参数，并传递到分页查询和条件总数查询。
+  - `CommunicateLogDBCon` / `CommunicateLogSqlLogic` 的通信日志条件查询接口增加 `maxUserPermission` 条件。
+  - `communicate_log_queries.sql` 的 `query_page_with_conditions` 和 `query_total_count_with_conditions` 增加 `user_permission <= ?`，避免低权限用户分页总数包含高权限记录。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/comunicatelogwidget/comunicatelogwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/communicatelogquerytask/communicatelogquerytask.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/communicatelogquerytask/communicatelogquerytask.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogdbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogdbcon.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/communicate_log_queries.sql`
+  - `README.md`
+- 兼容性影响：低权限用户查询通信日志历史记录时，不再出现总页数/总记录数包含不可见高权限记录导致的空页或少行问题。
+- 验证情况：已通过受影响的 `comunicatelogwidget`、`communicatelogquerytask`、`communicatelogdbcon`、`communicatelogsqllogic` 及对应 moc 目标文件编译；完整链接需关闭正在运行的 `OHB80PortMonitor_V_1_0_0.exe` 后执行。
+- 备注：`communicate_log_queries.sql` 位于 `bin/x64`，当前受 `.gitignore` 忽略，发布包需要同步该运行时 SQL 文件。
 
 ## v0.5.6
 
@@ -25,6 +51,7 @@
   - `History Log` 查询拆分为“基础条件分页展示”和“keyword 命中统计/导航”，修复模糊查询后 X/Y 分母为 0、Pre/Next 不可用以及首尾命中无法循环跳转的问题。
   - `History Log` 增加 `Record No.` SpinBox 和 `Jump` 按钮，可输入第 N 条 keyword 命中记录并自动切换到对应页面。
   - `operation_log_queries.sql` 新增 `query_matched_id_by_position`，按当前权限、时间范围、日志类型和 keyword 直接定位第 N 条命中记录，避免通过多次 Next 逐条跳转。
+  - `Live Log` 实时显示增加稳定性约束：界面最多保留最近 2000 条可见日志，新日志按权限过滤后增量追加，超限批量裁剪旧记录，避免 UI 模型无限增长。
   - 按 Qt C++ 命名规范和头文件注释规范整理运行日志控件、查询任务和数据库连接层头文件。
 - 改动文件：
   - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.h`

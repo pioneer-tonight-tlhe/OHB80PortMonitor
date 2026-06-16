@@ -39,7 +39,8 @@ public:
                                                    const QString& endTime,
                                                    int pageSize,
                                                    int pageNumber,
-                                                   SortOrder sortOrder = SortOrder::Desc);
+                                                   SortOrder sortOrder = SortOrder::Desc,
+                                                   int maxUserPermission = 0);
 
     int queryTotalCount();
 
@@ -48,7 +49,8 @@ public:
                                       int execStatus,
                                       int retryCount,
                                       const QString& startTime,
-                                      const QString& endTime);
+                                      const QString& endTime,
+                                      int maxUserPermission = 0);
 
     int queryMonthRange();
 
