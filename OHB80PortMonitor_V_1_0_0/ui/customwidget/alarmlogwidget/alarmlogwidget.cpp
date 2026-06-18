@@ -7,12 +7,14 @@
 #include "paginationwidget.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/alarmlogdb/alarmlogdbcon.h"
+#include "app/shareddata.h"
 #include "usermanager.h"
 #include <QStandardItemModel>
 #include <QScroller>
 #include <QScrollerProperties>
 #include <QDebug>
 #include <QMessageBox>
+#include <limits>
 
 AlarmLogWidget::AlarmLogWidget(QWidget *parent)
     : QWidget(parent)
@@ -323,7 +325,34 @@ void AlarmLogWidget::initUi()
 {
     // QRCode 设备编号范围 1~10（与写入测试中的 DEVICE-0001..DEVICE-0010 对齐）
     ui->spinBoxQRCode->setRange(1, 10);
-    ui->spinBoxQRCode->setValue(1);
+    const QStringList qrcodes = SharedData::getAllQrcodes();
+    int minQrCode = std::numeric_limits<int>::max();
+    int maxQrCode = std::numeric_limits<int>::min();
+    bool hasValidQrCode = false;
+
+    for (const QString &qrCode : qrcodes) {
+        bool ok = false;
+        const qlonglong value = qrCode.toLongLong(&ok);
+        if (!ok) {
+            continue;
+        }
+
+        const int intValue = static_cast<int>(qBound<qlonglong>(
+            std::numeric_limits<int>::min(),
+            value,
+            std::numeric_limits<int>::max()));
+        minQrCode = qMin(minQrCode, intValue);
+        maxQrCode = qMax(maxQrCode, intValue);
+        hasValidQrCode = true;
+    }
+
+    if (hasValidQrCode) {
+        ui->spinBoxQRCode->setRange(minQrCode, maxQrCode);
+        ui->spinBoxQRCode->setValue(minQrCode);
+    } else {
+        ui->spinBoxQRCode->setRange(1, 10);
+        ui->spinBoxQRCode->setValue(1);
+    }
 
     // 警报级别：按 alarmtype.h 中定义的 AlarmLevel 枚举填充
     ui->comboBoxAlarmLevel->clear();

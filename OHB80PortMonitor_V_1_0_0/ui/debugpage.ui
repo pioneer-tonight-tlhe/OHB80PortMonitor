@@ -82,6 +82,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="btnHumidityOffset">
+        <property name="text">
+         <string>Humidity Offset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="btnVEFCStatus">
         <property name="text">
          <string>VEFC Status</string>

@@ -82,13 +82,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="btnHumidityOffset">
-        <property name="text">
-         <string>Humidity Offset</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="btnPurgeFlow">
         <property name="text">
          <string>Purge Flow</string>

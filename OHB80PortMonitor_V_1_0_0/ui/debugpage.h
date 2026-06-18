@@ -11,6 +11,7 @@ class FirmwareUpdateConfigSettingWidget;
 class FirmwareUpdateSettingWidget;
 class VEFCGasTypeSettingWidget;
 class UIRefreshTimeSettingWidget;
+class HumidityOffsetSettingWidget;
 class VEFCFlowUnitMediumStatusWidget;
 class BoardEnableStatusWidget;
 class FoupInVacuumExtractionEnableWidget;
@@ -24,8 +25,6 @@ public:
     ~DebugPage();
 
     void initUI();
-
-    // 导航栏
     void initNav();
 
 private slots:
@@ -34,11 +33,12 @@ private slots:
 private:
     Ui::DebugPage *ui;
     FirmwareUpdateConfigSettingWidget *m_firmwareConfigWidget;
-    FirmwareUpdateSettingWidget       *m_firmwareUpdateWidget;
-    VEFCGasTypeSettingWidget          *m_vefcGasTypeWidget;
-    UIRefreshTimeSettingWidget        *m_uiRefreshTimeWidget;
-    VEFCFlowUnitMediumStatusWidget    *m_vefcFlowUnitMediumStatusWidget;
-    BoardEnableStatusWidget            *m_boardEnableStatusWidget;
+    FirmwareUpdateSettingWidget *m_firmwareUpdateWidget;
+    VEFCGasTypeSettingWidget *m_vefcGasTypeWidget;
+    UIRefreshTimeSettingWidget *m_uiRefreshTimeWidget;
+    HumidityOffsetSettingWidget *m_humidityOffsetWidget;
+    VEFCFlowUnitMediumStatusWidget *m_vefcFlowUnitMediumStatusWidget;
+    BoardEnableStatusWidget *m_boardEnableStatusWidget;
     FoupInVacuumExtractionEnableWidget *m_foupInVacuumExtractionEnableWidget;
 };
 

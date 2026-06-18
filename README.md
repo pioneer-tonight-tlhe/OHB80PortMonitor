@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：V0.5.7**
+**当前版本：待发布**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,43 @@
 ---
 
 ## 更新日志
+
+## 待发布
+
+### 湿度配置页迁移到 DebugPage
+- 修改时间：2026-06-17
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：将原 ConfigPage 中的湿度偏移配置入口迁移到 DebugPage，统一归入调试类功能区，便于维护和调试。
+- 功能点明细：
+  - `ConfigPage` 移除 `HumidityOffsetSettingWidget` 及对应导航按钮。
+  - `DebugPage` 新增 `HumidityOffsetSettingWidget` 及对应导航按钮。
+  - 湿度配置的读写逻辑保持不变，仅调整页面入口位置。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `README.md`
+- 兼容性影响：原湿度配置入口位置变更，功能逻辑与下发协议不变。
+- 验证情况：已完成 64 位 Debug 构建验证，完整链接需关闭正在运行的 `OHB80PortMonitor_V_1_0_0.exe` 后执行。
+
+### AlarmPage History QRCode 范围动态化
+- 修改时间：2026-06-17
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：将 AlarmPage 的 History 查询页中 QRCode SpinBox 范围改为从共享内存读取全量设备二维码，并按数值最小值/最大值动态设置。
+- 功能点明细：
+  - 通过 `SharedData::getAllQrcodes()` 获取整机 QRCode 列表。
+  - 过滤可转为数字的 QRCode，按数值最小值/最大值设置 `spinBoxQRCode` 范围。
+  - 当共享数据中无有效 QRCode 时，回退到默认范围。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - `README.md`
+- 兼容性影响：History 查询 QRCode 输入范围将随共享设备配置自动变化。
+- 验证情况：已完成 `debug/alarmlogwidget.o` 强制重编译验证。
 
 ## v0.5.7
 

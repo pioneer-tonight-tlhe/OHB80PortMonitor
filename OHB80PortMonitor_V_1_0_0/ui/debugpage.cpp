@@ -1,15 +1,18 @@
 #include "debugpage.h"
+
 #include "ui_debugpage.h"
+#include "customwidget/configsettingwidget/humidityoffsetsettingwidget.h"
+#include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdatesettingwidget.h"
-#include "customwidget/debugsettingwidget/vefcgastypesettingwidget.h"
+#include "customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.h"
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
-#include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
-#include "customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.h"
-#include <QScrollBar>
+#include "customwidget/debugsettingwidget/vefcgastypesettingwidget.h"
+
 #include <QScroller>
 #include <QScrollerProperties>
+#include <QScrollBar>
 
 DebugPage::DebugPage(QWidget *parent)
     : QWidget(parent)
@@ -18,12 +21,12 @@ DebugPage::DebugPage(QWidget *parent)
     , m_firmwareUpdateWidget(nullptr)
     , m_vefcGasTypeWidget(nullptr)
     , m_uiRefreshTimeWidget(nullptr)
+    , m_humidityOffsetWidget(nullptr)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
     , m_boardEnableStatusWidget(nullptr)
     , m_foupInVacuumExtractionEnableWidget(nullptr)
 {
     ui->setupUi(this);
-
     initUI();
 }
 
@@ -36,10 +39,9 @@ void DebugPage::initUI()
 {
     initNav();
 
-    // 启用触摸/鼠标拖动滚动手势（支持触屏滑动滚动区域）
     if (ui->scrollArea && ui->scrollArea->viewport()) {
         QScroller::grabGesture(ui->scrollArea->viewport(), QScroller::LeftMouseButtonGesture);
-        QScroller* scroller = QScroller::scroller(ui->scrollArea->viewport());
+        QScroller *scroller = QScroller::scroller(ui->scrollArea->viewport());
         QScrollerProperties props = scroller->scrollerProperties();
         props.setScrollMetric(QScrollerProperties::DragStartDistance, 0.005);
         props.setScrollMetric(QScrollerProperties::OvershootDragResistanceFactor, 0.3);
@@ -47,40 +49,35 @@ void DebugPage::initUI()
         scroller->setScrollerProperties(props);
     }
 
-    // 固件更新配置 SettingWidget
     m_firmwareConfigWidget = new FirmwareUpdateConfigSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_firmwareConfigWidget);
 
-    // 固件升级 SettingWidget（独立的 SettingWidget，与配置界面平级）
     m_firmwareUpdateWidget = new FirmwareUpdateSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_firmwareUpdateWidget);
 
-    // 配置界面选择 bin 文件后 → 同步到升级界面
     connect(m_firmwareConfigWidget, &FirmwareUpdateConfigSettingWidget::binFilePathChanged,
             m_firmwareUpdateWidget, &FirmwareUpdateSettingWidget::setFirmwareFilePath);
 
-    // VEFC 气体介质类型 SettingWidget
     m_vefcGasTypeWidget = new VEFCGasTypeSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcGasTypeWidget);
 
-    // UI 页面刷新时间 SettingWidget
     m_uiRefreshTimeWidget = new UIRefreshTimeSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_uiRefreshTimeWidget);
 
-    // VEFC 流量单位 / 介质状态读取 SettingWidget
+    m_humidityOffsetWidget = new HumidityOffsetSettingWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_humidityOffsetWidget);
+
     m_vefcFlowUnitMediumStatusWidget = new VEFCFlowUnitMediumStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcFlowUnitMediumStatusWidget);
 
-    // 板卡禁用状态读取 SettingWidget
     m_boardEnableStatusWidget = new BoardEnableStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_boardEnableStatusWidget);
 
     m_foupInVacuumExtractionEnableWidget = new FoupInVacuumExtractionEnableWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_foupInVacuumExtractionEnableWidget);
-    
+
     ui->scrollAreaWidgetContents->layout()->addItem(
-        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding)
-    );
+        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
 
 void DebugPage::initNav()
@@ -93,10 +90,9 @@ void DebugPage::initNav()
     }
 }
 
-
 void DebugPage::navBtnClicked()
 {
-    QToolButton *btn = (QToolButton *)sender();
+    QToolButton *btn = static_cast<QToolButton *>(sender());
     QString objName = btn->objectName();
 
     QList<QToolButton *> btns = ui->widgetTop->findChildren<QToolButton *>();
@@ -113,6 +109,8 @@ void DebugPage::navBtnClicked()
         targetWidget = m_vefcGasTypeWidget;
     } else if (objName == "btnUIRefreshTime") {
         targetWidget = m_uiRefreshTimeWidget;
+    } else if (objName == "btnHumidityOffset") {
+        targetWidget = m_humidityOffsetWidget;
     } else if (objName == "btnVEFCStatus") {
         targetWidget = m_vefcFlowUnitMediumStatusWidget;
     } else if (objName == "btnBoardEnable") {

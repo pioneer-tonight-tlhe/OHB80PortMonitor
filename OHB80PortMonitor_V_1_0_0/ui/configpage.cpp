@@ -1,15 +1,16 @@
 #include "configpage.h"
+
 #include "ui_configpage.h"
+#include "customwidget/configsettingwidget/deviceenablesettingwidget.h"
 #include "customwidget/configsettingwidget/idlepurgesettingwidget.h"
 #include "customwidget/configsettingwidget/pneumaticvalvepressuresettingwidget.h"
+#include "customwidget/configsettingwidget/purgeflowsettingwidget.h"
 #include "customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.h"
 #include "customwidget/configsettingwidget/sh85selfchecksettingwidget.h"
-#include "customwidget/configsettingwidget/humidityoffsetsettingwidget.h"
-#include "customwidget/configsettingwidget/purgeflowsettingwidget.h"
-#include "customwidget/configsettingwidget/deviceenablesettingwidget.h"
-#include <QScrollBar>
+
 #include <QScroller>
 #include <QScrollerProperties>
+#include <QScrollBar>
 
 ConfigPage::ConfigPage(QWidget *parent)
     : QWidget(parent)
@@ -18,7 +19,6 @@ ConfigPage::ConfigPage(QWidget *parent)
     , m_pneumaticValvePressureWidget(nullptr)
     , m_sh85PeriodicSelfCheckWidget(nullptr)
     , m_sh85SelfCheckWidget(nullptr)
-    , m_humidityOffsetWidget(nullptr)
     , m_deviceEnableWidget(nullptr)
     , m_purgeFlowWidget(nullptr)
 {
@@ -35,10 +35,9 @@ void ConfigPage::initUI()
 {
     initNav();
 
-    // 启用触摸/鼠标拖动滚动手势（支持触屏滑动滚动区域）
     if (ui->scrollArea && ui->scrollArea->viewport()) {
         QScroller::grabGesture(ui->scrollArea->viewport(), QScroller::LeftMouseButtonGesture);
-        QScroller* scroller = QScroller::scroller(ui->scrollArea->viewport());
+        QScroller *scroller = QScroller::scroller(ui->scrollArea->viewport());
         QScrollerProperties props = scroller->scrollerProperties();
         props.setScrollMetric(QScrollerProperties::DragStartDistance, 0.005);
         props.setScrollMetric(QScrollerProperties::OvershootDragResistanceFactor, 0.3);
@@ -64,9 +63,6 @@ void ConfigPage::initUI()
     onPeriodicSelfCheckRunningStateChanged(m_sh85PeriodicSelfCheckWidget->isRunning());
     onSelfCheckRunningStateChanged(m_sh85SelfCheckWidget->isRunning());
 
-    m_humidityOffsetWidget = new HumidityOffsetSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_humidityOffsetWidget);
-
     m_purgeFlowWidget = new PurgeFlowSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_purgeFlowWidget);
 
@@ -74,8 +70,7 @@ void ConfigPage::initUI()
     ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceEnableWidget);
 
     ui->scrollAreaWidgetContents->layout()->addItem(
-        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding)
-        );
+        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
 
 void ConfigPage::initNav()
@@ -90,7 +85,7 @@ void ConfigPage::initNav()
 
 void ConfigPage::navBtnClicked()
 {
-    QToolButton *btn = (QToolButton *)sender();
+    QToolButton *btn = static_cast<QToolButton *>(sender());
     QString objName = btn->objectName();
 
     QList<QToolButton *> btns = ui->widgetTop->findChildren<QToolButton *>();
@@ -107,8 +102,6 @@ void ConfigPage::navBtnClicked()
         targetWidget = m_sh85PeriodicSelfCheckWidget;
     } else if (objName == "btnSH85SelfCheck") {
         targetWidget = m_sh85SelfCheckWidget;
-    } else if (objName == "btnHumidityOffset") {
-        targetWidget = m_humidityOffsetWidget;
     } else if (objName == "btnPurgeFlow") {
         targetWidget = m_purgeFlowWidget;
     } else if (objName == "btnDeviceEnable") {
@@ -121,13 +114,8 @@ void ConfigPage::navBtnClicked()
     }
 }
 
-// ============================================================
-// 协调 SH85 自检控件
-// ============================================================
-
 void ConfigPage::onSelfCheckRunningStateChanged(bool running)
 {
-    // 手动自检状态变化时，禁用/启用定期自检控件
     if (m_sh85PeriodicSelfCheckWidget) {
         m_sh85PeriodicSelfCheckWidget->setPeriodicActionEnabled(!running);
     }
@@ -135,7 +123,6 @@ void ConfigPage::onSelfCheckRunningStateChanged(bool running)
 
 void ConfigPage::onPeriodicSelfCheckRunningStateChanged(bool running)
 {
-    // 定期自检状态变化时，禁用/启用手动自检控件
     if (m_sh85SelfCheckWidget) {
         m_sh85SelfCheckWidget->setCheckActionEnabled(!running);
     }
