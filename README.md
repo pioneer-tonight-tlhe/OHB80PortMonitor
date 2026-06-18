@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：待发布**
+**当前版本：v0.5.8**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -10,7 +10,7 @@
 
 ## 更新日志
 
-## 待发布
+## v0.5.8
 
 ### 湿度配置页迁移到 DebugPage
 - 修改时间：2026-06-17
@@ -214,7 +214,7 @@
   - `OHB80PortMonitor_V_1_0_0/data/logdatabases/vefcsensormonitordb/vefcsensormonitorsqllogic.cpp`
   - `README.md`
 - 兼容性影响：常规日志数据库历史数据保留周期由 7 个月缩短为 6 个月；VEFC 采集数据库保留周期不变。
-- 备注：本版本发布时通信日志数据库仍保留原磁盘阈值清理；该机制已在“待发布”记录中迁移到调度层统一处理。
+- 备注：本版本发布时通信日志数据库仍保留原磁盘阈值清理；该机制已在“v0.5.8”记录中迁移到调度层统一处理。
 
 ### 常规日志数据库统一清理日志
 
@@ -237,7 +237,7 @@
   - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
   - `README.md`
 - 兼容性影响：常规日志数据库的月度清理记录位置发生变化，后续排查常规日志库清理情况需查看 `log_db/database_cleanup/month_clean`。
-- 备注：本版本统一日志仅覆盖月度保留清理；通信日志磁盘阈值清理已在“待发布”记录中迁移到 `scheduler/disk_pressure_cleanup_task/clean`。
+- 备注：本版本统一日志仅覆盖月度保留清理；通信日志磁盘阈值清理已在“v0.5.8”记录中迁移到 `scheduler/disk_pressure_cleanup_task/clean`。
 
 ---
 
