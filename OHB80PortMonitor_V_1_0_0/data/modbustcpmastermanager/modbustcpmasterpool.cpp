@@ -338,6 +338,32 @@ ModbusTcpMaster* ModbusTcpMasterPool::getMaster(const QString& id) const
     return m_mastersById.value(id, nullptr);
 }
 
+bool ModbusTcpMasterPool::renameMaster(const QString& oldId, const QString& newId, QString* errorMessage)
+{
+    if (oldId == newId) {
+        if (errorMessage) errorMessage->clear();
+        return true;
+    }
+
+    if (!m_mastersById.contains(oldId)) {
+        if (errorMessage) *errorMessage = QString("Master %1 does not exist").arg(oldId);
+        return false;
+    }
+
+    if (m_mastersById.contains(newId)) {
+        if (errorMessage) *errorMessage = QString("Master %1 already exists").arg(newId);
+        return false;
+    }
+
+    ModbusTcpMaster* master = m_mastersById.take(oldId);
+    m_mastersById.insert(newId, master);
+    ModbusLogger::systemInfo("ModbusTcpMasterPool", "renameMaster",
+        QString("Renamed master key oldId=%1 newId=%2").arg(oldId, newId));
+
+    if (errorMessage) errorMessage->clear();
+    return true;
+}
+
 QStringList ModbusTcpMasterPool::masterIds() const
 {
     return m_mastersById.keys();

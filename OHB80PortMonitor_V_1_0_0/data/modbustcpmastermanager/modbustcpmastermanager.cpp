@@ -94,6 +94,47 @@ ModbusTcpMaster* ModbusTcpMasterManager::getMaster(const QString& id) const
     return m_masterPool->getMaster(id);
 }
 
+bool ModbusTcpMasterManager::reconfigureMaster(const QString& oldId,
+                                               const QString& newId,
+                                               const QString& ip,
+                                               quint16 port,
+                                               QString* errorMessage)
+{
+    if (!m_masterPool) {
+        if (errorMessage) *errorMessage = QStringLiteral("Master pool is null");
+        return false;
+    }
+
+    ModbusTcpMaster* master = m_masterPool->getMaster(oldId);
+    if (!master) {
+        if (errorMessage) *errorMessage = QString("Master %1 does not exist").arg(oldId);
+        return false;
+    }
+
+    if (oldId != newId && m_masterPool->getMaster(newId)) {
+        if (errorMessage) *errorMessage = QString("Master %1 already exists").arg(newId);
+        return false;
+    }
+
+    QString localError;
+    if (!master->reconfigureDeviceInfo(newId, ip, port, &localError)) {
+        if (errorMessage) *errorMessage = localError;
+        return false;
+    }
+
+    if (!m_masterPool->renameMaster(oldId, newId, &localError)) {
+        if (errorMessage) *errorMessage = localError;
+        return false;
+    }
+
+    ModbusLogger::systemInfo("ModbusTcpMasterManager", "reconfigureMaster",
+        QString("Reconfigured master oldId=%1 newId=%2 IP=%3 Port=%4")
+            .arg(oldId).arg(newId).arg(ip).arg(port));
+
+    if (errorMessage) errorMessage->clear();
+    return true;
+}
+
 bool ModbusTcpMasterManager::startMaster(const QString& id, ModbusConnecter::ConnectionMode mode)
 {
     ModbusTcpMaster* master = m_masterPool->getMaster(id);

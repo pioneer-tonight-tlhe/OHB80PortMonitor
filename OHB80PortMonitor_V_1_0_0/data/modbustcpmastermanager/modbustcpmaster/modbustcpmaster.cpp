@@ -3,6 +3,8 @@
 #include "sh85selfchecker.h"
 #include "modbuslogger.h"
 #include <QDebug>
+#include <QMetaObject>
+#include <QThread>
 
 // ============================================================
 // ModbusTcpMaster - Modbus TCP 主控对象实现
@@ -114,6 +116,64 @@ FirmwareUpgrader* ModbusTcpMaster::firmwareUpgrader() const
 SH85SelfChecker* ModbusTcpMaster::selfChecker() const
 {
     return m_selfChecker;
+}
+
+bool ModbusTcpMaster::reconfigureDeviceInfo(const QString& newId,
+                                            const QString& newIp,
+                                            quint16 newPort,
+                                            QString* errorMessage)
+{
+    if (QThread::currentThread() != thread()) {
+        bool result = false;
+        QString localError;
+        const bool invoked = QMetaObject::invokeMethod(this, [&]() {
+            result = reconfigureDeviceInfo(newId, newIp, newPort, &localError);
+        }, Qt::BlockingQueuedConnection);
+        if (!invoked) {
+            localError = QStringLiteral("Failed to invoke master reconfiguration");
+        }
+        if (errorMessage) {
+            *errorMessage = localError;
+        }
+        return invoked && result;
+    }
+
+    if (newId.trimmed().isEmpty()) {
+        if (errorMessage) *errorMessage = QStringLiteral("QRCode is empty");
+        return false;
+    }
+    if (newIp.trimmed().isEmpty()) {
+        if (errorMessage) *errorMessage = QStringLiteral("IP is empty");
+        return false;
+    }
+    if (newPort == 0) {
+        if (errorMessage) *errorMessage = QStringLiteral("Port is invalid");
+        return false;
+    }
+    if (!m_connector) {
+        if (errorMessage) *errorMessage = QStringLiteral("Connector is null");
+        return false;
+    }
+
+    const QString oldId = ID;
+    const QString oldIp = m_ip;
+    const quint16 oldPort = m_port;
+
+    ModbusLogger::masterInfo(oldId, "ModbusTcpMaster", "reconfigureDeviceInfo",
+        QString("Reconfigure device: oldId=%1 oldEndpoint=%2:%3 newId=%4 newEndpoint=%5:%6")
+            .arg(oldId).arg(oldIp).arg(oldPort).arg(newId).arg(newIp).arg(newPort));
+
+    stop(ModbusConnecter::ConnectionMode::AutoReconnect);
+    m_ip = newIp;
+    m_port = newPort;
+    m_connector->setEndpoint(m_ip, m_port);
+    ID = newId;
+    start(ModbusConnecter::ConnectionMode::AutoReconnect);
+
+    if (errorMessage) {
+        errorMessage->clear();
+    }
+    return true;
 }
 
 void ModbusTcpMaster::onConnectionStatusChanged(ModbusConnecter::ConnectionStatus status, const QString& /*masterId*/)
@@ -263,7 +323,7 @@ void ModbusTcpMaster::createInitialIssuerIfNeeded()
         return;
     }
 
-    m_initialIssuer = new InitialCommandIssuer(*m_sender, ID, this);
+    m_initialIssuer = new InitialCommandIssuer(*m_sender, ID, this, this);
     connect(m_initialIssuer, &InitialCommandIssuer::finished,
             this, &ModbusTcpMaster::onInitialFinished);
 }

@@ -28,6 +28,9 @@ public:
     
     // 根据qrcode设置FoupOfOHBInfo对象方法
     bool setFoupByQRCode(const QString& qrCode, const FoupOfOHBInfo& foupInfo);
+
+    // 刷新 Set ID（当内部 Foup 的 QRCode 被直接修改后调用）
+    void refreshSetId();
     
     // 设置整个Foup队列
     void setFoups(const QVector<FoupOfOHBInfo>& foups);

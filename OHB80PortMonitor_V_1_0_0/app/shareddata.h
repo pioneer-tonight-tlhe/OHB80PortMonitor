@@ -30,6 +30,12 @@ public:
     // 根据 qrCode 获取 FoupOfOHBInfo 指针（用于直接修改）
     static FoupOfOHBInfo* getFoupByQRCode(const QString& qrCode);
 
+    // 更新 Foup 设备信息，并同步刷新所属 Set 的显示 ID
+    static bool updateFoupDeviceInfoByQRCode(const QString& oldQrCode,
+                                             const QString& newQrCode,
+                                             const QString& ip,
+                                             quint16 port);
+
     // 收集所有设备的 qrCode 列表
     static QStringList getAllQrcodes();
 

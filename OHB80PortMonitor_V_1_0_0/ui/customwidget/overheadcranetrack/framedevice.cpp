@@ -270,6 +270,7 @@ void FrameDevice::updateFoupInfo()
     }
 
     // 更新数据显示
+    setLabIDValueText(m_foupInfo->qrCode());
     setLabInletPressureValue(m_foupInfo->inletPressure());
     setLabInletFlowValue(m_foupInfo->inletFlow());
     setLabRHValue(m_foupInfo->RH());

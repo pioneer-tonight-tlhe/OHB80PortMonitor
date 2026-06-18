@@ -192,7 +192,10 @@ void AlarmDispatchTask::writeSummarySnapshot()
         QStringList qrs = QStringList(groups.value(type).values());
         std::sort(qrs.begin(), qrs.end(), [](const QString& a, const QString& b){
             bool ok1=false, ok2=false; int ia=a.toInt(&ok1); int ib=b.toInt(&ok2);
-            if (ok1 && ok2) return ia < ib; return a < b;
+            if (ok1 && ok2) {
+                return ia < ib;
+            }
+            return a < b;
         });
         const int count = qrs.size();
         const QString display = qrs.join(QStringLiteral("，"));
@@ -285,8 +288,61 @@ void AlarmDispatchTask::syncAllFoupAlarmStates()
     // 全量同步用于启动恢复和批量清空，避免部分设备保留旧的 UI 告警状态。
     const QSet<QString> blockedAlarmTypes = AlarmConfig::getInstance().readBlockedAlarms();
     const QStringList qrCodes = SharedData::getAllQrcodes();
+    QSet<QString> currentQrCodes;
     for (const QString& qrCode : qrCodes) {
-        syncFoupAlarmState(qrCode, blockedAlarmTypes);
+        const QString normalizedQrCode = qrCode.trimmed();
+        if (normalizedQrCode.isEmpty()) {
+            continue;
+        }
+        currentQrCodes.insert(normalizedQrCode);
+        syncFoupAlarmState(normalizedQrCode, blockedAlarmTypes);
+    }
+    resolveMissingQRCodeActiveAlarms(currentQrCodes);
+}
+
+void AlarmDispatchTask::resolveMissingQRCodeActiveAlarms(const QSet<QString>& currentQrCodes)
+{
+    QSet<QString> missingQrCodes;
+    {
+        QMutexLocker locker(&m_mutex);
+        for (auto it = m_active.constBegin(); it != m_active.constEnd(); ++it) {
+            const AlarmInfo& info = it.value();
+            if (info.alarmSource != static_cast<int>(AlarmSource::Device)) {
+                continue;
+            }
+
+            const QString qrCode = info.record.qrCode.trimmed();
+            if (!qrCode.isEmpty() && !currentQrCodes.contains(qrCode)) {
+                missingQrCodes.insert(qrCode);
+            }
+        }
+    }
+
+    if (missingQrCodes.isEmpty()) {
+        return;
+    }
+
+    QStringList sortedQrCodes = missingQrCodes.values();
+    std::sort(sortedQrCodes.begin(), sortedQrCodes.end(), [](const QString& lhs, const QString& rhs) {
+        bool lhsOk = false;
+        bool rhsOk = false;
+        const int lhsValue = lhs.toInt(&lhsOk);
+        const int rhsValue = rhs.toInt(&rhsOk);
+        if (lhsOk && rhsOk) {
+            return lhsValue < rhsValue;
+        }
+        return lhs < rhs;
+    });
+
+    for (const QString& qrCode : qAsConst(sortedQrCodes)) {
+        const int resolvedCount = submitResolveAllByQRCode(qrCode);
+        if (resolvedCount > 0) {
+            m_logger->summaryLogger().info(
+                QString("[resolveMissingQRCodeActiveAlarms] Resolved %1 active alarms for missing QRCode %2")
+                    .arg(resolvedCount)
+                    .arg(qrCode)
+                    .toStdString());
+        }
     }
 }
 
@@ -461,6 +517,112 @@ void AlarmDispatchTask::submitResolve(int alarmType,
 // =====================================================================
 // 查询接口
 // =====================================================================
+int AlarmDispatchTask::submitResolveAllBySourceIdentifier(int alarmSource,
+                                                          const QString& sourceIdentifier)
+{
+    const QString normalizedIdentifier = sourceIdentifier.trimmed();
+    if (normalizedIdentifier.isEmpty()) {
+        return 0;
+    }
+
+    QList<AlarmInfo> resolvedInfos;
+    {
+        QMutexLocker locker(&m_mutex);
+        for (auto it = m_active.begin(); it != m_active.end(); ) {
+            AlarmInfo info = it.value();
+            if (info.alarmSource == alarmSource
+                && info.record.qrCode.trimmed() == normalizedIdentifier) {
+                info.record.isResolved = 1;
+                info.record.resolveTime = QDateTime::currentDateTime()
+                    .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+                resolvedInfos.append(info);
+                it = m_active.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    for (const AlarmInfo& resolvedInfo : qAsConst(resolvedInfos)) {
+        const QString resolveMessage = QString("[submitResolveAllBySourceIdentifier] Resolve submitted\n"
+                                               "Alarm ID: %1\n"
+                                               "Alarm type: %2\n"
+                                               "Alarm level: %3\n"
+                                               "Source identifier: %4\n"
+                                               "Resolve time: %5\n"
+                                               "Description: %6")
+            .arg(resolvedInfo.alarmId)
+            .arg(alarmTypeDisplayText(resolvedInfo.record.alarmType))
+            .arg(alarmLevelDisplayText(resolvedInfo.record.alarmLevel))
+            .arg(resolvedInfo.record.qrCode)
+            .arg(resolvedInfo.record.resolveTime)
+            .arg(resolvedInfo.record.description);
+        m_logger->deviceLogger(resolvedInfo.record.qrCode).info(resolveMessage.toStdString());
+
+        persistResolve(resolvedInfo);
+
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            const QString resolveMsg = QString("[AlarmResolved] %1").arg(resolvedInfo.record.description);
+            opTask->logMessage(resolveMsg);
+        }
+        emit alarmResolved(resolvedInfo);
+    }
+
+    return resolvedInfos.count();
+}
+
+int AlarmDispatchTask::submitResolveAllByQRCode(const QString& qrCode)
+{
+    const QString normalizedQRCode = qrCode.trimmed();
+    if (normalizedQRCode.isEmpty()) {
+        return 0;
+    }
+
+    QList<AlarmInfo> resolvedInfos;
+    {
+        QMutexLocker locker(&m_mutex);
+        for (auto it = m_active.begin(); it != m_active.end(); ) {
+            AlarmInfo info = it.value();
+            if (info.record.qrCode.trimmed() == normalizedQRCode) {
+                info.record.isResolved = 1;
+                info.record.resolveTime = QDateTime::currentDateTime()
+                    .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+                resolvedInfos.append(info);
+                it = m_active.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    for (const AlarmInfo& resolvedInfo : qAsConst(resolvedInfos)) {
+        const QString resolveMessage = QString("[submitResolveAllByQRCode] Resolve submitted\n"
+                                               "Alarm ID: %1\n"
+                                               "Alarm type: %2\n"
+                                               "Alarm level: %3\n"
+                                               "QRCode: %4\n"
+                                               "Resolve time: %5\n"
+                                               "Description: %6")
+            .arg(resolvedInfo.alarmId)
+            .arg(alarmTypeDisplayText(resolvedInfo.record.alarmType))
+            .arg(alarmLevelDisplayText(resolvedInfo.record.alarmLevel))
+            .arg(resolvedInfo.record.qrCode)
+            .arg(resolvedInfo.record.resolveTime)
+            .arg(resolvedInfo.record.description);
+        m_logger->deviceLogger(resolvedInfo.record.qrCode).info(resolveMessage.toStdString());
+
+        persistResolve(resolvedInfo);
+
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            const QString resolveMsg = QString("[AlarmResolved] %1").arg(resolvedInfo.record.description);
+            opTask->logMessage(resolveMsg);
+        }
+        emit alarmResolved(resolvedInfo);
+    }
+
+    return resolvedInfos.count();
+}
+
 bool AlarmDispatchTask::isActive(const QString& alarmId) const
 {
     QMutexLocker locker(&m_mutex);

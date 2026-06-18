@@ -204,6 +204,21 @@ void ModbusConnecter::setAutoReconnectInterval(int intervalMs)
     m_reconnectTimer->setInterval(intervalMs);
 }
 
+void ModbusConnecter::setEndpoint(const QString& host, quint16 port)
+{
+    if (QThread::currentThread() != thread()) {
+        QMetaObject::invokeMethod(this, [this, host, port]() {
+            setEndpoint(host, port);
+        }, Qt::BlockingQueuedConnection);
+        return;
+    }
+
+    m_host = host;
+    m_port = port;
+    ModbusLogger::masterInfo(m_masterId, "ModbusTcpMaster", "ModbusConnecter", "setEndpoint",
+        QString("Updated endpoint IP=%1 Port=%2").arg(m_host).arg(m_port));
+}
+
 bool ModbusConnecter::performConnection()
 {
     if (!m_socket) {

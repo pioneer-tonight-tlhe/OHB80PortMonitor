@@ -88,6 +88,10 @@ public:
      */
     void setAutoReconnectInterval(int intervalMs);
 
+    QString host() const { return m_host; }
+    quint16 port() const { return m_port; }
+    void setEndpoint(const QString& host, quint16 port);
+
 signals:
     /**
      * @brief 连接状态改变信号

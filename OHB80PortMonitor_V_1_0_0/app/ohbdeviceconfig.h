@@ -52,6 +52,10 @@ public:
 
     // 设置设备 enable 状态（持久化到配置文件）
     bool setDeviceEnable(const QString& qrCode, bool enable);
+    bool updateDeviceInfoByQRCode(const QString& oldQrCode,
+                                   const QString& newQrCode,
+                                   const QString& ip,
+                                   quint16 port);
 
     QString getConfigPath() const;
 

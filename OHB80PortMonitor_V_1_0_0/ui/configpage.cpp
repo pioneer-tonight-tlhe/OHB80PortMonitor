@@ -2,6 +2,7 @@
 
 #include "ui_configpage.h"
 #include "customwidget/configsettingwidget/deviceenablesettingwidget.h"
+#include "customwidget/configsettingwidget/deviceinfosettingwidget.h"
 #include "customwidget/configsettingwidget/idlepurgesettingwidget.h"
 #include "customwidget/configsettingwidget/pneumaticvalvepressuresettingwidget.h"
 #include "customwidget/configsettingwidget/purgeflowsettingwidget.h"
@@ -21,6 +22,7 @@ ConfigPage::ConfigPage(QWidget *parent)
     , m_sh85SelfCheckWidget(nullptr)
     , m_deviceEnableWidget(nullptr)
     , m_purgeFlowWidget(nullptr)
+    , m_deviceInfoWidget(nullptr)
 {
     ui->setupUi(this);
     initUI();
@@ -69,6 +71,9 @@ void ConfigPage::initUI()
     m_deviceEnableWidget = new DeviceEnableSettingWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceEnableWidget);
 
+    m_deviceInfoWidget = new DeviceInfoSettingWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceInfoWidget);
+
     ui->scrollAreaWidgetContents->layout()->addItem(
         new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
@@ -106,6 +111,8 @@ void ConfigPage::navBtnClicked()
         targetWidget = m_purgeFlowWidget;
     } else if (objName == "btnDeviceEnable") {
         targetWidget = m_deviceEnableWidget;
+    } else if (objName == "btnDeviceInfo") {
+        targetWidget = m_deviceInfoWidget;
     }
 
     if (targetWidget) {

@@ -83,6 +83,8 @@ public:
      */
     ModbusTcpMaster* getMaster(const QString& id) const;
 
+    bool renameMaster(const QString& oldId, const QString& newId, QString* errorMessage = nullptr);
+
     /**
      * @brief 获取当前工作线程数
      * @return 线程数

@@ -13,6 +13,7 @@ class SH85PeriodicSelfCheckSettingWidget;
 class SH85SelfCheckSettingWidget;
 class PurgeFlowSettingWidget;
 class DeviceEnableSettingWidget;
+class DeviceInfoSettingWidget;
 
 class ConfigPage : public QWidget
 {
@@ -38,6 +39,7 @@ private:
     SH85SelfCheckSettingWidget *m_sh85SelfCheckWidget;
     DeviceEnableSettingWidget *m_deviceEnableWidget;
     PurgeFlowSettingWidget *m_purgeFlowWidget;
+    DeviceInfoSettingWidget *m_deviceInfoWidget;
 };
 
 #endif // CONFIGPAGE_H

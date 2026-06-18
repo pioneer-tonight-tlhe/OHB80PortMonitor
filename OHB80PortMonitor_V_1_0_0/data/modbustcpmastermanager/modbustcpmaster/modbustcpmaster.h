@@ -165,6 +165,11 @@ public:
      */
     quint16 port() const { return m_port; }
 
+    bool reconfigureDeviceInfo(const QString& newId,
+                               const QString& newIp,
+                               quint16 newPort,
+                               QString* errorMessage = nullptr);
+
 signals:
     /**
      * @brief 错误信号

@@ -126,6 +126,27 @@ FoupOfOHBInfo* SharedData::getFoupByQRCode(const QString& qrCode)
     return nullptr;
 }
 
+bool SharedData::updateFoupDeviceInfoByQRCode(const QString& oldQrCode,
+                                              const QString& newQrCode,
+                                              const QString& ip,
+                                              quint16 port)
+{
+    for (int i = 0; i < setOfOHBInfoList.size(); ++i) {
+        SetOfOHBInfo& setInfo = setOfOHBInfoList[i];
+        QVector<FoupOfOHBInfo>& foups = setInfo.getFoups();
+        for (int j = 0; j < foups.size(); ++j) {
+            if (foups[j].qrCode() == oldQrCode) {
+                foups[j].setQrCode(newQrCode);
+                foups[j].setIp(ip);
+                foups[j].setPort(port);
+                setInfo.refreshSetId();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void SharedData::initScheduler()
 {
     // 启动调度器

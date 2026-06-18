@@ -83,6 +83,11 @@ bool SetOfOHBInfo::setFoupByQRCode(const QString& qrCode, const FoupOfOHBInfo& f
     return false;
 }
 
+void SetOfOHBInfo::refreshSetId()
+{
+    updateSetId();
+}
+
 void SetOfOHBInfo::setSize(int size)
 {
     if (size <= 0) {

@@ -119,6 +119,10 @@ public:
                        int alarmSource,
                        const QString& sourceIdentifier);
 
+    int submitResolveAllBySourceIdentifier(int alarmSource,
+                                           const QString& sourceIdentifier);
+    int submitResolveAllByQRCode(const QString& qrCode);
+
     // 查询某 alarmId 是否仍活跃（线程安全）
     bool isActive(const QString& alarmId) const;
 
@@ -183,6 +187,9 @@ private:
 
     // 启动恢复、批量重置后使用：按 m_active 全量刷新所有设备的告警显示状态。
     void syncAllFoupAlarmStates();
+
+    // 当前 SharedData 已不存在的设备 QRCode 不应继续保留 active 告警。
+    void resolveMissingQRCodeActiveAlarms(const QSet<QString>& currentQrCodes);
 
     // 从 m_active 中选择指定设备当前最需要展示的告警 ID；优先级按 alarmLevel 从高到低。
     QString selectedActiveAlarmIdForQrCode(const QString& qrCode) const;

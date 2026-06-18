@@ -64,6 +64,12 @@ public:
      */
     ModbusTcpMaster* getMaster(const QString& id) const;
 
+    bool reconfigureMaster(const QString& oldId,
+                           const QString& newId,
+                           const QString& ip,
+                           quint16 port,
+                           QString* errorMessage = nullptr);
+
     /**
      * @brief 启动指定 Master 的连接流程
      * @param id Master 的唯一标识符

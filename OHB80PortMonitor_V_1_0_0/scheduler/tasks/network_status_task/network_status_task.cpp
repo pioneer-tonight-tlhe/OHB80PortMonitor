@@ -113,6 +113,26 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
 {
     if (m_stopped) return;
 
+    ModbusTcpMasterManager &manager = ModbusTcpMasterManager::instance();
+    ModbusTcpMaster *master = manager.getMaster(masterId);
+    FoupOfOHBInfo* foup = SharedData::getFoupByQRCode(masterId);
+    if (!master || !foup) {
+        int resolvedCount = 0;
+        if (AlarmDispatchTask* dispatcher = SharedData::getAlarmDispatchTask()) {
+            resolvedCount = dispatcher->submitResolveAllByQRCode(masterId);
+        }
+
+        m_lastStatusMap.remove(masterId);
+        m_offlineReportedMap.remove(masterId);
+        m_logger->deviceWarn(masterId, "onStatusChanged",
+            QString("忽略非当前设备的连接状态事件，状态=%1，Master存在=%2，Foup存在=%3，已恢复旧告警数=%4")
+                .arg(statusToString(status))
+                .arg(master ? QStringLiteral("true") : QStringLiteral("false"))
+                .arg(foup ? QStringLiteral("true") : QStringLiteral("false"))
+                .arg(resolvedCount));
+        return;
+    }
+
     // 获取上一次状态
     ModbusConnecter::ConnectionStatus lastStatus = m_lastStatusMap.value(masterId, ModbusConnecter::ConnectionStatus::Disconnected);
     m_lastStatusMap[masterId] = status;
@@ -137,17 +157,7 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
         return;
     }
 
-    // 获取 IP 和端口信息
-    ModbusTcpMasterManager &manager = ModbusTcpMasterManager::instance();
-    ModbusTcpMaster *master = manager.getMaster(masterId);
     const QString ipPortStr = masterEndpoint(master);
-
-    // 当连接断开或出错时，设置告警
-    FoupOfOHBInfo* foup = SharedData::getFoupByQRCode(masterId);
-    if (!foup) {
-        m_logger->deviceWarn(masterId, "onStatusChanged",
-            QString("未找到对应的 FoupOfOHBInfo，IP端口=%1").arg(ipPortStr));
-    }
 
     if (status == ModbusConnecter::ConnectionStatus::Connected) {
         // 状态变化日志：连接成功 -> info，仅输出“上一次状态->当前状态”
@@ -323,6 +333,8 @@ void NetworkStatusTask::logWriteQRCodeSubmitFailure(const QString &masterId,
 
 void NetworkStatusTask::onWriteQRCodeFinished(ModbusCommand cmd, const QString &masterId)
 {
+    Q_UNUSED(masterId)
+
     if (m_stopped) return;
 
     // 检查是否是我们关注的 WriteQRCode 指令

@@ -206,6 +206,57 @@ bool OHBDeviceConfig::setDeviceEnable(const QString& qrCode, bool enable)
     return false;
 }
 
+bool OHBDeviceConfig::updateDeviceInfoByQRCode(const QString& oldQrCode,
+                                               const QString& newQrCode,
+                                               const QString& ip,
+                                               quint16 port)
+{
+    QVector<OHBDeviceInfo> devices = readDevices();
+    int targetIndex = -1;
+
+    for (int i = 0; i < devices.size(); ++i) {
+        if (devices.at(i).qrCode == oldQrCode) {
+            targetIndex = i;
+        } else if (devices.at(i).qrCode == newQrCode) {
+            qWarning() << "OHBDeviceConfig: QRCode already exists:" << newQrCode;
+            return false;
+        }
+    }
+
+    if (targetIndex < 0) {
+        qWarning() << "OHBDeviceConfig: device not found, QRCode=" << oldQrCode;
+        return false;
+    }
+
+    devices[targetIndex].qrCode = newQrCode;
+    devices[targetIndex].ip = ip;
+    devices[targetIndex].port = port;
+
+    if (!writeDevices(devices)) {
+        return false;
+    }
+
+    QVector<QString> masterDevices = readMasterDevices();
+    bool masterListChanged = false;
+    for (QString& masterId : masterDevices) {
+        if (masterId == oldQrCode) {
+            masterId = newQrCode;
+            masterListChanged = true;
+        }
+    }
+
+    if (masterListChanged && !writeMasterDevices(masterDevices)) {
+        return false;
+    }
+
+    qDebug() << "OHBDeviceConfig: updated device info"
+             << "oldQrCode=" << oldQrCode
+             << "newQrCode=" << newQrCode
+             << "ip=" << ip
+             << "port=" << port;
+    return true;
+}
+
 bool OHBDeviceConfig::readSH85SelfCheckEnabled() const
 {
     QSettings settings(m_configFilePath, QSettings::IniFormat);

@@ -3,6 +3,8 @@
 
 #include "cycliccommandissuer.h"
 
+class ModbusTcpMaster;
+
 // ============================================================
 // InitialCommandIssuer - 初始指令下发器
 //
@@ -21,7 +23,10 @@ class InitialCommandIssuer : public CyclicCommandIssuer
     Q_OBJECT
 
 public:
-    explicit InitialCommandIssuer(ModbusCommandSender& sender, const QString& masterId = QString(), QObject* parent = nullptr);
+    explicit InitialCommandIssuer(ModbusCommandSender& sender,
+                                  const QString& masterId = QString(),
+                                  ModbusTcpMaster* master = nullptr,
+                                  QObject* parent = nullptr);
 
     // 禁用拷贝和赋值（引用成员不支持）
     InitialCommandIssuer(const InitialCommandIssuer&) = delete;
@@ -32,11 +37,13 @@ signals:
     void finished(QList<ModbusCommand> failedCommands);
 
 private slots:
+    void onCommandSucceeded(ModbusCommand cmd);
     void onRoundComplete(QList<ModbusCommand> failedCommands);
     void onLogMessage(QString message);
 
 private:
     QString& m_masterId;                // Master 设备 ID（引用）
+    ModbusTcpMaster* m_master = nullptr;
 };
 
 #endif // INITIALCOMMANDISSUER_H
