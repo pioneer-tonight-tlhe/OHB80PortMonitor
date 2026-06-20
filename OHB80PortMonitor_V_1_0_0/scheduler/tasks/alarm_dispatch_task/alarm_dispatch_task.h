@@ -177,6 +177,12 @@ private:
 
     // DB 写入完成回调：检测到 update_resolve 完成后查询完整记录并 emit alarmResolvePersisted
     void onAlarmDBRecordResolved(const QString& qrCode, const QString& alarmType, const QString& resolveTime);
+    void onAlarmDBRecordInserted(const AlarmRecord& record);
+
+    void rememberRecentQRCodeResolve(const QString& qrCode);
+    bool shouldAutoResolveInsertedRecord(const AlarmRecord& record);
+    int resolveUnresolvedDbRowsByQRCode(const QString& qrCode);
+    void scheduleResolveUnresolvedDbRowsByQRCode(const QString& qrCode);
 
     // UI 告警状态只允许由定时器根据 m_active 统一刷新。
     // 这样可以避免 MonitorDataTask / NetworkStatusTask 各自清红，误清其它仍然活跃的告警。
@@ -196,6 +202,7 @@ private:
     QString selectedActiveAlarmIdForQrCode(const QString& qrCode, const QSet<QString>& blockedAlarmTypes) const;
 
     QHash<QString, AlarmInfo> m_active;
+    QHash<QString, qint64>    m_recentQRCodeResolveUntilMs;
     mutable QMutex            m_mutex;
     AlarmDispatchTaskLogger*  m_logger = nullptr;
     QTimer*                   m_foupAlarmSyncTimer = nullptr;

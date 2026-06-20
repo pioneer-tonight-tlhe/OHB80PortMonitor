@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.5.8**
+**当前版本：v0.5.9**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,55 @@
 ---
 
 ## 更新日志
+
+## v0.5.9
+
+### ConfigPage 新增设备信息配置
+- 修改时间：2026-06-18
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：在 ConfigPage 新增设备信息配置入口，支持查看设备 QRCode、固件版本号、IP、Port，并支持修改单台设备的 IP、Port 和 QRCode。
+- 功能点明细：
+  - 新增 `DeviceInfoSettingWidget`，顶部导航新增 `Device Info` 入口。
+  - `View` 按钮弹出设备信息表格，表头为 `QRCode`、`固件版本号`、`IP`、`Port`；固件版本号由 `InitialCommandIssuer` 解析初始化阶段 `ReadVersion` 指令响应后写入运行态 `ModbusTcpMaster`。
+  - 修改区拆分为三行：`Current QRCode` 选择当前要修改的设备；`New QRCode` 行独立设置新的设备编号；`IP / Port` 行独立设置设备连接地址和端口。
+  - IP 输入框校验 IPv4 地址，Port 输入框校验 `1-65535`；`Current QRCode` 按当前设备二维码最小值/最大值动态设置范围，`New QRCode` 固定范围为 `0~99999`，且不能设置为其他已有设备的 QRCode。
+  - 新增 `SetDeviceInfoTask` 作为业务层入口，统一写入运行日志，并串联运行态 Master 重配置、配置文件持久化和共享内存更新；共享数据更新会同步刷新 Foup 信息和所属 Set ID。
+  - `FrameDevice` 刷新 Foup 信息时同步刷新显示的 QRCode，确保修改设备编号后 Foup 层界面能显示最新编号。
+  - 修改 IP/Port 时会停止当前连接和自动重连，更新连接端点后恢复自动重连。
+  - 修改 QRCode 时先参考 `NetworkStatusTask` 的 `WriteQRCode` 写入流程下发 0x10 指令，只有设备侧写入成功后才更新运行态 Master ID 映射、`ohb_device.ini` 和共享数据；下发结果同步写入通讯日志和运行日志。
+  - QRCode 修改成功后会通知 `AlarmDispatchTask` 按旧 QRCode 批量恢复该设备编号下的所有 active 告警；`NetworkStatusTask` 会过滤旧 QRCode 的过期连接状态事件，`AlarmDispatchTask` 定时同步时也会恢复 SharedData 中已不存在 QRCode 的残留 active 告警，并对告警日志异步 INSERT 晚于 UPDATE 的情况做延迟补偿，避免旧设备编号被移除后又重新产生离线或其它残留设备告警。
+  - 配置文件持久化失败时会尝试回滚运行态 Master 到旧 QRCode、旧 IP 和旧 Port。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/configsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_device_info_task/set_device_info_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_device_info_task/set_device_info_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/ohbdeviceconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/app/ohbdeviceconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
+  - `OHB80PortMonitor_V_1_0_0/classes/setofohbinfo.h`
+  - `OHB80PortMonitor_V_1_0_0/classes/setofohbinfo.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbusconnecter.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbusconnecter.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmastermanager.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmastermanager.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmasterpool.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmasterpool.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/overheadcranetrack/framedevice.cpp`
+  - `README.md`
+- 兼容性影响：新增配置入口不改变已有设备监控、通信日志和告警逻辑；修改 QRCode 后，后续运行态查找和配置文件中的设备编号会使用新 QRCode。
+- 验证情况：已执行 64 位 Debug 编译验证，相关目标通过编译；复验链接阶段因 `OHB80PortMonitor_V_1_0_0/bin/x64/OHB80PortMonitor_V_1_0_0.exe` 正在被占用，未能覆盖生成，关闭正在运行的程序后重新执行 `mingw32-make` 即可完成链接。
 
 ## v0.5.8
 

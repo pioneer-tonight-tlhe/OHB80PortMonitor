@@ -91,6 +91,9 @@ void AlarmDispatchTask::start()
         connect(db, &LogDB::AlarmLogDBCon::recordResolved,
                 this, &AlarmDispatchTask::onAlarmDBRecordResolved,
                 Qt::QueuedConnection);
+        connect(db, &LogDB::AlarmLogDBCon::recordInserted,
+                this, &AlarmDispatchTask::onAlarmDBRecordInserted,
+                Qt::QueuedConnection);
     }
 
     m_logger->summaryLogger().info(QString("[start] 警报调度任务已启动，活跃警报数=%1").arg(activeCount()).toStdString());
@@ -578,6 +581,8 @@ int AlarmDispatchTask::submitResolveAllByQRCode(const QString& qrCode)
         return 0;
     }
 
+    rememberRecentQRCodeResolve(normalizedQRCode);
+
     QList<AlarmInfo> resolvedInfos;
     {
         QMutexLocker locker(&m_mutex);
@@ -620,7 +625,120 @@ int AlarmDispatchTask::submitResolveAllByQRCode(const QString& qrCode)
         emit alarmResolved(resolvedInfo);
     }
 
-    return resolvedInfos.count();
+    const int dbResolvedCount = resolveUnresolvedDbRowsByQRCode(normalizedQRCode);
+    scheduleResolveUnresolvedDbRowsByQRCode(normalizedQRCode);
+
+    return resolvedInfos.count() + dbResolvedCount;
+}
+
+void AlarmDispatchTask::rememberRecentQRCodeResolve(const QString& qrCode)
+{
+    const QString normalizedQRCode = qrCode.trimmed();
+    if (normalizedQRCode.isEmpty()) {
+        return;
+    }
+
+    constexpr qint64 kRecentResolveGraceMs = 30000;
+    const qint64 expireAt = QDateTime::currentMSecsSinceEpoch() + kRecentResolveGraceMs;
+    QMutexLocker locker(&m_mutex);
+    m_recentQRCodeResolveUntilMs.insert(normalizedQRCode, expireAt);
+}
+
+bool AlarmDispatchTask::shouldAutoResolveInsertedRecord(const AlarmRecord& record)
+{
+    if (record.isResolved != static_cast<int>(AlarmResolvedStatus::Unresolved)) {
+        return false;
+    }
+
+    const QString qrCode = record.qrCode.trimmed();
+    if (qrCode.isEmpty()) {
+        return false;
+    }
+
+    bool numericQRCode = false;
+    qrCode.toInt(&numericQRCode);
+    if (!numericQRCode) {
+        return false;
+    }
+
+    if (!SharedData::getAllQrcodes().contains(qrCode)) {
+        return true;
+    }
+
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    QMutexLocker locker(&m_mutex);
+    auto it = m_recentQRCodeResolveUntilMs.find(qrCode);
+    if (it == m_recentQRCodeResolveUntilMs.end()) {
+        return false;
+    }
+    if (it.value() < now) {
+        m_recentQRCodeResolveUntilMs.erase(it);
+        return false;
+    }
+    return true;
+}
+
+int AlarmDispatchTask::resolveUnresolvedDbRowsByQRCode(const QString& qrCode)
+{
+    const QString normalizedQRCode = qrCode.trimmed();
+    if (normalizedQRCode.isEmpty()) {
+        return 0;
+    }
+
+    auto* db = LogDB::DatabaseManager::instance().alarmLogCon();
+    if (!db) {
+        return 0;
+    }
+
+    constexpr int kPageSize = 10000;
+    const QList<AlarmRecord> rows = db->queryPageWithConditions(
+        /*alarmLevel*/ -1,
+        /*qrCode*/ normalizedQRCode,
+        /*alarmType*/ QString(),
+        /*isResolved*/ static_cast<int>(AlarmResolvedStatus::Unresolved),
+        /*startTime*/ QString(),
+        /*endTime*/ QString(),
+        /*pageSize*/ kPageSize,
+        /*pageNumber*/ 1);
+
+    QSet<int> alarmTypes;
+    for (const AlarmRecord& row : rows) {
+        if (row.qrCode.trimmed() == normalizedQRCode
+            && row.isResolved == static_cast<int>(AlarmResolvedStatus::Unresolved)) {
+            alarmTypes.insert(row.alarmType);
+        }
+    }
+
+    if (alarmTypes.isEmpty()) {
+        return 0;
+    }
+
+    const QString resolveTime = QDateTime::currentDateTime()
+        .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    for (int alarmType : qAsConst(alarmTypes)) {
+        db->updateResolve(normalizedQRCode, QString::number(alarmType), resolveTime);
+    }
+
+    const QString message = QString("[resolveUnresolvedDbRowsByQRCode] Resolved DB rows for QRCode %1, alarmTypeCount=%2")
+        .arg(normalizedQRCode)
+        .arg(alarmTypes.count());
+    m_logger->deviceLogger(normalizedQRCode).info(message.toStdString());
+    return alarmTypes.count();
+}
+
+void AlarmDispatchTask::scheduleResolveUnresolvedDbRowsByQRCode(const QString& qrCode)
+{
+    const QString normalizedQRCode = qrCode.trimmed();
+    if (normalizedQRCode.isEmpty()) {
+        return;
+    }
+
+    const QList<int> retryDelaysMs = { 200, 1000, 3000 };
+    for (int delayMs : retryDelaysMs) {
+        QTimer::singleShot(delayMs, this, [this, normalizedQRCode]() {
+            resolveUnresolvedDbRowsByQRCode(normalizedQRCode);
+        });
+    }
 }
 
 bool AlarmDispatchTask::isActive(const QString& alarmId) const
@@ -858,4 +976,26 @@ void AlarmDispatchTask::onAlarmDBRecordResolved(const QString& qrCode, const QSt
         .arg(resolveTime);
     // m_logger->summaryLogger().warn(message.toStdString());
     m_logger->deviceLogger(qrCode).warn(message.toStdString());
+}
+
+void AlarmDispatchTask::onAlarmDBRecordInserted(const AlarmRecord& record)
+{
+    if (!shouldAutoResolveInsertedRecord(record)) {
+        return;
+    }
+
+    auto* db = LogDB::DatabaseManager::instance().alarmLogCon();
+    if (!db) {
+        return;
+    }
+
+    const QString qrCode = record.qrCode.trimmed();
+    const QString resolveTime = QDateTime::currentDateTime()
+        .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+    db->updateResolve(qrCode, QString::number(record.alarmType), resolveTime);
+
+    const QString message = QString("[onAlarmDBRecordInserted] Auto-resolved late inserted alarm for QRCode %1, alarmType=%2")
+        .arg(qrCode)
+        .arg(alarmTypeDisplayText(record.alarmType));
+    m_logger->deviceLogger(qrCode).info(message.toStdString());
 }
