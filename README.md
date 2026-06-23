@@ -14,12 +14,37 @@
 
 - 发布日期：2026-06-15
 
+### 完善固件升级测试控制交互与 CSV 中文表头
+- 修改时间：2026-06-16
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 关联信息：`FirmwareUpgradeTestSettingWidget` / `FirmwareUpgradeTestReportRepository` / `DebugPage`
+- 功能概述：完善固件升级测试 UI 的运行控制体验和后台 CSV 数据格式，使测试进度以进度条呈现，暂停后可调整轮次间隔并在继续时生效，同时提供重新测试入口、顶部导航入口和中文 CSV 表头。
+- 功能点明细：
+  - 将固件升级测试的总轮次进度和单轮设备进度由文本显示调整为 `QProgressBar` 控件，并保持 `0/10000`、`0/1` 的格式展示。
+  - 新增目标设备号 `SpinBox`，按输入的设备 QRCode/设备 ID 只调度一台设备参与固件升级测试。
+  - 保留固件升级测试次数设置，当前支持配置 `1..100000` 轮，默认 `10000` 轮；测试运行期间锁定，进入暂停状态后允许修改，且新次数必须大于已完成轮次。
+  - 暂停测试进入 `Paused` 状态或已发起暂停请求后允许修改每轮间隔时间；再次点击继续测试时，会先把新的间隔写回 `FirmwareUpgradeStressTask`，再继续下一轮测试。
+  - 将轮次间隔最小值调整为 `2 s`，并在 UI 层与 `FirmwareUpgradeStressTask` 调度层同时做最小值兜底，避免过短间隔导致 UI 或底层升级流程压力过高。
+  - 新增 `Restart Test` 按钮：无任务时可直接发起新测试；任务暂停后可安全取消当前会话并重新从第 0 轮开始测试。
+  - 在 DebugPage 顶部导航栏新增 `Firmware Test` 入口，点击后可定位到固件升级测试控制区域。
+  - 将固件升级测试三个 CSV 文件的表头统一改为中文，包括会话汇总、轮次汇总和失败明细；轮次汇总继续保留截图路径字段，便于通过 CSV 定位每轮测试截图。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupgradetestsettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupgradetestsettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `README.md`
+- 兼容性影响：新生成的固件升级测试 CSV 使用中文表头；历史英文表头测试报告不会自动迁移。
+- 备注：当前仍保持“后台写 CSV + 每轮保存截图”的报告方式，不恢复 UI 报告弹窗。
+
 ### 新增固件升级测试报表 CSV 数据层
 - 修改时间：2026-06-15
 - 变更类型：Added
 - 开发人员：Simon（工号：13）
 - 关联信息：`FirmwareUpgradeTestReportRepository` / `FirmwareUpgradeTestSessionSummaryRecord` / `FirmwareUpgradeTestRoundSummaryRecord` / `FirmwareUpgradeTestFailureDetailRecord`
-- 功能概述：为固件升级测试功能新增基于 CSV 的报表数据层，用于统一保存测试会话概况、单轮结果和失败明细，为后续调度任务和测试报告 UI 提供稳定的数据契约。
+- 功能概述：为固件升级测试功能新增基于 CSV 的报表数据层，用于统一保存测试会话概况、单轮结果和失败明细，为后续调度任务和外部分析流程提供稳定的数据契约。
 - 功能点明细：
   - 新增 `firmware_upgrade_test_report_types.h`，定义测试会话汇总、单轮汇总、失败明细和完整报告四类结构体。
   - 新增 `FirmwareUpgradeTestReportRepository`，封装测试报表目录初始化、CSV 写入、CSV 读取和完整报告聚合加载逻辑。
@@ -27,12 +52,12 @@
   - 统一约定测试报表根目录为 `log/firmware_upgrade/test_reports/<session_id>/`，并在每个会话目录下自动创建 `captures/` 子目录。
   - 新增 `session_summary.csv`，用于保存某次测试任务的最新会话快照，包括目标轮次、已完成轮次、轮次间隔、设备数、成功轮次、失败轮次和固件文件路径。
   - 新增 `round_summary.csv`，用于按轮次追加保存单轮测试的开始时间、结束时间、参与设备数、成功设备数、失败设备数、轮次结果和截图路径。
-  - 新增 `failure_detail.csv`，用于按失败设备追加保存 `qrcode`、失败阶段、失败码、失败原因、失败时间和截图路径，作为测试报告弹窗第二行失败明细的主要数据源。
+  - 新增 `failure_detail.csv`，用于按失败设备追加保存二维码、失败阶段、失败码、失败原因、失败时间和截图路径，作为后台失败明细分析的主要数据源。
   - `createSessionId()` 使用时间戳生成 `session_id`，当同名目录已存在时自动追加数字后缀，避免同毫秒测试会话冲突。
   - `initializeSession()` 负责创建会话目录、截图目录以及三个 CSV 文件表头，保证调度任务在首次写入前无需关心目录和文件准备工作。
   - `writeSessionSummary()` 采用“重写表头 + 写入一条最新记录”的方式保存会话快照；`appendRoundSummary()` 和 `appendFailureDetail()` 采用追加写入方式保存过程数据。
-  - `loadReport()` 统一加载会话汇总、轮次汇总和失败明细，便于后续报告 UI 一次性读取完整数据。
-  - `loadFailureDetails(sessionId, roundIndex)` 支持按指定轮次筛选失败明细，便于测试报告按轮次展示失败设备、失败原因和图片链接。
+  - `loadReport()` 统一加载会话汇总、轮次汇总和失败明细，便于后续外部工具或独立分析流程一次性读取完整数据。
+  - `loadFailureDetails(sessionId, roundIndex)` 支持按指定轮次筛选失败明细，便于按轮次分析失败设备和失败原因。
 - 改动文件：
   - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_types.h`
   - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.h`
@@ -41,6 +66,67 @@
   - `README.md`
 - 兼容性影响：当前仅新增固件升级测试的数据层，不改变现有 `FirmwareUpgradeTask`、`FirmwareUpgrader` 和手动固件升级 UI 的运行行为。
 - 备注：后续固件升级测试调度任务应按“初始化会话目录 → 写入初始会话快照 → 每轮追加轮次汇总/失败明细 → 轮次结束后刷新会话快照”的顺序使用本数据层。
+
+### 新增 FirmwareUpgradeStressTask 固件升级测试调度任务第一版
+- 修改时间：2026-06-15
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 关联信息：`FirmwareUpgradeStressTask`
+- 功能概述：新增固件升级测试调度任务第一版，在业务层实现按轮次循环执行固件升级、轮次间隔控制、软暂停/继续和测试结果落盘能力，为后续测试控制 UI 和后台 CSV 分析流程提供直接可用的调度核心。
+- 功能点明细：
+  - 新增 `FirmwareUpgradeStressTask`，复用现有 `FirmwareUpgradeTask` 作为单轮执行器，在同一调度线程内以事件驱动方式串联多轮升级，避免通过 `Scheduler` 再次嵌套提交子任务造成阻塞。
+  - 支持通过构造参数或 setter 设置固件文件路径、目标测试轮次、每轮间隔时间和参与设备列表；当未显式指定设备列表时，默认快照当前全部设备参与测试。
+  - 新增轮次级调度状态机：任务启动后初始化测试会话，逐轮启动固件升级；每轮结束后根据成功设备数和失败设备数生成轮次结果，并决定进入下一轮、暂停或结束。
+  - 支持软暂停逻辑：调用 `pause()` 时不会立即中断当前轮次；如果当前正处于轮次执行中，则等待本轮完成后进入 `Paused` 状态；如果正处于轮次间隔等待中，则立即停表并切换为 `Paused`。
+  - 支持继续逻辑：在 `Paused` 状态下调用 `resume()` 后恢复为 `Running`，并从下一轮继续测试，不重置当前测试会话和已完成统计。
+  - 支持取消逻辑：调用 `stop()` 时会停止轮次间隔计时器，并在有单轮升级任务运行时转发取消请求给当前 `FirmwareUpgradeTask`；无运行轮次时直接结束整个测试会话。
+  - 新增总轮次进度信号 `totalRoundProgressChanged(completedRounds, targetRounds)`，用于后续 UI 展示 `0/10000` 形式的测试轮次进度。
+  - 新增单轮设备进度信号 `currentRoundProgressChanged(completedDevices, totalDevices)`，用于后续 UI 展示 `0/80` 形式的单轮次固件升级进度。
+  - 新增 `roundStarted`、`roundSummaryReady`、`failureDetailReady`、`sessionSummaryUpdated` 和 `stressTaskFinished` 信号，便于后续 UI 分别监听轮次启动、轮次汇总、失败明细、会话快照刷新和测试整体完成事件。
+  - 复用底层 `deviceProgress`、`deviceStateLog` 和 `deviceFinished` 信号，对外继续透传单设备升级进度、状态日志和单设备完成结果。
+  - 在每轮结束时，根据本轮设备结果构造 `FirmwareUpgradeTestRoundSummaryRecord` 并写入 `round_summary.csv`；对每个失败设备构造 `FirmwareUpgradeTestFailureDetailRecord` 并写入 `failure_detail.csv`。
+  - 在任务启动、暂停、继续、取消和完成时持续刷新 `session_summary.csv`，保证后台 CSV 记录和后续恢复逻辑始终基于最新的会话快照。
+  - 新增失败码归类逻辑，优先根据消息中的 ASCII 特征如 `TCP`、`Bin`、`AreYouThere`、`cancel` 进行归类；无法直接归类时回退为按阶段生成通用失败码，如 `PREPARING_FAILURE`、`DATA_TRANSFER_FAILURE`、`VERSION_CHECK_FAILURE`。
+  - 预留轮次截图路径字段，当前调度任务仅负责生成 CSV 记录，默认不在 UI 线程执行截图或截图路径回填。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_stress_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_stress_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_types.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `README.md`
+- 兼容性影响：当前仅新增固件升级测试调度能力，不替换现有手动固件升级流程；由于测试控制 UI 尚未接入，现阶段不会影响用户现有的固件升级操作入口。
+- 备注：后续建议继续实现固件升级测试 `SettingWidget` 以及“测试启用时冻结现有手动升级控件”的界面联动逻辑；测试结果默认通过后台 CSV 文件查看。
+
+### 新增固件升级测试控制 UI 与后台 CSV 记录
+- 修改时间：2026-06-15
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 关联信息：`FirmwareUpgradeTestSettingWidget` / `FirmwareUpdateWidget` / `FirmwareUpgradeStressTask`
+- 功能概述：在现有固件升级页面中新增固件升级测试控制区，并将原手动升级表格复用为测试运行期的只读监视面板，实现测试轮次控制、软暂停、每轮间隔设置、轮次/单轮进度显示以及后台 CSV 记录。
+- 功能点明细：
+  - 新增 `FirmwareUpgradeTestSettingWidget`，提供测试轮次设置、每轮间隔时间设置、开始测试、暂停测试、总轮次进度和单轮设备进度控件。
+  - `FirmwareUpdateSettingWidget` 现同时承载原手动固件升级控件和测试控制控件，并将配置区选择的同一份固件 `bin` 文件路径同步给两者，满足复用现有固件升级配置 UI 的需求。
+  - 扩展 `FirmwareUpdateWidget` 为“可交互手动升级”和“只读测试监视”双模式：测试任务运行或暂停期间冻结原有手动升级按钮，只保留设备表格、进度条、状态和日志用于展示当前轮次执行过程。
+  - 新增 `setSelectedDevices()`、`prepareMonitoredRound()`、`applyMonitoredDeviceProgress()`、`applyMonitoredDeviceStateLog()`、`applyMonitoredDeviceFinished()` 和 `updateMonitoredRoundProgress()` 等监视接口，使 `FirmwareUpgradeStressTask` 的信号可直接驱动现有升级表格而不重复实现第二套设备进度视图。
+  - `prepareMonitoredRound()` 在设备列表未变化时不再重复清空和重建设备表格，仅重置当前轮次状态和进度，降低长轮次测试期间的 UI 压力。
+  - 测试控件不再实现 UI 报告弹窗和报告热更新；测试结果由 `FirmwareUpgradeStressTask` 在后台写入 `session_summary.csv`、`round_summary.csv` 和 `failure_detail.csv`。
+  - `round_summary.csv` 和 `failure_detail.csv` 表头保留 `截图路径` 字段；每轮测试由调度任务先写入确定截图路径，测试 UI 在收到轮次汇总信号后把当前监视表截图保存到该路径，不再对 CSV 做二次回写，成功和失败轮次都会截图。
+  - 测试调度按用户输入的目标设备号只让单台设备参与升级流程，即使当前未连接也会进入底层升级逻辑，由 `FirmwareUpgrader` 和 `FirmwareUpgradeTask` 产生对应失败原因并写入 CSV 明细。
+  - 测试控件通过监听 `SchedulerTask::stateChanged`、`sessionSummaryUpdated`、`roundStarted`、`totalRoundProgressChanged`、`currentRoundProgressChanged` 和 `stressTaskFinished` 信号，完成开始/继续/暂停按钮状态切换以及 `0/10000` / `0/1` 进度文本刷新。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupgradetestsettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupgradetestsettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupdatesettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupdatesettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupdatewidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupdatewidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/firmware_upgrade_test_task/firmware_upgrade_stress_task.h`
+  - `README.md`
+- 兼容性影响：测试控件运行期间会冻结现有手动固件升级入口，防止手动升级与自动测试并行提交；测试结束或失败清理后会自动恢复原控件交互，不影响原有非测试场景。
+- 备注：当前不提供 UI 报告查看入口，测试报告以 CSV 文件形式落盘，后续可由外部工具或独立分析流程读取。
 
 ---
 

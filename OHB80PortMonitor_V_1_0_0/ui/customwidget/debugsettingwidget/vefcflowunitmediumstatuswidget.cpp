@@ -2,7 +2,7 @@
 #include "../settingwidget/settingitemwidget.h"
 #include "modaltabledialog.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/read_vefc_flow_unit_medium_status_task/read_vefc_flow_unit_medium_status_task.h"
+#include "tasks/read_vefc_flow_unit_medium_status_task/read_vefc_flow_unit_medium_status_task.h"
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"

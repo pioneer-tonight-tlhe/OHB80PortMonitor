@@ -1,11 +1,13 @@
 #ifndef FIRMWAREUPDATEWIDGET_H
 #define FIRMWAREUPDATEWIDGET_H
 
-#include <QWidget>
-#include <QTableWidget>
-#include <QSet>
-#include <QHash>
 #include <QDateTime>
+#include <QByteArray>
+#include <QHash>
+#include <QSet>
+#include <QTableWidget>
+#include <QWidget>
+#include <QStringList>
 
 #include "modbustcpmastermanager/modbustcpmaster/firmwareupgrader.h"
 
@@ -24,27 +26,38 @@ public:
     ~FirmwareUpdateWidget();
 
     enum DeviceStatus {
-        Idle = 0,       // 空闲
+        Idle = 0,
         Waiting,
-        Updating,       // 升级中
-        Success,        // 成功
-        Failed          // 失败
+        Updating,
+        Success,
+        Failed
     };
 
 public:
-    // 设置固件升级文件路径
     void setFirmwareFilePath(const QString &filePath);
     QString firmwareFilePath() const;
 
-    // 设置截图存放目录
     void setCaptureDirectory(const QString &dirPath);
     QString captureDirectory() const;
+    void setInteractiveEnabled(bool enabled);
+
+    void setSelectedDevices(const QStringList &deviceIds);
+    void prepareMonitoredRound(const QStringList &deviceIds);
+    void applyMonitoredDeviceProgress(const QString &qrcode, int percent);
+    void applyMonitoredDeviceStateLog(const QString &qrcode,
+                                      FirmwareUpgrader::UpgradeState state,
+                                      const QString &logMessage,
+                                      const QByteArray &frame);
+    void applyMonitoredDeviceFinished(const QString &qrcode, bool success, const QString &message);
+    void updateMonitoredRoundProgress(int completed, int total);
+    QString captureCurrentScreenshot(const QString &fileNamePrefix = QString());
+    bool saveCurrentScreenshot(const QString &filePath);
 
 public slots:
-    void onAddDeviceForUpdate();        // 选中要升级的设备
-    void onAddAllDevices();             // 添加所有设备到表格
-    void onClear();                     // 清理表格中所有数据
-    void onUpdateSelectedDevices();     // 开始升级选中的设备
+    void onAddDeviceForUpdate();
+    void onAddAllDevices();
+    void onClear();
+    void onUpdateSelectedDevices();
 
 private slots:
     void onTaskDeviceProgress(const QString &qrcode, int percent);
@@ -58,47 +71,50 @@ private slots:
 private:
     Ui::FirmwareUpdateWidget *ui;
 
-    // 固件升级相关
-    QString m_firmwareFilePath;  // 固件文件路径
+    QString m_firmwareFilePath;
 
-    // 进度跟踪相关
-    int m_totalDevices;          // 总设备数
-    int m_completedDevices;      // 已完成设备数
-    int m_successCount;          // 成功设备数
-    int m_failCount;             // 失败设备数
-    QSet<QString> m_completedDeviceIds;  // 已完成的设备ID集合
+    int m_totalDevices;
+    int m_completedDevices;
+    int m_successCount;
+    int m_failCount;
+    QSet<QString> m_completedDeviceIds;
 
-    // 升级时间记录
     QHash<QString, QDateTime> m_deviceUpgradeStartTimes;
-
-    // 截图相关
-    QString m_captureDirectory;  // 截图存放目录
-
-    // ---- 性能优化 ----
-    QHash<QString, int> m_qrcodeRowMap;   // qrcode → 行索引 O(1) 查找
+    QString m_captureDirectory;
+    QHash<QString, int> m_qrcodeRowMap;
+    bool m_interactiveEnabled = true;
+    bool m_bulkUpdatingDeviceTable = false;
 
     void initUI();
     void initLoggerWidget();
     void initTableWidget(QTableWidget *table, const QStringList &headers);
     void initTableWidgetSelectedDevices();
     void addDeviceToTable(ModbusTcpMaster *master);
+    void addDeviceToTable(const QString &qrCode);
+    QStringList selectedDeviceIdsInTable() const;
     void updateTableHeight();
     void updateProgressBar();
     void resetProgress();
+    void resetDeviceRows();
+    void prepareDevicesForUpgrade(const QStringList &deviceIds);
+    void handleDeviceProgress(const QString &qrcode, int percent);
+    void handleDeviceStateLog(const QString &qrcode,
+                              FirmwareUpgrader::UpgradeState state,
+                              const QString &logMessage,
+                              const QByteArray &frame);
+    void handleDeviceFinished(const QString &qrcode, bool success, const QString &message);
+    void handleAllProgress(int completed, int total, bool showCompletionDialog);
 
-    // 状态相关辅助函数
     QString getStatusText(DeviceStatus status) const;
     QString getStatusStyle(DeviceStatus status) const;
 
-    // 日志写入辅助
     void writeLog(const QString &level, const QString &qrcode,
                   const QString &phase, const QString &message);
 
-    // 截图相关
-    void captureTableWidgetScreenshot();
+    QString captureTableWidgetScreenshot(const QString &fileNamePrefix = QString());
+    bool saveTableWidgetScreenshot(const QString &filePath);
     bool ensureCaptureDirectoryExists();
 
-    // 升级阶段转换
     static QString upgradeStateToPhase(FirmwareUpgrader::UpgradeState state);
 };
 

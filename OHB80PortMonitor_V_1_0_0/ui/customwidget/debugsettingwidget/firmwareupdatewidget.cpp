@@ -301,27 +301,7 @@ void FirmwareUpdateWidget::onUpdateSelectedDevices()
 
     qDebug() << "[FirmwareUpdateWidget] Starting upgrade for" << selectedDeviceIds.count() << "devices";
 
-    // 重置成功/失败计数
-    m_successCount = 0;
-    m_failCount = 0;
-
-    // 3. 将表格中对应设备状态设置为 Wait
-    for (int row = 0; row < ui->tableWidgetSelectedDevices->rowCount(); ++row) {
-        QLabel* qrCodeLabel = qobject_cast<QLabel*>(ui->tableWidgetSelectedDevices->cellWidget(row, 0));
-        if (qrCodeLabel && selectedDeviceIds.contains(qrCodeLabel->text())) {
-            QLabel* statusLabel = qobject_cast<QLabel*>(ui->tableWidgetSelectedDevices->cellWidget(row, 2));
-            if (statusLabel) {
-                statusLabel->setText(getStatusText(Waiting));
-                statusLabel->setStyleSheet(getStatusStyle(Waiting));
-            }
-        }
-    }
-
-    // 4. 设置进度跟踪
-    m_totalDevices = selectedDeviceIds.count();
-    m_completedDevices = 0;
-    m_completedDeviceIds.clear();
-    updateProgressBar();
+    prepareDevicesForUpgrade(selectedDeviceIds);
 
     // 5. 创建固件升级调度任务并连接信号
     FirmwareUpgradeTask *task = new FirmwareUpgradeTask(selectedDeviceIds, m_firmwareFilePath);
@@ -356,6 +336,83 @@ QString FirmwareUpdateWidget::captureDirectory() const
     return m_captureDirectory;
 }
 
+void FirmwareUpdateWidget::setInteractiveEnabled(bool enabled)
+{
+    m_interactiveEnabled = enabled;
+    ui->lineEditQRCode->setEnabled(enabled);
+    ui->btnAddDevice->setEnabled(enabled);
+    ui->btnAddAllDevices->setEnabled(enabled);
+    ui->btnUdateSelected->setEnabled(enabled);
+    ui->btnClear->setEnabled(enabled);
+
+    for (int row = 0; row < ui->tableWidgetSelectedDevices->rowCount(); ++row) {
+        if (QPushButton *deleteButton = qobject_cast<QPushButton*>(
+                ui->tableWidgetSelectedDevices->cellWidget(row, 4))) {
+            deleteButton->setEnabled(enabled);
+        }
+    }
+}
+
+void FirmwareUpdateWidget::setSelectedDevices(const QStringList &deviceIds)
+{
+    ui->tableWidgetSelectedDevices->setRowCount(0);
+    m_qrcodeRowMap.clear();
+
+    m_bulkUpdatingDeviceTable = true;
+    for (const QString &deviceId : deviceIds) {
+        addDeviceToTable(deviceId);
+    }
+    m_bulkUpdatingDeviceTable = false;
+
+    updateTableHeight();
+    resetProgress();
+}
+
+void FirmwareUpdateWidget::prepareMonitoredRound(const QStringList &deviceIds)
+{
+    if (selectedDeviceIdsInTable() != deviceIds) {
+        setSelectedDevices(deviceIds);
+    }
+
+    prepareDevicesForUpgrade(deviceIds);
+}
+
+void FirmwareUpdateWidget::applyMonitoredDeviceProgress(const QString &qrcode, int percent)
+{
+    handleDeviceProgress(qrcode, percent);
+}
+
+void FirmwareUpdateWidget::applyMonitoredDeviceStateLog(const QString &qrcode,
+                                                        FirmwareUpgrader::UpgradeState state,
+                                                        const QString &logMessage,
+                                                        const QByteArray &frame)
+{
+    handleDeviceStateLog(qrcode, state, logMessage, frame);
+}
+
+void FirmwareUpdateWidget::applyMonitoredDeviceFinished(const QString &qrcode,
+                                                        bool success,
+                                                        const QString &message)
+{
+    handleDeviceFinished(qrcode, success, message);
+}
+
+void FirmwareUpdateWidget::updateMonitoredRoundProgress(int completed, int total)
+{
+    handleAllProgress(completed, total, false);
+}
+
+QString FirmwareUpdateWidget::captureCurrentScreenshot(const QString &fileNamePrefix)
+{
+    return captureTableWidgetScreenshot(fileNamePrefix);
+}
+
+bool FirmwareUpdateWidget::saveCurrentScreenshot(const QString &filePath)
+{
+    return saveTableWidgetScreenshot(filePath);
+}
+
+
 // ======================================================
 // 表格初始化
 // ======================================================
@@ -387,10 +444,13 @@ void FirmwareUpdateWidget::initTableWidgetSelectedDevices()
 
 void FirmwareUpdateWidget::addDeviceToTable(ModbusTcpMaster *master)
 {
+    addDeviceToTable(master ? master->ID : QStringLiteral("Unknown"));
+}
+
+void FirmwareUpdateWidget::addDeviceToTable(const QString &qrCode)
+{
     int row = ui->tableWidgetSelectedDevices->rowCount();
     ui->tableWidgetSelectedDevices->insertRow(row);
-
-    QString qrCode = master ? master->ID : "Unknown";
 
     // 第0列：QRCode
     QLabel *qrCodeLabel = new QLabel(qrCode);
@@ -419,6 +479,7 @@ void FirmwareUpdateWidget::addDeviceToTable(ModbusTcpMaster *master)
     // 第4列：删除按钮
     QPushButton *deleteButton = new QPushButton("Delete");
     deleteButton->setMaximumWidth(70);
+    deleteButton->setEnabled(m_interactiveEnabled);
     ui->tableWidgetSelectedDevices->setCellWidget(row, 4, deleteButton);
 
     // O(1) 行索引缓存
@@ -438,7 +499,25 @@ void FirmwareUpdateWidget::addDeviceToTable(ModbusTcpMaster *master)
         }
     });
 
-    updateTableHeight();
+    if (!m_bulkUpdatingDeviceTable) {
+        updateTableHeight();
+    }
+}
+
+QStringList FirmwareUpdateWidget::selectedDeviceIdsInTable() const
+{
+    QStringList deviceIds;
+    deviceIds.reserve(ui->tableWidgetSelectedDevices->rowCount());
+
+    for (int row = 0; row < ui->tableWidgetSelectedDevices->rowCount(); ++row) {
+        QLabel *qrCodeLabel = qobject_cast<QLabel*>(
+            ui->tableWidgetSelectedDevices->cellWidget(row, 0));
+        if (qrCodeLabel) {
+            deviceIds.append(qrCodeLabel->text());
+        }
+    }
+
+    return deviceIds;
 }
 
 // ======================================================
@@ -484,6 +563,55 @@ void FirmwareUpdateWidget::resetProgress()
     updateProgressBar();
 }
 
+void FirmwareUpdateWidget::resetDeviceRows()
+{
+    for (int row = 0; row < ui->tableWidgetSelectedDevices->rowCount(); ++row) {
+        if (QProgressBar *bar = qobject_cast<QProgressBar*>(
+                ui->tableWidgetSelectedDevices->cellWidget(row, 1))) {
+            bar->setValue(0);
+        }
+
+        if (QLabel *statusLabel = qobject_cast<QLabel*>(
+                ui->tableWidgetSelectedDevices->cellWidget(row, 2))) {
+            statusLabel->setText(getStatusText(Idle));
+            statusLabel->setStyleSheet(getStatusStyle(Idle));
+        }
+
+        if (QLabel *resultLabel = qobject_cast<QLabel*>(
+                ui->tableWidgetSelectedDevices->cellWidget(row, 3))) {
+            resultLabel->clear();
+            resultLabel->setStyleSheet(QString());
+        }
+    }
+}
+
+void FirmwareUpdateWidget::prepareDevicesForUpgrade(const QStringList &deviceIds)
+{
+    m_successCount = 0;
+    m_failCount = 0;
+    m_totalDevices = deviceIds.count();
+    m_completedDevices = 0;
+    m_completedDeviceIds.clear();
+
+    resetDeviceRows();
+
+    for (int row = 0; row < ui->tableWidgetSelectedDevices->rowCount(); ++row) {
+        QLabel *qrCodeLabel = qobject_cast<QLabel*>(
+            ui->tableWidgetSelectedDevices->cellWidget(row, 0));
+        if (!qrCodeLabel || !deviceIds.contains(qrCodeLabel->text())) {
+            continue;
+        }
+
+        if (QLabel *statusLabel = qobject_cast<QLabel*>(
+                ui->tableWidgetSelectedDevices->cellWidget(row, 2))) {
+            statusLabel->setText(getStatusText(Waiting));
+            statusLabel->setStyleSheet(getStatusStyle(Waiting));
+        }
+    }
+
+    updateProgressBar();
+}
+
 // ======================================================
 // 状态文本 / 样式
 // ======================================================
@@ -511,11 +639,155 @@ QString FirmwareUpdateWidget::getStatusStyle(DeviceStatus status) const
     }
 }
 
+void FirmwareUpdateWidget::handleDeviceProgress(const QString &qrcode, int percent)
+{
+    const int row = m_qrcodeRowMap.value(qrcode, -1);
+    if (row < 0) {
+        return;
+    }
+
+    QProgressBar *bar = qobject_cast<QProgressBar*>(
+        ui->tableWidgetSelectedDevices->cellWidget(row, 1));
+    QLabel *statusLabel = qobject_cast<QLabel*>(
+        ui->tableWidgetSelectedDevices->cellWidget(row, 2));
+
+    if (bar) {
+        bar->setValue(percent);
+    }
+
+    if (statusLabel && percent > 0 && percent < 100) {
+        statusLabel->setText(getStatusText(Updating));
+        statusLabel->setStyleSheet(getStatusStyle(Updating));
+    }
+}
+
+void FirmwareUpdateWidget::handleDeviceStateLog(const QString &qrcode,
+                                                FirmwareUpgrader::UpgradeState state,
+                                                const QString &logMessage,
+                                                const QByteArray &frame)
+{
+    qDebug() << "[FirmwareUpdateWidget][handleDeviceStateLog] qrcode:" << qrcode
+             << "state:" << static_cast<int>(state)
+             << "message:" << logMessage;
+
+    using UpgradeState = FirmwareUpgrader::UpgradeState;
+
+    writeLog("info", qrcode, upgradeStateToPhase(state), logMessage);
+
+    if (state != UpgradeState::SendingDataFrame) {
+        const int row = m_qrcodeRowMap.value(qrcode, -1);
+        if (row >= 0) {
+            if (QLabel *resultLabel = qobject_cast<QLabel*>(
+                    ui->tableWidgetSelectedDevices->cellWidget(row, 3))) {
+                resultLabel->setText(logMessage);
+            }
+        }
+    }
+
+    if (!frame.isEmpty()
+        && (state == UpgradeState::DataTransferStarted
+            || state == UpgradeState::SendingDataFrame
+            || state == UpgradeState::SendingLastFrame)) {
+        const int total = frame.size();
+        for (int offset = 0; offset < total; offset += 128) {
+            const int end = qMin(offset + 128, total);
+            QString hex;
+            hex.reserve((end - offset) * 3);
+            for (int index = offset; index < end; ++index) {
+                if (index > offset) {
+                    hex += QLatin1Char(' ');
+                }
+                hex += QString::number(static_cast<quint8>(frame[index]), 16)
+                           .rightJustified(2, QLatin1Char('0'))
+                           .toUpper();
+            }
+
+            writeLog("info", qrcode, QStringLiteral("DataFrame"), hex);
+        }
+    }
+}
+
+void FirmwareUpdateWidget::handleDeviceFinished(const QString &qrcode,
+                                                bool success,
+                                                const QString &message)
+{
+    qDebug() << "[FirmwareUpdateWidget][handleDeviceFinished] qrcode:" << qrcode
+             << "success:" << success << "message:" << message;
+
+    const int row = m_qrcodeRowMap.value(qrcode, -1);
+    if (row >= 0) {
+        QProgressBar *bar = qobject_cast<QProgressBar*>(
+            ui->tableWidgetSelectedDevices->cellWidget(row, 1));
+        QLabel *statusLabel = qobject_cast<QLabel*>(
+            ui->tableWidgetSelectedDevices->cellWidget(row, 2));
+        QLabel *resultLabel = qobject_cast<QLabel*>(
+            ui->tableWidgetSelectedDevices->cellWidget(row, 3));
+
+        if (success) {
+            if (bar) {
+                bar->setValue(100);
+            }
+            if (statusLabel) {
+                statusLabel->setText(getStatusText(Success));
+                statusLabel->setStyleSheet(getStatusStyle(Success));
+            }
+            if (resultLabel) {
+                resultLabel->setText(QStringLiteral("Upgrade success"));
+                resultLabel->setStyleSheet(QStringLiteral("QLabel { color: green; }"));
+            }
+            ++m_successCount;
+        } else {
+            if (statusLabel) {
+                statusLabel->setText(getStatusText(Failed));
+                statusLabel->setStyleSheet(getStatusStyle(Failed));
+            }
+            if (resultLabel) {
+                resultLabel->setText(message);
+                resultLabel->setStyleSheet(QStringLiteral("QLabel { color: red; }"));
+            }
+            ++m_failCount;
+        }
+    } else {
+        qDebug() << "[FirmwareUpdateWidget][handleDeviceFinished] row not found for qrcode:" << qrcode;
+    }
+
+    writeLog(success ? "info" : "error", qrcode, QStringLiteral("Finished"), message);
+}
+
+void FirmwareUpdateWidget::handleAllProgress(int completed, int total, bool showCompletionDialog)
+{
+    m_completedDevices = completed;
+    m_totalDevices = total;
+    updateProgressBar();
+
+    if (!showCompletionDialog || completed < total || total <= 0) {
+        return;
+    }
+
+    ui->tableWidgetSelectedDevices->viewport()->repaint();
+    captureTableWidgetScreenshot();
+
+    QString summary;
+    summary += QStringLiteral("Firmware update finished.\n\n");
+    summary += QStringLiteral("Total:   %1 device(s)\n").arg(total);
+    summary += QStringLiteral("Success: %1 device(s)\n").arg(m_successCount);
+    summary += QStringLiteral("Failed:  %1 device(s)").arg(m_failCount);
+
+    if (m_failCount == 0) {
+        QMessageBox::information(this, QStringLiteral("Update Complete"), summary);
+    } else {
+        QMessageBox::warning(this, QStringLiteral("Update Complete (with failures)"), summary);
+    }
+}
+
 // ======================================================
 // 固件升级任务信号处理槽
 // ======================================================
 void FirmwareUpdateWidget::onTaskDeviceProgress(const QString &qrcode, int percent)
 {
+    handleDeviceProgress(qrcode, percent);
+    return;
+
     int row = m_qrcodeRowMap.value(qrcode, -1);
     if (row < 0) return;
     QProgressBar *bar       = qobject_cast<QProgressBar*>(ui->tableWidgetSelectedDevices->cellWidget(row, 1));
@@ -532,6 +804,9 @@ void FirmwareUpdateWidget::onTaskDeviceStateLog(const QString &qrcode,
                                                 const QString &logMessage,
                                                 const QByteArray &frame)
 {
+    handleDeviceStateLog(qrcode, state, logMessage, frame);
+    return;
+
     qDebug() << "[FirmwareUpdateWidget][onTaskDeviceStateLog] 接收状态日志:" << qrcode
              << "状态:" << static_cast<int>(state) << "消息:" << logMessage;
 
@@ -572,6 +847,9 @@ void FirmwareUpdateWidget::onTaskDeviceStateLog(const QString &qrcode,
 
 void FirmwareUpdateWidget::onTaskDeviceFinished(const QString &qrcode, bool success, const QString &message)
 {
+    handleDeviceFinished(qrcode, success, message);
+    return;
+
     qDebug() << "[FirmwareUpdateWidget][onTaskDeviceFinished] 接收设备完成信号:" << qrcode
              << "成功:" << success << "消息:" << message;
 
@@ -599,6 +877,9 @@ void FirmwareUpdateWidget::onTaskDeviceFinished(const QString &qrcode, bool succ
 
 void FirmwareUpdateWidget::onTaskAllProgress(int completed, int total)
 {
+    handleAllProgress(completed, total, true);
+    return;
+
     m_completedDevices = completed;
     m_totalDevices     = total;
     updateProgressBar();
@@ -634,15 +915,61 @@ bool FirmwareUpdateWidget::ensureCaptureDirectoryExists()
     return true;
 }
 
-void FirmwareUpdateWidget::captureTableWidgetScreenshot()
+bool FirmwareUpdateWidget::saveTableWidgetScreenshot(const QString &filePath)
+{
+    if (filePath.trimmed().isEmpty()) {
+        return false;
+    }
+
+    const QFileInfo fileInfo(filePath);
+    QDir dir(fileInfo.absolutePath());
+    if (!dir.exists() && !dir.mkpath(QStringLiteral("."))) {
+        qDebug() << "[FirmwareUpdateWidget] Failed to create screenshot directory:"
+                 << fileInfo.absolutePath();
+        return false;
+    }
+
+    const QString originalCaptureDirectory = m_captureDirectory;
+    m_captureDirectory = fileInfo.absolutePath();
+    const QString generatedPath = captureTableWidgetScreenshot(fileInfo.completeBaseName());
+    m_captureDirectory = originalCaptureDirectory;
+
+    if (generatedPath.trimmed().isEmpty()) {
+        return false;
+    }
+
+    if (QFileInfo(generatedPath).absoluteFilePath() == fileInfo.absoluteFilePath()) {
+        return true;
+    }
+
+    QFile::remove(filePath);
+    if (QFile::rename(generatedPath, filePath)) {
+        return true;
+    }
+
+    if (QFile::copy(generatedPath, filePath)) {
+        QFile::remove(generatedPath);
+        return true;
+    }
+
+    qDebug() << "[FirmwareUpdateWidget] Failed to move screenshot:"
+             << generatedPath << "=>" << filePath;
+    return false;
+}
+
+QString FirmwareUpdateWidget::captureTableWidgetScreenshot(const QString &fileNamePrefix)
 {
     if (!ensureCaptureDirectoryExists()) {
         qDebug() << "[FirmwareUpdateWidget] 无法创建截图目录:" << m_captureDirectory;
-        return;
+        return QString();
     }
 
     QTableWidget *table = ui->tableWidgetSelectedDevices;
-    if (table->rowCount() == 0) return;
+    if (table->rowCount() == 0) {
+        return QString();
+    }
+
+    table->viewport()->repaint();
 
     // 计算完整内容尺寸
     int headerH  = table->horizontalHeader()->isVisible()
@@ -713,14 +1040,18 @@ void FirmwareUpdateWidget::captureTableWidgetScreenshot()
     painter.end();
 
     // 保存文件
-    QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss_zzz");
-    QString fileName  = QString("firmware_update_%1.png").arg(timestamp);
+    const QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss_zzz");
+    const QString fileName = fileNamePrefix.trimmed().isEmpty()
+        ? QString("firmware_update_%1.png").arg(timestamp)
+        : QString("%1_%2.png").arg(fileNamePrefix, timestamp);
     QString filePath  = QDir(m_captureDirectory).filePath(fileName);
 
     if (fullPixmap.save(filePath, "PNG")) {
         qDebug() << "[FirmwareUpdateWidget] 截图已保存"
                  << QString("(%1x%2)").arg(totalW).arg(totalH) << filePath;
+        return filePath;
     } else {
         qDebug() << "[FirmwareUpdateWidget] 截图保存失败:" << filePath;
+        return QString();
     }
 }

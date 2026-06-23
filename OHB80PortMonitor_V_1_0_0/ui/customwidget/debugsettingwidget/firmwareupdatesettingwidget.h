@@ -4,6 +4,7 @@
 #include "../settingwidget/settingwidget.h"
 
 class FirmwareUpdateWidget;
+class FirmwareUpgradeTestSettingWidget;
 
 // ====================================================================
 // FirmwareUpdateSettingWidget —— 固件升级界面容器
@@ -18,6 +19,7 @@ public:
 
     // 对外暴露内部的 FirmwareUpdateWidget（只读指针）
     FirmwareUpdateWidget *firmwareUpdateWidget() const;
+    FirmwareUpgradeTestSettingWidget *firmwareUpgradeTestWidget() const;
 
 public slots:
     // 设置固件 bin 文件路径（由外部配置控件触发）
@@ -25,6 +27,7 @@ public slots:
 
 private:
     FirmwareUpdateWidget *m_firmwareUpdateWidget;
+    FirmwareUpgradeTestSettingWidget *m_firmwareUpgradeTestWidget;
 };
 
 #endif // FIRMWAREUPDATESETTINGWIDGET_H

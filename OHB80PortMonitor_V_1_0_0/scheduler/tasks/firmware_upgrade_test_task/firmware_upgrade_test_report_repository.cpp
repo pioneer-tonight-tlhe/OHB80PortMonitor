@@ -10,40 +10,40 @@
 
 namespace {
 const QStringList kSessionSummaryHeaders = {
-    QStringLiteral("session_id"),
-    QStringLiteral("start_time"),
-    QStringLiteral("end_time"),
-    QStringLiteral("status"),
-    QStringLiteral("target_rounds"),
-    QStringLiteral("completed_rounds"),
-    QStringLiteral("interval_ms"),
-    QStringLiteral("device_count"),
-    QStringLiteral("success_rounds"),
-    QStringLiteral("failed_rounds"),
-    QStringLiteral("bin_file_path")
+    QStringLiteral("会话ID"),
+    QStringLiteral("开始时间"),
+    QStringLiteral("结束时间"),
+    QStringLiteral("状态"),
+    QStringLiteral("目标轮次"),
+    QStringLiteral("已完成轮次"),
+    QStringLiteral("轮次间隔毫秒"),
+    QStringLiteral("设备数量"),
+    QStringLiteral("成功轮次"),
+    QStringLiteral("失败轮次"),
+    QStringLiteral("固件文件路径")
 };
 
 const QStringList kRoundSummaryHeaders = {
-    QStringLiteral("session_id"),
-    QStringLiteral("round_index"),
-    QStringLiteral("start_time"),
-    QStringLiteral("end_time"),
-    QStringLiteral("total_devices"),
-    QStringLiteral("success_devices"),
-    QStringLiteral("failed_devices"),
-    QStringLiteral("result"),
-    QStringLiteral("screenshot_path")
+    QStringLiteral("会话ID"),
+    QStringLiteral("轮次"),
+    QStringLiteral("开始时间"),
+    QStringLiteral("结束时间"),
+    QStringLiteral("设备总数"),
+    QStringLiteral("成功设备数"),
+    QStringLiteral("失败设备数"),
+    QStringLiteral("结果"),
+    QStringLiteral("截图路径")
 };
 
 const QStringList kFailureDetailHeaders = {
-    QStringLiteral("session_id"),
-    QStringLiteral("round_index"),
-    QStringLiteral("qrcode"),
-    QStringLiteral("phase"),
-    QStringLiteral("error_code"),
-    QStringLiteral("error_message"),
-    QStringLiteral("occurred_time"),
-    QStringLiteral("screenshot_path")
+    QStringLiteral("会话ID"),
+    QStringLiteral("轮次"),
+    QStringLiteral("二维码"),
+    QStringLiteral("失败阶段"),
+    QStringLiteral("失败码"),
+    QStringLiteral("失败原因"),
+    QStringLiteral("失败时间"),
+    QStringLiteral("截图路径")
 };
 
 QString toCsvTime(const QDateTime &dateTime)
@@ -83,46 +83,46 @@ int rowIntValue(const QStringList &headers, const QStringList &row, const QStrin
 QJsonObject toJsonObject(const FirmwareUpgradeTestSessionSummaryRecord &record)
 {
     return QJsonObject{
-        {QStringLiteral("session_id"), record.sessionId},
-        {QStringLiteral("start_time"), toCsvTime(record.startTime)},
-        {QStringLiteral("end_time"), toCsvTime(record.endTime)},
-        {QStringLiteral("status"), record.status},
-        {QStringLiteral("target_rounds"), record.targetRounds},
-        {QStringLiteral("completed_rounds"), record.completedRounds},
-        {QStringLiteral("interval_ms"), record.intervalMs},
-        {QStringLiteral("device_count"), record.deviceCount},
-        {QStringLiteral("success_rounds"), record.successRounds},
-        {QStringLiteral("failed_rounds"), record.failedRounds},
-        {QStringLiteral("bin_file_path"), record.binFilePath}
+        {QStringLiteral("会话ID"), record.sessionId},
+        {QStringLiteral("开始时间"), toCsvTime(record.startTime)},
+        {QStringLiteral("结束时间"), toCsvTime(record.endTime)},
+        {QStringLiteral("状态"), record.status},
+        {QStringLiteral("目标轮次"), record.targetRounds},
+        {QStringLiteral("已完成轮次"), record.completedRounds},
+        {QStringLiteral("轮次间隔毫秒"), record.intervalMs},
+        {QStringLiteral("设备数量"), record.deviceCount},
+        {QStringLiteral("成功轮次"), record.successRounds},
+        {QStringLiteral("失败轮次"), record.failedRounds},
+        {QStringLiteral("固件文件路径"), record.binFilePath}
     };
 }
 
 QJsonObject toJsonObject(const FirmwareUpgradeTestRoundSummaryRecord &record)
 {
     return QJsonObject{
-        {QStringLiteral("session_id"), record.sessionId},
-        {QStringLiteral("round_index"), record.roundIndex},
-        {QStringLiteral("start_time"), toCsvTime(record.startTime)},
-        {QStringLiteral("end_time"), toCsvTime(record.endTime)},
-        {QStringLiteral("total_devices"), record.totalDevices},
-        {QStringLiteral("success_devices"), record.successDevices},
-        {QStringLiteral("failed_devices"), record.failedDevices},
-        {QStringLiteral("result"), record.result},
-        {QStringLiteral("screenshot_path"), record.screenshotPath}
+        {QStringLiteral("会话ID"), record.sessionId},
+        {QStringLiteral("轮次"), record.roundIndex},
+        {QStringLiteral("开始时间"), toCsvTime(record.startTime)},
+        {QStringLiteral("结束时间"), toCsvTime(record.endTime)},
+        {QStringLiteral("设备总数"), record.totalDevices},
+        {QStringLiteral("成功设备数"), record.successDevices},
+        {QStringLiteral("失败设备数"), record.failedDevices},
+        {QStringLiteral("结果"), record.result},
+        {QStringLiteral("截图路径"), record.screenshotPath}
     };
 }
 
 QJsonObject toJsonObject(const FirmwareUpgradeTestFailureDetailRecord &record)
 {
     return QJsonObject{
-        {QStringLiteral("session_id"), record.sessionId},
-        {QStringLiteral("round_index"), record.roundIndex},
-        {QStringLiteral("qrcode"), record.qrcode},
-        {QStringLiteral("phase"), record.phase},
-        {QStringLiteral("error_code"), record.errorCode},
-        {QStringLiteral("error_message"), record.errorMessage},
-        {QStringLiteral("occurred_time"), toCsvTime(record.occurredTime)},
-        {QStringLiteral("screenshot_path"), record.screenshotPath}
+        {QStringLiteral("会话ID"), record.sessionId},
+        {QStringLiteral("轮次"), record.roundIndex},
+        {QStringLiteral("二维码"), record.qrcode},
+        {QStringLiteral("失败阶段"), record.phase},
+        {QStringLiteral("失败码"), record.errorCode},
+        {QStringLiteral("失败原因"), record.errorMessage},
+        {QStringLiteral("失败时间"), toCsvTime(record.occurredTime)},
+        {QStringLiteral("截图路径"), record.screenshotPath}
     };
 }
 
@@ -130,17 +130,17 @@ FirmwareUpgradeTestSessionSummaryRecord sessionSummaryFromRow(const QStringList 
                                                              const QStringList &row)
 {
     FirmwareUpgradeTestSessionSummaryRecord record;
-    record.sessionId = rowValue(headers, row, QStringLiteral("session_id"));
-    record.startTime = fromCsvTime(rowValue(headers, row, QStringLiteral("start_time")));
-    record.endTime = fromCsvTime(rowValue(headers, row, QStringLiteral("end_time")));
-    record.status = rowValue(headers, row, QStringLiteral("status"));
-    record.targetRounds = rowIntValue(headers, row, QStringLiteral("target_rounds"));
-    record.completedRounds = rowIntValue(headers, row, QStringLiteral("completed_rounds"));
-    record.intervalMs = rowIntValue(headers, row, QStringLiteral("interval_ms"));
-    record.deviceCount = rowIntValue(headers, row, QStringLiteral("device_count"));
-    record.successRounds = rowIntValue(headers, row, QStringLiteral("success_rounds"));
-    record.failedRounds = rowIntValue(headers, row, QStringLiteral("failed_rounds"));
-    record.binFilePath = rowValue(headers, row, QStringLiteral("bin_file_path"));
+    record.sessionId = rowValue(headers, row, QStringLiteral("会话ID"));
+    record.startTime = fromCsvTime(rowValue(headers, row, QStringLiteral("开始时间")));
+    record.endTime = fromCsvTime(rowValue(headers, row, QStringLiteral("结束时间")));
+    record.status = rowValue(headers, row, QStringLiteral("状态"));
+    record.targetRounds = rowIntValue(headers, row, QStringLiteral("目标轮次"));
+    record.completedRounds = rowIntValue(headers, row, QStringLiteral("已完成轮次"));
+    record.intervalMs = rowIntValue(headers, row, QStringLiteral("轮次间隔毫秒"));
+    record.deviceCount = rowIntValue(headers, row, QStringLiteral("设备数量"));
+    record.successRounds = rowIntValue(headers, row, QStringLiteral("成功轮次"));
+    record.failedRounds = rowIntValue(headers, row, QStringLiteral("失败轮次"));
+    record.binFilePath = rowValue(headers, row, QStringLiteral("固件文件路径"));
     return record;
 }
 
@@ -148,15 +148,15 @@ FirmwareUpgradeTestRoundSummaryRecord roundSummaryFromRow(const QStringList &hea
                                                           const QStringList &row)
 {
     FirmwareUpgradeTestRoundSummaryRecord record;
-    record.sessionId = rowValue(headers, row, QStringLiteral("session_id"));
-    record.roundIndex = rowIntValue(headers, row, QStringLiteral("round_index"));
-    record.startTime = fromCsvTime(rowValue(headers, row, QStringLiteral("start_time")));
-    record.endTime = fromCsvTime(rowValue(headers, row, QStringLiteral("end_time")));
-    record.totalDevices = rowIntValue(headers, row, QStringLiteral("total_devices"));
-    record.successDevices = rowIntValue(headers, row, QStringLiteral("success_devices"));
-    record.failedDevices = rowIntValue(headers, row, QStringLiteral("failed_devices"));
-    record.result = rowValue(headers, row, QStringLiteral("result"));
-    record.screenshotPath = rowValue(headers, row, QStringLiteral("screenshot_path"));
+    record.sessionId = rowValue(headers, row, QStringLiteral("会话ID"));
+    record.roundIndex = rowIntValue(headers, row, QStringLiteral("轮次"));
+    record.startTime = fromCsvTime(rowValue(headers, row, QStringLiteral("开始时间")));
+    record.endTime = fromCsvTime(rowValue(headers, row, QStringLiteral("结束时间")));
+    record.totalDevices = rowIntValue(headers, row, QStringLiteral("设备总数"));
+    record.successDevices = rowIntValue(headers, row, QStringLiteral("成功设备数"));
+    record.failedDevices = rowIntValue(headers, row, QStringLiteral("失败设备数"));
+    record.result = rowValue(headers, row, QStringLiteral("结果"));
+    record.screenshotPath = rowValue(headers, row, QStringLiteral("截图路径"));
     return record;
 }
 
@@ -164,14 +164,14 @@ FirmwareUpgradeTestFailureDetailRecord failureDetailFromRow(const QStringList &h
                                                             const QStringList &row)
 {
     FirmwareUpgradeTestFailureDetailRecord record;
-    record.sessionId = rowValue(headers, row, QStringLiteral("session_id"));
-    record.roundIndex = rowIntValue(headers, row, QStringLiteral("round_index"));
-    record.qrcode = rowValue(headers, row, QStringLiteral("qrcode"));
-    record.phase = rowValue(headers, row, QStringLiteral("phase"));
-    record.errorCode = rowValue(headers, row, QStringLiteral("error_code"));
-    record.errorMessage = rowValue(headers, row, QStringLiteral("error_message"));
-    record.occurredTime = fromCsvTime(rowValue(headers, row, QStringLiteral("occurred_time")));
-    record.screenshotPath = rowValue(headers, row, QStringLiteral("screenshot_path"));
+    record.sessionId = rowValue(headers, row, QStringLiteral("会话ID"));
+    record.roundIndex = rowIntValue(headers, row, QStringLiteral("轮次"));
+    record.qrcode = rowValue(headers, row, QStringLiteral("二维码"));
+    record.phase = rowValue(headers, row, QStringLiteral("失败阶段"));
+    record.errorCode = rowValue(headers, row, QStringLiteral("失败码"));
+    record.errorMessage = rowValue(headers, row, QStringLiteral("失败原因"));
+    record.occurredTime = fromCsvTime(rowValue(headers, row, QStringLiteral("失败时间")));
+    record.screenshotPath = rowValue(headers, row, QStringLiteral("截图路径"));
     return record;
 }
 
@@ -194,6 +194,7 @@ bool ensureHeaderFile(const QString &filePath, const QStringList &headers)
 
     return existingHeaders == headers;
 }
+
 } // namespace
 
 QString FirmwareUpgradeTestReportRepository::createSessionId()

@@ -1,4 +1,5 @@
 INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/tasks/firmware_upgrade_test_task
 
 HEADERS += \
     $$PWD/scheduler_task.h \
@@ -27,6 +28,7 @@ HEADERS += \
     $$PWD/tasks/firmware_upgrade_task/firmware_upgrade_task.h \
     $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_types.h \
     $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.h \
+    $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_stress_task.h \
     $$PWD/tasks/set_idle_purge_task/set_idle_purge_task.h \
     $$PWD/tasks/set_pneumatic_valve_pressure_task/set_pneumatic_valve_pressure_task.h \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_task.h \
@@ -73,6 +75,7 @@ SOURCES += \
     $$PWD/tasks/set_firmware_config_task/set_firmware_config_task.cpp \
     $$PWD/tasks/firmware_upgrade_task/firmware_upgrade_task.cpp \
     $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_repository.cpp \
+    $$PWD/tasks/firmware_upgrade_test_task/firmware_upgrade_stress_task.cpp \
     $$PWD/tasks/set_idle_purge_task/set_idle_purge_task.cpp \
     $$PWD/tasks/set_pneumatic_valve_pressure_task/set_pneumatic_valve_pressure_task.cpp \
     $$PWD/tasks/sh85selfchecktask/sh85_self_check_task.cpp \

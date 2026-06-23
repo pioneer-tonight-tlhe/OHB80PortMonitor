@@ -2,6 +2,7 @@
 #include "ui_debugpage.h"
 #include "customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdatesettingwidget.h"
+#include "customwidget/debugsettingwidget/firmwareupgradetestsettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcgastypesettingwidget.h"
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
@@ -109,6 +110,13 @@ void DebugPage::navBtnClicked()
         targetWidget = m_firmwareConfigWidget;
     } else if (objName == "btnFirmwareUpdate") {
         targetWidget = m_firmwareUpdateWidget;
+    } else if (objName == "btnFirmwareUpgradeTest") {
+        targetWidget = m_firmwareUpdateWidget
+            ? static_cast<QWidget *>(m_firmwareUpdateWidget->firmwareUpgradeTestWidget())
+            : nullptr;
+        if (!targetWidget) {
+            targetWidget = m_firmwareUpdateWidget;
+        }
     } else if (objName == "btnVEFCGasType") {
         targetWidget = m_vefcGasTypeWidget;
     } else if (objName == "btnUIRefreshTime") {

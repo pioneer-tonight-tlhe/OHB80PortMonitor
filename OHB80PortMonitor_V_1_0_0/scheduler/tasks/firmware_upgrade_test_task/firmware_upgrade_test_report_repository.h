@@ -1,7 +1,7 @@
 #ifndef FIRMWARE_UPGRADE_TEST_REPORT_REPOSITORY_H
 #define FIRMWARE_UPGRADE_TEST_REPORT_REPOSITORY_H
 
-#include "firmware_upgrade_test_report_types.h"
+#include "tasks/firmware_upgrade_test_task/firmware_upgrade_test_report_types.h"
 
 #include <QStringList>
 

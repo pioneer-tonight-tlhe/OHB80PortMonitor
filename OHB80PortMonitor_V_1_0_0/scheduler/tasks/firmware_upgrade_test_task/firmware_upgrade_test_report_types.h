@@ -2,6 +2,7 @@
 #define FIRMWARE_UPGRADE_TEST_REPORT_TYPES_H
 
 #include <QDateTime>
+#include <QMetaType>
 #include <QString>
 #include <QVector>
 
@@ -52,5 +53,10 @@ struct FirmwareUpgradeTestReportData
     QVector<FirmwareUpgradeTestRoundSummaryRecord> roundSummaries;
     QVector<FirmwareUpgradeTestFailureDetailRecord> failureDetails;
 };
+
+Q_DECLARE_METATYPE(FirmwareUpgradeTestSessionSummaryRecord)
+Q_DECLARE_METATYPE(FirmwareUpgradeTestRoundSummaryRecord)
+Q_DECLARE_METATYPE(FirmwareUpgradeTestFailureDetailRecord)
+Q_DECLARE_METATYPE(FirmwareUpgradeTestReportData)
 
 #endif // FIRMWARE_UPGRADE_TEST_REPORT_TYPES_H

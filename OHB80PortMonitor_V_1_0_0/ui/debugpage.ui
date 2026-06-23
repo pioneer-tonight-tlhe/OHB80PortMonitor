@@ -68,6 +68,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="btnFirmwareUpgradeTest">
+        <property name="text">
+         <string>Firmware Test</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="btnVEFCGasType">
         <property name="text">
          <string>VEFC Gas Type</string>
