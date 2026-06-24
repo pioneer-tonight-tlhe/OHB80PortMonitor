@@ -35,6 +35,9 @@ public:
     explicit HumidityOffsetSettingWidget(QWidget *parent = nullptr);
     ~HumidityOffsetSettingWidget();
 
+    void setInitialConfigValues(double humidityLowerLimitPercent,
+                                double humidityOffsetPercent);
+
 private slots:
     void onSetThresholdClicked();
     void onSetThresholdAllClicked();

@@ -68,6 +68,7 @@ private:
     void disconnectAll();
     void checkAllFinished();
     void forceFinish();
+    bool persistConfig(QString *errorMessage = nullptr);
     void logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode);
 
     void writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason);

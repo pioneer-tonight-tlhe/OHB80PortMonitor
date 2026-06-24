@@ -25,6 +25,8 @@ void CommandResponseParser::registerBuiltinParsers()
     registerParser("ReadIdlePurgeAll",        &CommandResponseParser::parseReadIdlePurgeAll);
     registerParser("ReadVEFCPressure",        &CommandResponseParser::parseReadVEFCPressure);
     registerParser("ReadVEFCTemperature",     &CommandResponseParser::parseReadVEFCTemperature);
+    registerParser("ReadVEFCFlowUnitAndMediumStatus",
+                   &CommandResponseParser::parseReadVEFCFlowUnitAndMediumStatus);
 }
 
 void CommandResponseParser::registerParser(const QString& commandId, ParseFunc func)
@@ -198,5 +200,25 @@ QVariantMap CommandResponseParser::parseReadVEFCTemperature(const ModbusCommand&
     }
 
     result["sensorTemperature"] = readU16BE(payload, 0) / 100.0;
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadVEFCFlowUnitAndMediumStatus(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 2) {
+        qWarning() << "[CommandResponseParser] ReadVEFCFlowUnitAndMediumStatus 响应字节数不足，实际=" << payload.size();
+        return result;
+    }
+
+    const quint8 unitRaw = static_cast<quint8>(payload.at(0));
+    const quint8 mediumRaw = static_cast<quint8>(payload.at(1));
+
+    result["unitRaw"] = unitRaw;
+    result["mediumRaw"] = mediumRaw;
+    result["unitOk"] = (unitRaw == 0);
+    result["mediumOk"] = (mediumRaw == 0);
     return result;
 }

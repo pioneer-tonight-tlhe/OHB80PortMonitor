@@ -3,6 +3,7 @@
 
 #include "settingwidget.h"
 
+#include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QPushButton>
 #include <QStringList>
@@ -24,6 +25,8 @@ public:
     explicit PneumaticValvePressureSettingWidget(QWidget *parent = nullptr);
     ~PneumaticValvePressureSettingWidget();
 
+    void setInitialConfigValue(double pressureBar);
+
 private slots:
     void onSetBtnClicked();      // 设置当前 SpinBox 设备 ID
     void onSetAllBtnClicked();   // 设置全部设备
@@ -41,9 +44,8 @@ private:
 
 private:
     // 控件指针
-    // QSpinBox  *m_qrcodeSpinBox;      // 设备 QRCode（int）
     QComboBox *m_comboBox;              // 主设备队列
-    QSpinBox  *m_pressureSpinBox;    // 压力设置（bar）
+    QDoubleSpinBox *m_pressureSpinBox;    // 压力设置（bar）
 
     // Set 按钮指针（任务期间禁用，避免并发任务提交）
     QPushButton *m_pressureSetBtn;

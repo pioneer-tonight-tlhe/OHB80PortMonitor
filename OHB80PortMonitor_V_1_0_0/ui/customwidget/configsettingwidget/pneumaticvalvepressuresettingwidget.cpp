@@ -66,6 +66,15 @@ PneumaticValvePressureSettingWidget::~PneumaticValvePressureSettingWidget()
 {
 }
 
+void PneumaticValvePressureSettingWidget::setInitialConfigValue(double pressureBar)
+{
+    if (!m_pressureSpinBox) {
+        return;
+    }
+
+    m_pressureSpinBox->setValue(pressureBar);
+}
+
 // ============================================================
 // UI 初始化
 // ============================================================
@@ -111,11 +120,13 @@ void PneumaticValvePressureSettingWidget::initPressureItem()
 {
     m_pressureItem = new SettingItemWidget(this);
     m_pressureItem->setTitle("Pneumatic Valve Pressure");
-    m_pressureItem->setTip("Set pneumatic valve pressure (0~1000 bar). Register value = pressure x 10000");
+    m_pressureItem->setTip("Set pneumatic valve pressure (0~1000 bar). Register value = pressure x 1000");
 
-    m_pressureSpinBox = new QSpinBox(m_pressureItem);
+    m_pressureSpinBox = new QDoubleSpinBox(m_pressureItem);
     m_pressureSpinBox->setRange(0, 1000);
-    m_pressureSpinBox->setValue(5);
+    m_pressureSpinBox->setDecimals(2);
+    m_pressureSpinBox->setSingleStep(0.1);
+    m_pressureSpinBox->setValue(3.0);
     m_pressureSpinBox->setSuffix(" bar");
     m_pressureSpinBox->setFixedWidth(120);
     m_pressureItem->addWidget("pressure_spin", m_pressureSpinBox);

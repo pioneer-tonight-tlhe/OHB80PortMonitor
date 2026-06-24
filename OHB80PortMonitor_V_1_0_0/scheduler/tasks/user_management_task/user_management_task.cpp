@@ -4,6 +4,9 @@
 #include "defer/defer.h"
 
 #include <QDebug>
+#include <QMetaObject>
+
+#include <memory>
 
 UserManagementTask::UserManagementTask(QObject *parent)
     : SchedulerTask(parent)
@@ -97,15 +100,14 @@ void UserManagementTask::executeLogin()
 {
     UserManager* mgr = UserManager::instance();
 
-    // 先声明连接对象
-    QMetaObject::Connection connOk;
-    QMetaObject::Connection connFail;
+    auto connOk = std::make_shared<QMetaObject::Connection>();
+    auto connFail = std::make_shared<QMetaObject::Connection>();
 
     // 临时连接登录信号，捕获结果后断开
-    connOk = connect(mgr, &UserManager::loginSuccess,
-        this, [this, &connOk, &connFail](const QString& username, UserPermission perm) {
-            QObject::disconnect(connOk);
-            QObject::disconnect(connFail);
+    *connOk = connect(mgr, &UserManager::loginSuccess,
+        this, [this, connOk, connFail](const QString& username, UserPermission perm) {
+            QObject::disconnect(*connOk);
+            QObject::disconnect(*connFail);
             qDebug() << "[UserManagementTask] 登录成功 user=" << username
                      << "perm=" << UserManager::permissionToString(perm);
             LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
@@ -117,10 +119,10 @@ void UserManagementTask::executeLogin()
             emit finished(true, QString("登录成功: %1").arg(username));
         });
 
-    connFail = connect(mgr, &UserManager::loginFailed,
-        this, [this, &connOk, &connFail](const QString& reason) {
-            QObject::disconnect(connOk);
-            QObject::disconnect(connFail);
+    *connFail = connect(mgr, &UserManager::loginFailed,
+        this, [this, connOk, connFail](const QString& reason) {
+            QObject::disconnect(*connOk);
+            QObject::disconnect(*connFail);
             qWarning() << "[UserManagementTask] 登录失败:" << reason;
             LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
                 QString("[UserManagementTask] 登录失败: %1").arg(reason).toStdString());
@@ -130,17 +132,21 @@ void UserManagementTask::executeLogin()
             emit finished(false, QString("登录失败: %1").arg(reason));
         });
 
-    mgr->login(m_username, m_password);
+    const QString username = m_username;
+    const QString password = m_password;
+    QMetaObject::invokeMethod(mgr, [mgr, username, password]() {
+        mgr->login(username, password);
+    }, Qt::QueuedConnection);
 }
 
 void UserManagementTask::executeLogout()
 {
     UserManager* mgr = UserManager::instance();
 
-    QMetaObject::Connection conn;
-    conn = connect(mgr, &UserManager::logoutSuccess,
-        this, [this, &conn]() {
-            QObject::disconnect(conn);
+    auto conn = std::make_shared<QMetaObject::Connection>();
+    *conn = connect(mgr, &UserManager::logoutSuccess,
+        this, [this, conn]() {
+            QObject::disconnect(*conn);
             qDebug() << "[UserManagementTask] 登出成功";
             LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
                 "[UserManagementTask] 登出成功");
@@ -150,7 +156,9 @@ void UserManagementTask::executeLogout()
             emit finished(true, QStringLiteral("登出成功"));
         });
 
-    mgr->logout();
+    QMetaObject::invokeMethod(mgr, [mgr]() {
+        mgr->logout();
+    }, Qt::QueuedConnection);
 }
 
 void UserManagementTask::executeChangePassword()

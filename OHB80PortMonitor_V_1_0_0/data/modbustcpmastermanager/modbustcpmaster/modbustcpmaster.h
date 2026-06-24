@@ -1,8 +1,22 @@
+/*******************************************************************************************
+ * @file modbustcpmaster.h
+ * @author Simon <工号：13> 2026-06-24
+ *
+ * @class ModbusTcpMaster
+ * @brief 编排单台 Modbus TCP 设备的连接、初始化、周期轮询和业务子模块。
+ *
+ * 设计目标：
+ *      1. 统一管理单台设备的连接生命周期和运行状态机。
+ *      2. 将连接器、指令发送器、初始化器和周期轮询器组合为完整设备运行单元。
+ *      3. 为调度层提供稳定的设备重配置、状态查询和子模块访问入口。
+ *******************************************************************************************/
 #ifndef MODBUSTCPMASTER_H
 #define MODBUSTCPMASTER_H
 
 #include <QObject>
+#include <QList>
 #include <QString>
+#include <QStringList>
 #include <QTcpSocket>
 
 #include "modbusconnecter.h"
@@ -14,21 +28,6 @@
 class FirmwareUpgrader;
 class SH85SelfChecker;
 
-// ============================================================
-// ModbusTcpMaster - Modbus TCP 主控对象
-//
-// 持有并编排所有子控件，通过内部状态机驱动完整的设备生命周期：
-//   连接 → 启动发送器 → 设备初始化 → 启动定时发送器 → 正常运行
-//
-// 使用方法：
-//   1. 构造后通过各 getter 获取子控件，自行完成全部配置和初始化
-//   2. 调用 connector()->connectDevice(mode) 启动连接（目标地址由外部共享的 QTcpSocket 提供）
-//   3. 连接 stateChanged / errorOccurred 监控运行状态
-//
-// 注意：
-//   子控件的全部配置（队列、超时、间隔等）由外部调用者自行实现，
-//   ModbusTcpMaster 只负责在正确的时机启动各子控件。
-// ============================================================
 class ModbusTcpMaster : public QObject
 {
     Q_OBJECT
@@ -39,6 +38,7 @@ class ModbusTcpMaster : public QObject
     friend class FirmwareUpgrader;
 
 public:
+    // ============================ 公共数据类型 ============================
     /**
      * @brief 状态机枚举
      * @details 表示 ModbusTcpMaster 当前所处的运行阶段
@@ -54,6 +54,7 @@ public:
     };
     Q_ENUM(State)
 
+    // ============================ 状态转换 ============================
     /**
      * @brief 将状态枚举转换为字符串
      * @param state 状态枚举值
@@ -61,6 +62,7 @@ public:
      */
     static QString stateToString(State state);
 
+    // ============================ 构造函数 ============================
     /**
      * @brief 构造函数
      * @param ip 设备 IP 地址
@@ -70,11 +72,13 @@ public:
      */
     explicit ModbusTcpMaster(const QString& ip, quint16 port, const QString& id = QString(), QObject* parent = nullptr);
 
+    // ============================ 身份信息 ============================
     /**
      * @brief 唯一标识符，由外部生成并设置，用于区分不同的 ModbusTcpMaster 实例
      */
     QString ID;
 
+    // ============================ 生命周期 ============================
     /**
      * @brief 启动 Modbus TCP Master
      * @param mode 连接模式（单连接/双连接）
@@ -88,6 +92,7 @@ public:
      */
     void stop(ModbusConnecter::ConnectionMode mode = ModbusConnecter::ConnectionMode::SingleConnection);
 
+    // ============================ 子模块访问 ============================
     /**
      * @brief 获取连接器
      * @return ModbusConnecter 指针
@@ -115,6 +120,17 @@ public:
      */
     InitialCommandIssuer* initialIssuer() const;
 
+    // ============================ 初始指令配置 ============================
+    /**
+     * @brief 配置初始指令队列。
+     * @param queue 初始指令队列
+     * @param intervalMs 指令间隔，单位 ms
+     * @param executionCount 初始化队列下发轮次
+     * @details Master 会缓存该配置，后续 InitialCommandIssuer 重建时自动恢复。
+     */
+    void configureInitialCommands(const QList<ModbusCommand>& queue, int intervalMs, int executionCount);
+
+    // ---- 子模块访问 ----
     /**
      * @brief 获取定时发送器
      * @return PeriodicCommandSender 指针
@@ -122,6 +138,7 @@ public:
      */
     PeriodicCommandSender* periodicSender() const;
 
+    // ============================ 状态查询 ============================
     /**
      * @brief 获取当前状态机状态
      * @return 当前状态
@@ -153,6 +170,7 @@ public:
      */
     SH85SelfChecker* selfChecker() const;
 
+    // ============================ 设备信息 ============================
     /**
      * @brief 获取设备 IP 地址
      * @return IP 地址字符串
@@ -165,58 +183,21 @@ public:
      */
     quint16 port() const { return m_port; }
 
+    // ============================ 设备重配置 ============================
     bool reconfigureDeviceInfo(const QString& newId,
                                const QString& newIp,
                                quint16 newPort,
                                QString* errorMessage = nullptr);
 
-signals:
-    /**
-     * @brief 错误信号
-     * @param state 发生错误时的状态
-     * @param message 错误描述
-     * @details 部分错误不中断流程（如初始化时部分指令失败），
-     *          连接错误和连续失败超阈值会导致状态进入 Error。
-     */
-    void errorOccurred(ModbusTcpMaster::State state, const QString& message);
-
-    /**
-     * @brief 状态机状态变更信号
-     * @param state 新状态
-     */
-    void stateChanged(ModbusTcpMaster::State state);
-
-private slots:
-    /**
-     * @brief 连接状态改变槽函数
-     * @param status 新的连接状态
-     */
-    void onConnectionStatusChanged(ModbusConnecter::ConnectionStatus status, const QString& masterId);
-
-    /**
-     * @brief 连接错误槽函数
-     * @param message 错误描述
-     */
-    void onConnectionError(const QString& message);
-
-    /**
-     * @brief 初始指令完成槽函数
-     * @param failedCommands 失败的指令列表
-     */
-    void onInitialFinished(QList<ModbusCommand> failedCommands);
-
-    /**
-     * @brief 定时发送器请求断开连接槽函数
-     */
-    void onPeriodicDisconnectRequested();
-
 private:
+    // ---- 状态转换 ----
     /**
      * @brief 进入新状态
      * @param state 新状态
      */
     void enterState(State state);
 
+    // ---- 子模块生命周期 ----
     /**
      * @brief 按需创建初始下发器
      */
@@ -247,28 +228,82 @@ private:
      */
     void startPeriodicSender();
 
+    // ---- 子模块访问 ----
     /**
      * @brief 获取 Socket
      * @return QTcpSocket 指针
      */
     QTcpSocket* socket() const { return m_socket; }
 
-    QString m_ip;                       // 设备 IP 地址
-    quint16 m_port = 0;                  // 设备端口
+signals:
+    // ---- 状态通知 ----
+    /**
+     * @brief 错误信号
+     * @param state 发生错误时的状态
+     * @param message 错误描述
+     * @details 部分错误不中断流程（如初始化时部分指令失败），
+     *          连接错误和连续失败超阈值会导致状态进入 Error。
+     */
+    void errorOccurred(ModbusTcpMaster::State state, const QString& message);
 
-    QTcpSocket* m_socket = nullptr;      // TCP Socket
-    ModbusConnecter* m_connector = nullptr;      // 连接器
-    ModbusCommandSender* m_sender = nullptr;      // 指令发送器
-    InitialCommandIssuer* m_initialIssuer = nullptr;  // 初始下发器
-    PeriodicCommandSender* m_periodicSender = nullptr; // 定时发送器
+    /**
+     * @brief 状态机状态变更信号
+     * @param state 新状态
+     */
+    void stateChanged(ModbusTcpMaster::State state);
 
-    bool m_initialStarted = false;        // 初始下发器是否已启动
-    bool m_periodicStarted = false;       // 定时发送器是否已启动
-    State m_state = State::Idle;          // 当前状态机状态
+private slots:
+    // ---- 连接状态 ----
+    /**
+     * @brief 连接状态改变槽函数
+     * @param status 新的连接状态
+     */
+    void onConnectionStatusChanged(ModbusConnecter::ConnectionStatus status, const QString& masterId);
 
-    QString m_firmwareVersion;             // 固件版本号
-    FirmwareUpgrader* m_firmwareUpgrader = nullptr; // 固件升级器
-    SH85SelfChecker* m_selfChecker = nullptr;       // SH85 自检器
+    /**
+     * @brief 连接错误槽函数
+     * @param message 错误描述
+     */
+    void onConnectionError(const QString& message);
+
+    // ---- 初始化状态 ----
+    /**
+     * @brief 初始指令完成槽函数
+     * @param isOk 初始指令是否全部通过
+     * @param errorMsgList 错误信息列表
+     */
+    void onInitialFinished(bool isOk, QStringList errorMsgList);
+
+    // ---- 周期轮询状态 ----
+    /**
+     * @brief 定时发送器请求断开连接槽函数
+     */
+    void onPeriodicDisconnectRequested();
+
+private:
+    // ---- 设备信息 ----
+    QString m_ip;                              // 设备 IP 地址。
+    quint16 m_port = 0;                        // 设备端口。
+    QString m_firmwareVersion;                 // 固件版本号。
+
+    // ---- 功能模块成员 ----
+    QTcpSocket* m_socket = nullptr;            // TCP Socket。
+    ModbusConnecter* m_connector = nullptr;    // 连接器。
+    ModbusCommandSender* m_sender = nullptr;   // 指令发送器。
+    InitialCommandIssuer* m_initialIssuer = nullptr;  // 初始下发器。
+    PeriodicCommandSender* m_periodicSender = nullptr; // 定时发送器。
+    FirmwareUpgrader* m_firmwareUpgrader = nullptr;    // 固件升级器。
+    SH85SelfChecker* m_selfChecker = nullptr;          // SH85 自检器。
+
+    // ---- 初始指令配置 ----
+    QList<ModbusCommand> m_initialCommandQueue; // 初始指令队列缓存。
+    int m_initialCommandIntervalMs = 1000;      // 初始指令间隔，单位 ms。
+    int m_initialCommandExecutionCount = 1;     // 初始指令下发轮次。
+
+    // ---- 运行状态 ----
+    bool m_initialStarted = false;             // 初始下发器是否已启动。
+    bool m_periodicStarted = false;            // 定时发送器是否已启动。
+    State m_state = State::Idle;               // 当前状态机状态。
 };
 
 #endif // MODBUSTCPMASTER_H

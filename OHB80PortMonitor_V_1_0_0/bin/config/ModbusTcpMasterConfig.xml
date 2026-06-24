@@ -7,8 +7,17 @@
         <CommandTimeout>1000</CommandTimeout>
         <RetryCount>3</RetryCount>
         <CommandSet>
+            <Command ref="WriteIdlePurgeEnable"/>
+            <Command ref="WriteIdlePurgeTime"/>
+            <Command ref="WriteIdlePurgeInterval"/>
+            <Command ref="SetBoardEnable"/>
+            <Command ref="WritePurgeFlow"/>
+            <Command ref="ReadVEFCFlowUnitAndMediumStatus"/>
+            <Command ref="WritePneumaticValvePressure"/>
+            <Command ref="WriteUIRefreshTime"/>
+            <Command ref="WriteHumidityOffset"/>
+            <Command ref="WriteHumidityOffsetThreshold"/>
             <Command ref="ReadVersion"/>
-            <Command ref="WriteVEFCGasType"/>
         </CommandSet>
     </InitialCommands>
 

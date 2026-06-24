@@ -22,6 +22,21 @@ UIRefreshTimeSettingWidget::UIRefreshTimeSettingWidget(QWidget *parent)
 
 UIRefreshTimeSettingWidget::~UIRefreshTimeSettingWidget() = default;
 
+void UIRefreshTimeSettingWidget::setInitialConfigValues(int logoTimeSeconds,
+                                                        int pageTotalTimeSeconds,
+                                                        int pageSwitchIntervalSeconds)
+{
+    if (m_logoSecSpinBox) {
+        m_logoSecSpinBox->setValue(logoTimeSeconds);
+    }
+    if (m_paramTotalSpinBox) {
+        m_paramTotalSpinBox->setValue(pageTotalTimeSeconds);
+    }
+    if (m_paramSwitchSpinBox) {
+        m_paramSwitchSpinBox->setValue(pageSwitchIntervalSeconds);
+    }
+}
+
 // ============================================================
 // UI
 // ============================================================

@@ -12,6 +12,8 @@ namespace Ui {
 class ComunicateLogWidget;
 }
 
+class WaitDialog;
+
 class ComunicateLogWidget : public QWidget
 {
     Q_OBJECT
@@ -47,9 +49,13 @@ private slots:
     void onTotalCountWithConditionsResult(int totalCount);
     void onLiveLogClicked(const QModelIndex& index);
     void onHistoryLogClicked(const QModelIndex& index);
+    void onCancelRequested();
+    void onTaskFinished(bool success, const QString& message);
 
 private:
     Ui::ComunicateLogWidget *ui;
+    WaitDialog* m_waitDialog;
+    QString m_activeTaskId;
     int m_currentPage;
     int m_pageSize;
     int m_totalPages;

@@ -1,11 +1,11 @@
 #include "idlepurgesettingwidget.h"
+
 #include "../settingwidget/settingitemwidget.h"
 #include "modaltabledialog.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/scheduler.h"
 
 #include <QColor>
-#include <QDebug>
 #include <QList>
 #include <QMessageBox>
 
@@ -23,13 +23,12 @@ QList<QStringList> buildDeviceResultRows(const QStringList &targetQrCodes,
         }
     }
 
-    // 格式化设置值（带单位）
     QString settingValueStr;
-    if (propertyName == "Enable") {
+    if (propertyName == "Idle Purge Enable") {
         settingValueStr = setValue == 1 ? "Set enable True" : "Set enable False";
-    } else if (propertyName == "PurgeTime") {
+    } else if (propertyName == "Purge Duration") {
         settingValueStr = QString("Set Purgetime %1 s").arg(setValue);
-    } else if (propertyName == "PurgeInterval") {
+    } else if (propertyName == "Purge Interval") {
         settingValueStr = QString("Set Interval %1 s").arg(setValue);
     } else {
         settingValueStr = QString("Set %1 %2").arg(propertyName).arg(setValue);
@@ -50,7 +49,10 @@ QList<QStringList> buildDeviceResultRows(const QStringList &targetQrCodes,
 
 void applyResultColors(ModalTableDialog *dialog)
 {
-    if (!dialog) return;
+    if (!dialog) {
+        return;
+    }
+
     dialog->setFieldTextColor(QStringLiteral("Result"), QStringLiteral("Fail"), QColor(210, 0, 0));
     dialog->setFieldTextColor(QStringLiteral("Result"), QStringLiteral("Success"), QColor(0, 150, 0));
 }
@@ -58,7 +60,7 @@ void applyResultColors(ModalTableDialog *dialog)
 
 IdlePurgeSettingWidget::IdlePurgeSettingWidget(QWidget *parent)
     : SettingWidget(parent)
-    , m_prepTimeLineEdit(nullptr)
+    , m_preparationTimeLineEdit(nullptr)
     , m_enableComboBox(nullptr)
     , m_durationSpinBox(nullptr)
     , m_intervalSpinBox(nullptr)
@@ -77,29 +79,45 @@ IdlePurgeSettingWidget::~IdlePurgeSettingWidget()
 {
 }
 
-// ============================================================
-// UI 初始化
-// ============================================================
-
 void IdlePurgeSettingWidget::initUI()
 {
-    initPrepTimeItem();
+    initPreparationTimeItem();
     initEnableItem();
     initDurationItem();
     initIntervalItem();
 }
 
-void IdlePurgeSettingWidget::initPrepTimeItem()
+void IdlePurgeSettingWidget::setConfigValues(bool enabled,
+                                             int purgeDurationSeconds,
+                                             int purgeIntervalSeconds)
+{
+    if (m_enableComboBox) {
+        const int index = m_enableComboBox->findData(enabled ? 1 : 0);
+        if (index >= 0) {
+            m_enableComboBox->setCurrentIndex(index);
+        }
+    }
+
+    if (m_durationSpinBox) {
+        m_durationSpinBox->setValue(purgeDurationSeconds);
+    }
+
+    if (m_intervalSpinBox) {
+        m_intervalSpinBox->setValue(purgeIntervalSeconds);
+    }
+}
+
+void IdlePurgeSettingWidget::initPreparationTimeItem()
 {
     auto *item = new SettingItemWidget(this);
     item->setTitle("Preparation Time");
     item->setTip("Fixed preparation phase duration before idle purge starts");
 
-    m_prepTimeLineEdit = new QLineEdit(item);
-    m_prepTimeLineEdit->setText("10 s");
-    m_prepTimeLineEdit->setReadOnly(true);
-    m_prepTimeLineEdit->setFixedWidth(120);
-    item->addWidget("prep_time_edit", m_prepTimeLineEdit);
+    m_preparationTimeLineEdit = new QLineEdit(item);
+    m_preparationTimeLineEdit->setText("10 s");
+    m_preparationTimeLineEdit->setReadOnly(true);
+    m_preparationTimeLineEdit->setFixedWidth(120);
+    item->addWidget("prep_time_edit", m_preparationTimeLineEdit);
 
     addItem(item);
 }
@@ -111,14 +129,15 @@ void IdlePurgeSettingWidget::initEnableItem()
     m_enableItem->setTip("Enable or disable idle purge function for all devices");
 
     m_enableComboBox = new QComboBox(m_enableItem);
-    m_enableComboBox->addItem("Enable",  1);
+    m_enableComboBox->addItem("Enable", 1);
     m_enableComboBox->addItem("Disable", 0);
     m_enableComboBox->setFixedWidth(120);
     m_enableItem->addWidget("enable_combo", m_enableComboBox);
 
     m_enableSetBtn = new QPushButton("Set", m_enableItem);
     m_enableItem->addWidget("enable_set_btn", m_enableSetBtn);
-    connect(m_enableSetBtn, &QPushButton::clicked, this, &IdlePurgeSettingWidget::onEnableSetBtnClicked);
+    connect(m_enableSetBtn, &QPushButton::clicked,
+            this, &IdlePurgeSettingWidget::onEnableSetBtnClicked);
 
     addItem(m_enableItem);
 }
@@ -138,7 +157,8 @@ void IdlePurgeSettingWidget::initDurationItem()
 
     m_durationSetBtn = new QPushButton("Set", m_durationItem);
     m_durationItem->addWidget("duration_set_btn", m_durationSetBtn);
-    connect(m_durationSetBtn, &QPushButton::clicked, this, &IdlePurgeSettingWidget::onDurationSetBtnClicked);
+    connect(m_durationSetBtn, &QPushButton::clicked,
+            this, &IdlePurgeSettingWidget::onDurationSetBtnClicked);
 
     addItem(m_durationItem);
 }
@@ -158,14 +178,11 @@ void IdlePurgeSettingWidget::initIntervalItem()
 
     m_intervalSetBtn = new QPushButton("Set", m_intervalItem);
     m_intervalItem->addWidget("interval_set_btn", m_intervalSetBtn);
-    connect(m_intervalSetBtn, &QPushButton::clicked, this, &IdlePurgeSettingWidget::onIntervalSetBtnClicked);
+    connect(m_intervalSetBtn, &QPushButton::clicked,
+            this, &IdlePurgeSettingWidget::onIntervalSetBtnClicked);
 
     addItem(m_intervalItem);
 }
-
-// ============================================================
-// 槽函数
-// ============================================================
 
 void IdlePurgeSettingWidget::onEnableSetBtnClicked()
 {
@@ -185,36 +202,37 @@ void IdlePurgeSettingWidget::onIntervalSetBtnClicked()
     submitCommand(m_intervalItem, SetIdlePurgeTask::IdlePurgeProperty::PurgeInterval, value);
 }
 
-// ============================================================
-// 内部辅助
-// ============================================================
-
 void IdlePurgeSettingWidget::submitCommand(SettingItemWidget *item,
-                                            SetIdlePurgeTask::IdlePurgeProperty property,
-                                            quint16 value)
+                                           SetIdlePurgeTask::IdlePurgeProperty property,
+                                           quint16 value)
 {
     auto *task = new SetIdlePurgeTask(property, value);
     const QStringList targetQrCodes = ModbusTcpMasterManager::instance().masterIds();
 
     item->setStatusWaiting();
-    // 任务运行期间禁用三个 Set 按钮，避免并发任务提交
     setAllSetButtonsEnabled(false);
 
     connect(task, &SetIdlePurgeTask::deviceRetrying, this,
             [item](const QString &qrCode, int retryCount, int maxRetry) {
                 item->setStatusWaiting(QString("Retrying %1 (%2/%3)")
-                    .arg(qrCode)
-                    .arg(retryCount)
-                    .arg(maxRetry));
+                                           .arg(qrCode)
+                                           .arg(retryCount)
+                                           .arg(maxRetry));
             },
             Qt::QueuedConnection);
 
     connect(task, &SetIdlePurgeTask::allFinished, this,
-            [this, item, targetQrCodes](bool allSuccess, int successCount,
-                         QStringList failedQrCodes,
-                         QString propertyName, quint16 setValue) {
+            [this, item, targetQrCodes](bool allSuccess,
+                                        int successCount,
+                                        QStringList failedQrCodes,
+                                        QString propertyName,
+                                        quint16 setValue) {
+                const bool persistFailed = !allSuccess
+                    && failedQrCodes.isEmpty()
+                    && successCount > 0;
                 const bool hasFailure = !allSuccess || !failedQrCodes.isEmpty();
                 const bool showDeviceTable = targetQrCodes.size() > 1 || failedQrCodes.size() > 1;
+
                 if (!hasFailure) {
                     item->setStatusOK();
                     if (showDeviceTable) {
@@ -222,7 +240,7 @@ void IdlePurgeSettingWidget::submitCommand(SettingItemWidget *item,
                             this,
                             QString("Idle Purge %1=%2 Result").arg(propertyName).arg(setValue),
                             QStringList{"QRCode", "Setting", "Result"},
-                            buildDeviceResultRows(targetQrCodes, failedQrCodes, allSuccess, propertyName, setValue));
+                            buildDeviceResultRows(targetQrCodes, failedQrCodes, true, propertyName, setValue));
                         applyResultColors(dialog);
                     } else {
                         auto *mb = new QMessageBox(QMessageBox::Information,
@@ -234,19 +252,29 @@ void IdlePurgeSettingWidget::submitCommand(SettingItemWidget *item,
                                                   QMessageBox::Ok,
                                                   this);
                         mb->setAttribute(Qt::WA_DeleteOnClose);
-                        // 显式非模态：避免 QDialog::open() 自动改成 WindowModal 阻塞主窗口
                         mb->setModal(false);
                         mb->setWindowModality(Qt::NonModal);
                         mb->show();
                     }
                 } else {
                     item->setStatusFailed();
-                    if (showDeviceTable) {
+                    if (persistFailed) {
+                        auto *mb = new QMessageBox(QMessageBox::Warning,
+                                                  "Set Failed",
+                                                  QString("[%1] was written to device(s), but local config persistence failed.")
+                                                      .arg(propertyName),
+                                                  QMessageBox::Ok,
+                                                  this);
+                        mb->setAttribute(Qt::WA_DeleteOnClose);
+                        mb->setModal(false);
+                        mb->setWindowModality(Qt::NonModal);
+                        mb->show();
+                    } else if (showDeviceTable) {
                         auto *dialog = ModalTableDialog::showAsync(
                             this,
                             QString("Idle Purge %1=%2 Result").arg(propertyName).arg(setValue),
                             QStringList{"QRCode", "Setting", "Result"},
-                            buildDeviceResultRows(targetQrCodes, failedQrCodes, allSuccess, propertyName, setValue));
+                            buildDeviceResultRows(targetQrCodes, failedQrCodes, false, propertyName, setValue));
                         applyResultColors(dialog);
                     } else {
                         const QString failList = failedQrCodes.join(", ");
@@ -260,12 +288,12 @@ void IdlePurgeSettingWidget::submitCommand(SettingItemWidget *item,
                                                   QMessageBox::Ok,
                                                   this);
                         mb->setAttribute(Qt::WA_DeleteOnClose);
-                        // 显式非模态：避免 QDialog::open() 自动改成 WindowModal 阻塞主窗口
                         mb->setModal(false);
                         mb->setWindowModality(Qt::NonModal);
                         mb->show();
                     }
                 }
+
                 setAllSetButtonsEnabled(true);
             });
 

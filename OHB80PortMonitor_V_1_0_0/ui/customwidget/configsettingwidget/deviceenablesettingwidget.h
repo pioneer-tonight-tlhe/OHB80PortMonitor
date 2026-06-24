@@ -32,6 +32,8 @@ public:
     explicit DeviceEnableSettingWidget(QWidget *parent = nullptr);
     ~DeviceEnableSettingWidget();
 
+    void setInitialConfigValue(bool enabled);
+
 private slots:
     void onSetClicked();
 

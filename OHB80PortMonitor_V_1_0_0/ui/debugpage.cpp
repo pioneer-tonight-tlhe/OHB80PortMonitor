@@ -1,5 +1,6 @@
 #include "debugpage.h"
 
+#include "app.h"
 #include "ui_debugpage.h"
 #include "customwidget/configsettingwidget/humidityoffsetsettingwidget.h"
 #include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
@@ -9,6 +10,7 @@
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
 #include "customwidget/debugsettingwidget/vefcgastypesettingwidget.h"
+#include "ohbdeviceconfig.h"
 
 #include <QScroller>
 #include <QScrollerProperties>
@@ -76,6 +78,18 @@ void DebugPage::initUI()
     m_foupInVacuumExtractionEnableWidget = new FoupInVacuumExtractionEnableWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_foupInVacuumExtractionEnableWidget);
 
+    const QVector<OHBDeviceConfigInfo> devices = OHBDeviceConfig::getInstance().readDevices();
+    if (!devices.isEmpty()) {
+        const OHBDeviceConfigInfo& firstDeviceConfig = devices.first();
+        m_uiRefreshTimeWidget->setInitialConfigValues(firstDeviceConfig.getLogoTimeSeconds(),
+                                                      firstDeviceConfig.getPageTotalTimeSeconds(),
+                                                      firstDeviceConfig.getPageSwitchIntervalSeconds());
+        m_humidityOffsetWidget->setInitialConfigValues(firstDeviceConfig.getHumidityLowerLimitPercent(),
+                                                       firstDeviceConfig.getHumidityOffsetPercent());
+    }
+
+    registerModulePermissions();
+
     ui->scrollAreaWidgetContents->layout()->addItem(
         new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
@@ -123,4 +137,40 @@ void DebugPage::navBtnClicked()
         QPoint pos = targetWidget->mapTo(ui->scrollAreaWidgetContents, QPoint(0, 0));
         ui->scrollArea->verticalScrollBar()->setValue(pos.y());
     }
+}
+
+void DebugPage::registerModulePermissions()
+{
+    App::registerModulePermission(m_firmwareConfigWidget,
+                                  ui->btnFirmwareConfig,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("FirmwareConfig"));
+    App::registerModulePermission(m_firmwareUpdateWidget,
+                                  ui->btnFirmwareUpdate,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("FirmwareUpdate"));
+    App::registerModulePermission(m_vefcGasTypeWidget,
+                                  ui->btnVEFCGasType,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("VEFCGasTypeConfiguration"));
+    App::registerModulePermission(m_uiRefreshTimeWidget,
+                                  ui->btnUIRefreshTime,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("UIRefreshTimeConfiguration"));
+    App::registerModulePermission(m_humidityOffsetWidget,
+                                  ui->btnHumidityOffset,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("HumidityOffsetConfiguration"));
+    App::registerModulePermission(m_vefcFlowUnitMediumStatusWidget,
+                                  ui->btnVEFCStatus,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("VEFCFlowUnitMediumStatus"));
+    App::registerModulePermission(m_boardEnableStatusWidget,
+                                  ui->btnBoardEnable,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("BoardEnableStatus"));
+    App::registerModulePermission(m_foupInVacuumExtractionEnableWidget,
+                                  ui->btnFoupInVacuumExtraction,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("FoupInVacuumExtractionEnable"));
 }

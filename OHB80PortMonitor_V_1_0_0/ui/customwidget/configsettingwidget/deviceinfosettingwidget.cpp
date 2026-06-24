@@ -1,7 +1,7 @@
 #include "deviceinfosettingwidget.h"
 
 #include "../settingwidget/settingitemwidget.h"
-#include "app/ohbdeviceconfig.h"
+#include "ohbdeviceconfig.h"
 #include "app/shareddata.h"
 #include "modaltabledialog.h"
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
@@ -122,15 +122,15 @@ void DeviceInfoSettingWidget::onViewClicked()
 
     for (const QString& qrCode : qrcodes) {
         ModbusTcpMaster* master = manager.getMaster(qrCode);
-        const OHBDeviceInfo configInfo = config.getDeviceByQRCode(qrCode);
+        const OHBDeviceConfigInfo configInfo = config.getDeviceByQRCode(qrCode);
 
         QString firmwareVersion = master ? master->firmwareVersion() : QString();
         if (firmwareVersion.trimmed().isEmpty()) {
             firmwareVersion = QStringLiteral("-");
         }
 
-        const QString ip = master ? master->ip() : configInfo.ip;
-        const quint16 port = master ? master->port() : configInfo.port;
+        const QString ip = master ? master->ip() : configInfo.getIp();
+        const quint16 port = master ? master->port() : configInfo.getPort();
 
         rows.append(QStringList{
             qrCode,
@@ -261,10 +261,10 @@ void DeviceInfoSettingWidget::loadDeviceInfo(int qrCode)
     }
 
     ModbusTcpMaster* master = ModbusTcpMasterManager::instance().getMaster(qrCodeText);
-    const OHBDeviceInfo configInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCodeText);
+    const OHBDeviceConfigInfo configInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCodeText);
 
-    const QString ip = master ? master->ip() : configInfo.ip;
-    const quint16 port = master ? master->port() : configInfo.port;
+    const QString ip = master ? master->ip() : configInfo.getIp();
+    const quint16 port = master ? master->port() : configInfo.getPort();
 
     QSignalBlocker blocker(m_newQrCodeSpinBox);
     m_newQrCodeSpinBox->setValue(qrCode);

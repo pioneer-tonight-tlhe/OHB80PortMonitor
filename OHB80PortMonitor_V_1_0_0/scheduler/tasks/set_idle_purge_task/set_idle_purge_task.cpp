@@ -1,12 +1,14 @@
 #include "set_idle_purge_task.h"
-#include "modbustcpmastermanager/modbustcpmastermanager.h"
-#include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
-#include "modbustcpmastermanager/modbustcpmaster/modbuscommandsender.h"
-#include "modbustcpmastermanager/modbuscommand/commandpool.h"
-#include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
+
+#include "app/shareddata.h"
+#include "idlepurgeconfig.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
-#include "app/shareddata.h"
+#include "modbustcpmastermanager/modbuscommand/commandpool.h"
+#include "modbustcpmastermanager/modbuscommand/commandresponseparser.h"
+#include "modbustcpmastermanager/modbustcpmaster/modbuscommandsender.h"
+#include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
+#include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 
 #include <QDateTime>
@@ -16,17 +18,26 @@
 #include <QVariantMap>
 
 namespace {
-QString bytesToHexWithCrc(const QByteArray& bytes, const QByteArray& crc)
+QString bytesToHexWithCrc(const QByteArray &bytes, const QByteArray &crc)
 {
     QStringList hexList;
     for (int i = 0; i < bytes.size(); ++i) {
-        hexList << QString("%1").arg(static_cast<quint8>(bytes[i]), 2, 16, QLatin1Char('0')).toUpper();
+        hexList << QString("%1")
+                       .arg(static_cast<quint8>(bytes[i]), 2, 16, QLatin1Char('0'))
+                       .toUpper();
     }
+
     if (crc.size() >= 2) {
-        hexList << QString("%1").arg(static_cast<quint8>(crc[0]), 2, 16, QLatin1Char('0')).toUpper();
-        hexList << QString("%1").arg(static_cast<quint8>(crc[1]), 2, 16, QLatin1Char('0')).toUpper();
+        hexList << QString("%1")
+                       .arg(static_cast<quint8>(crc[0]), 2, 16, QLatin1Char('0'))
+                       .toUpper();
+        hexList << QString("%1")
+                       .arg(static_cast<quint8>(crc[1]), 2, 16, QLatin1Char('0'))
+                       .toUpper();
     }
-    return hexList.isEmpty() ? QStringLiteral("无") : hexList.join(QStringLiteral(" "));
+
+    return hexList.isEmpty() ? QStringLiteral("None")
+                             : hexList.join(QStringLiteral(" "));
 }
 } // namespace
 
@@ -36,7 +47,7 @@ SetIdlePurgeTask::SetIdlePurgeTask(IdlePurgeProperty property,
     : SchedulerTask(parent)
     , m_property(property)
     , m_value(value)
-    , deviceLogger("scheduler/set_idle_purge_task/detail")
+    , m_deviceLogger("scheduler/set_idle_purge_task/detail")
 {
     qDebug() << "[Scheduler][SetIdlePurgeTask] create task"
              << propertyToString(property) << "=" << value;
@@ -59,41 +70,39 @@ void SetIdlePurgeTask::start()
     m_connections.clear();
     m_successCount = 0;
     m_failedQrCodes.clear();
-    m_targetQrCodes.clear();
     m_allFinishedEmitted = false;
 
     const QString propertyName = propertyToString(m_property);
-    const QString propertyValue = valueWithUnit(m_value);
-    const QString cmdId = commandIdForProperty(m_property);
+    const QString propertyValue = getValueText(m_value);
+    const QString cmdId = getCommandIdForProperty(m_property);
 
-    ModbusTcpMasterManager &mgr = ModbusTcpMasterManager::instance();
-    CommandPool *pool = mgr.commandPool();
-    if (!pool) {
+    ModbusTcpMasterManager &masterManager = ModbusTcpMasterManager::instance();
+    CommandPool *commandPool = masterManager.commandPool();
+    if (!commandPool) {
         setState(Failed);
         emit allFinished(false, 0, {}, propertyName, m_value);
-        emit finished(false, "SetIdlePurgeTask: CommandPool 未初始化");
+        emit finished(false, QStringLiteral("SetIdlePurgeTask: CommandPool not initialized"));
         return;
     }
 
-    if (!pool->contains(cmdId)) {
+    if (!commandPool->contains(cmdId)) {
         setState(Failed);
         emit allFinished(false, 0, {}, propertyName, m_value);
-        emit finished(false, QString("SetIdlePurgeTask: 指令 '%1' 不存在").arg(cmdId));
+        emit finished(false, QString("SetIdlePurgeTask: command '%1' not found").arg(cmdId));
         return;
     }
 
-    const QStringList masterIds = mgr.masterIds();
-    m_targetQrCodes = masterIds;
+    const QStringList masterIds = masterManager.masterIds();
     if (masterIds.isEmpty()) {
         setState(Failed);
         emit allFinished(false, 0, {}, propertyName, m_value);
-        emit finished(false, "SetIdlePurgeTask: 没有找到目标设备");
+        emit finished(false, QStringLiteral("SetIdlePurgeTask: no target devices found"));
         return;
     }
 
     const QByteArray regValue = buildRegisterValue(m_value);
 
-    if (auto* opTaskStart = SharedData::getOperationDispatchTask()) {
+    if (auto *opTaskStart = SharedData::getOperationDispatchTask()) {
         opTaskStart->log(OperationDispatchTask::MsgType::Message,
                          QString("SetIdlePurge task started: %1 = %2")
                              .arg(propertyName)
@@ -102,12 +111,14 @@ void SetIdlePurgeTask::start()
     }
 
     for (const QString &id : masterIds) {
-        ModbusTcpMaster *master = mgr.getMaster(id);
+        ModbusTcpMaster *master = masterManager.getMaster(id);
         if (!master) {
-            qWarning() << "[Scheduler][SetIdlePurgeTask] Master does not exist:" << id;
-            writeDeviceSkipLog(id, cmdId, QStringLiteral("Master 不存在"));
-            m_failedQrCodes.append(id);
-            if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            qWarning() << "[Scheduler][SetIdlePurgeTask] master does not exist:" << id;
+            writeDeviceSkipLog(id, cmdId, QStringLiteral("Master not found"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
+            }
+            if (auto *opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
             continue;
@@ -115,9 +126,11 @@ void SetIdlePurgeTask::start()
 
         if (!master->isConnected()) {
             qWarning() << "[Scheduler][SetIdlePurgeTask] device disconnected, skip:" << id;
-            writeDeviceSkipLog(id, cmdId, QStringLiteral("设备未连接"));
-            m_failedQrCodes.append(id);
-            if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            writeDeviceSkipLog(id, cmdId, QStringLiteral("Device disconnected"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
+            }
+            if (auto *opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
             continue;
@@ -126,20 +139,24 @@ void SetIdlePurgeTask::start()
         ModbusCommandSender *sender = master->sender();
         if (!sender) {
             qWarning() << "[Scheduler][SetIdlePurgeTask] sender is null:" << id;
-            writeDeviceSkipLog(id, cmdId, QStringLiteral("Sender 为空"));
-            m_failedQrCodes.append(id);
-            if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            writeDeviceSkipLog(id, cmdId, QStringLiteral("Sender is null"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
+            }
+            if (auto *opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
             continue;
         }
 
-        ModbusCommand cmd = pool->clone(cmdId);
+        ModbusCommand cmd = commandPool->clone(cmdId);
         if (!cmd.isValid()) {
             qWarning() << "[Scheduler][SetIdlePurgeTask] clone command failed:" << id;
-            writeDeviceSkipLog(id, cmdId, QStringLiteral("克隆指令失败"));
-            m_failedQrCodes.append(id);
-            if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            writeDeviceSkipLog(id, cmdId, QStringLiteral("Clone command failed"));
+            if (!m_failedQrCodes.contains(id)) {
+                m_failedQrCodes.append(id);
+            }
+            if (auto *opTask = SharedData::getOperationDispatchTask()) {
                 logFailedDevice(opTask, id);
             }
             continue;
@@ -162,10 +179,10 @@ void SetIdlePurgeTask::start()
             cmd.response.rawBytes[5] = regValue[1];
         }
 
-        auto conn = connect(sender, &ModbusCommandSender::commandFinished,
-                            this, &SetIdlePurgeTask::onCommandFinished,
-                            Qt::QueuedConnection);
-        m_connections.append(conn);
+        auto finishedConn = connect(sender, &ModbusCommandSender::commandFinished,
+                                    this, &SetIdlePurgeTask::onCommandFinished,
+                                    Qt::QueuedConnection);
+        m_connections.append(finishedConn);
 
         auto retryConn = connect(sender, &ModbusCommandSender::commandTimeoutRetry,
                                  this, &SetIdlePurgeTask::onCommandTimeoutRetry,
@@ -193,61 +210,74 @@ void SetIdlePurgeTask::stop()
     m_stopped = true;
     disconnectAll();
     setState(Cancelled);
-    emit finished(false, "SetIdlePurgeTask: 任务已取消");
+    emit finished(false, QStringLiteral("SetIdlePurgeTask: cancelled"));
 }
 
 void SetIdlePurgeTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
 {
-    if (m_stopped) return;
-    if (!m_pendingMap.contains(cmd.uuid)) return;
+    if (m_stopped) {
+        return;
+    }
+    if (!m_pendingMap.contains(cmd.uuid)) {
+        return;
+    }
+
     m_pendingMap.remove(cmd.uuid);
 
-    {
-        const QString sentTimeStr = cmd.sentMs > 0
-            ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
-            : QStringLiteral("-");
-        int execStatus = 3;
-        if (cmd.received) execStatus = 0;
-        else if (cmd.timedOut) execStatus = 1;
-        else if (cmd.sendCount > 1) execStatus = 2;
+    const QString sentTimeStr = cmd.sentMs > 0
+        ? QDateTime::fromMSecsSinceEpoch(cmd.sentMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
+        : QStringLiteral("-");
+    int execStatus = 3;
+    if (cmd.received) {
+        execStatus = 0;
+    } else if (cmd.timedOut) {
+        execStatus = 1;
+    } else if (cmd.sendCount > 1) {
+        execStatus = 2;
+    }
 
-        const int retryCount = qMax(0, cmd.sendCount - 1);
-        QString description;
-        if (execStatus != 0) {
-            description = cmd.errorMessage;
-        } else {
-            QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
-            if (!parsedData.isEmpty()) {
-                QStringList parts;
-                for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it) {
-                    parts << QString("%1=%2").arg(it.key(), it.value().toString());
-                }
-                description = parts.join(", ");
+    const int retryCount = qMax(0, cmd.sendCount - 1);
+    QString description;
+    if (execStatus != 0) {
+        description = cmd.errorMessage;
+    } else {
+        const QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
+        if (!parsedData.isEmpty()) {
+            QStringList parts;
+            for (auto it = parsedData.constBegin(); it != parsedData.constEnd(); ++it) {
+                parts << QString("%1=%2").arg(it.key(), it.value().toString());
             }
+            description = parts.join(QStringLiteral(", "));
         }
-        if (description.isEmpty()) {
-            description = QStringLiteral("OK");
+    }
+    if (description.isEmpty()) {
+        description = QStringLiteral("OK");
+    }
+
+    if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
+        const QString respTimeStr = cmd.responseMs > 0
+            ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
+            : QString();
+
+        QByteArray requestWithCrc = cmd.request.rawBytes;
+        if (!cmd.request.crc.isEmpty() && cmd.request.crc.size() >= 2) {
+            requestWithCrc.append(cmd.request.crc);
         }
 
-        if (LogDB::CommunicateLogDBCon *db = LogDB::DatabaseManager::instance().communicateLogCon()) {
-            const QString respTimeStr = cmd.responseMs > 0
-                ? QDateTime::fromMSecsSinceEpoch(cmd.responseMs).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"))
-                : QString();
-
-            QByteArray requestWithCrc = cmd.request.rawBytes;
-            if (!cmd.request.crc.isEmpty() && cmd.request.crc.size() >= 2) {
-                requestWithCrc.append(cmd.request.crc);
-            }
-
-            QByteArray responseWithCrc = cmd.response.rawBytes;
-            if (!cmd.response.crc.isEmpty() && cmd.response.crc.size() >= 2) {
-                responseWithCrc.append(cmd.response.crc);
-            }
-
-            db->insertRecord(sentTimeStr, respTimeStr, cmd.id, masterId,
-                             execStatus, retryCount,
-                             requestWithCrc, responseWithCrc, description);
+        QByteArray responseWithCrc = cmd.response.rawBytes;
+        if (!cmd.response.crc.isEmpty() && cmd.response.crc.size() >= 2) {
+            responseWithCrc.append(cmd.response.crc);
         }
+
+        db->insertRecord(sentTimeStr,
+                         respTimeStr,
+                         cmd.id,
+                         masterId,
+                         execStatus,
+                         retryCount,
+                         requestWithCrc,
+                         responseWithCrc,
+                         description);
     }
 
     const bool success = cmd.received
@@ -261,13 +291,15 @@ void SetIdlePurgeTask::onCommandFinished(ModbusCommand cmd, const QString &maste
         ++m_successCount;
         qDebug() << "[Scheduler][SetIdlePurgeTask] device success:" << masterId;
     } else {
-        m_failedQrCodes.append(masterId);
+        if (!m_failedQrCodes.contains(masterId)) {
+            m_failedQrCodes.append(masterId);
+        }
         qWarning() << "[Scheduler][SetIdlePurgeTask] device failed:" << masterId
                    << "timedOut=" << cmd.timedOut
                    << "checksumError=" << cmd.checksumError
                    << "deviceBusy=" << cmd.deviceBusy;
 
-        if (auto* opTask = SharedData::getOperationDispatchTask()) {
+        if (auto *opTask = SharedData::getOperationDispatchTask()) {
             logFailedDevice(opTask, masterId);
         }
     }
@@ -278,15 +310,21 @@ void SetIdlePurgeTask::onCommandFinished(ModbusCommand cmd, const QString &maste
 void SetIdlePurgeTask::checkAllFinished()
 {
     const int done = m_completedCount.fetchAndAddOrdered(1) + 1;
-    if (done < m_totalCount) return;
+    if (done < m_totalCount) {
+        return;
+    }
 
     forceFinish();
 }
 
 void SetIdlePurgeTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId)
 {
-    if (m_stopped) return;
-    if (!m_pendingMap.contains(cmd.uuid)) return;
+    if (m_stopped) {
+        return;
+    }
+    if (!m_pendingMap.contains(cmd.uuid)) {
+        return;
+    }
 
     const int retryCount = qMax(0, cmd.sendCount - 1);
     const int maxRetry = cmd.maxRetryCount;
@@ -299,85 +337,162 @@ void SetIdlePurgeTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &m
 
 void SetIdlePurgeTask::forceFinish()
 {
-    if (m_allFinishedEmitted) return;
+    if (m_allFinishedEmitted) {
+        return;
+    }
     m_allFinishedEmitted = true;
 
     disconnectAll();
 
-    auto* opTaskPending = SharedData::getOperationDispatchTask();
-    for (const QString &qrCode : m_pendingMap.values()) {
-        if (!m_failedQrCodes.contains(qrCode)) {
-            m_failedQrCodes.append(qrCode);
-        }
-
-        if (opTaskPending) {
+    if (auto *opTaskPending = SharedData::getOperationDispatchTask()) {
+        for (const QString &qrCode : m_pendingMap.values()) {
+            if (!m_failedQrCodes.contains(qrCode)) {
+                m_failedQrCodes.append(qrCode);
+            }
             logFailedDevice(opTaskPending, qrCode);
+        }
+    } else {
+        for (const QString &qrCode : m_pendingMap.values()) {
+            if (!m_failedQrCodes.contains(qrCode)) {
+                m_failedQrCodes.append(qrCode);
+            }
         }
     }
     m_pendingMap.clear();
 
     const QString propertyName = propertyToString(m_property);
-    const QString propertyValue = valueWithUnit(m_value);
-    const bool allSuccess = m_failedQrCodes.isEmpty();
-    setState(allSuccess ? Finished : Failed);
+    const QString propertyValue = getValueText(m_value);
+    const bool deviceWriteSuccess = m_failedQrCodes.isEmpty();
+    bool persistSuccess = true;
+    QString persistErrorMessage;
 
-    if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
-        const QString desc = allSuccess
-            ? QString("SetIdlePurge %1=%2 task completed: %3 devices succeeded")
-                  .arg(propertyName)
-                  .arg(propertyValue)
-                  .arg(m_successCount)
-            : QString("SetIdlePurge %1=%2 task finished: %3 succeeded, %4 failed")
-                  .arg(propertyName)
-                  .arg(propertyValue)
-                  .arg(m_successCount)
-                  .arg(m_failedQrCodes.count());
-        opTaskEnd->log(OperationDispatchTask::MsgType::Message, desc, 0);
+    if (deviceWriteSuccess) {
+        persistSuccess = persistConfig(&persistErrorMessage);
+        if (!persistSuccess) {
+            qWarning() << "[Scheduler][SetIdlePurgeTask] config persistence failed:"
+                       << propertyName << propertyValue << persistErrorMessage;
+            deviceDetailLogger().warn(
+                QString("[SetIdlePurgeTask] config persistence failed\n"
+                        "property: %1\n"
+                        "value: %2\n"
+                        "reason: %3")
+                    .arg(propertyName)
+                    .arg(propertyValue)
+                    .arg(persistErrorMessage)
+                    .toStdString());
+        }
     }
 
-    const QString finishedMessage = allSuccess
-        ? QString("SetIdlePurgeTask: %1 设置完毕（共 %2 台）")
-              .arg(propertyName)
-              .arg(m_successCount)
-        : QString("SetIdlePurgeTask: %1 设置完毕，%2 台成功，%3 台失败")
-              .arg(propertyName)
-              .arg(m_successCount)
-              .arg(m_failedQrCodes.count());
+    const bool finalSuccess = deviceWriteSuccess && persistSuccess;
+    setState(finalSuccess ? Finished : Failed);
 
-    emit allFinished(allSuccess, m_successCount, m_failedQrCodes, propertyName, m_value);
+    if (auto *opTaskEnd = SharedData::getOperationDispatchTask()) {
+        QString desc;
+        OperationDispatchTask::MsgType msgType = OperationDispatchTask::MsgType::Message;
 
-    emit finished(allSuccess, finishedMessage);
+        if (finalSuccess) {
+            desc = QString("SetIdlePurge %1=%2 task completed: %3 devices succeeded")
+                       .arg(propertyName)
+                       .arg(propertyValue)
+                       .arg(m_successCount);
+        } else if (!deviceWriteSuccess) {
+            desc = QString("SetIdlePurge %1=%2 task finished: %3 succeeded, %4 failed")
+                       .arg(propertyName)
+                       .arg(propertyValue)
+                       .arg(m_successCount)
+                       .arg(m_failedQrCodes.count());
+            msgType = OperationDispatchTask::MsgType::Error;
+        } else {
+            desc = QString("SetIdlePurge %1=%2 task finished: %3 devices succeeded, but config persistence failed (%4)")
+                       .arg(propertyName)
+                       .arg(propertyValue)
+                       .arg(m_successCount)
+                       .arg(persistErrorMessage);
+            msgType = OperationDispatchTask::MsgType::Error;
+        }
+
+        opTaskEnd->log(msgType, desc, 0);
+    }
+
+    QString finishedMessage;
+    if (finalSuccess) {
+        finishedMessage = QString("SetIdlePurgeTask: %1 completed (%2 devices)")
+                              .arg(propertyName)
+                              .arg(m_successCount);
+    } else if (!deviceWriteSuccess) {
+        finishedMessage = QString("SetIdlePurgeTask: %1 completed, %2 succeeded, %3 failed")
+                              .arg(propertyName)
+                              .arg(m_successCount)
+                              .arg(m_failedQrCodes.count());
+    } else {
+        finishedMessage = QString("SetIdlePurgeTask: %1 device write succeeded, but config persistence failed (%2)")
+                              .arg(propertyName)
+                              .arg(persistErrorMessage);
+    }
+
+    emit allFinished(finalSuccess, m_successCount, m_failedQrCodes, propertyName, m_value);
+    emit finished(finalSuccess, finishedMessage);
 }
 
-void SetIdlePurgeTask::logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode)
+bool SetIdlePurgeTask::persistConfig(QString *errorMessage)
+{
+    IdlePurgeConfig &config = IdlePurgeConfig::getInstance();
+    bool success = false;
+
+    switch (m_property) {
+    case IdlePurgeProperty::Enable:
+        success = config.setEnabled(m_value != 0);
+        break;
+    case IdlePurgeProperty::PurgeTime:
+        success = config.setPurgeDurationSeconds(static_cast<int>(m_value));
+        break;
+    case IdlePurgeProperty::PurgeInterval:
+        success = config.setPurgeIntervalSeconds(static_cast<int>(m_value));
+        break;
+    }
+
+    if (errorMessage) {
+        if (success) {
+            errorMessage->clear();
+        } else {
+            *errorMessage = QString("write %1 to %2 failed")
+                                .arg(propertyToString(m_property))
+                                .arg(config.getConfigPath());
+        }
+    }
+
+    return success;
+}
+
+void SetIdlePurgeTask::logFailedDevice(OperationDispatchTask *opTask, const QString &qrCode)
 {
     const QString desc = QString("[QRCode:%1]: SetIdlePurge %2=%3 task failed")
-        .arg(qrcode)
-        .arg(propertyToString(m_property))
-        .arg(valueWithUnit(m_value));
+                             .arg(qrCode)
+                             .arg(propertyToString(m_property))
+                             .arg(getValueText(m_value));
     opTask->log(OperationDispatchTask::MsgType::Error, desc, 0);
 }
 
-void SetIdlePurgeTask::writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason)
+void SetIdlePurgeTask::writeDeviceSkipLog(const QString &qrCode,
+                                          const QString &commandId,
+                                          const QString &reason)
 {
-    // 合并到 subFunction 共享日志文件，qrCode 放在行内，
-    // 避免为每个设备创建唯一 logger 导致的写锁饱和。
     deviceDetailLogger().info(
-        QString("[SetIdlePurgeTask][QRCode:%1] 跳过下发\n指令: %2\n原因: %3")
+        QString("[SetIdlePurgeTask][QRCode:%1] skip send\ncommand: %2\nreason: %3")
             .arg(qrCode)
             .arg(commandId)
             .arg(reason)
             .toStdString());
 }
 
-void SetIdlePurgeTask::writeDeviceCommandLog(const QString& qrCode, const ModbusCommand& cmd, bool success)
+void SetIdlePurgeTask::writeDeviceCommandLog(const QString &qrCode,
+                                             const ModbusCommand &cmd,
+                                             bool success)
 {
-    // 合并到 subFunction 共享日志文件，qrCode 放在行内，
-    // 避免为每个设备创建唯一 logger 导致的写锁饱和。
     const std::string msg = QString("[QRCode:%1] %2")
-        .arg(qrCode)
-        .arg(commandFrameLogString(cmd))
-        .toStdString();
+                                .arg(qrCode)
+                                .arg(buildCommandFrameLogString(cmd))
+                                .toStdString();
     if (success) {
         deviceDetailLogger().info(msg);
     } else {
@@ -385,41 +500,49 @@ void SetIdlePurgeTask::writeDeviceCommandLog(const QString& qrCode, const Modbus
     }
 }
 
-QString SetIdlePurgeTask::commandFrameLogString(const ModbusCommand& cmd) const
+QString SetIdlePurgeTask::buildCommandFrameLogString(const ModbusCommand &cmd) const
 {
     QString responseFrame;
     if (cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy) {
         responseFrame = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
     } else {
         QStringList failureReasons;
-        if (cmd.timedOut) failureReasons << QStringLiteral("超时");
-        if (cmd.checksumError) failureReasons << QStringLiteral("校验错误");
-        if (cmd.deviceBusy) failureReasons << QStringLiteral("设备忙");
-        if (!cmd.errorMessage.isEmpty()) failureReasons << cmd.errorMessage;
+        if (cmd.timedOut) {
+            failureReasons << QStringLiteral("timeout");
+        }
+        if (cmd.checksumError) {
+            failureReasons << QStringLiteral("checksum error");
+        }
+        if (cmd.deviceBusy) {
+            failureReasons << QStringLiteral("device busy");
+        }
+        if (!cmd.errorMessage.isEmpty()) {
+            failureReasons << cmd.errorMessage;
+        }
 
         const QString failureText = failureReasons.isEmpty()
-            ? QStringLiteral("失败")
+            ? QStringLiteral("failed")
             : failureReasons.join(QStringLiteral(", "));
         if (!cmd.received) {
             responseFrame = failureText;
         } else {
             const QString frameText = bytesToHexWithCrc(cmd.response.rawBytes, cmd.response.crc);
-            responseFrame = frameText == QStringLiteral("无")
+            responseFrame = frameText == QStringLiteral("None")
                 ? failureText
                 : QString("%1, %2").arg(failureText, frameText);
         }
     }
 
-    return QString("[SetIdlePurgeTask] 指令下发完成\n"
-                   "指令: %1\n"
-                   "请求帧: %2\n"
-                   "响应帧: %3")
+    return QString("[SetIdlePurgeTask] command finished\n"
+                   "command: %1\n"
+                   "request: %2\n"
+                   "response: %3")
         .arg(cmd.id)
         .arg(bytesToHexWithCrc(cmd.request.rawBytes, cmd.request.crc))
         .arg(responseFrame);
 }
 
-QString SetIdlePurgeTask::subFunctionName() const
+QString SetIdlePurgeTask::getSubFunctionName() const
 {
     switch (m_property) {
     case IdlePurgeProperty::Enable:
@@ -432,14 +555,12 @@ QString SetIdlePurgeTask::subFunctionName() const
     return QStringLiteral("unknown");
 }
 
-QString SetIdlePurgeTask::deviceLogPath() const
+QString SetIdlePurgeTask::getDeviceLogPath() const
 {
-    // 合并为 subFunction 级共享文件（3 个文件代替原本 3*80=240 个），
-    // qrCode 以「[QRCode:xxx]」前缀的形式写在每行。
-    return QStringLiteral("scheduler/set_idle_purge_task/%1").arg(subFunctionName());
+    return QStringLiteral("scheduler/set_idle_purge_task/%1").arg(getSubFunctionName());
 }
 
-QString SetIdlePurgeTask::safeLogPathSegment(const QString& value)
+QString SetIdlePurgeTask::buildSafeLogPathSegment(const QString &value)
 {
     QString result = value.trimmed();
     if (result.isEmpty()) {
@@ -459,20 +580,18 @@ QString SetIdlePurgeTask::safeLogPathSegment(const QString& value)
     return result;
 }
 
-ILogger& SetIdlePurgeTask::deviceDetailLogger()
+ILogger &SetIdlePurgeTask::deviceDetailLogger()
 {
-    // subFunction 级路径在任务生命周期内不变，设一次即可，
-    // 后续调用复用同一 logger，索引 logger_mtx_ 只需共享读锁。
     if (!m_loggerInitialized) {
-        deviceLogger.set_log_file(deviceLogPath().toStdString());
+        m_deviceLogger.set_log_file(getDeviceLogPath().toStdString());
         m_loggerInitialized = true;
     }
-    return deviceLogger;
+    return m_deviceLogger;
 }
 
-QString SetIdlePurgeTask::commandIdForProperty(IdlePurgeProperty p) const
+QString SetIdlePurgeTask::getCommandIdForProperty(IdlePurgeProperty property) const
 {
-    switch (p) {
+    switch (property) {
     case IdlePurgeProperty::Enable:
         return QStringLiteral("WriteIdlePurgeEnable");
     case IdlePurgeProperty::PurgeTime:
@@ -499,11 +618,12 @@ void SetIdlePurgeTask::disconnectAll()
     m_connections.clear();
 }
 
-QString SetIdlePurgeTask::valueWithUnit(quint16 value) const
+QString SetIdlePurgeTask::getValueText(quint16 value) const
 {
     switch (m_property) {
     case IdlePurgeProperty::Enable:
-        return (value == 1) ? QStringLiteral("enable") : QStringLiteral("disable");
+        return (value == 1) ? QStringLiteral("enable")
+                            : QStringLiteral("disable");
     case IdlePurgeProperty::PurgeTime:
     case IdlePurgeProperty::PurgeInterval:
         return QString("%1 s").arg(value);
@@ -511,9 +631,9 @@ QString SetIdlePurgeTask::valueWithUnit(quint16 value) const
     return QString::number(value);
 }
 
-QString SetIdlePurgeTask::propertyToString(IdlePurgeProperty p)
+QString SetIdlePurgeTask::propertyToString(IdlePurgeProperty property)
 {
-    switch (p) {
+    switch (property) {
     case IdlePurgeProperty::Enable:
         return QStringLiteral("Idle Purge Enable");
     case IdlePurgeProperty::PurgeTime:

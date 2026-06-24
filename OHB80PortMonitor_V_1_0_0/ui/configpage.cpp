@@ -1,5 +1,6 @@
 #include "configpage.h"
 
+#include "app.h"
 #include "ui_configpage.h"
 #include "customwidget/configsettingwidget/deviceenablesettingwidget.h"
 #include "customwidget/configsettingwidget/deviceinfosettingwidget.h"
@@ -8,6 +9,8 @@
 #include "customwidget/configsettingwidget/purgeflowsettingwidget.h"
 #include "customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.h"
 #include "customwidget/configsettingwidget/sh85selfchecksettingwidget.h"
+#include "ohbdeviceconfig.h"
+#include "idlepurgeconfig.h"
 
 #include <QScroller>
 #include <QScrollerProperties>
@@ -15,7 +18,7 @@
 
 ConfigPage::ConfigPage(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::ConfigPage)
+    , m_ui(new Ui::ConfigPage)
     , m_idlePurgeWidget(nullptr)
     , m_pneumaticValvePressureWidget(nullptr)
     , m_sh85PeriodicSelfCheckWidget(nullptr)
@@ -24,22 +27,22 @@ ConfigPage::ConfigPage(QWidget *parent)
     , m_purgeFlowWidget(nullptr)
     , m_deviceInfoWidget(nullptr)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
     initUI();
 }
 
 ConfigPage::~ConfigPage()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void ConfigPage::initUI()
 {
     initNav();
 
-    if (ui->scrollArea && ui->scrollArea->viewport()) {
-        QScroller::grabGesture(ui->scrollArea->viewport(), QScroller::LeftMouseButtonGesture);
-        QScroller *scroller = QScroller::scroller(ui->scrollArea->viewport());
+    if (m_ui->scrollArea && m_ui->scrollArea->viewport()) {
+        QScroller::grabGesture(m_ui->scrollArea->viewport(), QScroller::LeftMouseButtonGesture);
+        QScroller *scroller = QScroller::scroller(m_ui->scrollArea->viewport());
         QScrollerProperties props = scroller->scrollerProperties();
         props.setScrollMetric(QScrollerProperties::DragStartDistance, 0.005);
         props.setScrollMetric(QScrollerProperties::OvershootDragResistanceFactor, 0.3);
@@ -48,52 +51,66 @@ void ConfigPage::initUI()
     }
 
     m_idlePurgeWidget = new IdlePurgeSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_idlePurgeWidget);
+    IdlePurgeConfig &idlePurgeConfig = IdlePurgeConfig::getInstance();
+    m_idlePurgeWidget->setConfigValues(idlePurgeConfig.isEnabled(),
+                                       idlePurgeConfig.getPurgeDurationSeconds(),
+                                       idlePurgeConfig.getPurgeIntervalSeconds());
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_idlePurgeWidget);
 
     m_pneumaticValvePressureWidget = new PneumaticValvePressureSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_pneumaticValvePressureWidget);
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_pneumaticValvePressureWidget);
 
     m_sh85PeriodicSelfCheckWidget = new SH85PeriodicSelfCheckSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_sh85PeriodicSelfCheckWidget);
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_sh85PeriodicSelfCheckWidget);
     connect(m_sh85PeriodicSelfCheckWidget, &SH85PeriodicSelfCheckSettingWidget::runningStateChanged,
             this, &ConfigPage::onPeriodicSelfCheckRunningStateChanged);
 
     m_sh85SelfCheckWidget = new SH85SelfCheckSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_sh85SelfCheckWidget);
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_sh85SelfCheckWidget);
     connect(m_sh85SelfCheckWidget, &SH85SelfCheckSettingWidget::runningStateChanged,
             this, &ConfigPage::onSelfCheckRunningStateChanged);
     onPeriodicSelfCheckRunningStateChanged(m_sh85PeriodicSelfCheckWidget->isRunning());
     onSelfCheckRunningStateChanged(m_sh85SelfCheckWidget->isRunning());
 
     m_purgeFlowWidget = new PurgeFlowSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_purgeFlowWidget);
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_purgeFlowWidget);
 
     m_deviceEnableWidget = new DeviceEnableSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceEnableWidget);
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceEnableWidget);
 
     m_deviceInfoWidget = new DeviceInfoSettingWidget(this);
-    ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceInfoWidget);
+    m_ui->scrollAreaWidgetContents->layout()->addWidget(m_deviceInfoWidget);
 
-    ui->scrollAreaWidgetContents->layout()->addItem(
+    const QVector<OHBDeviceConfigInfo> devices = OHBDeviceConfig::getInstance().readDevices();
+    if (!devices.isEmpty()) {
+        const OHBDeviceConfigInfo& firstDeviceConfig = devices.first();
+        m_purgeFlowWidget->setInitialConfigValue(firstDeviceConfig.getPurgeFlowLitersPerMinute());
+        m_pneumaticValvePressureWidget->setInitialConfigValue(firstDeviceConfig.getVppePressureBar());
+        m_deviceEnableWidget->setInitialConfigValue(firstDeviceConfig.isEnabled());
+    }
+
+    registerModulePermissions();
+
+    m_ui->scrollAreaWidgetContents->layout()->addItem(
         new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
 }
 
 void ConfigPage::initNav()
 {
-    ui->widgetTop->setProperty("nav", "top");
-    QList<QToolButton *> btns = ui->widgetTop->findChildren<QToolButton *>();
+    m_ui->widgetTop->setProperty("nav", "top");
+    QList<QToolButton *> btns = m_ui->widgetTop->findChildren<QToolButton *>();
     foreach (QToolButton *btn, btns) {
         btn->setCheckable(true);
-        connect(btn, &QPushButton::clicked, this, &ConfigPage::navBtnClicked);
+        connect(btn, &QPushButton::clicked, this, &ConfigPage::onNavBtnClicked);
     }
 }
 
-void ConfigPage::navBtnClicked()
+void ConfigPage::onNavBtnClicked()
 {
     QToolButton *btn = static_cast<QToolButton *>(sender());
     QString objName = btn->objectName();
 
-    QList<QToolButton *> btns = ui->widgetTop->findChildren<QToolButton *>();
+    QList<QToolButton *> btns = m_ui->widgetTop->findChildren<QToolButton *>();
     foreach (QToolButton *b, btns) {
         b->setChecked(b == btn);
     }
@@ -116,9 +133,41 @@ void ConfigPage::navBtnClicked()
     }
 
     if (targetWidget) {
-        QPoint pos = targetWidget->mapTo(ui->scrollAreaWidgetContents, QPoint(0, 0));
-        ui->scrollArea->verticalScrollBar()->setValue(pos.y());
+        QPoint pos = targetWidget->mapTo(m_ui->scrollAreaWidgetContents, QPoint(0, 0));
+        m_ui->scrollArea->verticalScrollBar()->setValue(pos.y());
     }
+}
+
+void ConfigPage::registerModulePermissions()
+{
+    App::registerModulePermission(m_idlePurgeWidget,
+                                  m_ui->btnIdelPurge,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("IdlePurgeConfiguration"));
+    App::registerModulePermission(m_pneumaticValvePressureWidget,
+                                  m_ui->btnPneumaticValvePressure,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("PneumaticValvePressureConfiguration"));
+    App::registerModulePermission(m_sh85PeriodicSelfCheckWidget,
+                                  m_ui->btnSH85PeriodicSelfCheck,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("SH85PeriodicSelfCheckConfiguration"));
+    App::registerModulePermission(m_sh85SelfCheckWidget,
+                                  m_ui->btnSH85SelfCheck,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("SH85SelfCheckConfiguration"));
+    App::registerModulePermission(m_purgeFlowWidget,
+                                  m_ui->btnPurgeFlow,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("PurgeFlowConfiguration"));
+    App::registerModulePermission(m_deviceEnableWidget,
+                                  m_ui->btnDeviceEnable,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("DeviceEnableConfiguration"));
+    App::registerModulePermission(m_deviceInfoWidget,
+                                  m_ui->btnDeviceInfo,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("DeviceInfoConfiguration"));
 }
 
 void ConfigPage::onSelfCheckRunningStateChanged(bool running)

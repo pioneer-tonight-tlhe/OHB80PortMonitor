@@ -1,12 +1,14 @@
 #include "app.h"
 #include "appconfig.h"
 #include "applogger.h"
+#include "modulepermissionconfig.h"
 #include "shareddata.h"
 #include "qthelper.h"
 #include "metatypes.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/scheduler.h"
 #include "logdatabases/databasemanager.h"
+#include "usermanager.h"
 #include <qdir>
 #include <qstandardpaths>
 #include <qdebug>
@@ -20,6 +22,17 @@ bool App::s_initialized = false;
 QString App::s_appVersion = "1.0.0";
 AppLogger* App::s_logger = nullptr;
 
+namespace {
+UserPermission toUserPermission(int permission)
+{
+    if (!ModulePermissionConfig::isValidPermission(permission)) {
+        return UserPermission::Root;
+    }
+
+    return static_cast<UserPermission>(permission);
+}
+}
+
 bool App::initialize()
 {
     if (s_initialized) {
@@ -30,6 +43,11 @@ bool App::initialize()
     
     // 注册元类型
     MetaTypes::registerTypes();
+
+    // 初始化模块权限配置，具体控件创建后再由 App 统一注册权限。
+    if (!ModulePermissionConfig::getInstance().reload()) {
+        qWarning() << "module_permission.ini 配置文件加载失败，使用默认模块权限";
+    }
 
     // 单实例检查
     if (!QtHelper::checkSingleInstance(getAppName())) {
@@ -153,6 +171,24 @@ void App::initScheduler()
 {
     // 调用 SharedData 的调度器初始化方法
     SharedData::initScheduler();
+}
+
+void App::registerModulePermission(QWidget* moduleWidget,
+                                   QWidget* navWidget,
+                                   const QString& pageName,
+                                   const QString& moduleName)
+{
+    // 统一从模块权限配置中读取最低权限，并同时注册内容区和导航入口。
+    UserManager* userManager = UserManager::instance();
+    if (!userManager) {
+        return;
+    }
+
+    const int permission = ModulePermissionConfig::getInstance().getPermission(pageName, moduleName);
+    const UserPermission userPermission = toUserPermission(permission);
+
+    userManager->registerWidget(moduleWidget, userPermission);
+    userManager->registerWidget(navWidget, userPermission);
 }
 
 void App::onAboutToQuit()

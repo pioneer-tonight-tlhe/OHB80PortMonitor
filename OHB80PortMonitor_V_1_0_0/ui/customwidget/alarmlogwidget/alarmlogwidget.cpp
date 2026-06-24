@@ -5,6 +5,7 @@
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/alarmlogquerytask/alarmlogquerytask.h"
 #include "paginationwidget.h"
+#include "waitdialog.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/alarmlogdb/alarmlogdbcon.h"
 #include "app/shareddata.h"
@@ -14,11 +15,13 @@
 #include <QScrollerProperties>
 #include <QDebug>
 #include <QMessageBox>
+#include <QTimer>
 #include <limits>
 
 AlarmLogWidget::AlarmLogWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::AlarmLogWidget)
+    , m_waitDialog(nullptr)
     , m_currentPage(1)
     , m_pageSize(500)
     , m_totalPages(0)
@@ -478,6 +481,16 @@ void AlarmLogWidget::onPaginationPageChanged(int page)
 
 void AlarmLogWidget::submitQuery(int page)
 {
+    if (!m_waitDialog) {
+        m_waitDialog = new WaitDialog(this);
+        connect(m_waitDialog, &WaitDialog::cancelRequested,
+                this, &AlarmLogWidget::onCancelRequested);
+    }
+    m_waitDialog->setWaiting(tr("Querying, please wait..."));
+    m_waitDialog->show();
+    m_waitDialog->raise();
+    m_waitDialog->activateWindow();
+
     AlarmLogQueryTask* task = new AlarmLogQueryTask();
     task->setPageNumber(page);
     task->setPageSize(m_pageSize);
@@ -500,8 +513,42 @@ void AlarmLogWidget::submitQuery(int page)
             this, &AlarmLogWidget::onPageWithConditionsResult, Qt::QueuedConnection);
     connect(task, &AlarmLogQueryTask::totalCountWithConditionsResult,
             this, &AlarmLogWidget::onTotalCountWithConditionsResult, Qt::QueuedConnection);
+    connect(task, &SchedulerTask::finished,
+            this, &AlarmLogWidget::onTaskFinished, Qt::QueuedConnection);
 
-    Scheduler::instance()->submitTask(task);
+    m_activeTaskId = Scheduler::instance()->submitTask(task);
+}
+
+void AlarmLogWidget::onCancelRequested()
+{
+    if (!m_activeTaskId.isEmpty()) {
+        Scheduler::instance()->cancelTask(m_activeTaskId);
+        m_activeTaskId.clear();
+    }
+    if (m_waitDialog) {
+        m_waitDialog->hide();
+    }
+}
+
+void AlarmLogWidget::onTaskFinished(bool success, const QString& message)
+{
+    if (m_activeTaskId.isEmpty()) {
+        return;
+    }
+    m_activeTaskId.clear();
+    if (!m_waitDialog || !m_waitDialog->isVisible()) {
+        return;
+    }
+    if (success) {
+        m_waitDialog->setSuccess(tr("Query successful"));
+    } else {
+        m_waitDialog->setFailure(tr("Query failed: %1").arg(message));
+    }
+    QTimer::singleShot(1000, this, [this]() {
+        if (m_waitDialog) {
+            m_waitDialog->hide();
+        }
+    });
 }
 
 void AlarmLogWidget::onPageWithConditionsResult(const QList<AlarmRecord>& records)

@@ -1,6 +1,6 @@
 #include "set_device_info_task.h"
 
-#include "app/ohbdeviceconfig.h"
+#include "ohbdeviceconfig.h"
 #include "app/shareddata.h"
 #include "classes/foupofohbinfo.h"
 #include "logdatabases/databasemanager.h"
@@ -74,15 +74,15 @@ void SetDeviceInfoTask::start()
 bool SetDeviceInfoTask::prepareTask(QString* errorMessage)
 {
     OHBDeviceConfig& config = OHBDeviceConfig::getInstance();
-    const QVector<OHBDeviceInfo> devices = config.readDevices();
+    const QVector<OHBDeviceConfigInfo> devices = config.readDevices();
     bool oldFound = false;
-    OHBDeviceInfo oldInfo;
+    OHBDeviceConfigInfo oldInfo;
 
-    for (const OHBDeviceInfo& device : devices) {
-        if (device.qrCode == m_oldQrCode) {
+    for (const OHBDeviceConfigInfo& device : devices) {
+        if (device.getQrCode() == m_oldQrCode) {
             oldFound = true;
             oldInfo = device;
-        } else if (device.qrCode == m_newQrCode) {
+        } else if (device.getQrCode() == m_newQrCode) {
             if (errorMessage) *errorMessage = QString("QRCode %1 already exists in config").arg(m_newQrCode);
             return false;
         }
@@ -104,8 +104,8 @@ bool SetDeviceInfoTask::prepareTask(QString* errorMessage)
         return false;
     }
 
-    m_oldIp = oldInfo.ip;
-    m_oldPort = oldInfo.port;
+    m_oldIp = oldInfo.getIp();
+    m_oldPort = oldInfo.getPort();
     if (errorMessage) errorMessage->clear();
     return true;
 }

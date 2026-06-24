@@ -75,6 +75,9 @@ private:
     // ReadVEFCTemperature：1个寄存器，2字节，原始值 / 100，单位 ℃
     static QVariantMap parseReadVEFCTemperature(const ModbusCommand& cmd);
 
+    // ReadVEFCFlowUnitAndMediumStatus：1个寄存器，hi/lo 分别表示流量单位与介质配置状态。
+    static QVariantMap parseReadVEFCFlowUnitAndMediumStatus(const ModbusCommand& cmd);
+
     QMap<QString, ParseFunc> m_parsers;
 };
 

@@ -78,6 +78,17 @@ HumidityOffsetSettingWidget::HumidityOffsetSettingWidget(QWidget *parent)
 
 HumidityOffsetSettingWidget::~HumidityOffsetSettingWidget() = default;
 
+void HumidityOffsetSettingWidget::setInitialConfigValues(double humidityLowerLimitPercent,
+                                                         double humidityOffsetPercent)
+{
+    if (m_thresholdSpinBox) {
+        m_thresholdSpinBox->setValue(humidityLowerLimitPercent);
+    }
+    if (m_offsetSpinBox) {
+        m_offsetSpinBox->setValue(humidityOffsetPercent);
+    }
+}
+
 // ============================================================
 // UI 初始化
 // ============================================================
