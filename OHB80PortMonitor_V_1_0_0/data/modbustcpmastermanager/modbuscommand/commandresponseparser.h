@@ -78,6 +78,14 @@ private:
     // ReadVEFCFlowUnitAndMediumStatus：1个寄存器，hi/lo 分别表示流量单位与介质配置状态。
     static QVariantMap parseReadVEFCFlowUnitAndMediumStatus(const ModbusCommand& cmd);
 
+    // ReadVersion：1个寄存器，2字节。
+    // 若字节为 ASCII 数字则按 x.y 解析，否则按原始数值解析。
+    static QVariantMap parseReadVersion(const ModbusCommand& cmd);
+
+    // ReadUIScreenVersion：1个寄存器，2字节。
+    // Byte0 表示版本第一段；Byte1 高4位/低4位分别表示第二段/第三段。
+    static QVariantMap parseReadUIScreenVersion(const ModbusCommand& cmd);
+
     QMap<QString, ParseFunc> m_parsers;
 };
 

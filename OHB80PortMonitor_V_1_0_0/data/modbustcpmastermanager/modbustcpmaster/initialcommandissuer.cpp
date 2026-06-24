@@ -29,28 +29,11 @@ constexpr const char* kWriteUIRefreshTimeCommandId = "WriteUIRefreshTime";
 constexpr const char* kWriteHumidityOffsetCommandId = "WriteHumidityOffset";
 constexpr const char* kWriteHumidityOffsetThresholdCommandId = "WriteHumidityOffsetThreshold";
 constexpr const char* kReadVersionCommandId = "ReadVersion";
+constexpr const char* kReadUIScreenVersionCommandId = "ReadUIScreenVersion";
 
 constexpr int kPurgeFlowRegisterScale = 100;
 constexpr int kVppePressureRegisterScale = 1000;
 constexpr int kHumidityPercentRegisterScale = 100;
-
-QString parseFirmwareVersion(const QByteArray& registerValue)
-{
-    if (registerValue.size() < 2) {
-        return QString();
-    }
-
-    const quint8 majorByte = static_cast<quint8>(registerValue.at(0));
-    const quint8 minorByte = static_cast<quint8>(registerValue.at(1));
-    const bool majorIsDigit = majorByte >= '0' && majorByte <= '9';
-    const bool minorIsDigit = minorByte >= '0' && minorByte <= '9';
-
-    if (majorIsDigit && minorIsDigit) {
-        return QString("%1.%2").arg(majorByte - '0').arg(minorByte - '0');
-    }
-
-    return QString("%1.%2").arg(majorByte).arg(minorByte);
-}
 
 QByteArray buildRegisterValue(quint16 value)
 {
@@ -143,7 +126,8 @@ QSet<QString> requiredInitialCommandIds()
         QString::fromLatin1(kWriteUIRefreshTimeCommandId),
         QString::fromLatin1(kWriteHumidityOffsetCommandId),
         QString::fromLatin1(kWriteHumidityOffsetThresholdCommandId),
-        QString::fromLatin1(kReadVersionCommandId)
+        QString::fromLatin1(kReadVersionCommandId),
+        QString::fromLatin1(kReadUIScreenVersionCommandId)
     };
 }
 } // namespace
@@ -386,30 +370,50 @@ bool InitialCommandIssuer::handleCommandSuccess(ModbusCommand& cmd)
         return false;
     }
 
-    if (cmd.id != QLatin1String(kReadVersionCommandId)) {
+    if (cmd.id != QLatin1String(kReadVersionCommandId)
+        && cmd.id != QLatin1String(kReadUIScreenVersionCommandId)) {
         return true;
     }
 
-    const QString version = parseFirmwareVersion(cmd.response.registerValue);
+    const bool isFirmwareVersionCommand = (cmd.id == QLatin1String(kReadVersionCommandId));
+    const QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
+    const QString version = isFirmwareVersionCommand
+                                ? parsedData.value("firmwareVersion").toString()
+                                : parsedData.value("uiScreenVersion").toString();
     if (version.isEmpty()) {
+        const QString commandName = isFirmwareVersionCommand
+                                        ? QStringLiteral("ReadVersion")
+                                        : QStringLiteral("ReadUIScreenVersion");
         ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "InitialCommandIssuer", "onCommandSucceeded",
-            QString("ReadVersion 响应解析失败，响应寄存器字节数=%1")
+            QString("%1 响应解析失败，响应寄存器字节数=%2")
+                .arg(commandName)
                 .arg(cmd.response.registerValue.size()));
         return false;
     }
 
     if (!m_master) {
-        appendErrorMessage(QString("ReadVersion parsed but master is null, version=%1").arg(version));
+        const QString commandName = isFirmwareVersionCommand
+                                        ? QStringLiteral("ReadVersion")
+                                        : QStringLiteral("ReadUIScreenVersion");
+        appendErrorMessage(QString("%1 parsed but master is null, version=%2").arg(commandName, version));
         ModbusLogger::masterWarn(m_masterId, "ModbusTcpMaster", "InitialCommandIssuer", "onCommandSucceeded",
-            QString("ReadVersion 解析成功但 Master 指针为空，版本号=%1").arg(version));
+            QString("%1 解析成功但 Master 指针为空，版本号=%2").arg(commandName, version));
         return false;
     }
 
-    m_master->m_firmwareVersion = version;
+    if (isFirmwareVersionCommand) {
+        m_master->m_firmwareVersion = version;
+    } else {
+        m_master->m_uiScreenVersion = version;
+    }
 
-    qDebug() << "[InitialCommandIssuer] [设备ID=" << m_masterId << "] ReadVersion parsed:" << version;
+    qDebug() << "[InitialCommandIssuer] [设备ID=" << m_masterId << "]"
+             << (isFirmwareVersionCommand ? "ReadVersion parsed:" : "ReadUIScreenVersion parsed:")
+             << version;
     ModbusLogger::masterInfo(m_masterId, "ModbusTcpMaster", "InitialCommandIssuer", "onCommandSucceeded",
-        QString("ReadVersion 解析完成，固件版本号=%1").arg(version));
+        isFirmwareVersionCommand
+            ? QString("ReadVersion 解析完成，固件版本号=%1").arg(version)
+            : QString("ReadUIScreenVersion 解析完成，UI 屏版本号=%1").arg(version));
 
     return true;
 }
@@ -417,7 +421,8 @@ bool InitialCommandIssuer::handleCommandSuccess(ModbusCommand& cmd)
 bool InitialCommandIssuer::validateSuccessfulCommand(ModbusCommand& cmd)
 {
     if (cmd.id != QLatin1String(kReadVEFCFlowUnitAndMediumStatusCommandId)
-        && cmd.id != QLatin1String(kReadVersionCommandId)) {
+        && cmd.id != QLatin1String(kReadVersionCommandId)
+        && cmd.id != QLatin1String(kReadUIScreenVersionCommandId)) {
         return true;
     }
 
@@ -442,9 +447,17 @@ bool InitialCommandIssuer::validateSuccessfulCommand(ModbusCommand& cmd)
         return true;
     }
 
-    const QString version = parseFirmwareVersion(cmd.response.registerValue);
+    const bool isFirmwareVersionCommand = (cmd.id == QLatin1String(kReadVersionCommandId));
+    const QVariantMap parsedData = CommandResponseParser::instance().parse(cmd);
+    const QString version = isFirmwareVersionCommand
+                                ? parsedData.value("firmwareVersion").toString()
+                                : parsedData.value("uiScreenVersion").toString();
     if (version.isEmpty()) {
-        cmd.errorMessage = QString("ReadVersion parse failed, register bytes=%1")
+        const QString commandName = isFirmwareVersionCommand
+                                        ? QStringLiteral("ReadVersion")
+                                        : QStringLiteral("ReadUIScreenVersion");
+        cmd.errorMessage = QString("%1 parse failed, register bytes=%2")
+                               .arg(commandName)
                                .arg(cmd.response.registerValue.size());
         return false;
     }

@@ -158,6 +158,24 @@ public:
     QString firmwareVersion() const;
 
     /**
+     * @brief 设置固件版本号
+     * @param firmwareVersion 固件版本号字符串
+     */
+    void setFirmwareVersion(const QString& firmwareVersion);
+
+    /**
+     * @brief 获取 UI 屏版本号
+     * @return UI 屏版本号字符串
+     */
+    QString uiScreenVersion() const;
+
+    /**
+     * @brief 设置 UI 屏版本号
+     * @param uiScreenVersion UI 屏版本号字符串
+     */
+    void setUiScreenVersion(const QString& uiScreenVersion);
+
+    /**
      * @brief 获取固件升级器
      * @return MtcFirmwareUpgrader 指针
      */
@@ -285,6 +303,7 @@ private:
     QString m_ip;                              // 设备 IP 地址。
     quint16 m_port = 0;                        // 设备端口。
     QString m_firmwareVersion;                 // 固件版本号。
+    QString m_uiScreenVersion;                 // UI 屏版本号。
 
     // ---- 功能模块成员 ----
     QTcpSocket* m_socket = nullptr;            // TCP Socket。

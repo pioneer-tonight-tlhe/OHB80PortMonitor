@@ -122,6 +122,21 @@ QString ModbusTcpMaster::firmwareVersion() const
     return m_firmwareVersion;
 }
 
+void ModbusTcpMaster::setFirmwareVersion(const QString& firmwareVersion)
+{
+    m_firmwareVersion = firmwareVersion;
+}
+
+QString ModbusTcpMaster::uiScreenVersion() const
+{
+    return m_uiScreenVersion;
+}
+
+void ModbusTcpMaster::setUiScreenVersion(const QString& uiScreenVersion)
+{
+    m_uiScreenVersion = uiScreenVersion;
+}
+
 FirmwareUpgrader* ModbusTcpMaster::firmwareUpgrader() const
 {
     return m_firmwareUpgrader;

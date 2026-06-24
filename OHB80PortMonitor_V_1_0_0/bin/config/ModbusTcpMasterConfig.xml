@@ -18,6 +18,7 @@
             <Command ref="WriteHumidityOffset"/>
             <Command ref="WriteHumidityOffsetThreshold"/>
             <Command ref="ReadVersion"/>
+            <Command ref="ReadUIScreenVersion"/>
         </CommandSet>
     </InitialCommands>
 
@@ -53,6 +54,28 @@
                 <SlaveAddr>01</SlaveAddr>
                 <Function>04</Function>
                 <StartAddr>00 15</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             功能码 04 — 读输入寄存器（单寄存器）
+             UI 屏版本号查询
+             请求帧: 01 04 00 20 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             CH_1: UI 屏版本号
+             ======================================== -->
+        <Command id="ReadUIScreenVersion">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 20</StartAddr>
                 <RegisterCount>00 01</RegisterCount>
             </request>
             <respond>

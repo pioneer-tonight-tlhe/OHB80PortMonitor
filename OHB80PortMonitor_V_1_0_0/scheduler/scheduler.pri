@@ -44,6 +44,7 @@ HEADERS += \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.h \
     $$PWD/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.h \
     $$PWD/tasks/read_vefc_flow_unit_medium_status_task/read_vefc_flow_unit_medium_status_task.h \
+    $$PWD/tasks/read_device_version_task/read_device_version_task.h \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task.h \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task_logger.h \
     $$PWD/tasks/operation_dispatch_task/operation_dispatch_task.h \
@@ -89,6 +90,7 @@ SOURCES += \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.cpp \
     $$PWD/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.cpp \
     $$PWD/tasks/read_vefc_flow_unit_medium_status_task/read_vefc_flow_unit_medium_status_task.cpp \
+    $$PWD/tasks/read_device_version_task/read_device_version_task.cpp \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task_logger.cpp \
     $$PWD/tasks/operation_dispatch_task/operation_dispatch_task.cpp \

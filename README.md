@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.5.10**
+**当前版本：v0.5.11**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,56 @@
 ---
 
 ## 更新日志
+
+## v0.5.11
+
+### ConfigPage 设备信息展示 UI 屏版本号
+- 修改时间：2026-06-24
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：完善 ConfigPage 中 Device Info 查看设备信息功能，在设备信息表格中展示 UI 屏幕版本号，并通过调度任务主动读取设备固件版本号和 UI 屏版本号。
+- 功能点明细：
+  - `View Device Information` 点击后不再只读取 `ModbusTcpMaster` 中已有的固件版本缓存，而是提交 `ReadDeviceVersionTask` 统一查询设备版本信息。
+  - 新增 `ReadDeviceVersionTask`，调度层对每台目标设备下发 `ReadVersion` 和 `ReadUIScreenVersion`，并通过 `CommandResponseParser` 解析结果。
+  - 查询成功后同步刷新 `ModbusTcpMaster` 中的固件版本号和 UI 屏版本号运行态缓存。
+  - Device Information 表格新增 `UI Screen Version` 字段，表头调整为 `QRCode`、`固件版本号`、`UI Screen Version`、`IP`、`Port`。
+  - UI 屏版本号显示格式从 `01.0.0` 调整为 `1.0.0`，主版本号不再补前导 0。
+  - 查看设备信息时如果存在部分设备版本读取失败，仅在设置项状态中显示 `Partial Failed`，不再弹出额外错误提示框。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/read_device_version_task/read_device_version_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/read_device_version_task/read_device_version_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.cpp`
+  - `README.md`
+- 兼容性影响：不改变设备信息修改流程；查看设备信息会额外触发版本读取业务指令，离线或读取失败的设备会在表格中显示 `-`。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
+
+### 添加ui屏幕版本号指令
+- 修改时间：2026-06-24
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增读取 UI 屏幕版本号的初始化指令，并在初始化成功后将 UI 屏版本号写入设备运行态。
+- 功能点明细：
+  - 在 `ModbusTcpMasterConfig.xml` 的 `<InitialCommands>` 中新增 `ReadUIScreenVersion`，确保设备连接成功后自动读取 UI 屏幕版本号。
+  - 新增 `ReadUIScreenVersion` 指令定义，请求帧为 `01 04 00 20 00 01`，响应帧为 `01 04 02 XX XX`。
+  - UI 屏版本号响应字段按 2 字节解析：第 1 字节表示版本号第一段，第 2 字节拆分为高 4 位和低 4 位，分别表示第二段和第三段。
+  - `CommandResponseParser` 新增 `ReadUIScreenVersion` 响应解析逻辑，并将 `ReadVersion` 的版本号解析一并收敛到统一的指令响应解析类中。
+  - `InitialCommandIssuer` 仅负责调用 `CommandResponseParser` 校验解析结果，并在解析成功后写入 `ModbusTcpMaster` 的 UI 屏版本号和固件版本号运行态字段。
+  - `ModbusTcpMaster` 新增 UI 屏版本号访问接口，供后续界面展示或业务读取使用。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.cpp`
+  - `README.md`
+- 兼容性影响：不改变初始化指令整体下发流程；版本号解析职责调整为由 `CommandResponseParser` 统一处理，并在初始化阶段新增 UI 屏版本号读取与运行态缓存。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
 
 ## v0.5.10
 
