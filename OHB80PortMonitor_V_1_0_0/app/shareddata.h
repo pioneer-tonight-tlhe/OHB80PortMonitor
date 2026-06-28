@@ -7,6 +7,7 @@
 #include <QString>
 #include <QVariantMap>
 #include "setofohbinfo.h"
+#include "electriccabinetinfo.h"
 
 class NetworkStatusTask;
 class MonitorDataTask;
@@ -17,6 +18,7 @@ class VEFCSensorMonitorTask;
 class VEFCMonitorInfo;
 class DiskPressureCleanupTask;
 class ElectricCabinetSerialPortStatusTask;
+class ElectricCabinetPropertyMonitorTask;
 class ElectricCabinetSerialPortController;
 
 class SharedData
@@ -70,6 +72,12 @@ public:
 
     static ElectricCabinetSerialPortStatusTask* getElectricCabinetSerialPortStatusTask();
 
+    // 获取电控柜属性信息（全局共享对象）
+    static ElectricCabinetInfo* getElectricCabinetInfo();
+
+    // 获取电控柜属性监控任务
+    static ElectricCabinetPropertyMonitorTask* getElectricCabinetPropertyMonitorTask();
+
 private:
     static bool s_modbusManagerInitialized;
     static NetworkStatusTask* s_networkStatusTask;
@@ -80,7 +88,9 @@ private:
     static VEFCSensorMonitorTask* s_vefcSensorMonitorTask;
     static DiskPressureCleanupTask* s_diskPressureCleanupTask;
     static ElectricCabinetSerialPortStatusTask* s_electricCabinetSerialPortStatusTask;
+    static ElectricCabinetPropertyMonitorTask* s_electricCabinetPropertyMonitorTask;
     static ElectricCabinetSerialPortController* s_electricCabinetSerialPortController;
+    static ElectricCabinetInfo s_electricCabinetInfo;
 };
 
 #endif // SHAREDDATA_H

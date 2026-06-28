@@ -25,6 +25,10 @@ HEADERS += \
     $$PWD/tasks/network_status_task/network_status_task_qrcode_logger.h \
     $$PWD/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.h \
     $$PWD/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task_logger.h \
+    $$PWD/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task.h \
+    $$PWD/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task_logger.h \
+    $$PWD/tasks/electric_cabinet_set_temp_humi_task/electric_cabinet_set_temp_humi_task.h \
+    $$PWD/tasks/electric_cabinet_switch_control_task/electric_cabinet_switch_control_task.h \
     $$PWD/tasks/set_firmware_config_task/set_firmware_config_task.h \
     $$PWD/tasks/firmware_upgrade_task/firmware_upgrade_task.h \
     $$PWD/tasks/set_idle_purge_task/set_idle_purge_task.h \
@@ -74,6 +78,10 @@ SOURCES += \
     $$PWD/tasks/network_status_task/network_status_task_qrcode_logger.cpp \
     $$PWD/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.cpp \
     $$PWD/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task_logger.cpp \
+    $$PWD/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task.cpp \
+    $$PWD/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task_logger.cpp \
+    $$PWD/tasks/electric_cabinet_set_temp_humi_task/electric_cabinet_set_temp_humi_task.cpp \
+    $$PWD/tasks/electric_cabinet_switch_control_task/electric_cabinet_switch_control_task.cpp \
     $$PWD/tasks/set_firmware_config_task/set_firmware_config_task.cpp \
     $$PWD/tasks/firmware_upgrade_task/firmware_upgrade_task.cpp \
     $$PWD/tasks/set_idle_purge_task/set_idle_purge_task.cpp \

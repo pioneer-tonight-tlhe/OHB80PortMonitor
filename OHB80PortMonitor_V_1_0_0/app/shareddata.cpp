@@ -11,6 +11,7 @@
 #include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h"
 #include "scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.h"
+#include "scheduler/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task.h"
 #include "electriccabinetserialportcontroller.h"
 #include "setofohbinfo.h"
 #include <QDebug>
@@ -26,7 +27,9 @@ SH85PeriodicSelfCheckTask3* SharedData::s_sh85PeriodicSelfCheckTask3 = nullptr;
 VEFCSensorMonitorTask* SharedData::s_vefcSensorMonitorTask = nullptr;
 DiskPressureCleanupTask* SharedData::s_diskPressureCleanupTask = nullptr;
 ElectricCabinetSerialPortStatusTask* SharedData::s_electricCabinetSerialPortStatusTask = nullptr;
+ElectricCabinetPropertyMonitorTask* SharedData::s_electricCabinetPropertyMonitorTask = nullptr;
 ElectricCabinetSerialPortController* SharedData::s_electricCabinetSerialPortController = nullptr;
+ElectricCabinetInfo SharedData::s_electricCabinetInfo;
 
 SharedData::SharedData() {
 
@@ -85,6 +88,7 @@ SharedData::SharedData() {
         s_electricCabinetSerialPortController = new ElectricCabinetSerialPortController();
         qDebug() << "[SharedData] ElectricCabinetSerialPortController created";
     }
+
 }
 
 QSharedPointer<SetOfOHBInfo> SharedData::getSetOfOHBInfoByUiId(int uiId)
@@ -184,11 +188,18 @@ void SharedData::initScheduler()
 
     // 提交网络状态监控任务（长驻任务）
     // NetworkStatusTask 内部会在设备启动前先创建并管理 InitCheckTask
-    // Electric cabinet serial port connection monitor.
+    // 电控柜串口连接监听任务：按配置初始化串口、开启自动连接，并同步连接状态/告警。
     if (!s_electricCabinetSerialPortStatusTask) {
         s_electricCabinetSerialPortStatusTask = new ElectricCabinetSerialPortStatusTask();
         QString id = scheduler->submitTask(s_electricCabinetSerialPortStatusTask);
         qDebug() << "[SharedData] submitted electric cabinet serial port status task, TaskID:" << id;
+    }
+
+    // 电控柜属性监控任务：复用上面的串口控制器，定时读取属性并写入 s_electricCabinetInfo。
+    if (!s_electricCabinetPropertyMonitorTask) {
+        s_electricCabinetPropertyMonitorTask = new ElectricCabinetPropertyMonitorTask();
+        QString id = scheduler->submitTask(s_electricCabinetPropertyMonitorTask);
+        qDebug() << "[SharedData] submitted electric cabinet property monitor task, TaskID:" << id;
     }
 
     if (!s_networkStatusTask) {
@@ -281,4 +292,14 @@ ElectricCabinetSerialPortController* SharedData::getElectricCabinetSerialPortCon
 ElectricCabinetSerialPortStatusTask* SharedData::getElectricCabinetSerialPortStatusTask()
 {
     return s_electricCabinetSerialPortStatusTask;
+}
+
+ElectricCabinetInfo* SharedData::getElectricCabinetInfo()
+{
+    return &s_electricCabinetInfo;
+}
+
+ElectricCabinetPropertyMonitorTask* SharedData::getElectricCabinetPropertyMonitorTask()
+{
+    return s_electricCabinetPropertyMonitorTask;
 }

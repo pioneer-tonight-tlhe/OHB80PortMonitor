@@ -4,6 +4,7 @@
 #include "app/shareddata.h"
 #include "electriccabinetserialportconfig.h"
 #include "electriccabinetserialportcontroller.h"
+#include "electriccabinetinfo.h"
 #include "scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h"
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 
@@ -177,6 +178,9 @@ void ElectricCabinetSerialPortStatusTask::applyConnectionState(bool connected, c
     }
 
     emit serialConnectionChanged(connected, reason);
+    if (ElectricCabinetInfo* info = SharedData::getElectricCabinetInfo()) {
+        info->setSerialPortConnected(connected);
+    }
 
     if (connected) {
         m_logger->info("applyConnectionState", QString("port=%1 connected. reason=%2").arg(m_portName, reason));

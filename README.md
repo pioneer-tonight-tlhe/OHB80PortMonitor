@@ -11,6 +11,113 @@
 ## 更新日志
 
 ## [待发布]
+### 电控柜开关控制任务
+- 修改时间：2026-06-28
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增电控柜开关控制任务，复用 SharedData 中共享的电控柜串口控制器下发风扇、指示灯、电源等开关量控制帧，校验设备回显后将最新开关状态写入全局 `ElectricCabinetInfo`。
+- 功能点明细：
+  - 新增 `ElectricCabinetSwitchControlTask`，参考旧项目 `switch_control_task` 的报文格式，向电控柜发送 `0x32` 开关控制帧。
+  - 任务支持通过 mask 控制 1 号风扇、2 号风扇、红色指示灯、绿色指示灯和电源输出，发送前会基于 `ElectricCabinetInfo` 中的当前开关状态合成目标状态字节。
+  - 任务启动时检查 `SharedData::getElectricCabinetSerialPortController()` 是否存在且串口已连接，未连接时直接失败并写入操作日志。
+  - 任务收到响应帧后校验帧头与寄存器号，解析设备回显的开关状态字节，并同步更新 `ElectricCabinetInfo` 中的风扇、指示灯和电源状态。
+  - 扩展 `ElectricCabinetSerialPortConfig` 与 `electric_cabinet_serial_port.ini`，新增 `[ElectricCabinetSwitchControl]` 配置段，保存 `CommandResponseTimeoutMs`。
+  - 任务成功、失败和超时结果统一写入 `OperationDispatchTask`，便于后续从操作日志中追踪电控柜开关控制过程。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/electric_cabinet_serial_port.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_switch_control_task/electric_cabinet_switch_control_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_switch_control_task/electric_cabinet_switch_control_task.cpp`
+  - `README.md`
+- 兼容性影响：新增任务仅作用于电控柜串口链路，不改变现有 OHB Modbus TCP 监控与调度流程；若串口未连接或设备未按预期回显，任务会按失败结束。
+
+### 电控柜温湿度阈值设置任务
+- 修改时间：2026-06-28
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增电控柜温湿度阈值设置任务，复用 SharedData 中共享的电控柜串口控制器下发温湿度阈值命令帧，校验设备回显后将确认成功的阈值写回独立串口配置文件。
+- 功能点明细：
+  - 新增 `ElectricCabinetSetTempHumiTask`，参考旧项目 `set_temp_humi_task` 的报文格式与回显校验逻辑，向电控柜发送 `0x34` 温湿度阈值设置帧。
+  - 任务启动时先检查 `SharedData::getElectricCabinetSerialPortController()` 是否存在且串口已连接；满足条件后再发送设置命令，避免在未连接状态下盲发串口数据。
+  - 任务收到响应帧后校验帧头、寄存器号以及温湿度寄存器值，仅当设备回显值与请求值一致时才判定成功。
+  - 扩展 `ElectricCabinetSerialPortConfig` 与 `electric_cabinet_serial_port.ini`，新增 `[ElectricCabinetTempHumi]` 配置段，保存 `TempMax`、`HumiMax` 和 `CommandResponseTimeoutMs`，供任务读取超时时间并在成功后回写最新阈值。
+  - 任务成功、失败和超时结果统一写入 `OperationDispatchTask`，便于后续从操作日志中追踪电控柜阈值设置过程。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/electric_cabinet_serial_port.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_set_temp_humi_task/electric_cabinet_set_temp_humi_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_set_temp_humi_task/electric_cabinet_set_temp_humi_task.cpp`
+  - `README.md`
+- 兼容性影响：新增任务仅作用于电控柜串口链路，不改变现有 OHB Modbus TCP 监控与调度流程；若串口未连接或设备回显不匹配，任务会按失败结束并保留原有配置值。
+
+### 电控柜属性监控任务
+- 修改时间：2026-06-28
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增电控柜属性监控常驻任务，复用 SharedData 中共享的电控柜串口控制器，按配置周期发送属性读取帧，解析电控柜风扇、指示灯、电源、急停、电压、电流、温湿度等属性，并直接写入 SharedData 中的全局 `ElectricCabinetInfo` 对象。
+- 功能点明细：
+  - 新增 `ElectricCabinetInfo`，参考 `FoupOfOHBInfo` 作为简单共享数据类，支持拷贝构造和拷贝赋值，不包含信号与槽。
+  - 新增 `ElectricCabinetPropertyMonitorTask`，默认发送 `02 03 00 00 33 33 33` 状态读取帧，接收并校验状态帧后更新 `ElectricCabinetInfo`。
+  - 新增 `ElectricCabinetPropertyMonitorTaskLogger`，记录属性监控任务启动、发送、接收、超时、发送失败和解析异常。
+  - 扩展 `ElectricCabinetSerialPortConfig` 与 `electric_cabinet_serial_port.ini`，新增 `[ElectricCabinetPropertyMonitor]` 配置段。
+  - `SharedData::initScheduler()` 在电控柜串口连接监听任务之后提交属性监控任务，确保属性轮询复用已初始化并自动连接的串口控制器。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/electric_cabinet_serial_port.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/classes/electriccontrolcabinet/electriccabinetinfo.h`
+  - `OHB80PortMonitor_V_1_0_0/classes/electriccontrolcabinet/electriccabinetinfo.cpp`
+  - `OHB80PortMonitor_V_1_0_0/classes/classes.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task_logger.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_property_monitor_task/electric_cabinet_property_monitor_task_logger.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.cpp`
+  - `README.md`
+- 兼容性影响：新增属性监控仅作用于电控柜串口链路，不改变现有 OHB Modbus TCP 监控流程。
+
+### 电控柜串口配置与连接监控任务
+- 修改时间：2026-06-28
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：为电控柜串口模块补充独立配置文件、常驻连接监控调度任务和串口未连接警报能力，并明确由调度任务负责按配置初始化串口控制器、开启自动连接与状态监听。
+- 功能点明细：
+  - 新增 `ElectricCabinetSerialPortConfig`，对应独立配置文件 `electric_cabinet_serial_port.ini`，支持读取和写回串口连接参数。
+  - 新增常驻任务 `ElectricCabinetSerialPortStatusTask`，参考 `NetworkStatusTask` 的组织方式，在调度层持续监听电控柜串口连接状态变化。
+  - 电控柜串口控制器的启动、参数初始化、自动连接和断开职责统一收口到 `ElectricCabinetSerialPortStatusTask`。
+  - 新增 `ElectricCabinetSerialPortStatusTaskLogger`，统一记录电控柜串口连接监控任务的启动、初始化、断开、错误和警报处理日志。
+  - 告警层新增电控柜串口未连接告警类型，串口断开时提交告警，串口恢复连接后自动恢复告警。
+  - `SharedData::initScheduler()` 已将电控柜串口连接监控任务加入常驻任务初始化流程。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/electric_cabinet_serial_port.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/electriccabinetserialportconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/config.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/alarmtype.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/eleccabinetserialport.pri`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportcontroller.h`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportcontroller.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportworker.h`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportworker.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/data.pri`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task_logger.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task_logger.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp`
+  - `README.md`
+- 兼容性影响：新增功能仅作用于电控柜串口链路，不改变现有 Modbus TCP 设备监控与调度流程。
+
 
 ### 构建电控柜data层（串口控制类ElectricCabinetSerialPortController）
 - 修改时间：2026-06-23

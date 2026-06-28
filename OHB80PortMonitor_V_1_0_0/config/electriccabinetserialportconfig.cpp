@@ -40,6 +40,9 @@ ElectricCabinetSerialPortConfig::ElectricCabinetSerialPortConfig()
 
     if (!QFileInfo::exists(m_configFilePath)) {
         writeSettings(ElectricCabinetSerialPortSettings());
+        writePropertyMonitorSettings(ElectricCabinetPropertyMonitorSettings());
+        writeTempHumiSettings(ElectricCabinetTempHumiSettings());
+        writeSwitchControlSettings(ElectricCabinetSwitchControlSettings());
     }
 }
 
@@ -73,6 +76,53 @@ ElectricCabinetSerialPortSettings ElectricCabinetSerialPortConfig::readSettings(
     return result;
 }
 
+ElectricCabinetPropertyMonitorSettings ElectricCabinetSerialPortConfig::readPropertyMonitorSettings() const
+{
+    ElectricCabinetPropertyMonitorSettings result;
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    settings.beginGroup("ElectricCabinetPropertyMonitor");
+    result.enabled = settings.value("Enabled", result.enabled).toBool();
+    result.pollIntervalMs = positiveOrDefault(settings.value("PollIntervalMs", result.pollIntervalMs).toInt(),
+                                              result.pollIntervalMs);
+    result.retryIntervalMs = positiveOrDefault(settings.value("RetryIntervalMs", result.retryIntervalMs).toInt(),
+                                               result.retryIntervalMs);
+    result.requestFrameHex = settings.value("RequestFrameHex", result.requestFrameHex).toString().trimmed();
+    settings.endGroup();
+
+    return result;
+}
+
+ElectricCabinetTempHumiSettings ElectricCabinetSerialPortConfig::readTempHumiSettings() const
+{
+    ElectricCabinetTempHumiSettings result;
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    settings.beginGroup("ElectricCabinetTempHumi");
+    result.tempMax = settings.value("TempMax", result.tempMax).toDouble();
+    result.humiMax = settings.value("HumiMax", result.humiMax).toDouble();
+    result.commandResponseTimeoutMs = positiveOrDefault(
+        settings.value("CommandResponseTimeoutMs", result.commandResponseTimeoutMs).toInt(),
+        result.commandResponseTimeoutMs);
+    settings.endGroup();
+
+    return result;
+}
+
+ElectricCabinetSwitchControlSettings ElectricCabinetSerialPortConfig::readSwitchControlSettings() const
+{
+    ElectricCabinetSwitchControlSettings result;
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    settings.beginGroup("ElectricCabinetSwitchControl");
+    result.commandResponseTimeoutMs = positiveOrDefault(
+        settings.value("CommandResponseTimeoutMs", result.commandResponseTimeoutMs).toInt(),
+        result.commandResponseTimeoutMs);
+    settings.endGroup();
+
+    return result;
+}
+
 bool ElectricCabinetSerialPortConfig::writeSettings(const ElectricCabinetSerialPortSettings& value)
 {
     QSettings settings(m_configFilePath, QSettings::IniFormat);
@@ -89,6 +139,51 @@ bool ElectricCabinetSerialPortConfig::writeSettings(const ElectricCabinetSerialP
     settings.setValue("ReconnectIntervalMs", positiveOrDefault(value.reconnectIntervalMs, 3000));
     settings.setValue("CommandTimeoutMs", positiveOrDefault(value.commandTimeoutMs, 1000));
     settings.setValue("InterFrameTimeoutMs", positiveOrDefault(value.interFrameTimeoutMs, 30));
+    settings.endGroup();
+
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+}
+
+bool ElectricCabinetSerialPortConfig::writePropertyMonitorSettings(
+    const ElectricCabinetPropertyMonitorSettings& value)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    settings.beginGroup("ElectricCabinetPropertyMonitor");
+    settings.setValue("Enabled", value.enabled);
+    settings.setValue("PollIntervalMs", positiveOrDefault(value.pollIntervalMs, 1000));
+    settings.setValue("RetryIntervalMs", positiveOrDefault(value.retryIntervalMs, 3000));
+    settings.setValue("RequestFrameHex", value.requestFrameHex.trimmed());
+    settings.endGroup();
+
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+}
+
+bool ElectricCabinetSerialPortConfig::writeTempHumiSettings(const ElectricCabinetTempHumiSettings& value)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    settings.beginGroup("ElectricCabinetTempHumi");
+    settings.setValue("TempMax", value.tempMax);
+    settings.setValue("HumiMax", value.humiMax);
+    settings.setValue("CommandResponseTimeoutMs",
+                      positiveOrDefault(value.commandResponseTimeoutMs, 1500));
+    settings.endGroup();
+
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+}
+
+bool ElectricCabinetSerialPortConfig::writeSwitchControlSettings(
+    const ElectricCabinetSwitchControlSettings& value)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    settings.beginGroup("ElectricCabinetSwitchControl");
+    settings.setValue("CommandResponseTimeoutMs",
+                      positiveOrDefault(value.commandResponseTimeoutMs, 1500));
     settings.endGroup();
 
     settings.sync();

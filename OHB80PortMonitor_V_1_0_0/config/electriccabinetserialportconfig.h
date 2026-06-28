@@ -32,6 +32,28 @@ struct ElectricCabinetSerialPortSettings
     int interFrameTimeoutMs = 30;
 };
 
+// ---- 电控柜属性监控参数结构 ----
+struct ElectricCabinetPropertyMonitorSettings
+{
+    bool enabled = true;
+    int pollIntervalMs = 1000;
+    int retryIntervalMs = 3000;
+    QString requestFrameHex = QStringLiteral("02 03 00 00 33 33 33");
+};
+
+struct ElectricCabinetTempHumiSettings
+{
+    double tempMax = 60.0;
+    double humiMax = 80.0;
+    int commandResponseTimeoutMs = 1500;
+};
+
+// ---- 电控柜开关控制参数结构 ----
+struct ElectricCabinetSwitchControlSettings
+{
+    int commandResponseTimeoutMs = 1500;
+};
+
 class ElectricCabinetSerialPortConfig
 {
 public:
@@ -41,6 +63,12 @@ public:
     // ============================ 配置读写 ============================
     ElectricCabinetSerialPortSettings readSettings() const;
     bool writeSettings(const ElectricCabinetSerialPortSettings& settings);
+    ElectricCabinetPropertyMonitorSettings readPropertyMonitorSettings() const;
+    bool writePropertyMonitorSettings(const ElectricCabinetPropertyMonitorSettings& settings);
+    ElectricCabinetTempHumiSettings readTempHumiSettings() const;
+    bool writeTempHumiSettings(const ElectricCabinetTempHumiSettings& settings);
+    ElectricCabinetSwitchControlSettings readSwitchControlSettings() const;
+    bool writeSwitchControlSettings(const ElectricCabinetSwitchControlSettings& settings);
 
     // ============================ 查询辅助 ============================
     QString getConfigPath() const;
