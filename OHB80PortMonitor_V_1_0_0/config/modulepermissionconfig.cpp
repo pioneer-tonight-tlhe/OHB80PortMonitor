@@ -256,6 +256,7 @@ QMap<QString, QMap<QString, int>> ModulePermissionConfig::createDefaultPermissio
     debugPagePermissions.insert("VEFCFlowUnitMediumStatus", 3);
     debugPagePermissions.insert("BoardEnableStatus", 3);
     debugPagePermissions.insert("FoupInVacuumExtractionEnable", 3);
+    debugPagePermissions.insert("FoupInAutoPurgeEnable", 3);
     permissions.insert(DebugPageGroup, debugPagePermissions);
 
     return permissions;

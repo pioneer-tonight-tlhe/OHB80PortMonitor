@@ -40,6 +40,9 @@ const char* const HumidityLowerLimitKey = "HumidityLowerLimit_pct";
 const char* const LegacyHumidityLowerLimitKeyWithUnderscore = "humidity_lower_limit_pct";
 const char* const LegacyHumidityLowerLimitKey = "HumidityLowerLimit";
 
+const char* const FoupInAutoPurgeEnableKey = "FoupInAutoPurgeEnable";
+const char* const LegacyFoupInAutoPurgeEnableKeyWithUnderscore = "foup_in_auto_purge_enable";
+
 const char* const MasterDevicesGroup = "MasterDevices";
 const char* const MasterDevicesKey = "List";
 const char* const LegacyMasterDevicesKey = "list";
@@ -58,6 +61,7 @@ const int DefaultPageSwitchIntervalSeconds = 5;
 const int DefaultPageTotalTimeSeconds = 5;
 const double DefaultHumidityOffsetPercent = 0.0;
 const double DefaultHumidityLowerLimitPercent = 5.0;
+const int DefaultFoupInAutoPurgeEnable = 0;
 const int DefaultSh85SelfCheckPeriodSeconds = 1800;
 
 QVariant readConfigValue(QSettings &settings,
@@ -137,6 +141,10 @@ OHBDeviceConfigInfo readDeviceInfoFromCurrentGroup(const QSettings &settings)
          LegacyHumidityLowerLimitKeyWithUnderscore,
          LegacyHumidityLowerLimitKey},
         DefaultHumidityLowerLimitPercent).toDouble();
+    const int foupInAutoPurgeEnable = readCurrentGroupValue(
+        settings,
+        {FoupInAutoPurgeEnableKey, LegacyFoupInAutoPurgeEnableKeyWithUnderscore},
+        DefaultFoupInAutoPurgeEnable).toInt();
 
     return OHBDeviceConfigInfo(qrCode,
                                ip,
@@ -148,7 +156,8 @@ OHBDeviceConfigInfo readDeviceInfoFromCurrentGroup(const QSettings &settings)
                                pageTotalTimeSeconds,
                                humidityOffsetPercent,
                                humidityLowerLimitPercent,
-                               vppePressureBar);
+                               vppePressureBar,
+                               qBound(0, foupInAutoPurgeEnable, 1));
 }
 }
 
@@ -220,6 +229,7 @@ bool OHBDeviceConfig::writeDevices(const QVector<OHBDeviceConfigInfo>& devices)
         settings.setValue(PageTotalTimeKey, deviceInfo.getPageTotalTimeSeconds());
         settings.setValue(HumidityOffsetKey, deviceInfo.getHumidityOffsetPercent());
         settings.setValue(HumidityLowerLimitKey, deviceInfo.getHumidityLowerLimitPercent());
+        settings.setValue(FoupInAutoPurgeEnableKey, deviceInfo.getFoupInAutoPurgeEnable());
         settings.endGroup();
     }
 
@@ -366,6 +376,31 @@ bool OHBDeviceConfig::setVppePressureBarByQRCode(const QString& qrCode, double v
     }
 
     qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode << "的设备，无法写入 VPPEPressure_bar";
+    return false;
+}
+
+bool OHBDeviceConfig::setFoupInAutoPurgeEnableByQRCode(const QString& qrCode, int enable)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    const int normalizedEnable = qBound(0, enable, 1);
+
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        const QString currentQrCode = settings.value(QRCodeKey, "").toString();
+        if (currentQrCode == qrCode) {
+            settings.setValue(FoupInAutoPurgeEnableKey, normalizedEnable);
+            settings.endGroup();
+            settings.sync();
+            qDebug() << "OHBDeviceConfig: 设置设备" << qrCode
+                     << "FoupInAutoPurgeEnable=" << normalizedEnable;
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+
+    qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode
+               << "的设备，无法写入 FoupInAutoPurgeEnable";
     return false;
 }
 

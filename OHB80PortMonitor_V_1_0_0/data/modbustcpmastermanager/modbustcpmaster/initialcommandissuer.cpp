@@ -23,6 +23,7 @@ constexpr const char* kWriteIdlePurgeTimeCommandId = "WriteIdlePurgeTime";
 constexpr const char* kWriteIdlePurgeIntervalCommandId = "WriteIdlePurgeInterval";
 constexpr const char* kSetBoardEnableCommandId = "SetBoardEnable";
 constexpr const char* kWritePurgeFlowCommandId = "WritePurgeFlow";
+constexpr const char* kWriteFoupInAutoPurgeEnableCommandId = "WriteFoupInAutoPurgeEnable";
 constexpr const char* kReadVEFCFlowUnitAndMediumStatusCommandId = "ReadVEFCFlowUnitAndMediumStatus";
 constexpr const char* kWritePneumaticValvePressureCommandId = "WritePneumaticValvePressure";
 constexpr const char* kWriteUIRefreshTimeCommandId = "WriteUIRefreshTime";
@@ -121,6 +122,7 @@ QSet<QString> requiredInitialCommandIds()
         QString::fromLatin1(kWriteIdlePurgeIntervalCommandId),
         QString::fromLatin1(kSetBoardEnableCommandId),
         QString::fromLatin1(kWritePurgeFlowCommandId),
+        QString::fromLatin1(kWriteFoupInAutoPurgeEnableCommandId),
         QString::fromLatin1(kReadVEFCFlowUnitAndMediumStatusCommandId),
         QString::fromLatin1(kWritePneumaticValvePressureCommandId),
         QString::fromLatin1(kWriteUIRefreshTimeCommandId),
@@ -262,6 +264,10 @@ void InitialCommandIssuer::configureCommand(ModbusCommand& cmd, const OHBDeviceC
         fillWriteSingleRegister(cmd, static_cast<quint16>(qBound(0,
                                                                  deviceInfo.getPurgeFlowLitersPerMinute() * kPurgeFlowRegisterScale,
                                                                  0xFFFF)));
+    } else if (cmd.id == QLatin1String(kWriteFoupInAutoPurgeEnableCommandId)) {
+        fillWriteSingleRegister(cmd, static_cast<quint16>(qBound(0,
+                                                                 deviceInfo.getFoupInAutoPurgeEnable(),
+                                                                 1)));
     } else if (cmd.id == QLatin1String(kWritePneumaticValvePressureCommandId)) {
         fillWriteSingleRegister(cmd, toRegisterValue(deviceInfo.getVppePressureBar(), kVppePressureRegisterScale));
     } else if (cmd.id == QLatin1String(kWriteUIRefreshTimeCommandId)) {

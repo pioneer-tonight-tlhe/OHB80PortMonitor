@@ -35,6 +35,7 @@ public:
     OHBDeviceConfigInfo getDeviceByMasterId(const QString& masterId) const;
     bool setDeviceEnable(const QString& qrCode, bool enable);
     bool setVppePressureBarByQRCode(const QString& qrCode, double vppePressureBar);
+    bool setFoupInAutoPurgeEnableByQRCode(const QString& qrCode, int enable);
     bool updateDeviceInfoByQRCode(const QString& oldQrCode,
                                   const QString& newQrCode,
                                   const QString& ip,

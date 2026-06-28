@@ -6,7 +6,8 @@ HEADERS += \
     $$PWD/uirefreshtimesettingwidget.h \
     $$PWD/vefcflowunitmediumstatuswidget.h \
     $$PWD/boardenablestatuswidget.h \
-    $$PWD/foupinvacuumextractionenablewidget.h
+    $$PWD/foupinvacuumextractionenablewidget.h \
+    $$PWD/foupinautopurgeenablewidget.h
 
 SOURCES += \
     $$PWD/firmwareupdateconfigsettingwidget.cpp \
@@ -16,7 +17,8 @@ SOURCES += \
     $$PWD/uirefreshtimesettingwidget.cpp \
     $$PWD/vefcflowunitmediumstatuswidget.cpp \
     $$PWD/boardenablestatuswidget.cpp \
-    $$PWD/foupinvacuumextractionenablewidget.cpp
+    $$PWD/foupinvacuumextractionenablewidget.cpp \
+    $$PWD/foupinautopurgeenablewidget.cpp
 
 FORMS += \
     $$PWD/firmwareupdatewidget.ui

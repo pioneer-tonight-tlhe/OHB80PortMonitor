@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.5.11**
+**当前版本：v0.5.12**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,40 @@
 ---
 
 ## 更新日志
+
+## v0.5.12
+
+### DebugPage 新增 FOUPIN 自动充气使能
+- 修改时间：2026-06-25
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：在通讯指令配置、DebugPage 调试界面、权限配置和设备配置类中新增 FOUPIN 自动充气使能能力，支持单设备和全部设备下发设置。
+- 功能点明细：
+  - 在 `ModbusTcpMasterConfig.xml` 中新增 `WriteFoupInAutoPurgeEnable` 指令，功能码 `0x06`，寄存器地址 `0x001C`，写入值 `0/1`。
+  - 将 `WriteFoupInAutoPurgeEnable` 加入 `<InitialCommands>`，设备连接初始化时会按 `ohb_device.ini` 中的配置值下发。
+  - 新增 `FoupInAutoPurgeEnableWidget`，DebugPage 中提供二维码 `SpinBox`、使能值选择框、`设置单个设备` 和 `设置所有设备` 按钮。
+  - DebugPage 顶部导航新增 `FOUPIN Auto Purge` 入口，并接入模块权限控制。
+  - `module_permission.ini` 和 `ModulePermissionConfig` 默认权限中新增 `FoupInAutoPurgeEnable = 3`。
+  - `OHBDeviceConfigInfo` 和 `OHBDeviceConfig` 新增 `FoupInAutoPurgeEnable` 配置字段，默认值为 `0`，支持读取、写入和按 QRCode 更新。
+  - 设置指令成功后，单设备或批量成功设备会同步写回 `ohb_device.ini`，保证重连初始化时继续使用最新配置。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `OHB80PortMonitor_V_1_0_0/classes/config/ohbdeviceconfiginfo.h`
+  - `OHB80PortMonitor_V_1_0_0/classes/config/ohbdeviceconfiginfo.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinautopurgeenablewidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinautopurgeenablewidget.cpp`
+  - `README.md`
+- 兼容性影响：默认值为 `0`，旧配置文件未包含该字段时保持“不执行充气及充气相关功能”的默认行为；新增初始化指令依赖设备侧支持寄存器 `0x001C`。
+- 验证情况：已使用 Qt 5.15.2 MinGW 64-bit Debug 执行 `qmake` 和 `mingw32-make -f Makefile.Debug`，构建通过。
 
 ## v0.5.11
 

@@ -27,6 +27,7 @@ class HumidityOffsetSettingWidget;
 class VEFCFlowUnitMediumStatusWidget;
 class BoardEnableStatusWidget;
 class FoupInVacuumExtractionEnableWidget;
+class FoupInAutoPurgeEnableWidget;
 
 class DebugPage : public QWidget
 {
@@ -62,6 +63,7 @@ private:
     VEFCFlowUnitMediumStatusWidget *m_vefcFlowUnitMediumStatusWidget;
     BoardEnableStatusWidget *m_boardEnableStatusWidget;
     FoupInVacuumExtractionEnableWidget *m_foupInVacuumExtractionEnableWidget;
+    FoupInAutoPurgeEnableWidget *m_foupInAutoPurgeEnableWidget;
 };
 
 #endif // DEBUGPAGE_H

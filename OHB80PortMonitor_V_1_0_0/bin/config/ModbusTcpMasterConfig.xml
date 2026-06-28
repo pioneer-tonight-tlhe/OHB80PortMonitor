@@ -12,6 +12,7 @@
             <Command ref="WriteIdlePurgeInterval"/>
             <Command ref="SetBoardEnable"/>
             <Command ref="WritePurgeFlow"/>
+            <Command ref="WriteFoupInAutoPurgeEnable"/>
             <Command ref="ReadVEFCFlowUnitAndMediumStatus"/>
             <Command ref="WritePneumaticValvePressure"/>
             <Command ref="WriteUIRefreshTime"/>
@@ -161,6 +162,30 @@
                 0：默认（Foup in 10s后关SW5真空阀）
                 1：保持（Foup in 保持开SW5真空阀）
         ======================================== -->
+        <!-- ========================================
+             Function 06 - Write single holding register
+             FOUPIN auto purge enable
+             Request: 01 06 00 1C 00 00 CRC
+             Response: 01 06 00 1C 00 00 CRC
+             CH_1:
+                 0: Default, do not purge or run related purge functions after FOUP is in place
+                 1: Purge normally after FOUP is in place and enable 30min humidity detection
+             ======================================== -->
+        <Command id="WriteFoupInAutoPurgeEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 1C</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 1C</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
         <Command id="ReadFoupStatus">
             <request>
                 <SlaveAddr>01</SlaveAddr>

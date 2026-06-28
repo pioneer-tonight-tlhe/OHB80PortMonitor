@@ -6,6 +6,7 @@
 #include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdatesettingwidget.h"
+#include "customwidget/debugsettingwidget/foupinautopurgeenablewidget.h"
 #include "customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.h"
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
@@ -27,6 +28,7 @@ DebugPage::DebugPage(QWidget *parent)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
     , m_boardEnableStatusWidget(nullptr)
     , m_foupInVacuumExtractionEnableWidget(nullptr)
+    , m_foupInAutoPurgeEnableWidget(nullptr)
 {
     ui->setupUi(this);
     initUI();
@@ -78,6 +80,9 @@ void DebugPage::initUI()
     m_foupInVacuumExtractionEnableWidget = new FoupInVacuumExtractionEnableWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_foupInVacuumExtractionEnableWidget);
 
+    m_foupInAutoPurgeEnableWidget = new FoupInAutoPurgeEnableWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_foupInAutoPurgeEnableWidget);
+
     const QVector<OHBDeviceConfigInfo> devices = OHBDeviceConfig::getInstance().readDevices();
     if (!devices.isEmpty()) {
         const OHBDeviceConfigInfo& firstDeviceConfig = devices.first();
@@ -86,6 +91,8 @@ void DebugPage::initUI()
                                                       firstDeviceConfig.getPageSwitchIntervalSeconds());
         m_humidityOffsetWidget->setInitialConfigValues(firstDeviceConfig.getHumidityLowerLimitPercent(),
                                                        firstDeviceConfig.getHumidityOffsetPercent());
+        m_foupInAutoPurgeEnableWidget->setInitialConfigValue(
+            firstDeviceConfig.getFoupInAutoPurgeEnable());
     }
 
     registerModulePermissions();
@@ -131,6 +138,8 @@ void DebugPage::navBtnClicked()
         targetWidget = m_boardEnableStatusWidget;
     } else if (objName == "btnFoupInVacuumExtraction") {
         targetWidget = m_foupInVacuumExtractionEnableWidget;
+    } else if (objName == "btnFoupInAutoPurge") {
+        targetWidget = m_foupInAutoPurgeEnableWidget;
     }
 
     if (targetWidget) {
@@ -173,4 +182,8 @@ void DebugPage::registerModulePermissions()
                                   ui->btnFoupInVacuumExtraction,
                                   QStringLiteral("DebugPage"),
                                   QStringLiteral("FoupInVacuumExtractionEnable"));
+    App::registerModulePermission(m_foupInAutoPurgeEnableWidget,
+                                  ui->btnFoupInAutoPurge,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("FoupInAutoPurgeEnable"));
 }

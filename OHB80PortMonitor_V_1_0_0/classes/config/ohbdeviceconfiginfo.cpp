@@ -10,6 +10,7 @@ OHBDeviceConfigInfo::OHBDeviceConfigInfo()
     , m_pageTotalTimeSeconds(5)
     , m_humidityOffsetPercent(0.0)
     , m_humidityLowerLimitPercent(5.0)
+    , m_foupInAutoPurgeEnable(0)
 {
 }
 
@@ -23,7 +24,8 @@ OHBDeviceConfigInfo::OHBDeviceConfigInfo(const QString& qrCode,
                                          int pageTotalTimeSeconds,
                                          double humidityOffsetPercent,
                                          double humidityLowerLimitPercent,
-                                         double vppePressureBar)
+                                         double vppePressureBar,
+                                         int foupInAutoPurgeEnable)
     : m_qrCode(qrCode)
     , m_ip(ip)
     , m_port(port)
@@ -35,6 +37,7 @@ OHBDeviceConfigInfo::OHBDeviceConfigInfo(const QString& qrCode,
     , m_pageTotalTimeSeconds(pageTotalTimeSeconds)
     , m_humidityOffsetPercent(humidityOffsetPercent)
     , m_humidityLowerLimitPercent(humidityLowerLimitPercent)
+    , m_foupInAutoPurgeEnable(foupInAutoPurgeEnable)
 {
 }
 
@@ -146,4 +149,14 @@ double OHBDeviceConfigInfo::getVppePressureBar() const
 void OHBDeviceConfigInfo::setVppePressureBar(double vppePressureBar)
 {
     m_vppePressureBar = vppePressureBar;
+}
+
+int OHBDeviceConfigInfo::getFoupInAutoPurgeEnable() const
+{
+    return m_foupInAutoPurgeEnable;
+}
+
+void OHBDeviceConfigInfo::setFoupInAutoPurgeEnable(int enable)
+{
+    m_foupInAutoPurgeEnable = enable;
 }
