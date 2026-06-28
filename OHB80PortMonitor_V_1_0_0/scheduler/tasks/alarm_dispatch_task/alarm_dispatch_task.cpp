@@ -803,7 +803,10 @@ void AlarmDispatchTask::loadActiveFromDb()
         info.record.userPermission  = row.userPermission;
         // alarm_source 未落库；generateAlarmId() 仅需 level/identifier/type，
         // 默认 Device 不影响 alarmId 与后续去重
-        info.alarmSource      = static_cast<int>(AlarmSource::Device);
+        info.alarmSource      =
+            (row.alarmType == static_cast<int>(AlarmType::ElectricCabinetSerialPortDisconnected))
+                ? static_cast<int>(AlarmSource::System)
+                : static_cast<int>(AlarmSource::Device);
         info.alarmId          = info.generateAlarmId();
 
         if (!m_active.contains(info.alarmId)) {

@@ -10,6 +10,8 @@
 #include "scheduler/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.h"
 #include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h"
+#include "scheduler/tasks/electric_cabinet_serial_port_status_task/electric_cabinet_serial_port_status_task.h"
+#include "electriccabinetserialportcontroller.h"
 #include "setofohbinfo.h"
 #include <QDebug>
 #include <QHash>
@@ -23,6 +25,8 @@ OperationDispatchTask* SharedData::s_operationDispatchTask = nullptr;
 SH85PeriodicSelfCheckTask3* SharedData::s_sh85PeriodicSelfCheckTask3 = nullptr;
 VEFCSensorMonitorTask* SharedData::s_vefcSensorMonitorTask = nullptr;
 DiskPressureCleanupTask* SharedData::s_diskPressureCleanupTask = nullptr;
+ElectricCabinetSerialPortStatusTask* SharedData::s_electricCabinetSerialPortStatusTask = nullptr;
+ElectricCabinetSerialPortController* SharedData::s_electricCabinetSerialPortController = nullptr;
 
 SharedData::SharedData() {
 
@@ -75,6 +79,11 @@ SharedData::SharedData() {
         
         qDebug() << "SharedData initialized" << setOfOHBInfoList.size() << "OHB items from config";
 
+    }
+
+    if (!s_electricCabinetSerialPortController) {
+        s_electricCabinetSerialPortController = new ElectricCabinetSerialPortController();
+        qDebug() << "[SharedData] ElectricCabinetSerialPortController created";
     }
 }
 
@@ -175,6 +184,13 @@ void SharedData::initScheduler()
 
     // 提交网络状态监控任务（长驻任务）
     // NetworkStatusTask 内部会在设备启动前先创建并管理 InitCheckTask
+    // Electric cabinet serial port connection monitor.
+    if (!s_electricCabinetSerialPortStatusTask) {
+        s_electricCabinetSerialPortStatusTask = new ElectricCabinetSerialPortStatusTask();
+        QString id = scheduler->submitTask(s_electricCabinetSerialPortStatusTask);
+        qDebug() << "[SharedData] submitted electric cabinet serial port status task, TaskID:" << id;
+    }
+
     if (!s_networkStatusTask) {
         s_networkStatusTask = new NetworkStatusTask();
         scheduler->submitTask(s_networkStatusTask);
@@ -255,4 +271,14 @@ SH85PeriodicSelfCheckTask3* SharedData::getSH85PeriodicSelfCheckTask3()
 VEFCSensorMonitorTask* SharedData::getVEFCSensorMonitorTask()
 {
     return s_vefcSensorMonitorTask;
+}
+
+ElectricCabinetSerialPortController* SharedData::getElectricCabinetSerialPortController()
+{
+    return s_electricCabinetSerialPortController;
+}
+
+ElectricCabinetSerialPortStatusTask* SharedData::getElectricCabinetSerialPortStatusTask()
+{
+    return s_electricCabinetSerialPortStatusTask;
 }

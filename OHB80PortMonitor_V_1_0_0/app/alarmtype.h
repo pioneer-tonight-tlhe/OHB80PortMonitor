@@ -66,7 +66,8 @@ enum class AlarmType : int
     VEFCAbnormal = 5001,  // VEFC异常（流量控制器异常），用户可见
     VEEPAbnormal = 5002,  // VEEP异常（压力控制器异常），用户可见
     SH85Abnormal = 5003,  // 85异常（温湿度传感器异常），用户可见
-    HumidityNotReached = 5101  // 湿度未达标（充氮半小时，湿度不达标），用户可见
+    HumidityNotReached = 5101,  // 湿度未达标（充氮半小时，湿度不达标），用户可见
+    ElectricCabinetSerialPortDisconnected = 6001
 };
 
 // 获取警告类型的显示名称
@@ -98,6 +99,7 @@ inline QString alarmTypeName(int type)
         case static_cast<int>(AlarmType::VEEPAbnormal): return QStringLiteral("VEEP Abnormal");
         case static_cast<int>(AlarmType::SH85Abnormal): return QStringLiteral("SH85 Abnormal");
         case static_cast<int>(AlarmType::HumidityNotReached): return QStringLiteral("Humidity Not Reached");
+        case static_cast<int>(AlarmType::ElectricCabinetSerialPortDisconnected): return QStringLiteral("Electric Cabinet Serial Port Disconnected");
         default: return QString::number(type);
     }
 }
@@ -130,7 +132,8 @@ inline QList<QPair<QString, int>> alarmTypeList()
         { QStringLiteral("VEFC Abnormal"), static_cast<int>(AlarmType::VEFCAbnormal) },
         { QStringLiteral("VEEP Abnormal"), static_cast<int>(AlarmType::VEEPAbnormal) },
         { QStringLiteral("SH85 Abnormal"), static_cast<int>(AlarmType::SH85Abnormal) },
-        { QStringLiteral("Humidity Not Reached"), static_cast<int>(AlarmType::HumidityNotReached) }
+        { QStringLiteral("Humidity Not Reached"), static_cast<int>(AlarmType::HumidityNotReached) },
+        { QStringLiteral("Electric Cabinet Serial Port Disconnected"), static_cast<int>(AlarmType::ElectricCabinetSerialPortDisconnected) }
     };
 }
 
@@ -175,6 +178,7 @@ inline int alarmTypeToLevel(int type)
         case static_cast<int>(AlarmType::VEEPAbnormal):
         case static_cast<int>(AlarmType::SH85Abnormal):
         case static_cast<int>(AlarmType::HumidityNotReached):
+        case static_cast<int>(AlarmType::ElectricCabinetSerialPortDisconnected):
             return static_cast<int>(AlarmLevel::Error);
         default:
             return static_cast<int>(AlarmLevel::Error);
@@ -261,6 +265,7 @@ inline int alarmTypeToResolvedStatus(int type)
         case static_cast<int>(AlarmType::VEEPAbnormal):
         case static_cast<int>(AlarmType::SH85Abnormal):
         case static_cast<int>(AlarmType::HumidityNotReached):
+        case static_cast<int>(AlarmType::ElectricCabinetSerialPortDisconnected):
             return static_cast<int>(AlarmResolvedStatus::Unresolved);
         default:
             return static_cast<int>(AlarmResolvedStatus::Unresolved);

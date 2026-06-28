@@ -16,6 +16,8 @@ class SH85PeriodicSelfCheckTask3;
 class VEFCSensorMonitorTask;
 class VEFCMonitorInfo;
 class DiskPressureCleanupTask;
+class ElectricCabinetSerialPortStatusTask;
+class ElectricCabinetSerialPortController;
 
 class SharedData
 {
@@ -63,6 +65,11 @@ public:
     // 获取 VEFC 监控信息（按 QRCode）
     static VEFCMonitorInfo* getVEFCMonitorInfo(const QString& qrCode);
 
+    // 获取电控柜串口控制类
+    static ElectricCabinetSerialPortController* getElectricCabinetSerialPortController();
+
+    static ElectricCabinetSerialPortStatusTask* getElectricCabinetSerialPortStatusTask();
+
 private:
     static bool s_modbusManagerInitialized;
     static NetworkStatusTask* s_networkStatusTask;
@@ -72,6 +79,8 @@ private:
     static SH85PeriodicSelfCheckTask3* s_sh85PeriodicSelfCheckTask3;
     static VEFCSensorMonitorTask* s_vefcSensorMonitorTask;
     static DiskPressureCleanupTask* s_diskPressureCleanupTask;
+    static ElectricCabinetSerialPortStatusTask* s_electricCabinetSerialPortStatusTask;
+    static ElectricCabinetSerialPortController* s_electricCabinetSerialPortController;
 };
 
 #endif // SHAREDDATA_H

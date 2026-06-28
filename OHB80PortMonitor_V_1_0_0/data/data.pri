@@ -2,6 +2,10 @@
 include ($$PWD/modbustcpmastermanager/modbustcpmastermanager.pri)
 INCLUDEPATH += $$PWD/modbustcpmastermanager
 
+#eleccabinetserialport
+include ($$PWD/eleccabinetserialport/eleccabinetserialport.pri)
+INCLUDEPATH += $$PWD/eleccabinetserialport
+
 
 #logdatabases
 include ($$PWD/logdatabases/logdatabases.pri)

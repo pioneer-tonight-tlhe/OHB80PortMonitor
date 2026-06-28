@@ -76,4 +76,8 @@ INCLUDEPATH += $$PWD/modaltabledialog
 include ($$PWD/scrollingtiplabel/scrollingtiplabel.pri)
 INCLUDEPATH += $$PWD/scrollingtiplabel
 
+#electriccontrolcabinet
+include ($$PWD/electriccontrolcabinet/electriccontrolcabinet.pri)
+INCLUDEPATH += $$PWD/electriccontrolcabinet
+
 FORMS +=

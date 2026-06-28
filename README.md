@@ -10,6 +10,32 @@
 
 ## 更新日志
 
+## [待发布]
+
+### 构建电控柜data层（串口控制类ElectricCabinetSerialPortController）
+- 修改时间：2026-06-23
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：构建电控柜 data 层串口控制能力，新增 `ElectricCabinetSerialPortController` 作为主线程侧统一入口，管理电控柜串口工作线程并对外提供串口收发、连接状态和错误上报接口。
+- 功能点明细：
+  - 新增 `ElectricCabinetSerialPortController`，封装串口连接、断开、发送帧、连接状态、原始帧接收、命令响应、命令超时和发送失败信号。
+  - 新增 `ElectricCabinetSerialPortWorker`，在独立工作线程内管理 `QSerialPort` 生命周期、收发缓冲、帧间隔超时、命令超时和自动重连逻辑。
+  - 支持串口参数配置，包括端口号、波特率、数据位、校验位、停止位、流控、自动重连间隔、命令超时和帧间隔超时。
+  - 将串口阻塞写入和重连处理隔离到工作线程，避免影响主线程和业务线程响应。
+  - 在 `SharedData` 中构造并初始化电控柜串口控制器，提供 `SharedData::getElectricCabinetSerialPortController()` 静态获取入口，便于业务模块共享同一个串口控制实例。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportcontroller.h`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportcontroller.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportworker.h`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/electriccabinetserialportworker.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/eleccabinetserialport/eleccabinetserialport.pri`
+  - `OHB80PortMonitor_V_1_0_0/data/data.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
+  - `README.md`
+- 兼容性影响：新增电控柜串口控制入口，不改变现有 Modbus TCP 设备监控、日志和告警流程；调用方可通过 `SharedData` 获取共享串口控制实例。
+- 验证情况：已执行 `git diff --check`；当前环境未检测到 `qmake` / `mingw32-make`，暂未完成完整编译验证。
+
 ## v0.5.9
 
 ### ConfigPage 新增设备信息配置
