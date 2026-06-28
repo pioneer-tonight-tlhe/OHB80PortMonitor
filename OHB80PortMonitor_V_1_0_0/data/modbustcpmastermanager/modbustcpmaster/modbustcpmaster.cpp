@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QMetaObject>
 #include <QThread>
+#include <QtGlobal>
 
 // ============================================================
 // ModbusTcpMaster - Modbus TCP 主控对象实现
@@ -88,6 +89,19 @@ InitialCommandIssuer* ModbusTcpMaster::initialIssuer() const
     return m_initialIssuer;
 }
 
+void ModbusTcpMaster::configureInitialCommands(const QList<ModbusCommand>& queue, int intervalMs, int executionCount)
+{
+    m_initialCommandQueue = queue;
+    m_initialCommandIntervalMs = qMax(0, intervalMs);
+    m_initialCommandExecutionCount = qMax(1, executionCount);
+
+    if (m_initialIssuer) {
+        m_initialIssuer->setCommandQueue(m_initialCommandQueue);
+        m_initialIssuer->setInterval(m_initialCommandIntervalMs);
+        m_initialIssuer->setExecutionCount(m_initialCommandExecutionCount);
+    }
+}
+
 PeriodicCommandSender* ModbusTcpMaster::periodicSender() const
 {
     return m_periodicSender;
@@ -106,6 +120,21 @@ bool ModbusTcpMaster::isConnected() const
 QString ModbusTcpMaster::firmwareVersion() const
 {
     return m_firmwareVersion;
+}
+
+void ModbusTcpMaster::setFirmwareVersion(const QString& firmwareVersion)
+{
+    m_firmwareVersion = firmwareVersion;
+}
+
+QString ModbusTcpMaster::uiScreenVersion() const
+{
+    return m_uiScreenVersion;
+}
+
+void ModbusTcpMaster::setUiScreenVersion(const QString& uiScreenVersion)
+{
+    m_uiScreenVersion = uiScreenVersion;
 }
 
 FirmwareUpgrader* ModbusTcpMaster::firmwareUpgrader() const
@@ -248,26 +277,21 @@ void ModbusTcpMaster::startInitialIssuer()
     m_initialIssuer->start();
 }
 
-void ModbusTcpMaster::onInitialFinished(QList<ModbusCommand> failedCommands)
+void ModbusTcpMaster::onInitialFinished(bool isOk, QStringList errorMsgList)
 {
-    qDebug() << "ModbusTcpMaster: [设备ID=" << ID << "] 初始化完成，失败指令数："
-             << failedCommands.size();
+    qDebug() << "ModbusTcpMaster: [设备ID=" << ID << "] 初始化完成，isOk="
+             << isOk << "错误信息数：" << errorMsgList.size();
     ModbusLogger::masterInfo(ID, "ModbusTcpMaster", "InitialCommandIssuer", "onInitialFinished",
-        QString("初始化完成，失败指令数=%1").arg(failedCommands.size()));
+        QString("初始化完成，isOk=%1，错误信息数=%2").arg(isOk).arg(errorMsgList.size()));
 
     m_initialStarted = false;
 
-    if (!failedCommands.isEmpty()) {
-        QStringList ids;
-        for (const auto& cmd : failedCommands) {
-            ids << cmd.id;
-        }
+    if (!isOk) {
         emit errorOccurred(State::Initializing,
-            QString("初始化完成，%1 条指令下发失败：%2")
-                .arg(failedCommands.size())
-                .arg(ids.join(", ")));
+            QString("初始化完成，存在 %1 条错误信息：%2")
+                .arg(errorMsgList.size())
+                .arg(errorMsgList.join("; ")));
     }
-    m_initialStarted = true;
 
     if (m_initialIssuer) {
         m_initialIssuer->deleteLater();
@@ -324,8 +348,14 @@ void ModbusTcpMaster::createInitialIssuerIfNeeded()
     }
 
     m_initialIssuer = new InitialCommandIssuer(*m_sender, ID, this, this);
-    connect(m_initialIssuer, &InitialCommandIssuer::finished,
+    connect(m_initialIssuer, &InitialCommandIssuer::finish,
             this, &ModbusTcpMaster::onInitialFinished);
+
+    if (!m_initialCommandQueue.isEmpty()) {
+        m_initialIssuer->setCommandQueue(m_initialCommandQueue);
+        m_initialIssuer->setInterval(m_initialCommandIntervalMs);
+        m_initialIssuer->setExecutionCount(m_initialCommandExecutionCount);
+    }
 }
 
 void ModbusTcpMaster::pauseChildren()
@@ -359,7 +389,7 @@ void ModbusTcpMaster::resumeChildren()
     }
     startSender();
     startInitialIssuer();
-    if (!m_initialIssuer || m_initialStarted == true) {
+    if (!m_initialIssuer) {
         startPeriodicSender();
     }
 }

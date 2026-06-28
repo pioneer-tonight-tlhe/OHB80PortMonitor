@@ -3,11 +3,13 @@
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
 #include "modbustcpmastermanager/modbustcpmaster/initialcommandissuer.h"
 #include "app/applogger.h"
+#include "app/shareddata.h"
 #include "loggermanager.h"
+#include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 
 #include <QDebug>
 
-InitCheckTask::InitCheckTask(QObject *parent)
+InitCheckTask::InitCheckTask(QObject* parent)
     : SchedulerTask(parent)
 {
     qDebug() << "=============================InitCheckTask 调度任务开始=============================";
@@ -30,7 +32,7 @@ void InitCheckTask::start()
     m_completedCount = 0;
     m_successCount = 0;
     m_failedMasterIds.clear();
-    m_failedCommandsMap.clear();
+    m_errorMsgMap.clear();
     m_connections.clear();
 
     ModbusTcpMasterManager &manager = ModbusTcpMasterManager::instance();
@@ -40,7 +42,7 @@ void InitCheckTask::start()
     LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
         QString("[Scheduler][InitCheckTask][start] 发现 %1 个已注册的设备: %2").arg(ids.size()).arg(ids.join(", ")).toStdString());
 
-    for (const QString &id : ids) {
+    for (const QString& id : ids) {
         ModbusTcpMaster *master = manager.getMaster(id);
         if (!master) {
             qWarning() << "[Scheduler][InitCheckTask][start] 无法获取设备" << id << "的 Master 对象，跳过";
@@ -58,9 +60,9 @@ void InitCheckTask::start()
         }
 
         // 通过 lambda 捕获 masterId，转发到 onInitialFinished
-        auto conn = connect(issuer, &InitialCommandIssuer::finished,
-                            this, [this, id](QList<ModbusCommand> failedCommands) {
-                                onInitialFinished(failedCommands, id);
+        auto conn = connect(issuer, &InitialCommandIssuer::finish,
+                            this, [this, id](bool isOk, QStringList errorMsgList) {
+                                onInitialFinished(isOk, errorMsgList, id);
                             }, Qt::QueuedConnection);
         m_connections.append(conn);
         m_totalCount++;
@@ -97,29 +99,55 @@ void InitCheckTask::stop()
         "[Scheduler][InitCheckTask][stop] 任务被取消");
 }
 
-void InitCheckTask::onInitialFinished(QList<ModbusCommand> failedCommands, const QString &masterId)
+void InitCheckTask::onInitialFinished(bool isOk, QStringList errorMsgList, const QString& masterId)
 {
     if (m_stopped) return;
 
-    if (failedCommands.isEmpty()) {
+    if (isOk) {
         m_successCount++;
         qDebug() << "[Scheduler][InitCheckTask][onInitialFinished] 设备" << masterId << "初始化成功 (" << m_completedCount + 1 << "/" << m_totalCount << ")";
         LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
             QString("[Scheduler][InitCheckTask][onInitialFinished] 设备 %1 初始化成功 (%2/%3)").arg(masterId).arg(m_completedCount + 1).arg(m_totalCount).toStdString());
+
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            opTask->log(OperationDispatchTask::MsgType::Message,
+                        QString("Initial commands succeeded: QRCode=%1").arg(masterId),
+                        0);
+        }
     } else {
         m_failedMasterIds.append(masterId);
-        m_failedCommandsMap[masterId] = failedCommands;
-
-        QStringList failedIds;
-        for (const auto &cmd : failedCommands) {
-            failedIds << cmd.id;
+        if (errorMsgList.isEmpty()) {
+            errorMsgList << QString("Initial commands failed: QRCode=%1, reason=unknown").arg(masterId);
         }
+        m_errorMsgMap[masterId] = errorMsgList;
+
         qWarning() << "[Scheduler][InitCheckTask][onInitialFinished] 设备" << masterId
-                   << "初始化存在失败指令:" << failedIds.join(", ")
+                   << "初始化存在错误:" << errorMsgList.join("; ")
                    << "(" << m_completedCount + 1 << "/" << m_totalCount << ")";
         LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN,
-            QString("[Scheduler][InitCheckTask][onInitialFinished] 设备 %1 初始化存在 %2 条失败指令: %3 (%4/%5)")
-                .arg(masterId).arg(failedCommands.size()).arg(failedIds.join(", ")).arg(m_completedCount + 1).arg(m_totalCount).toStdString());
+            QString("[Scheduler][InitCheckTask][onInitialFinished] 设备 %1 初始化存在 %2 条错误: %3 (%4/%5)")
+                .arg(masterId).arg(errorMsgList.size()).arg(errorMsgList.join("; ")).arg(m_completedCount + 1).arg(m_totalCount).toStdString());
+
+        for (int i = 0; i < errorMsgList.size(); ++i) {
+            const QString errorLine = QString("[Scheduler][InitCheckTask][onInitialFinished] 设备 %1 初始化错误 %2/%3: %4")
+                                          .arg(masterId)
+                                          .arg(i + 1)
+                                          .arg(errorMsgList.size())
+                                          .arg(errorMsgList.at(i));
+            qWarning().noquote() << errorLine;
+            LoggerManager::getInstance()->log(m_taskLogPath, Level::WARN, errorLine.toStdString());
+        }
+
+        if (auto* opTask = SharedData::getOperationDispatchTask()) {
+            opTask->log(OperationDispatchTask::MsgType::Warn,
+                        QString("Initial commands failed: QRCode=%1, errorCount=%2")
+                            .arg(masterId)
+                            .arg(errorMsgList.size()),
+                        0);
+            for (const QString& errorMsg : qAsConst(errorMsgList)) {
+                opTask->log(OperationDispatchTask::MsgType::Warn, errorMsg, 0);
+            }
+        }
     }
 
     m_completedCount++;
@@ -152,7 +180,7 @@ void InitCheckTask::checkAllFinished()
 
     QString msg = allSuccess
         ? QString("全部 %1 台设备初始化成功").arg(m_totalCount)
-        : QString("初始化完成：%1 台成功，%2 台存在失败指令（%3）")
+        : QString("初始化完成：%1 台成功，%2 台存在初始化错误（%3）")
               .arg(m_successCount)
               .arg(m_failedMasterIds.count())
               .arg(m_failedMasterIds.join(", "));
@@ -168,7 +196,7 @@ void InitCheckTask::disconnectAll()
     qDebug() << "[Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数:" << m_connections.size();
     LoggerManager::getInstance()->log(m_taskLogPath, Level::DEBUG,
         QString("[Scheduler][InitCheckTask][disconnectAll] 断开所有信号连接，连接数: %1").arg(m_connections.size()).toStdString());
-    for (const QMetaObject::Connection &conn : qAsConst(m_connections))
+    for (const QMetaObject::Connection& conn : qAsConst(m_connections))
         QObject::disconnect(conn);
     m_connections.clear();
 }

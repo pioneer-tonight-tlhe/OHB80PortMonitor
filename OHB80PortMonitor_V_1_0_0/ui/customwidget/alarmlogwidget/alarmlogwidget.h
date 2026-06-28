@@ -9,6 +9,7 @@ class AlarmLogWidget;
 }
 
 class QStandardItemModel;
+class WaitDialog;
 
 class AlarmLogWidget : public QWidget
 {
@@ -36,9 +37,13 @@ private slots:
                           const QString& resolveTime);
     void onLiveLogClicked(const QModelIndex& index);
     void onHistoryLogClicked(const QModelIndex& index);
+    void onCancelRequested();
+    void onTaskFinished(bool success, const QString& message);
 
 private:
     Ui::AlarmLogWidget *ui;
+    WaitDialog* m_waitDialog;
+    QString m_activeTaskId;
 
     // 分页状态
     int m_currentPage;

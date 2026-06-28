@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.5.9**
+**当前版本：v0.5.12**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -34,7 +34,176 @@
   - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
   - `README.md`
 - 兼容性影响：新增电控柜串口控制入口，不改变现有 Modbus TCP 设备监控、日志和告警流程；调用方可通过 `SharedData` 获取共享串口控制实例。
-- 验证情况：已执行 `git diff --check`；当前环境未检测到 `qmake` / `mingw32-make`，暂未完成完整编译验证。
+## v0.5.12
+
+### DebugPage 新增 FOUPIN 自动充气使能
+- 修改时间：2026-06-25
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：在通讯指令配置、DebugPage 调试界面、权限配置和设备配置类中新增 FOUPIN 自动充气使能能力，支持单设备和全部设备下发设置。
+- 功能点明细：
+  - 在 `ModbusTcpMasterConfig.xml` 中新增 `WriteFoupInAutoPurgeEnable` 指令，功能码 `0x06`，寄存器地址 `0x001C`，写入值 `0/1`。
+  - 将 `WriteFoupInAutoPurgeEnable` 加入 `<InitialCommands>`，设备连接初始化时会按 `ohb_device.ini` 中的配置值下发。
+  - 新增 `FoupInAutoPurgeEnableWidget`，DebugPage 中提供二维码 `SpinBox`、使能值选择框、`设置单个设备` 和 `设置所有设备` 按钮。
+  - DebugPage 顶部导航新增 `FOUPIN Auto Purge` 入口，并接入模块权限控制。
+  - `module_permission.ini` 和 `ModulePermissionConfig` 默认权限中新增 `FoupInAutoPurgeEnable = 3`。
+  - `OHBDeviceConfigInfo` 和 `OHBDeviceConfig` 新增 `FoupInAutoPurgeEnable` 配置字段，默认值为 `0`，支持读取、写入和按 QRCode 更新。
+  - 设置指令成功后，单设备或批量成功设备会同步写回 `ohb_device.ini`，保证重连初始化时继续使用最新配置。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `OHB80PortMonitor_V_1_0_0/classes/config/ohbdeviceconfiginfo.h`
+  - `OHB80PortMonitor_V_1_0_0/classes/config/ohbdeviceconfiginfo.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinautopurgeenablewidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinautopurgeenablewidget.cpp`
+  - `README.md`
+- 兼容性影响：默认值为 `0`，旧配置文件未包含该字段时保持“不执行充气及充气相关功能”的默认行为；新增初始化指令依赖设备侧支持寄存器 `0x001C`。
+- 验证情况：已使用 Qt 5.15.2 MinGW 64-bit Debug 执行 `qmake` 和 `mingw32-make -f Makefile.Debug`，构建通过。
+
+## v0.5.11
+
+### ConfigPage 设备信息展示 UI 屏版本号
+- 修改时间：2026-06-24
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：完善 ConfigPage 中 Device Info 查看设备信息功能，在设备信息表格中展示 UI 屏幕版本号，并通过调度任务主动读取设备固件版本号和 UI 屏版本号。
+- 功能点明细：
+  - `View Device Information` 点击后不再只读取 `ModbusTcpMaster` 中已有的固件版本缓存，而是提交 `ReadDeviceVersionTask` 统一查询设备版本信息。
+  - 新增 `ReadDeviceVersionTask`，调度层对每台目标设备下发 `ReadVersion` 和 `ReadUIScreenVersion`，并通过 `CommandResponseParser` 解析结果。
+  - 查询成功后同步刷新 `ModbusTcpMaster` 中的固件版本号和 UI 屏版本号运行态缓存。
+  - Device Information 表格新增 `UI Screen Version` 字段，表头调整为 `QRCode`、`固件版本号`、`UI Screen Version`、`IP`、`Port`。
+  - UI 屏版本号显示格式从 `01.0.0` 调整为 `1.0.0`，主版本号不再补前导 0。
+  - 查看设备信息时如果存在部分设备版本读取失败，仅在设置项状态中显示 `Partial Failed`，不再弹出额外错误提示框。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/read_device_version_task/read_device_version_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/read_device_version_task/read_device_version_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.cpp`
+  - `README.md`
+- 兼容性影响：不改变设备信息修改流程；查看设备信息会额外触发版本读取业务指令，离线或读取失败的设备会在表格中显示 `-`。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
+
+### 添加ui屏幕版本号指令
+- 修改时间：2026-06-24
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增读取 UI 屏幕版本号的初始化指令，并在初始化成功后将 UI 屏版本号写入设备运行态。
+- 功能点明细：
+  - 在 `ModbusTcpMasterConfig.xml` 的 `<InitialCommands>` 中新增 `ReadUIScreenVersion`，确保设备连接成功后自动读取 UI 屏幕版本号。
+  - 新增 `ReadUIScreenVersion` 指令定义，请求帧为 `01 04 00 20 00 01`，响应帧为 `01 04 02 XX XX`。
+  - UI 屏版本号响应字段按 2 字节解析：第 1 字节表示版本号第一段，第 2 字节拆分为高 4 位和低 4 位，分别表示第二段和第三段。
+  - `CommandResponseParser` 新增 `ReadUIScreenVersion` 响应解析逻辑，并将 `ReadVersion` 的版本号解析一并收敛到统一的指令响应解析类中。
+  - `InitialCommandIssuer` 仅负责调用 `CommandResponseParser` 校验解析结果，并在解析成功后写入 `ModbusTcpMaster` 的 UI 屏版本号和固件版本号运行态字段。
+  - `ModbusTcpMaster` 新增 UI 屏版本号访问接口，供后续界面展示或业务读取使用。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/modbustcpmaster.cpp`
+  - `README.md`
+- 兼容性影响：不改变初始化指令整体下发流程；版本号解析职责调整为由 `CommandResponseParser` 统一处理，并在初始化阶段新增 UI 屏版本号读取与运行态缓存。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
+
+## v0.5.10
+
+### 修复 Logout 登出崩溃问题
+- 修改时间：2026-06-24
+- 变更类型：Fixed
+- 开发人员：Simon（工号：13）
+- 功能概述：修复点击 `Logout` 后界面卡顿并导致程序崩溃的问题。
+- 功能点明细：
+  - 修复 `UserManagementTask` 在调度器线程中直接调用 `UserManager::logout()` 导致后台线程操作 UI 控件的问题。
+  - `UserManager::login()` 和 `UserManager::logout()` 改为通过 `QMetaObject::invokeMethod(..., Qt::QueuedConnection)` 投递到 `UserManager` 所在线程执行。
+  - 保持用户管理任务仍由 Scheduler 调度，不改变登录、登出入口和现有业务调用方式。
+  - 修复临时信号连接中引用捕获 `QMetaObject::Connection` 的隐患，避免异步回调时访问失效引用。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/user_management_task/user_management_task.cpp`
+  - `README.md`
+- 兼容性影响：不改变用户权限枚举、登录校验和登出流程，仅调整登录/登出实际执行线程，避免后台线程直接刷新界面。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
+
+### 配置文件与指令初始器
+- 修改时间：2026-06-24
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：整理 OHB 设备配置、Modbus 初始化指令配置和 `InitialCommandIssuer` 初始化下发流程，明确设备连接成功后的初始化指令来源、下发规则和结果反馈方式。
+- 功能点明细：
+  - 运行时设备配置文件位于 `OHB80PortMonitor_V_1_0_0/bin/config/ohb_device.ini`。
+  - `[IdleConfig]` 对应 `IdlePurgeConfig`，包含 `Enabled`、`PurgeDuration_s`、`PurgeInterval_s`。
+  - `[SH85SelfCheckTask]` 管理 SH85 周期自检任务开关和周期，包含 `Enabled`、`Period_s`。
+  - `[MasterDevices]` 管理当前启用的 Master 设备 QRCode 列表，包含 `List`。
+  - `[OHB1]` 至 `[OHB80]` 对应 `OHBDeviceConfig` 和 `OHBDeviceConfigInfo`，包含 `QRCode`、`Ip`、`Port`、`Enable`、`PurgeFlow_l_min`、`VPPEPressure_bar`、`LogoTime_s`、`PageSwitchInterval_s`、`PageTotalTime_s`、`HumidityOffset_pct`、`HumidityLowerLimit_pct`。
+  - Modbus 指令配置文件位于 `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`，其中 `<InitialCommands>` 节点定义设备连接成功后的初始化指令队列。
+  - `<InitialCommands>` 中 `CommandInterval` 表示初始化指令下发间隔，`CommandTimeout` 表示单条初始化指令等待响应超时，`RetryCount` 表示失败指令重试轮次，`CommandSet` 表示初始化指令列表。
+  - `InitialCommandIssuer` 位于 `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.h/.cpp`。
+  - `InitialCommandIssuer` 会读取 `ohb_device.ini` 中的 Idle Purge 和 OHB 设备配置，并结合 `ModbusTcpMasterConfig.xml` 中 `<InitialCommands>` 配置的指令顺序，生成实际下发到设备的初始化指令。
+  - `InitialCommandIssuer` 当前不再继承 `CyclicCommandIssuer`，而是独立管理初始化队列和下发轮次。
+  - 初始化开始时，将 XML 中的 `CommandSet` 生成第一轮待下发队列。
+  - 每条初始化指令在每一轮只提交一次，初始化器会将单条指令的 `maxRetryCount` 置为 `0`。
+  - 指令成功后不再进入下一轮；指令失败、超时、校验失败、队列繁忙拒绝或业务校验失败时，进入下一轮待下发队列。
+  - 当前轮结束后，如果失败队列为空，则本次初始化成功；如果失败队列不为空且仍有剩余轮次，则下一轮只下发上一轮失败的指令。
+  - 轮次用完后如果仍存在失败指令，则本次初始化失败，并将最终失败原因写入 `errorMsgList`。
+  - 当前初始化指令顺序为 `WriteIdlePurgeEnable`、`WriteIdlePurgeTime`、`WriteIdlePurgeInterval`、`SetBoardEnable`、`WritePurgeFlow`、`ReadVEFCFlowUnitAndMediumStatus`、`WritePneumaticValvePressure`、`WriteUIRefreshTime`、`WriteHumidityOffset`、`WriteHumidityOffsetThreshold`、`ReadVersion`。
+  - 初始化完成后，`InitialCommandIssuer` 通过 `finish(bool isOk, QStringList errorMsgList)` 信号返回结果。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ohb_device.ini`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/config/idlepurgeconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/idlepurgeconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/classes/config/ohbdeviceconfiginfo.h`
+  - `OHB80PortMonitor_V_1_0_0/classes/config/ohbdeviceconfiginfo.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/initialcommandissuer.cpp`
+  - `README.md`
+- 兼容性影响：初始化指令仍由 XML 中 `<InitialCommands>` 控制，失败重试逻辑改为按轮次只重发上一轮失败指令；调用方通过 `finish(bool isOk, QStringList errorMsgList)` 读取初始化结果。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
+
+### 模块权限配置
+- 修改时间：2026-06-24
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增独立的模块权限配置能力，通过 `module_permission.ini` 控制 ConfigPage、DebugPage 中各功能模块的最低访问权限。
+- 功能点明细：
+  - 模块权限配置文件位于 `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`。
+  - 配置类位于 `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.h/.cpp`。
+  - 权限等级与 `UserPermission` 保持一致：`0=Guest`、`1=Normal`、`2=Debug`、`3=Engineer`、`4=Root`。
+  - `[ConfigPage]` 配置 ConfigPage 模块权限，包含 `IdlePurgeConfiguration`、`PneumaticValvePressureConfiguration`、`SH85PeriodicSelfCheckConfiguration`、`SH85SelfCheckConfiguration`、`PurgeFlowConfiguration`、`DeviceEnableConfiguration`、`DeviceInfoConfiguration`。
+  - `[DebugPage]` 配置 DebugPage 模块权限，包含 `FirmwareConfig`、`FirmwareUpdate`、`VEFCGasTypeConfiguration`、`UIRefreshTimeConfiguration`、`HumidityOffsetConfiguration`、`VEFCFlowUnitMediumStatus`、`BoardEnableStatus`、`FoupInVacuumExtractionEnable`。
+  - `ModulePermissionConfig` 提供模块权限读取、页面权限读取、全量权限读取和对应写入方法。
+  - `App::initialize()` 启动阶段加载 `ModulePermissionConfig`，保证页面控件创建前模块权限配置已经可用。
+  - 页面控件创建完成后，由 `App::registerModulePermission()` 根据配置文件统一注册模块内容控件和顶部导航按钮权限。
+  - 未配置或未知模块默认按 Root 权限处理，避免新模块未配置时被低权限用户误访问。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/config/config.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/app.h`
+  - `OHB80PortMonitor_V_1_0_0/app/app.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `README.md`
+- 兼容性影响：不改变用户登录和用户权限枚举，只改变 ConfigPage、DebugPage 内部模块的可见性来源；后续调整模块权限只需要修改 `module_permission.ini`。
+- 验证情况：已完成静态差异检查；完整编译由本机环境执行。
+>>>>>>> origin/main
 
 ## v0.5.9
 
@@ -3491,7 +3660,7 @@ GraphConfigParser::parse()
 #### 修改内容
 1. **InitCheckTask 初始化检查任务**
    - 创建 `scheduler/tasks/init_check_task.h` 和 `.cpp`
-   - 普通任务，监听所有 ModbusTcpMaster 的 InitialCommandIssuer 的 `finished` 信号
+   - 普通任务，监听所有 ModbusTcpMaster 的 InitialCommandIssuer 的 `finish(bool isOk, QStringList errorMsgList)` 信号
    - 汇总所有设备的初始化结果，区分成功和失败设备
    - 发射 `allFinished` 信号，携带成功数、失败数和失败设备ID列表
    - 任务完成后自动释放，不占用调度器资源
@@ -3572,7 +3741,7 @@ NetworkStatusTask::start()
   ↓ start all ModbusTcpMaster
   ↓ connect statusChanged signals
 InitCheckTask::start()
-  ↓ connect InitialCommandIssuer::finished signals
+  ↓ connect InitialCommandIssuer::finish signals
   ↓ wait for all devices init
   ↓ emit allFinished
 NetworkStatusTask::onInitCheckFinished()

@@ -8,6 +8,7 @@
 #include "periodiccommandsender.h"
 #include <QMetaObject>
 #include <QDebug>
+#include <QtGlobal>
 
 // 最大线程数限制
 static constexpr int MAX_THREAD_COUNT = 65535;
@@ -283,18 +284,22 @@ void ModbusTcpMasterPool::initializeMaster(ModbusTcpMaster* master)
     }
 
     // 配置 InitialCommandIssuer
-    auto initialIssuer = master->initialIssuer();
-    if (!initialQueue.isEmpty() && initialIssuer) {
-        initialIssuer->setCommandQueue(initialQueue);
-        initialIssuer->setInterval(initialConfig.interval);
+    if (!initialQueue.isEmpty()) {
+        const int initialExecutionCount = qMax(1, initialConfig.retryCount + 1);
+        master->configureInitialCommands(initialQueue, initialConfig.interval, initialExecutionCount);
         qDebug() << "[data][ModbusTcpMasterPool] 已配置 InitialCommandIssuer:"
                  << "指令数=" << initialQueue.size()
                  << "间隔=" << initialConfig.interval
                  << "超时=" << initialConfig.timeout
-                 << "重试=" << initialConfig.retryCount;
+                 << "失败重试轮次=" << initialConfig.retryCount
+                 << "总轮次=" << initialExecutionCount;
         ModbusLogger::systemInfo("ModbusTcpMasterPool", "InitialCommandIssuer", "initializeMaster",
-            QString("已配置 InitialCommandIssuer 指令数=%1 间隔=%2 超时=%3 重试=%4")
-                .arg(initialQueue.size()).arg(initialConfig.interval).arg(initialConfig.timeout).arg(initialConfig.retryCount));
+            QString("已配置 InitialCommandIssuer 指令数=%1 间隔=%2 超时=%3 失败重试轮次=%4 总轮次=%5")
+                .arg(initialQueue.size())
+                .arg(initialConfig.interval)
+                .arg(initialConfig.timeout)
+                .arg(initialConfig.retryCount)
+                .arg(initialExecutionCount));
     }
 
     // 配置 PeriodicCommandSender

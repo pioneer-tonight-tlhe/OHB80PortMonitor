@@ -1,3 +1,15 @@
+/*******************************************************************************************
+ * @file idlepurgesettingwidget.h
+ * @author Simon <工号：13> 2026-06-23
+ *
+ * @class IdlePurgeSettingWidget
+ * @brief 提供 Idle Purge 配置项的界面展示与下发入口。
+ *
+ * 设计目标：
+ *      1. 仅负责 Idle Purge 配置项的界面展示、输入收集与任务触发。
+ *      2. 通过统一的设置项控件组织启用、时长和周期参数的编辑入口。
+ *      3. 将配置持久化职责保留在调度任务层，避免界面层直接写配置文件。
+ *******************************************************************************************/
 #ifndef IDLEPURGESETTINGWIDGET_H
 #define IDLEPURGESETTINGWIDGET_H
 
@@ -6,62 +18,54 @@
 
 #include <QComboBox>
 #include <QLineEdit>
-#include <QSpinBox>
 #include <QPushButton>
+#include <QSpinBox>
 
 class SettingItemWidget;
 
-// ====================================================================
-// IdlePurgeSettingWidget — Idle Purge 参数配置控件
-//   继承 SettingWidget，提供以下设置项：
-//   1. Preparation Time    — 只读，固定显示 10 s
-//   2. Idle Purge Enable   — ComboBox(Enable/Disable) + Set 按钮
-//   3. Purge Duration      — SpinBox(秒) + Set 按钮
-//   4. Purge Interval      — SpinBox(秒) + Set 按钮
-// ====================================================================
 class IdlePurgeSettingWidget : public SettingWidget
 {
     Q_OBJECT
 
 public:
+    // ============================ 构造函数 ============================
     explicit IdlePurgeSettingWidget(QWidget *parent = nullptr);
-    ~IdlePurgeSettingWidget();
+    ~IdlePurgeSettingWidget() override;
 
-private slots:
-    void onEnableSetBtnClicked();       // 设置 Idle Purge 使能
-    void onDurationSetBtnClicked();     // 设置充气持续时间
-    void onIntervalSetBtnClicked();     // 设置充气间隔时间
+    // ============================ 业务功能 ============================
+    void setConfigValues(bool enabled, int purgeDurationSeconds, int purgeIntervalSeconds);
 
 private:
+    // ============================ 界面初始化 ============================
     void initUI();
+    void initPreparationTimeItem();
+    void initEnableItem();
+    void initDurationItem();
+    void initIntervalItem();
 
-    void initPrepTimeItem();            // 准备阶段时间（只读）
-    void initEnableItem();              // 使能设置项
-    void initDurationItem();            // 充气持续时间设置项
-    void initIntervalItem();            // 充气间隔时间设置项
-
-    // 通用指令提交方法
+    // ============================ 任务提交 ============================
     void submitCommand(SettingItemWidget *item,
                        SetIdlePurgeTask::IdlePurgeProperty property,
                        quint16 value);
-
-private:
-    // 设置任务运行期间所有 Set 按钮的启用状态
     void setAllSetButtonsEnabled(bool enabled);
 
-private:
-    // 控件指针
-    QLineEdit  *m_prepTimeLineEdit;     // 准备阶段时间（只读）
-    QComboBox  *m_enableComboBox;       // 使能选择
-    QSpinBox   *m_durationSpinBox;      // 充气持续时间
-    QSpinBox   *m_intervalSpinBox;      // 充气间隔时间
+private slots:
+    // ---- 按钮响应 ----
+    void onEnableSetBtnClicked();
+    void onDurationSetBtnClicked();
+    void onIntervalSetBtnClicked();
 
-    // Set 按钮指针（任务期间禁用，避免并发任务提交）
+private:
+    // ---- 控件成员 ----
+    QLineEdit *m_preparationTimeLineEdit;
+    QComboBox *m_enableComboBox;
+    QSpinBox *m_durationSpinBox;
+    QSpinBox *m_intervalSpinBox;
     QPushButton *m_enableSetBtn;
     QPushButton *m_durationSetBtn;
     QPushButton *m_intervalSetBtn;
 
-    // SettingItemWidget 指针（用于显示状态）
+    // ---- 条目成员 ----
     SettingItemWidget *m_enableItem;
     SettingItemWidget *m_durationItem;
     SettingItemWidget *m_intervalItem;

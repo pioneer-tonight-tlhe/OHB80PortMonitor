@@ -5,6 +5,7 @@
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/communicatelogquerytask/communicatelogquerytask.h"
 #include "paginationwidget/paginationwidget.h"
+#include "waitdialog.h"
 #include "datetimesetdialog.h"
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
@@ -16,6 +17,7 @@
 #include <QScroller>
 #include <QScrollerProperties>
 #include <QMessageBox>
+#include <QTimer>
 
 // execStatus 数字转可读字符串
 static QString execStatusToString(int status)
@@ -46,6 +48,7 @@ const QStringList ComunicateLogWidget::kLiveHeaders = {
 ComunicateLogWidget::ComunicateLogWidget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ComunicateLogWidget)
+    , m_waitDialog(nullptr)
     , m_currentPage(1)
     , m_pageSize(500)
     , m_totalPages(0)
@@ -405,6 +408,16 @@ void ComunicateLogWidget::onPaginationPageChanged(int page)
 
 void ComunicateLogWidget::submitQuery(int page)
 {
+    if (!m_waitDialog) {
+        m_waitDialog = new WaitDialog(this);
+        connect(m_waitDialog, &WaitDialog::cancelRequested,
+                this, &ComunicateLogWidget::onCancelRequested);
+    }
+    m_waitDialog->setWaiting(tr("Querying, please wait..."));
+    m_waitDialog->show();
+    m_waitDialog->raise();
+    m_waitDialog->activateWindow();
+
     CommunicateLogQueryTask* task = new CommunicateLogQueryTask();
     task->setPageNumber(page);
     task->setPageSize(m_pageSize);
@@ -428,8 +441,42 @@ void ComunicateLogWidget::submitQuery(int page)
             this, &ComunicateLogWidget::onPageWithConditionsResult, Qt::QueuedConnection);
     connect(task, &CommunicateLogQueryTask::totalCountWithConditionsResult,
             this, &ComunicateLogWidget::onTotalCountWithConditionsResult, Qt::QueuedConnection);
+    connect(task, &SchedulerTask::finished,
+            this, &ComunicateLogWidget::onTaskFinished, Qt::QueuedConnection);
 
-    Scheduler::instance()->submitTask(task);
+    m_activeTaskId = Scheduler::instance()->submitTask(task);
+}
+
+void ComunicateLogWidget::onCancelRequested()
+{
+    if (!m_activeTaskId.isEmpty()) {
+        Scheduler::instance()->cancelTask(m_activeTaskId);
+        m_activeTaskId.clear();
+    }
+    if (m_waitDialog) {
+        m_waitDialog->hide();
+    }
+}
+
+void ComunicateLogWidget::onTaskFinished(bool success, const QString& message)
+{
+    if (m_activeTaskId.isEmpty()) {
+        return;
+    }
+    m_activeTaskId.clear();
+    if (!m_waitDialog || !m_waitDialog->isVisible()) {
+        return;
+    }
+    if (success) {
+        m_waitDialog->setSuccess(tr("Query successful"));
+    } else {
+        m_waitDialog->setFailure(tr("Query failed: %1").arg(message));
+    }
+    QTimer::singleShot(1000, this, [this]() {
+        if (m_waitDialog) {
+            m_waitDialog->hide();
+        }
+    });
 }
 
 void ComunicateLogWidget::onPageWithConditionsResult(const QList<CommunicateRecord>& records)

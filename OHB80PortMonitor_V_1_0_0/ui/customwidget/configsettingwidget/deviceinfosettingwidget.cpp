@@ -1,16 +1,18 @@
 #include "deviceinfosettingwidget.h"
 
 #include "../settingwidget/settingitemwidget.h"
-#include "app/ohbdeviceconfig.h"
+#include "ohbdeviceconfig.h"
 #include "app/shareddata.h"
 #include "modaltabledialog.h"
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/scheduler.h"
+#include "scheduler/tasks/read_device_version_task/read_device_version_task.h"
 #include "scheduler/tasks/set_device_info_task/set_device_info_task.h"
 
 #include <QAbstractSocket>
 #include <QDebug>
+#include <QHash>
 #include <QHostAddress>
 #include <QIntValidator>
 #include <QLabel>
@@ -38,7 +40,7 @@ void DeviceInfoSettingWidget::initViewItem()
 {
     m_viewItem = new SettingItemWidget(this);
     m_viewItem->setTitle("View Device Information");
-    m_viewItem->setTip("Show QRCode, firmware version, IP and Port for all configured devices");
+    m_viewItem->setTip("Show QRCode, firmware version, UI screen version, IP and Port for all configured devices");
 
     m_viewButton = new QPushButton("View", m_viewItem);
     m_viewItem->addWidget("view_btn", m_viewButton);
@@ -116,34 +118,110 @@ void DeviceInfoSettingWidget::onViewClicked()
         return;
     }
 
-    QList<QStringList> rows;
-    ModbusTcpMasterManager& manager = ModbusTcpMasterManager::instance();
-    OHBDeviceConfig& config = OHBDeviceConfig::getInstance();
+    using Task = ReadDeviceVersionTask;
+    const QVector<QString> qrcodeVector(qrcodes.begin(), qrcodes.end());
+    auto* task = new Task(qrcodeVector);
 
-    for (const QString& qrCode : qrcodes) {
-        ModbusTcpMaster* master = manager.getMaster(qrCode);
-        const OHBDeviceInfo configInfo = config.getDeviceByQRCode(qrCode);
-
-        QString firmwareVersion = master ? master->firmwareVersion() : QString();
-        if (firmwareVersion.trimmed().isEmpty()) {
-            firmwareVersion = QStringLiteral("-");
-        }
-
-        const QString ip = master ? master->ip() : configInfo.ip;
-        const quint16 port = master ? master->port() : configInfo.port;
-
-        rows.append(QStringList{
-            qrCode,
-            firmwareVersion,
-            ip.isEmpty() ? QStringLiteral("-") : ip,
-            port > 0 ? QString::number(port) : QStringLiteral("-")
-        });
+    m_viewItem->setStatusWaiting(QStringLiteral("Reading device versions..."));
+    if (m_viewButton) {
+        m_viewButton->setEnabled(false);
     }
 
-    ModalTableDialog::showAsync(this,
-                                "Device Information",
-                                QStringList{"QRCode", QStringLiteral("固件版本号"), "IP", "Port"},
-                                rows);
+    connect(task,
+            &Task::deviceRetrying,
+            this,
+            [this](const QString& qrCode, const QString& commandId, int retryCount, int maxRetry) {
+                m_viewItem->setStatusWaiting(QString("Retrying %1 %2 (%3/%4)")
+                                                 .arg(qrCode)
+                                                 .arg(commandId)
+                                                 .arg(retryCount)
+                                                 .arg(maxRetry));
+            },
+            Qt::QueuedConnection);
+
+    connect(task,
+            &Task::allFinished,
+            this,
+            [this, qrcodes](bool allSuccess,
+                            int successCount,
+                            QList<Task::DeviceVersionInfo> results) {
+                Q_UNUSED(successCount)
+
+                QHash<QString, Task::DeviceVersionInfo> resultMap;
+                for (const Task::DeviceVersionInfo& info : results) {
+                    resultMap.insert(info.qrCode, info);
+                }
+
+                QList<QStringList> rows;
+                ModbusTcpMasterManager& manager = ModbusTcpMasterManager::instance();
+                OHBDeviceConfig& config = OHBDeviceConfig::getInstance();
+
+                for (const QString& qrCode : qrcodes) {
+                    ModbusTcpMaster* master = manager.getMaster(qrCode);
+                    const OHBDeviceConfigInfo configInfo = config.getDeviceByQRCode(qrCode);
+                    const Task::DeviceVersionInfo info = resultMap.value(qrCode);
+
+                    QString firmwareVersion = info.firmwareVersion;
+                    if (firmwareVersion.trimmed().isEmpty() && master) {
+                        firmwareVersion = master->firmwareVersion();
+                    }
+                    if (firmwareVersion.trimmed().isEmpty()) {
+                        firmwareVersion = QStringLiteral("-");
+                    }
+
+                    QString uiScreenVersion = info.uiScreenVersion;
+                    if (uiScreenVersion.trimmed().isEmpty() && master) {
+                        uiScreenVersion = master->uiScreenVersion();
+                    }
+                    if (uiScreenVersion.trimmed().isEmpty()) {
+                        uiScreenVersion = QStringLiteral("-");
+                    }
+
+                    const QString ip = master ? master->ip() : configInfo.getIp();
+                    const quint16 port = master ? master->port() : configInfo.getPort();
+
+                    rows.append(QStringList{
+                        qrCode,
+                        firmwareVersion,
+                        uiScreenVersion,
+                        ip.isEmpty() ? QStringLiteral("-") : ip,
+                        port > 0 ? QString::number(port) : QStringLiteral("-")
+                    });
+                }
+
+                if (allSuccess) {
+                    m_viewItem->setStatusOK();
+                } else {
+                    m_viewItem->setStatusFailed(QStringLiteral("Partial Failed"));
+                }
+                if (m_viewButton) {
+                    m_viewButton->setEnabled(true);
+                }
+
+                ModalTableDialog::showAsync(this,
+                                            "Device Information",
+                                            QStringList{"QRCode",
+                                                        QStringLiteral("固件版本号"),
+                                                        "UI Screen Version",
+                                                        "IP",
+                                                        "Port"},
+                                            rows);
+            },
+            Qt::QueuedConnection);
+
+    connect(task,
+            &Task::finished,
+            this,
+            [this](bool success, const QString& msg) {
+                Q_UNUSED(success)
+                Q_UNUSED(msg)
+                if (m_viewButton) {
+                    m_viewButton->setEnabled(true);
+                }
+            },
+            Qt::QueuedConnection);
+
+    Scheduler::instance()->submitTask(task);
 }
 
 void DeviceInfoSettingWidget::onSetQrCodeClicked()
@@ -261,10 +339,10 @@ void DeviceInfoSettingWidget::loadDeviceInfo(int qrCode)
     }
 
     ModbusTcpMaster* master = ModbusTcpMasterManager::instance().getMaster(qrCodeText);
-    const OHBDeviceInfo configInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCodeText);
+    const OHBDeviceConfigInfo configInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCodeText);
 
-    const QString ip = master ? master->ip() : configInfo.ip;
-    const quint16 port = master ? master->port() : configInfo.port;
+    const QString ip = master ? master->ip() : configInfo.getIp();
+    const quint16 port = master ? master->port() : configInfo.getPort();
 
     QSignalBlocker blocker(m_newQrCodeSpinBox);
     m_newQrCodeSpinBox->setValue(qrCode);

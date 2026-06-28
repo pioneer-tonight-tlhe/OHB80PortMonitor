@@ -30,6 +30,8 @@ public:
     explicit PurgeFlowSettingWidget(QWidget *parent = nullptr);
     ~PurgeFlowSettingWidget();
 
+    void setInitialConfigValue(int purgeFlowLitersPerMinute);
+
 private slots:
     void onSetBtnClicked();
     void onSetAllBtnClicked();

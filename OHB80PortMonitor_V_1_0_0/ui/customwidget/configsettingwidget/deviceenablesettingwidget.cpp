@@ -1,7 +1,7 @@
 #include "deviceenablesettingwidget.h"
 #include "../settingwidget/settingitemwidget.h"
 #include "app/shareddata.h"
-#include "app/ohbdeviceconfig.h"
+#include "ohbdeviceconfig.h"
 #include "classes/foupofohbinfo.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/send_command_task/send_command_task.h"
@@ -26,6 +26,18 @@ DeviceEnableSettingWidget::DeviceEnableSettingWidget(QWidget *parent)
 }
 
 DeviceEnableSettingWidget::~DeviceEnableSettingWidget() = default;
+
+void DeviceEnableSettingWidget::setInitialConfigValue(bool enabled)
+{
+    if (!m_statusComboBox) {
+        return;
+    }
+
+    const int index = m_statusComboBox->findData(enabled);
+    if (index >= 0) {
+        m_statusComboBox->setCurrentIndex(index);
+    }
+}
 
 // ============================================================
 // UI 初始化

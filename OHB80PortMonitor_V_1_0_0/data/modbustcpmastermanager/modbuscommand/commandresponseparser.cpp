@@ -25,6 +25,10 @@ void CommandResponseParser::registerBuiltinParsers()
     registerParser("ReadIdlePurgeAll",        &CommandResponseParser::parseReadIdlePurgeAll);
     registerParser("ReadVEFCPressure",        &CommandResponseParser::parseReadVEFCPressure);
     registerParser("ReadVEFCTemperature",     &CommandResponseParser::parseReadVEFCTemperature);
+    registerParser("ReadVEFCFlowUnitAndMediumStatus",
+                   &CommandResponseParser::parseReadVEFCFlowUnitAndMediumStatus);
+    registerParser("ReadVersion",             &CommandResponseParser::parseReadVersion);
+    registerParser("ReadUIScreenVersion",     &CommandResponseParser::parseReadUIScreenVersion);
 }
 
 void CommandResponseParser::registerParser(const QString& commandId, ParseFunc func)
@@ -198,5 +202,78 @@ QVariantMap CommandResponseParser::parseReadVEFCTemperature(const ModbusCommand&
     }
 
     result["sensorTemperature"] = readU16BE(payload, 0) / 100.0;
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadVEFCFlowUnitAndMediumStatus(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 2) {
+        qWarning() << "[CommandResponseParser] ReadVEFCFlowUnitAndMediumStatus 响应字节数不足，实际=" << payload.size();
+        return result;
+    }
+
+    const quint8 unitRaw = static_cast<quint8>(payload.at(0));
+    const quint8 mediumRaw = static_cast<quint8>(payload.at(1));
+
+    result["unitRaw"] = unitRaw;
+    result["mediumRaw"] = mediumRaw;
+    result["unitOk"] = (unitRaw == 0);
+    result["mediumOk"] = (mediumRaw == 0);
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadVersion(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 2) {
+        qWarning() << "[CommandResponseParser] ReadVersion 响应字节数不足，实际=" << payload.size();
+        return result;
+    }
+
+    const quint8 majorByte = static_cast<quint8>(payload.at(0));
+    const quint8 minorByte = static_cast<quint8>(payload.at(1));
+    const bool majorIsDigit = majorByte >= '0' && majorByte <= '9';
+    const bool minorIsDigit = minorByte >= '0' && minorByte <= '9';
+
+    QString version;
+    if (majorIsDigit && minorIsDigit) {
+        version = QString("%1.%2").arg(majorByte - '0').arg(minorByte - '0');
+    } else {
+        version = QString("%1.%2").arg(majorByte).arg(minorByte);
+    }
+
+    result["firmwareVersionMajorRaw"] = majorByte;
+    result["firmwareVersionMinorRaw"] = minorByte;
+    result["firmwareVersion"] = version;
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadUIScreenVersion(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 2) {
+        qWarning() << "[CommandResponseParser] ReadUIScreenVersion 响应字节数不足，实际=" << payload.size();
+        return result;
+    }
+
+    const quint8 majorPart = static_cast<quint8>(payload.at(0));
+    const quint8 minorPatchPart = static_cast<quint8>(payload.at(1));
+    const quint8 minorPart = static_cast<quint8>((minorPatchPart >> 4) & 0x0F);
+    const quint8 patchPart = static_cast<quint8>(minorPatchPart & 0x0F);
+
+    result["uiScreenVersionMajor"] = majorPart;
+    result["uiScreenVersionMinor"] = minorPart;
+    result["uiScreenVersionPatch"] = patchPart;
+    result["uiScreenVersion"] = QString("%1.%2.%3")
+                                    .arg(majorPart)
+                                    .arg(minorPart)
+                                    .arg(patchPart);
     return result;
 }

@@ -32,6 +32,10 @@ public:
     explicit UIRefreshTimeSettingWidget(QWidget *parent = nullptr);
     ~UIRefreshTimeSettingWidget();
 
+    void setInitialConfigValues(int logoTimeSeconds,
+                                int pageTotalTimeSeconds,
+                                int pageSwitchIntervalSeconds);
+
 private slots:
     void onSetBtnClicked();
     void onSetAllBtnClicked();

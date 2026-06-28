@@ -6,7 +6,7 @@
 #include "scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h"
 #include "app/applogger.h"
 #include "app/shareddata.h"
-#include "app/ohbdeviceconfig.h"
+#include "ohbdeviceconfig.h"
 #include "loggermanager.h"
 
 #include <QDebug>

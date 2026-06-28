@@ -7,8 +7,19 @@
         <CommandTimeout>1000</CommandTimeout>
         <RetryCount>3</RetryCount>
         <CommandSet>
+            <Command ref="WriteIdlePurgeEnable"/>
+            <Command ref="WriteIdlePurgeTime"/>
+            <Command ref="WriteIdlePurgeInterval"/>
+            <Command ref="SetBoardEnable"/>
+            <Command ref="WritePurgeFlow"/>
+            <Command ref="WriteFoupInAutoPurgeEnable"/>
+            <Command ref="ReadVEFCFlowUnitAndMediumStatus"/>
+            <Command ref="WritePneumaticValvePressure"/>
+            <Command ref="WriteUIRefreshTime"/>
+            <Command ref="WriteHumidityOffset"/>
+            <Command ref="WriteHumidityOffsetThreshold"/>
             <Command ref="ReadVersion"/>
-            <Command ref="WriteVEFCGasType"/>
+            <Command ref="ReadUIScreenVersion"/>
         </CommandSet>
     </InitialCommands>
 
@@ -44,6 +55,28 @@
                 <SlaveAddr>01</SlaveAddr>
                 <Function>04</Function>
                 <StartAddr>00 15</StartAddr>
+                <RegisterCount>00 01</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>02</ByteCount>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
+        <!-- ========================================
+             功能码 04 — 读输入寄存器（单寄存器）
+             UI 屏版本号查询
+             请求帧: 01 04 00 20 00 01 CRC
+             响应帧: 01 04 02 XX XX CRC
+             CH_1: UI 屏版本号
+             ======================================== -->
+        <Command id="ReadUIScreenVersion">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 20</StartAddr>
                 <RegisterCount>00 01</RegisterCount>
             </request>
             <respond>
@@ -129,6 +162,30 @@
                 0：默认（Foup in 10s后关SW5真空阀）
                 1：保持（Foup in 保持开SW5真空阀）
         ======================================== -->
+        <!-- ========================================
+             Function 06 - Write single holding register
+             FOUPIN auto purge enable
+             Request: 01 06 00 1C 00 00 CRC
+             Response: 01 06 00 1C 00 00 CRC
+             CH_1:
+                 0: Default, do not purge or run related purge functions after FOUP is in place
+                 1: Purge normally after FOUP is in place and enable 30min humidity detection
+             ======================================== -->
+        <Command id="WriteFoupInAutoPurgeEnable">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 1C</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>06</Function>
+                <StartAddr>00 1C</StartAddr>
+                <RegisterValue>00 00</RegisterValue>
+            </respond>
+        </Command>
+
         <Command id="ReadFoupStatus">
             <request>
                 <SlaveAddr>01</SlaveAddr>

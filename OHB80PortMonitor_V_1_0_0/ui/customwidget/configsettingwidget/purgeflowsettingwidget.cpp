@@ -65,6 +65,13 @@ PurgeFlowSettingWidget::PurgeFlowSettingWidget(QWidget *parent)
 
 PurgeFlowSettingWidget::~PurgeFlowSettingWidget() = default;
 
+void PurgeFlowSettingWidget::setInitialConfigValue(int purgeFlowLitersPerMinute)
+{
+    if (m_flowSpinBox) {
+        m_flowSpinBox->setValue(purgeFlowLitersPerMinute);
+    }
+}
+
 // ============================================================
 // UI
 // ============================================================
