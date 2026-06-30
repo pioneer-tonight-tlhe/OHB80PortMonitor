@@ -34,6 +34,9 @@ public:
     // 执行解析，返回 QVariantMap；未注册或解析失败返回空 map
     QVariantMap parse(const ModbusCommand& cmd) const;
 
+    // 解析 1 个版本号寄存器：Byte0 为主版本，Byte1 高4位/低4位分别为次版本/补丁版本。
+    static QString parseRegisterVersionString(const QByteArray& payload, bool withLeadingV = false);
+
 private:
     CommandResponseParser();
 
@@ -79,7 +82,7 @@ private:
     static QVariantMap parseReadVEFCFlowUnitAndMediumStatus(const ModbusCommand& cmd);
 
     // ReadVersion：1个寄存器，2字节。
-    // 若字节为 ASCII 数字则按 x.y 解析，否则按原始数值解析。
+    // Byte0 表示版本第一段；Byte1 高4位/低4位分别表示第二段/第三段。
     static QVariantMap parseReadVersion(const ModbusCommand& cmd);
 
     // ReadUIScreenVersion：1个寄存器，2字节。

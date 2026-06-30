@@ -41,6 +41,7 @@ HEADERS += \
     $$PWD/tasks/set_humidity_offset_task/set_humidity_offset_task.h \
     $$PWD/tasks/set_device_info_task/set_device_info_task.h \
     $$PWD/tasks/set_purge_flow_task/set_purge_flow_task.h \
+    $$PWD/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.h \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.h \
     $$PWD/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.h \
     $$PWD/tasks/read_vefc_flow_unit_medium_status_task/read_vefc_flow_unit_medium_status_task.h \
@@ -48,7 +49,8 @@ HEADERS += \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task.h \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task_logger.h \
     $$PWD/tasks/operation_dispatch_task/operation_dispatch_task.h \
-    $$PWD/tasks/user_management_task/user_management_task.h
+    $$PWD/tasks/user_management_task/user_management_task.h \
+    $$PWD/tasks/config_file_task/set_config_file_task.h
 
 SOURCES += \
     $$PWD/scheduler.cpp \
@@ -87,6 +89,7 @@ SOURCES += \
     $$PWD/tasks/set_humidity_offset_task/set_humidity_offset_task.cpp \
     $$PWD/tasks/set_device_info_task/set_device_info_task.cpp \
     $$PWD/tasks/set_purge_flow_task/set_purge_flow_task.cpp \
+    $$PWD/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.cpp \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.cpp \
     $$PWD/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.cpp \
     $$PWD/tasks/read_vefc_flow_unit_medium_status_task/read_vefc_flow_unit_medium_status_task.cpp \
@@ -94,4 +97,5 @@ SOURCES += \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp \
     $$PWD/tasks/alarm_dispatch_task/alarm_dispatch_task_logger.cpp \
     $$PWD/tasks/operation_dispatch_task/operation_dispatch_task.cpp \
-    $$PWD/tasks/user_management_task/user_management_task.cpp
+    $$PWD/tasks/user_management_task/user_management_task.cpp \
+    $$PWD/tasks/config_file_task/set_config_file_task.cpp

@@ -4,12 +4,16 @@
 #include "modaltabledialog.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/scheduler.h"
+#include "idlepurgeconfig.h"
 
 #include <QColor>
 #include <QList>
 #include <QMessageBox>
 
 namespace {
+constexpr int kIdlePurgeValueMin = 0;
+constexpr int kIdlePurgeValueMax = 65534;
+
 QList<QStringList> buildDeviceResultRows(const QStringList &targetQrCodes,
                                          const QStringList &failedQrCodes,
                                          bool allSuccess,
@@ -70,6 +74,7 @@ IdlePurgeSettingWidget::IdlePurgeSettingWidget(QWidget *parent)
     , m_enableItem(nullptr)
     , m_durationItem(nullptr)
     , m_intervalItem(nullptr)
+    , m_preparationTimeItem(nullptr)
 {
     setTitle("Idle Purge Configuration");
     initUI();
@@ -107,19 +112,32 @@ void IdlePurgeSettingWidget::setConfigValues(bool enabled,
     }
 }
 
+void IdlePurgeSettingWidget::loadConfigValues()
+{
+    IdlePurgeConfig &config = IdlePurgeConfig::getInstance();
+    setConfigValues(config.isEnabled(),
+                    config.getPurgeDurationSeconds(),
+                    config.getPurgeIntervalSeconds());
+}
+
+QWidget* IdlePurgeSettingWidget::preparationTimeItem() const
+{
+    return m_preparationTimeItem;
+}
+
 void IdlePurgeSettingWidget::initPreparationTimeItem()
 {
-    auto *item = new SettingItemWidget(this);
-    item->setTitle("Preparation Time");
-    item->setTip("Fixed preparation phase duration before idle purge starts");
+    m_preparationTimeItem = new SettingItemWidget(this);
+    m_preparationTimeItem->setTitle("Preparation Time");
+    m_preparationTimeItem->setTip("Fixed preparation phase duration before idle purge starts");
 
-    m_preparationTimeLineEdit = new QLineEdit(item);
+    m_preparationTimeLineEdit = new QLineEdit(m_preparationTimeItem);
     m_preparationTimeLineEdit->setText("10 s");
     m_preparationTimeLineEdit->setReadOnly(true);
     m_preparationTimeLineEdit->setFixedWidth(120);
-    item->addWidget("prep_time_edit", m_preparationTimeLineEdit);
+    m_preparationTimeItem->addWidget("prep_time_edit", m_preparationTimeLineEdit);
 
-    addItem(item);
+    addItem(m_preparationTimeItem);
 }
 
 void IdlePurgeSettingWidget::initEnableItem()
@@ -149,7 +167,7 @@ void IdlePurgeSettingWidget::initDurationItem()
     m_durationItem->setTip("Set idle purge inflation duration (seconds) for all devices");
 
     m_durationSpinBox = new QSpinBox(m_durationItem);
-    m_durationSpinBox->setRange(1, 9999);
+    m_durationSpinBox->setRange(kIdlePurgeValueMin, kIdlePurgeValueMax);
     m_durationSpinBox->setValue(10);
     m_durationSpinBox->setSuffix(" s");
     m_durationSpinBox->setFixedWidth(120);
@@ -170,7 +188,7 @@ void IdlePurgeSettingWidget::initIntervalItem()
     m_intervalItem->setTip("Set idle purge interval between cycles (seconds) for all devices");
 
     m_intervalSpinBox = new QSpinBox(m_intervalItem);
-    m_intervalSpinBox->setRange(1, 99999);
+    m_intervalSpinBox->setRange(kIdlePurgeValueMin, kIdlePurgeValueMax);
     m_intervalSpinBox->setValue(5);
     m_intervalSpinBox->setSuffix(" s");
     m_intervalSpinBox->setFixedWidth(120);
@@ -294,6 +312,7 @@ void IdlePurgeSettingWidget::submitCommand(SettingItemWidget *item,
                     }
                 }
 
+                loadConfigValues();
                 setAllSetButtonsEnabled(true);
             });
 

@@ -34,6 +34,7 @@ public:
 
     // ============================ 业务功能 ============================
     void setConfigValues(bool enabled, int purgeDurationSeconds, int purgeIntervalSeconds);
+    QWidget* preparationTimeItem() const;
 
 private:
     // ============================ 界面初始化 ============================
@@ -47,6 +48,7 @@ private:
     void submitCommand(SettingItemWidget *item,
                        SetIdlePurgeTask::IdlePurgeProperty property,
                        quint16 value);
+    void loadConfigValues();
     void setAllSetButtonsEnabled(bool enabled);
 
 private slots:
@@ -69,6 +71,7 @@ private:
     SettingItemWidget *m_enableItem;
     SettingItemWidget *m_durationItem;
     SettingItemWidget *m_intervalItem;
+    SettingItemWidget *m_preparationTimeItem;
 };
 
 #endif // IDLEPURGESETTINGWIDGET_H

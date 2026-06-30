@@ -13,6 +13,11 @@ FirmwareConfig& FirmwareConfig::getInstance()
     return instance;
 }
 
+void FirmwareConfig::reloadConfig()
+{
+    loadConfig();
+}
+
 FirmwareConfig::FirmwareConfig()
     : m_prepareCmdTimeoutMs(1000)
     , m_waitingForEquipmentReadyMs(1000)

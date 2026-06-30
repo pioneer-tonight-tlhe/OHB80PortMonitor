@@ -5,8 +5,10 @@
 
 #include <QList>
 #include <QMetaType>
+#include <QDate>
 #include <QString>
 #include <QStringList>
+#include <QVector>
 
 // ====================================================================
 // VEFCSensorMonitorTypes - VEFC 监控任务的公共数据类型
@@ -87,11 +89,35 @@ struct RoundSummary {
     QStringList skippedDevices;
 };
 
+struct DebugMetricStats {
+    QString name;
+    QString unit;
+    int count = 0;
+    bool hasData = false;
+    double min = 0.0;
+    double max = 0.0;
+    double average = 0.0;
+};
+
+struct DebugSnapshot {
+    QDate date;
+    bool databaseAvailable = false;
+    QString errorMessage;
+    QVector<VEFCSensorMonitorRecord> softwareFirstOpenRecords;
+    QVector<VEFCSensorMonitorRecord> todayFirstRecords;
+    QVector<VEFCSensorMonitorRecord> todayLatestRecords;
+    QVector<VEFCSensorMonitorRecord> todayRecords;
+    QVector<DebugMetricStats> statistics;
+};
+
 } // namespace VEFCSensorMonitor
 
 Q_DECLARE_METATYPE(VEFCSensorMonitor::SensorCommandType)
 Q_DECLARE_METATYPE(VEFCSensorMonitor::DeviceRoundState)
 Q_DECLARE_METATYPE(QList<VEFCSensorMonitor::DeviceRoundState>)
 Q_DECLARE_METATYPE(VEFCSensorMonitor::RoundSummary)
+Q_DECLARE_METATYPE(VEFCSensorMonitor::DebugMetricStats)
+Q_DECLARE_METATYPE(QVector<VEFCSensorMonitor::DebugMetricStats>)
+Q_DECLARE_METATYPE(VEFCSensorMonitor::DebugSnapshot)
 
 #endif // VEFC_SENSOR_MONITOR_TYPES_H

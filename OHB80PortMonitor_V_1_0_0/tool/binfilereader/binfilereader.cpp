@@ -3,6 +3,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QtConcurrent>
 
 BinFileReader::BinFileReader(QObject *parent)
@@ -19,6 +20,21 @@ BinFileReader::~BinFileReader()
     LoggerManager::getInstance()->log("debug", Level::INFO, "BinFileReader 析构开始");
     clean();
     LoggerManager::getInstance()->log("debug", Level::INFO, "BinFileReader 析构完成");
+}
+
+QString BinFileReader::parseVersionFromFileName(const QString& filePath)
+{
+    const QString fileName = QFileInfo(filePath).fileName();
+    static const QRegularExpression versionRe(
+        QStringLiteral(R"((?:^|[^A-Za-z0-9])V_(\d+)_(\d+)_(\d+)(?=\D|$))"));
+
+    const QRegularExpressionMatch match = versionRe.match(fileName);
+    if (!match.hasMatch()) {
+        return QString();
+    }
+
+    return QStringLiteral("V%1.%2.%3")
+        .arg(match.captured(1), match.captured(2), match.captured(3));
 }
 
 void BinFileReader::setPacketSize(int bytesPerPacket)

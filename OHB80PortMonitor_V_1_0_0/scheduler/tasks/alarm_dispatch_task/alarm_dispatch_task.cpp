@@ -40,6 +40,21 @@ bool isBlockedForFoup(const AlarmInfo& info, const QSet<QString>& blockedAlarmTy
     return blockedAlarmTypes.contains(alarmTypeName(info.record.alarmType));
 }
 
+QString resolveDescriptionFor(const AlarmInfo& info)
+{
+    if (info.record.alarmType == static_cast<int>(AlarmType::HumidityNotReached)) {
+        return QStringLiteral("[qrcode: %1] 湿度成功达到标准（30min充氮后湿度达标）. Alarm Code:5101")
+            .arg(info.record.qrCode.trimmed());
+    }
+
+    return info.record.description;
+}
+
+void applyResolveDescription(AlarmInfo& info)
+{
+    info.record.description = resolveDescriptionFor(info);
+}
+
 } // namespace
 
 AlarmDispatchTask::AlarmDispatchTask(QObject* parent)
@@ -470,6 +485,7 @@ void AlarmDispatchTask::submitResolve(const QString& alarmId)
         resolvedInfo.record.isResolved   = 1;
         resolvedInfo.record.resolveTime = QDateTime::currentDateTime()
                                         .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+        applyResolveDescription(resolvedInfo);
         // 只有成功从 active 集合移除，才说明本次恢复请求真正生效。
         m_active.erase(it);
     }
@@ -538,6 +554,7 @@ int AlarmDispatchTask::submitResolveAllBySourceIdentifier(int alarmSource,
                 info.record.isResolved = 1;
                 info.record.resolveTime = QDateTime::currentDateTime()
                     .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+                applyResolveDescription(info);
                 resolvedInfos.append(info);
                 it = m_active.erase(it);
             } else {
@@ -592,6 +609,7 @@ int AlarmDispatchTask::submitResolveAllByQRCode(const QString& qrCode)
                 info.record.isResolved = 1;
                 info.record.resolveTime = QDateTime::currentDateTime()
                     .toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+                applyResolveDescription(info);
                 resolvedInfos.append(info);
                 it = m_active.erase(it);
             } else {

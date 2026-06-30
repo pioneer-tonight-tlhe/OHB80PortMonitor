@@ -35,6 +35,8 @@ signals:
     void postTransferWaitTimeApplied();
 
 private:
+    bool persistConfig(QString *errorMessage);
+
     std::optional<int> m_prepareTimeout;
     std::optional<int> m_waitingTime;
     std::optional<int> m_sendInterval;

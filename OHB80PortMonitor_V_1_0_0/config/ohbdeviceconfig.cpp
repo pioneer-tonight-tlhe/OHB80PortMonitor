@@ -64,6 +64,18 @@ const double DefaultHumidityLowerLimitPercent = 5.0;
 const int DefaultFoupInAutoPurgeEnable = 0;
 const int DefaultSh85SelfCheckPeriodSeconds = 1800;
 
+QString formatConfigDouble(double value, int precision = 2)
+{
+    QString text = QString::number(value, 'f', precision);
+    while (text.contains('.') && text.endsWith('0')) {
+        text.chop(1);
+    }
+    if (text.endsWith('.')) {
+        text.chop(1);
+    }
+    return text;
+}
+
 QVariant readConfigValue(QSettings &settings,
                          const QString &groupName,
                          const QString &keyName,
@@ -223,12 +235,12 @@ bool OHBDeviceConfig::writeDevices(const QVector<OHBDeviceConfigInfo>& devices)
         settings.setValue(PortKey, deviceInfo.getPort());
         settings.setValue(DeviceEnableKey, deviceInfo.isEnabled());
         settings.setValue(PurgeFlowKey, deviceInfo.getPurgeFlowLitersPerMinute());
-        settings.setValue(VppePressureKey, deviceInfo.getVppePressureBar());
+        settings.setValue(VppePressureKey, formatConfigDouble(deviceInfo.getVppePressureBar()));
         settings.setValue(LogoTimeKey, deviceInfo.getLogoTimeSeconds());
         settings.setValue(PageSwitchIntervalKey, deviceInfo.getPageSwitchIntervalSeconds());
         settings.setValue(PageTotalTimeKey, deviceInfo.getPageTotalTimeSeconds());
-        settings.setValue(HumidityOffsetKey, deviceInfo.getHumidityOffsetPercent());
-        settings.setValue(HumidityLowerLimitKey, deviceInfo.getHumidityLowerLimitPercent());
+        settings.setValue(HumidityOffsetKey, formatConfigDouble(deviceInfo.getHumidityOffsetPercent()));
+        settings.setValue(HumidityLowerLimitKey, formatConfigDouble(deviceInfo.getHumidityLowerLimitPercent()));
         settings.setValue(FoupInAutoPurgeEnableKey, deviceInfo.getFoupInAutoPurgeEnable());
         settings.endGroup();
     }
@@ -356,6 +368,31 @@ bool OHBDeviceConfig::setDeviceEnable(const QString& qrCode, bool enable)
     return false;
 }
 
+bool OHBDeviceConfig::setPurgeFlowLitersPerMinuteByQRCode(const QString& qrCode,
+                                                          int purgeFlowLitersPerMinute)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        const QString currentQrCode = settings.value(QRCodeKey, "").toString();
+        if (currentQrCode == qrCode) {
+            settings.setValue(PurgeFlowKey, purgeFlowLitersPerMinute);
+            settings.endGroup();
+            settings.sync();
+            qDebug() << "OHBDeviceConfig: 设置设备" << qrCode
+                     << "PurgeFlow_l_min=" << purgeFlowLitersPerMinute;
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+
+    qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode
+               << "的设备，无法写入 PurgeFlow_l_min";
+    return false;
+}
+
 bool OHBDeviceConfig::setVppePressureBarByQRCode(const QString& qrCode, double vppePressureBar)
 {
     QSettings settings(m_configFilePath, QSettings::IniFormat);
@@ -365,7 +402,7 @@ bool OHBDeviceConfig::setVppePressureBarByQRCode(const QString& qrCode, double v
         settings.beginGroup(groupName);
         const QString currentQrCode = settings.value(QRCodeKey, "").toString();
         if (currentQrCode == qrCode) {
-            settings.setValue(VppePressureKey, vppePressureBar);
+            settings.setValue(VppePressureKey, formatConfigDouble(vppePressureBar));
             settings.endGroup();
             settings.sync();
             qDebug() << "OHBDeviceConfig: 设置设备" << qrCode
@@ -376,6 +413,86 @@ bool OHBDeviceConfig::setVppePressureBarByQRCode(const QString& qrCode, double v
     }
 
     qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode << "的设备，无法写入 VPPEPressure_bar";
+    return false;
+}
+
+bool OHBDeviceConfig::setUIRefreshTimeByQRCode(const QString& qrCode,
+                                               int logoTimeSeconds,
+                                               int pageTotalTimeSeconds,
+                                               int pageSwitchIntervalSeconds)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        const QString currentQrCode = settings.value(QRCodeKey, "").toString();
+        if (currentQrCode == qrCode) {
+            settings.setValue(LogoTimeKey, logoTimeSeconds);
+            settings.setValue(PageTotalTimeKey, pageTotalTimeSeconds);
+            settings.setValue(PageSwitchIntervalKey, pageSwitchIntervalSeconds);
+            settings.endGroup();
+            settings.sync();
+            qDebug() << "OHBDeviceConfig: 设置设备" << qrCode
+                     << "LogoTime_s=" << logoTimeSeconds
+                     << "PageTotalTime_s=" << pageTotalTimeSeconds
+                     << "PageSwitchInterval_s=" << pageSwitchIntervalSeconds;
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+
+    qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode
+               << "的设备，无法写入 UI Refresh Time";
+    return false;
+}
+
+bool OHBDeviceConfig::setHumidityOffsetPercentByQRCode(const QString& qrCode, double humidityOffsetPercent)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        const QString currentQrCode = settings.value(QRCodeKey, "").toString();
+        if (currentQrCode == qrCode) {
+            settings.setValue(HumidityOffsetKey, formatConfigDouble(humidityOffsetPercent));
+            settings.endGroup();
+            settings.sync();
+            qDebug() << "OHBDeviceConfig: 璁剧疆璁惧" << qrCode
+                     << "HumidityOffset_pct=" << humidityOffsetPercent;
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+
+    qWarning() << "OHBDeviceConfig: 鏈壘鍒?QRCode=" << qrCode
+               << "鐨勮澶囷紝鏃犳硶鍐欏叆 HumidityOffset_pct";
+    return false;
+}
+
+bool OHBDeviceConfig::setHumidityLowerLimitPercentByQRCode(const QString& qrCode,
+                                                           double humidityLowerLimitPercent)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        const QString currentQrCode = settings.value(QRCodeKey, "").toString();
+        if (currentQrCode == qrCode) {
+            settings.setValue(HumidityLowerLimitKey, formatConfigDouble(humidityLowerLimitPercent));
+            settings.endGroup();
+            settings.sync();
+            qDebug() << "OHBDeviceConfig: 璁剧疆璁惧" << qrCode
+                     << "HumidityLowerLimit_pct=" << humidityLowerLimitPercent;
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+
+    qWarning() << "OHBDeviceConfig: 鏈壘鍒?QRCode=" << qrCode
+               << "鐨勮澶囷紝鏃犳硶鍐欏叆 HumidityLowerLimit_pct";
     return false;
 }
 

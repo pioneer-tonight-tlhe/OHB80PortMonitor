@@ -9,6 +9,7 @@
 #include "app/shareddata.h"
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "usermanager/usermanager.h"
+#include "ohbdeviceconfig.h"
 
 #include <QDateTime>
 #include <QDebug>
@@ -433,16 +434,30 @@ void SetHumidityOffsetTask::forceFinish()
     }
     m_pendingMap.clear();
     m_pendingCommands.clear();
-    const bool allSuccess = m_failedQrCodes.isEmpty();
+    const bool deviceWriteSuccess = m_failedQrCodes.isEmpty();
+    bool persistSuccess = true;
+    QString persistErrorMessage;
+    if (m_successCount > 0) {
+        persistSuccess = persistConfig(&persistErrorMessage);
+    }
+
+    const bool allSuccess = deviceWriteSuccess && persistSuccess;
     setState(allSuccess ? Finished : Failed);
 
     if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
-        const QString desc = allSuccess
-            ? QString("SetHumidityOffset task completed: %1 devices succeeded")
-                  .arg(m_successCount)
-            : QString("SetHumidityOffset task finished: %1 succeeded, %2 failed")
-                  .arg(m_successCount)
-                  .arg(m_failedQrCodes.count());
+        QString desc;
+        if (allSuccess) {
+            desc = QString("SetHumidityOffset task completed: %1 devices succeeded")
+                       .arg(m_successCount);
+        } else if (!persistSuccess) {
+            desc = QString("SetHumidityOffset task finished: %1 devices succeeded, config persistence failed (%2)")
+                       .arg(m_successCount)
+                       .arg(persistErrorMessage);
+        } else {
+            desc = QString("SetHumidityOffset task finished: %1 succeeded, %2 failed")
+                       .arg(m_successCount)
+                       .arg(m_failedQrCodes.count());
+        }
         opTaskEnd->log(allSuccess ? OperationDispatchTask::MsgType::Message
                                   : OperationDispatchTask::MsgType::Error,
                        desc, 0);
@@ -451,13 +466,51 @@ void SetHumidityOffsetTask::forceFinish()
     emit allFinished(allSuccess, m_successCount, m_failedQrCodes,
                      m_thresholdSet, m_thresholdPct,
                      m_offsetSet, m_offsetPct);
-    emit finished(allSuccess,
-                  allSuccess
-                      ? QString("SetHumidityOffsetTask: completed, %1 devices succeeded")
+    QString finishMessage;
+    if (allSuccess) {
+        finishMessage = QString("SetHumidityOffsetTask: completed, %1 devices succeeded")
+                            .arg(m_successCount);
+    } else if (!persistSuccess) {
+        finishMessage = QString("SetHumidityOffsetTask: device write succeeded, but config persistence failed (%1)")
+                            .arg(persistErrorMessage);
+    } else {
+        finishMessage = QString("SetHumidityOffsetTask: completed, %1 succeeded, %2 failed")
                             .arg(m_successCount)
-                      : QString("SetHumidityOffsetTask: completed, %1 succeeded, %2 failed")
-                            .arg(m_successCount)
-                            .arg(m_failedQrCodes.count()));
+                            .arg(m_failedQrCodes.count());
+    }
+    emit finished(allSuccess, finishMessage);
+}
+
+bool SetHumidityOffsetTask::persistConfig(QString *errorMessage)
+{
+    OHBDeviceConfig &config = OHBDeviceConfig::getInstance();
+
+    for (const QString &qrCode : qAsConst(m_targetQrCodes)) {
+        if (m_failedQrCodes.contains(qrCode)) {
+            continue;
+        }
+
+        if (m_thresholdSet
+            && !config.setHumidityLowerLimitPercentByQRCode(qrCode, m_thresholdPct)) {
+            if (errorMessage) {
+                *errorMessage = QString("failed to write HumidityLowerLimit_pct for %1").arg(qrCode);
+            }
+            return false;
+        }
+
+        if (m_offsetSet
+            && !config.setHumidityOffsetPercentByQRCode(qrCode, m_offsetPct)) {
+            if (errorMessage) {
+                *errorMessage = QString("failed to write HumidityOffset_pct for %1").arg(qrCode);
+            }
+            return false;
+        }
+    }
+
+    if (errorMessage) {
+        errorMessage->clear();
+    }
+    return true;
 }
 
 void SetHumidityOffsetTask::logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode)

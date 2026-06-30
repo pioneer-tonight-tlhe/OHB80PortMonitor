@@ -35,7 +35,7 @@
 | 9 | **SetHumidityOffsetTask** | 设置湿度校准参数任务。支持下发湿度偏移阈值（WriteHumidityOffsetThreshold）和湿度偏移量（WriteHumidityOffset），寄存器值 = 百分比 × 100。 |
 | 10 | **SetIdlePurgeTask** | 设置空闲吹扫参数任务。批量写入 Idle Purge 相关属性（如启用/禁用、间隔时间等）到目标设备。 |
 | 11 | **SetPneumaticValvePressureTask** | 设置气控阀压力任务。向目标设备写入压力值（单位 bar），寄存器值 = pressureBar × 1000，5 秒整体超时。 |
-| 12 | **SetPurgeFlowTask** | 设置吹扫流量任务。通过 WritePurgeFlow 指令（FC 0x06, addr 0x0000）设置 VEFC 流量大小，寄存器值 = flow × 100，仅 FOUP IN 时有效。 |
+| 12 | **SetPurgeFlowTask** | 设置吹扫流量任务。通过 WritePurgeFlow 指令（FC 0x06, addr 0x0000）设置 VEFC 流量大小，寄存器值 = flow × 10，仅 FOUP IN 时有效。 |
 | 13 | **SetUIRefreshTimeTask** | 设置 UI 刷新时间任务。通过 WriteUIRefreshTime 指令（FC 0x10, addr 0x0004）设置下位机屏幕的 log 界面和属性页面显示时长（秒）。 |
 | 14 | **SetVEFCGasTypeTask** | 设置 VEFC 气体类型任务。通过 WriteVEFCGasType 指令（FC 0x06, addr 0x0001）写入气体介质类型（CDA / N2 / Ar / CO2 / O2），掉电保持。 |
 

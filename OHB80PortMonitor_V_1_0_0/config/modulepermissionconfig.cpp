@@ -239,12 +239,17 @@ QMap<QString, QMap<QString, int>> ModulePermissionConfig::createDefaultPermissio
 
     QMap<QString, int> configPagePermissions;
     configPagePermissions.insert("IdlePurgeConfiguration", 1);
+    configPagePermissions.insert("IdlePurgeConfiguration.PreparationTime", 3);
     configPagePermissions.insert("PneumaticValvePressureConfiguration", 1);
     configPagePermissions.insert("SH85PeriodicSelfCheckConfiguration", 1);
     configPagePermissions.insert("SH85SelfCheckConfiguration", 1);
     configPagePermissions.insert("PurgeFlowConfiguration", 1);
     configPagePermissions.insert("DeviceEnableConfiguration", 1);
     configPagePermissions.insert("DeviceInfoConfiguration", 1);
+    configPagePermissions.insert("DeviceInfoConfiguration.ViewDeviceInformation", 1);
+    configPagePermissions.insert("DeviceInfoConfiguration.CurrentQRCode", 2);
+    configPagePermissions.insert("DeviceInfoConfiguration.NewQRCode", 2);
+    configPagePermissions.insert("DeviceInfoConfiguration.IPPort", 2);
     permissions.insert(ConfigPageGroup, configPagePermissions);
 
     QMap<QString, int> debugPagePermissions;
@@ -254,9 +259,11 @@ QMap<QString, QMap<QString, int>> ModulePermissionConfig::createDefaultPermissio
     debugPagePermissions.insert("UIRefreshTimeConfiguration", 3);
     debugPagePermissions.insert("HumidityOffsetConfiguration", 3);
     debugPagePermissions.insert("VEFCFlowUnitMediumStatus", 3);
+    debugPagePermissions.insert("VEFCSensorMonitor", 3);
     debugPagePermissions.insert("BoardEnableStatus", 3);
     debugPagePermissions.insert("FoupInVacuumExtractionEnable", 3);
     debugPagePermissions.insert("FoupInAutoPurgeEnable", 3);
+    debugPagePermissions.insert("ConfigFiles", 3);
     permissions.insert(DebugPageGroup, debugPagePermissions);
 
     return permissions;

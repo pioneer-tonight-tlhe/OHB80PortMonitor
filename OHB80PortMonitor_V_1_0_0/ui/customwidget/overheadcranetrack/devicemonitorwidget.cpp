@@ -164,10 +164,10 @@ void Graph::DeviceMonitorWidget::refreshFoupMonitor()
     auto idleStateStr = [](IdleState s) -> QString {
         QString str;
         switch (s) {
-        case IdleState::Stopped:   str = "Stop"; break;
-        case IdleState::Preparing: str = "Preparing"; break;
-        case IdleState::Purging:   str = "Purging"; break;
-        case IdleState::Idle:      str = "Interval"; break;
+        case IdleState::Stopped:   str = "Stop"; break;     // idle 状态下，停止充气
+        case IdleState::Preparing: str = "Preparing"; break;    // idle 功能刚开启
+        case IdleState::Purging:   str = "Purging"; break;      // idle 功能充气中
+        case IdleState::Idle:      str = "Interval"; break;         // idle 功能停止
         default:                   str = "Unknown"; break;
         }
         qDebug() << "[DeviceMonitorWidget] idleStateStr: raw=" << static_cast<int>(s) << "str=" << str;

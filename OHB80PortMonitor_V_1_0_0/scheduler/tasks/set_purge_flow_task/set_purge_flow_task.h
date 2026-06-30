@@ -18,7 +18,7 @@ class OperationDispatchTask;
 // SetPurgeFlowTask — 设置 Purge 流量大小（VEFC 流量）
 //
 //   底层指令：WritePurgeFlow（FC 0x06, addr 0x0000）
-//   寄存器值 = flow × 100（例：35 → 3500）
+//   寄存器值 = flow × 10（例：35 → 350）
 //   说明：仅 FOUP IN 时有效，FOUP OUT 状态固定为 0
 //
 //   信号 allFinished：
@@ -42,7 +42,7 @@ public:
     QString taskType() const override { return "SetPurgeFlowTask"; }
 
     // 寄存器值倍率：flow × kRegisterScale 写入设备
-    static constexpr int kRegisterScale = 100;
+    static constexpr int kRegisterScale = 10;
 
 signals:
     void allFinished(bool allSuccess,
@@ -62,6 +62,7 @@ private:
     void disconnectAll();
     void checkAllFinished();
     void forceFinish();
+    bool persistConfig(QString *errorMessage);
     void logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode);
 
     void writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason);

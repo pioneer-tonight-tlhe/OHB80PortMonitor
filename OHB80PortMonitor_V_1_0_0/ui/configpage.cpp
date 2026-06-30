@@ -144,6 +144,10 @@ void ConfigPage::registerModulePermissions()
                                   m_ui->btnIdelPurge,
                                   QStringLiteral("ConfigPage"),
                                   QStringLiteral("IdlePurgeConfiguration"));
+    App::registerModulePermission(m_idlePurgeWidget ? m_idlePurgeWidget->preparationTimeItem() : nullptr,
+                                  nullptr,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("IdlePurgeConfiguration.PreparationTime"));
     App::registerModulePermission(m_pneumaticValvePressureWidget,
                                   m_ui->btnPneumaticValvePressure,
                                   QStringLiteral("ConfigPage"),
@@ -168,6 +172,22 @@ void ConfigPage::registerModulePermissions()
                                   m_ui->btnDeviceInfo,
                                   QStringLiteral("ConfigPage"),
                                   QStringLiteral("DeviceInfoConfiguration"));
+    App::registerModulePermission(m_deviceInfoWidget ? m_deviceInfoWidget->viewItem() : nullptr,
+                                  nullptr,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("DeviceInfoConfiguration.ViewDeviceInformation"));
+    App::registerModulePermission(m_deviceInfoWidget ? m_deviceInfoWidget->currentQrCodeItem() : nullptr,
+                                  nullptr,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("DeviceInfoConfiguration.CurrentQRCode"));
+    App::registerModulePermission(m_deviceInfoWidget ? m_deviceInfoWidget->qrCodeModifyItem() : nullptr,
+                                  nullptr,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("DeviceInfoConfiguration.NewQRCode"));
+    App::registerModulePermission(m_deviceInfoWidget ? m_deviceInfoWidget->endpointModifyItem() : nullptr,
+                                  nullptr,
+                                  QStringLiteral("ConfigPage"),
+                                  QStringLiteral("DeviceInfoConfiguration.IPPort"));
 }
 
 void ConfigPage::onSelfCheckRunningStateChanged(bool running)

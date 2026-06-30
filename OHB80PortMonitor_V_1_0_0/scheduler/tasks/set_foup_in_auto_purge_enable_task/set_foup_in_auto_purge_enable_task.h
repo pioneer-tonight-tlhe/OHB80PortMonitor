@@ -1,5 +1,5 @@
-#ifndef SET_UI_REFRESH_TIME_TASK_H
-#define SET_UI_REFRESH_TIME_TASK_H
+#ifndef SET_FOUP_IN_AUTO_PURGE_ENABLE_TASK_H
+#define SET_FOUP_IN_AUTO_PURGE_ENABLE_TASK_H
 
 #include "../../scheduler_task.h"
 #include "ilogger.h"
@@ -14,29 +14,25 @@
 
 class OperationDispatchTask;
 
-class SetUIRefreshTimeTask : public SchedulerTask
+class SetFoupInAutoPurgeEnableTask : public SchedulerTask
 {
     Q_OBJECT
 
 public:
-    explicit SetUIRefreshTimeTask(const QVector<QString> &qrcodes,
-                                  int logoSec,
-                                  int paramTotalSec,
-                                  int paramSwitchSec,
-                                  QObject *parent = nullptr);
-    ~SetUIRefreshTimeTask() override;
+    explicit SetFoupInAutoPurgeEnableTask(const QVector<QString> &qrcodes,
+                                          int enableValue,
+                                          QObject *parent = nullptr);
+    ~SetFoupInAutoPurgeEnableTask() override;
 
     void start() override;
     void stop() override;
-    QString taskType() const override { return "SetUIRefreshTimeTask"; }
+    QString taskType() const override { return "SetFoupInAutoPurgeEnableTask"; }
 
 signals:
     void allFinished(bool allSuccess,
                      int successCount,
                      QStringList failedQrCodes,
-                     int logoSec,
-                     int paramTotalSec,
-                     int paramSwitchSec);
+                     int enableValue);
     void deviceRetrying(QString qrCode, int retryCount, int maxRetry);
 
 private slots:
@@ -45,7 +41,7 @@ private slots:
     void onTimeout();
 
 private:
-    QByteArray buildPayload() const;
+    QByteArray buildRegisterValue(quint16 value) const;
     void disconnectAll();
     void checkAllFinished();
     void forceFinish();
@@ -60,9 +56,7 @@ private:
 
 private:
     QVector<QString> m_qrcodes;
-    int m_logoSec;
-    int m_paramTotalSec;
-    int m_paramSwitchSec;
+    int m_enableValue = 0;
 
     QHash<qint64, QString> m_pendingMap;
     QList<QMetaObject::Connection> m_connections;
@@ -81,4 +75,4 @@ private:
     bool m_loggerInitialized = false;
 };
 
-#endif // SET_UI_REFRESH_TIME_TASK_H
+#endif // SET_FOUP_IN_AUTO_PURGE_ENABLE_TASK_H

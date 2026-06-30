@@ -25,9 +25,11 @@ class VEFCGasTypeSettingWidget;
 class UIRefreshTimeSettingWidget;
 class HumidityOffsetSettingWidget;
 class VEFCFlowUnitMediumStatusWidget;
+class VEFCSensorMonitorWidget;
 class BoardEnableStatusWidget;
 class FoupInVacuumExtractionEnableWidget;
 class FoupInAutoPurgeEnableWidget;
+class ConfigFileSettingWidget;
 
 class DebugPage : public QWidget
 {
@@ -61,9 +63,11 @@ private:
     UIRefreshTimeSettingWidget *m_uiRefreshTimeWidget;
     HumidityOffsetSettingWidget *m_humidityOffsetWidget;
     VEFCFlowUnitMediumStatusWidget *m_vefcFlowUnitMediumStatusWidget;
+    VEFCSensorMonitorWidget *m_vefcSensorMonitorWidget;
     BoardEnableStatusWidget *m_boardEnableStatusWidget;
     FoupInVacuumExtractionEnableWidget *m_foupInVacuumExtractionEnableWidget;
     FoupInAutoPurgeEnableWidget *m_foupInAutoPurgeEnableWidget;
+    ConfigFileSettingWidget *m_configFileSettingWidget;
 };
 
 #endif // DEBUGPAGE_H

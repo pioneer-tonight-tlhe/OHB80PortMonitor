@@ -29,6 +29,26 @@ DeviceInfoSettingWidget::DeviceInfoSettingWidget(QWidget* parent)
 
 DeviceInfoSettingWidget::~DeviceInfoSettingWidget() = default;
 
+QWidget* DeviceInfoSettingWidget::viewItem() const
+{
+    return m_viewItem;
+}
+
+QWidget* DeviceInfoSettingWidget::currentQrCodeItem() const
+{
+    return m_currentQrCodeItem;
+}
+
+QWidget* DeviceInfoSettingWidget::qrCodeModifyItem() const
+{
+    return m_qrCodeModifyItem;
+}
+
+QWidget* DeviceInfoSettingWidget::endpointModifyItem() const
+{
+    return m_endpointModifyItem;
+}
+
 void DeviceInfoSettingWidget::initUI()
 {
     initViewItem();
@@ -201,7 +221,7 @@ void DeviceInfoSettingWidget::onViewClicked()
                 ModalTableDialog::showAsync(this,
                                             "Device Information",
                                             QStringList{"QRCode",
-                                                        QStringLiteral("固件版本号"),
+                                                        QStringLiteral("Firmware Version"),
                                                         "UI Screen Version",
                                                         "IP",
                                                         "Port"},

@@ -7,6 +7,7 @@
 #include "logdatabases/databasemanager.h"
 #include "logdatabases/communicatelogdb/communicatelogdbcon.h"
 #include "app/shareddata.h"
+#include "ohbdeviceconfig.h"
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 
 #include <QDateTime>
@@ -300,18 +301,45 @@ void SetPurgeFlowTask::forceFinish()
     }
     m_pendingMap.clear();
 
-    const bool allSuccess = m_failedQrCodes.isEmpty();
+    const bool deviceWriteSuccess = m_failedQrCodes.isEmpty();
+    bool persistSuccess = true;
+    QString persistErrorMessage;
+
+    if (deviceWriteSuccess) {
+        persistSuccess = persistConfig(&persistErrorMessage);
+        if (!persistSuccess) {
+            qWarning() << "[Scheduler][SetPurgeFlowTask] config persistence failed:"
+                       << persistErrorMessage;
+            deviceDetailLogger().warn(
+                QString("[SetPurgeFlowTask] config persistence failed\n"
+                        "flow: %1 L/Min\n"
+                        "reason: %2")
+                    .arg(m_flowValue)
+                    .arg(persistErrorMessage)
+                    .toStdString());
+        }
+    }
+
+    const bool allSuccess = deviceWriteSuccess && persistSuccess;
     setState(allSuccess ? Finished : Failed);
 
     if (auto* opTaskEnd = SharedData::getOperationDispatchTask()) {
-        const QString desc = allSuccess
-            ? QString("SetPurgeFlow flow=%1 L/Min task completed: %2 devices succeeded")
-                  .arg(m_flowValue)
-                  .arg(m_successCount)
-            : QString("SetPurgeFlow flow=%1 L/Min task finished: %2 succeeded, %3 failed")
-                  .arg(m_flowValue)
-                  .arg(m_successCount)
-                  .arg(m_failedQrCodes.count());
+        QString desc;
+        if (allSuccess) {
+            desc = QString("SetPurgeFlow flow=%1 L/Min task completed: %2 devices succeeded")
+                       .arg(m_flowValue)
+                       .arg(m_successCount);
+        } else if (!deviceWriteSuccess) {
+            desc = QString("SetPurgeFlow flow=%1 L/Min task finished: %2 succeeded, %3 failed")
+                       .arg(m_flowValue)
+                       .arg(m_successCount)
+                       .arg(m_failedQrCodes.count());
+        } else {
+            desc = QString("SetPurgeFlow flow=%1 L/Min task finished: %2 devices succeeded, but config persistence failed (%3)")
+                       .arg(m_flowValue)
+                       .arg(m_successCount)
+                       .arg(persistErrorMessage);
+        }
         opTaskEnd->log(OperationDispatchTask::MsgType::Message, desc, 0);
     }
 
@@ -320,8 +348,38 @@ void SetPurgeFlowTask::forceFinish()
                   allSuccess
                       ? QString("SetPurgeFlowTask: flow=%1 completed (%2 devices)")
                             .arg(m_flowValue).arg(m_successCount)
-                      : QString("SetPurgeFlowTask: flow=%1 completed, %2 succeeded, %3 failed")
-                            .arg(m_flowValue).arg(m_successCount).arg(m_failedQrCodes.count()));
+                      : (deviceWriteSuccess
+                             ? QString("SetPurgeFlowTask: device write succeeded, but config persistence failed (%1)")
+                                   .arg(persistErrorMessage)
+                             : QString("SetPurgeFlowTask: flow=%1 completed, %2 succeeded, %3 failed")
+                                   .arg(m_flowValue).arg(m_successCount).arg(m_failedQrCodes.count())));
+}
+
+bool SetPurgeFlowTask::persistConfig(QString *errorMessage)
+{
+    OHBDeviceConfig &config = OHBDeviceConfig::getInstance();
+    QStringList failedQrCodes;
+
+    for (const QString &qrCode : qAsConst(m_targetQrCodes)) {
+        if (!config.setPurgeFlowLitersPerMinuteByQRCode(qrCode, m_flowValue)) {
+            failedQrCodes.append(qrCode);
+            if (!m_failedQrCodes.contains(qrCode)) {
+                m_failedQrCodes.append(qrCode);
+            }
+        }
+    }
+
+    if (errorMessage) {
+        if (failedQrCodes.isEmpty()) {
+            errorMessage->clear();
+        } else {
+            *errorMessage = QString("write PurgeFlow_l_min to %1 failed, qrcodes=%2")
+                                .arg(config.getConfigPath())
+                                .arg(failedQrCodes.join(", "));
+        }
+    }
+
+    return failedQrCodes.isEmpty();
 }
 
 void SetPurgeFlowTask::logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode)

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QString>
 #include <QVector>
 #include <QMutex>
 #include <QFutureWatcher>
@@ -38,6 +39,13 @@ public:
      */
     explicit BinFileReader(QObject *parent = nullptr);
     ~BinFileReader();
+
+    /**
+     * @brief 从 bin 文件名中解析固件版本号
+     * @param filePath bin 文件完整路径或文件名
+     * @return 匹配到 V_x_x_x 字段时返回 Vx.x.x，否则返回空字符串
+     */
+    static QString parseVersionFromFileName(const QString& filePath);
 
     /**
      * @brief 设置统一分包大小

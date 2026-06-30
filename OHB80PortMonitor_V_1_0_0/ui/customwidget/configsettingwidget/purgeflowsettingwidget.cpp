@@ -7,6 +7,7 @@
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
+#include "ohbdeviceconfig.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -101,6 +102,10 @@ void PurgeFlowSettingWidget::initQrcodeItem()
     }
 
     m_qrcodeItem->addWidget("qrcode_spin", m_qrcodeSpinBox);
+    connect(m_qrcodeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, [this](int value) {
+                loadFlowFromConfig(QString::number(value));
+            });
     addItem(m_qrcodeItem);
 }
 
@@ -108,10 +113,10 @@ void PurgeFlowSettingWidget::initFlowItem()
 {
     m_flowItem = new SettingItemWidget(this);
     m_flowItem->setTitle("Purge Flow");
-    m_flowItem->setTip("Set VEFC purge flow (only valid in FOUP IN). Register value = flow x 100");
+    m_flowItem->setTip("Set VEFC purge flow (only valid in FOUP IN). Register value = flow x 10");
 
     m_flowSpinBox = new QSpinBox(m_flowItem);
-    m_flowSpinBox->setRange(0, 650);             // flow × 100 须在 16-bit 范围内
+    m_flowSpinBox->setRange(0, 650);
     m_flowSpinBox->setValue(35);
     m_flowSpinBox->setSuffix(" L/Min");
     m_flowSpinBox->setFixedWidth(120);
@@ -221,6 +226,7 @@ void PurgeFlowSettingWidget::submitTask(const QStringList &qrcodes, int flowValu
                         mb->show();
                     }
                 }
+                loadFlowFromConfig(m_qrcodeSpinBox ? QString::number(m_qrcodeSpinBox->value()) : QString());
                 setAllSetButtonsEnabled(true);
             });
 
@@ -231,6 +237,20 @@ void PurgeFlowSettingWidget::submitTask(const QStringList &qrcodes, int flowValu
     LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][PurgeFlowSettingWidget][submitTask]：提交任务 设备数=%1 flow=%2")
             .arg(qrcodes.size()).arg(flowValue).toStdString());
+}
+
+void PurgeFlowSettingWidget::loadFlowFromConfig(const QString &qrCode)
+{
+    if (!m_flowSpinBox || qrCode.isEmpty()) {
+        return;
+    }
+
+    const OHBDeviceConfigInfo deviceInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCode);
+    if (deviceInfo.getQrCode().isEmpty()) {
+        return;
+    }
+
+    m_flowSpinBox->setValue(deviceInfo.getPurgeFlowLitersPerMinute());
 }
 
 void PurgeFlowSettingWidget::setAllSetButtonsEnabled(bool enabled)

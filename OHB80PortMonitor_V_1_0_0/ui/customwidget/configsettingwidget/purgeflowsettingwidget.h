@@ -42,6 +42,7 @@ private:
     void initFlowItem();
 
     void submitTask(const QStringList &qrcodes, int flowValue);
+    void loadFlowFromConfig(const QString &qrCode);
 
     // 设置任务运行期间所有 Set 按钮的启用状态
     void setAllSetButtonsEnabled(bool enabled);

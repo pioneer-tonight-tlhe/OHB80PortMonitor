@@ -6,6 +6,7 @@
 #include "app/shareddata.h"
 #include "app/applogger.h"
 #include "loggermanager.h"
+#include "ohbdeviceconfig.h"
 
 #include <QColor>
 #include <QDebug>
@@ -123,6 +124,10 @@ void HumidityOffsetSettingWidget::initQrcodeItem()
     }
 
     m_qrcodeItem->addWidget("qrcode_spin", m_qrcodeSpinBox);
+    connect(m_qrcodeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, [this](int value) {
+                loadHumidityConfigFromConfig(QString::number(value));
+            });
     addItem(m_qrcodeItem);
 }
 
@@ -308,6 +313,7 @@ void HumidityOffsetSettingWidget::submitTask(const QStringList &qrcodes,
                         mb->show();
                     }
                 }
+                loadHumidityConfigFromConfig(m_qrcodeSpinBox ? QString::number(m_qrcodeSpinBox->value()) : QString());
                 setAllSetButtonsEnabled(true);
             });
 
@@ -318,6 +324,25 @@ void HumidityOffsetSettingWidget::submitTask(const QStringList &qrcodes,
     LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][HumidityOffsetSettingWidget][submitTask]：提交任务 field=%1 设备数=%2 value=%3%%")
             .arg(fieldName).arg(qrcodes.size()).arg(valuePct).toStdString());
+}
+
+void HumidityOffsetSettingWidget::loadHumidityConfigFromConfig(const QString &qrCode)
+{
+    if ((!m_thresholdSpinBox && !m_offsetSpinBox) || qrCode.isEmpty()) {
+        return;
+    }
+
+    const OHBDeviceConfigInfo deviceInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCode);
+    if (deviceInfo.getQrCode().isEmpty()) {
+        return;
+    }
+
+    if (m_thresholdSpinBox) {
+        m_thresholdSpinBox->setValue(deviceInfo.getHumidityLowerLimitPercent());
+    }
+    if (m_offsetSpinBox) {
+        m_offsetSpinBox->setValue(deviceInfo.getHumidityOffsetPercent());
+    }
 }
 
 void HumidityOffsetSettingWidget::setAllSetButtonsEnabled(bool enabled)

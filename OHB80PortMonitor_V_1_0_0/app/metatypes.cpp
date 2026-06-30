@@ -15,6 +15,7 @@
 #include "communicaterecord.h"
 #include "deviceparamrecord.h"
 #include "vefcsensormonitorrecord.h"
+#include "scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_types.h"
 #include "scheduler/scheduler_task.h"
 #include "usermanager/usermanager.h"
 
@@ -53,6 +54,9 @@ void MetaTypes::registerTypes()
     qRegisterMetaType<CommunicateRecord>("CommunicateRecord");
     qRegisterMetaType<DeviceParamRecord>("DeviceParamRecord");
     qRegisterMetaType<VEFCSensorMonitorRecord>("VEFCSensorMonitorRecord");
+    qRegisterMetaType<VEFCSensorMonitor::DebugMetricStats>("VEFCSensorMonitor::DebugMetricStats");
+    qRegisterMetaType<QVector<VEFCSensorMonitor::DebugMetricStats>>("QVector<VEFCSensorMonitor::DebugMetricStats>");
+    qRegisterMetaType<VEFCSensorMonitor::DebugSnapshot>("VEFCSensorMonitor::DebugSnapshot");
     qRegisterMetaType<AlarmInfo>("AlarmInfo");
     qRegisterMetaType<QList<AlarmRecord>>("QList<AlarmRecord>");
     qRegisterMetaType<QList<OperationRecord>>("QList<OperationRecord>");

@@ -32,7 +32,7 @@ constexpr const char* kWriteHumidityOffsetThresholdCommandId = "WriteHumidityOff
 constexpr const char* kReadVersionCommandId = "ReadVersion";
 constexpr const char* kReadUIScreenVersionCommandId = "ReadUIScreenVersion";
 
-constexpr int kPurgeFlowRegisterScale = 100;
+constexpr int kPurgeFlowRegisterScale = 10;
 constexpr int kVppePressureRegisterScale = 1000;
 constexpr int kHumidityPercentRegisterScale = 100;
 

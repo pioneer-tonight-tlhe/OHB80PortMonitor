@@ -86,6 +86,7 @@ private:
     void tryMarkDeviceSuccess(const QString &qrcode);
     void checkAllFinished();
     void forceFinish();
+    bool persistConfig(QString *errorMessage);
     void logFailedDevice(OperationDispatchTask* opTask, const QString& qrcode);
 
     void writeDeviceSkipLog(const QString& qrCode, const QString& commandId, const QString& reason);

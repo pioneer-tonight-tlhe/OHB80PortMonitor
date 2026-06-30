@@ -1,4 +1,4 @@
-#include "set_ui_refresh_time_task.h"
+#include "set_foup_in_auto_purge_enable_task.h"
 
 #include "app/shareddata.h"
 #include "logdatabases/databasemanager.h"
@@ -18,9 +18,8 @@
 #include <QVariantMap>
 
 namespace {
-constexpr const char *kCmdId = "WriteUIRefreshTime";
+constexpr const char *kCmdId = "WriteFoupInAutoPurgeEnable";
 constexpr int kTotalTimeoutMs = 5000;
-constexpr int kPayloadBytes = 6;
 
 QString bytesToHexWithCrc(const QByteArray &bytes, const QByteArray &crc)
 {
@@ -42,30 +41,24 @@ QString bytesToHexWithCrc(const QByteArray &bytes, const QByteArray &crc)
 }
 } // namespace
 
-SetUIRefreshTimeTask::SetUIRefreshTimeTask(const QVector<QString> &qrcodes,
-                                           int logoSec,
-                                           int paramTotalSec,
-                                           int paramSwitchSec,
-                                           QObject *parent)
+SetFoupInAutoPurgeEnableTask::SetFoupInAutoPurgeEnableTask(const QVector<QString> &qrcodes,
+                                                           int enableValue,
+                                                           QObject *parent)
     : SchedulerTask(parent)
     , m_qrcodes(qrcodes)
-    , m_logoSec(logoSec)
-    , m_paramTotalSec(paramTotalSec)
-    , m_paramSwitchSec(paramSwitchSec)
-    , deviceLogger("scheduler/set_ui_refresh_time_task/detail")
+    , m_enableValue(qBound(0, enableValue, 1))
+    , deviceLogger("scheduler/set_foup_in_auto_purge_enable_task/detail")
 {
-    qDebug() << "[Scheduler][SetUIRefreshTimeTask] create task: qrcodes=" << qrcodes
-             << "logoSec=" << logoSec
-             << "paramTotalSec=" << paramTotalSec
-             << "paramSwitchSec=" << paramSwitchSec;
+    qDebug() << "[Scheduler][SetFoupInAutoPurgeEnableTask] create task qrcodes=" << qrcodes
+             << "enableValue=" << m_enableValue;
 }
 
-SetUIRefreshTimeTask::~SetUIRefreshTimeTask()
+SetFoupInAutoPurgeEnableTask::~SetFoupInAutoPurgeEnableTask()
 {
-    qDebug() << "[Scheduler][SetUIRefreshTimeTask] destroy task";
+    qDebug() << "[Scheduler][SetFoupInAutoPurgeEnableTask] destroy task";
 }
 
-void SetUIRefreshTimeTask::start()
+void SetFoupInAutoPurgeEnableTask::start()
 {
     disconnectAll();
 
@@ -82,8 +75,8 @@ void SetUIRefreshTimeTask::start()
 
     if (m_qrcodes.isEmpty()) {
         setState(Failed);
-        emit allFinished(false, 0, {}, m_logoSec, m_paramTotalSec, m_paramSwitchSec);
-        emit finished(false, QStringLiteral("SetUIRefreshTimeTask: qrcode list is empty"));
+        emit allFinished(false, 0, {}, m_enableValue);
+        emit finished(false, QStringLiteral("SetFoupInAutoPurgeEnableTask: qrcode list is empty"));
         return;
     }
 
@@ -91,19 +84,17 @@ void SetUIRefreshTimeTask::start()
     CommandPool *pool = manager.commandPool();
     if (!pool || !pool->contains(kCmdId)) {
         setState(Failed);
-        emit allFinished(false, 0, {}, m_logoSec, m_paramTotalSec, m_paramSwitchSec);
-        emit finished(false, QStringLiteral("SetUIRefreshTimeTask: command '%1' not found").arg(kCmdId));
+        emit allFinished(false, 0, {}, m_enableValue);
+        emit finished(false, QStringLiteral("SetFoupInAutoPurgeEnableTask: command '%1' not found").arg(kCmdId));
         return;
     }
 
-    const QByteArray payload = buildPayload();
+    const QByteArray registerBytes = buildRegisterValue(static_cast<quint16>(m_enableValue));
 
     if (auto *opTaskStart = SharedData::getOperationDispatchTask()) {
         opTaskStart->log(OperationDispatchTask::MsgType::Message,
-                         QString("SetUIRefreshTime task started: logo=%1s total=%2s switch=%3s for %4 devices")
-                             .arg(m_logoSec)
-                             .arg(m_paramTotalSec)
-                             .arg(m_paramSwitchSec)
+                         QString("SetFoupInAutoPurgeEnable task started: enable=%1 for %2 devices")
+                             .arg(m_enableValue)
                              .arg(m_qrcodes.size()),
                          0);
     }
@@ -114,18 +105,8 @@ void SetUIRefreshTimeTask::start()
 
     for (const QString &id : m_qrcodes) {
         ModbusTcpMaster *master = manager.getMaster(id);
-        if (!master) {
-            writeDeviceSkipLog(id, kCmdId, QStringLiteral("master not found"));
-            if (!m_failedQrCodes.contains(id)) {
-                m_failedQrCodes.append(id);
-            }
-            if (auto *opTask = SharedData::getOperationDispatchTask()) {
-                logFailedDevice(opTask, id);
-            }
-            continue;
-        }
-        if (!master->isConnected()) {
-            writeDeviceSkipLog(id, kCmdId, QStringLiteral("device disconnected"));
+        if (!master || !master->isConnected() || !master->sender()) {
+            writeDeviceSkipLog(id, kCmdId, QStringLiteral("device unavailable"));
             if (!m_failedQrCodes.contains(id)) {
                 m_failedQrCodes.append(id);
             }
@@ -136,17 +117,6 @@ void SetUIRefreshTimeTask::start()
         }
 
         ModbusCommandSender *sender = master->sender();
-        if (!sender) {
-            writeDeviceSkipLog(id, kCmdId, QStringLiteral("sender is null"));
-            if (!m_failedQrCodes.contains(id)) {
-                m_failedQrCodes.append(id);
-            }
-            if (auto *opTask = SharedData::getOperationDispatchTask()) {
-                logFailedDevice(opTask, id);
-            }
-            continue;
-        }
-
         ModbusCommand cmd = pool->clone(kCmdId);
         if (!cmd.isValid()) {
             writeDeviceSkipLog(id, kCmdId, QStringLiteral("clone command failed"));
@@ -160,36 +130,38 @@ void SetUIRefreshTimeTask::start()
         }
 
         cmd.module = CommandModule::BusinessCommandIssuer;
-        cmd.request.registerValue = payload;
-        cmd.request.byteCount = static_cast<quint8>(payload.size());
+        cmd.request.registerValue = registerBytes;
+        cmd.request.byteCount = static_cast<quint8>(registerBytes.size());
 
-        if (cmd.request.functionCode == 0x10
-            && cmd.request.rawBytes.size() >= 7 + kPayloadBytes
-            && payload.size() == kPayloadBytes) {
-            for (int i = 0; i < kPayloadBytes; ++i) {
-                cmd.request.rawBytes[7 + i] = payload[i];
-            }
+        if (cmd.request.functionCode == 0x06
+            && cmd.request.rawBytes.size() >= 6
+            && registerBytes.size() >= 2) {
+            cmd.request.rawBytes[4] = registerBytes[0];
+            cmd.request.rawBytes[5] = registerBytes[1];
+        }
+
+        cmd.response.registerValue = registerBytes;
+        if (cmd.response.rawBytes.size() >= 6 && registerBytes.size() >= 2) {
+            cmd.response.rawBytes[4] = registerBytes[0];
+            cmd.response.rawBytes[5] = registerBytes[1];
         }
 
         auto finishedConnection = connect(sender,
                                           &ModbusCommandSender::commandFinished,
                                           this,
-                                          &SetUIRefreshTimeTask::onCommandFinished,
+                                          &SetFoupInAutoPurgeEnableTask::onCommandFinished,
                                           Qt::QueuedConnection);
         m_connections.append(finishedConnection);
 
         auto retryConnection = connect(sender,
                                        &ModbusCommandSender::commandTimeoutRetry,
                                        this,
-                                       &SetUIRefreshTimeTask::onCommandTimeoutRetry,
+                                       &SetFoupInAutoPurgeEnableTask::onCommandTimeoutRetry,
                                        Qt::QueuedConnection);
         m_connections.append(retryConnection);
 
         m_pendingMap[cmd.uuid] = id;
         ++m_totalCount;
-
-        qDebug() << "[Scheduler][SetUIRefreshTimeTask] send to" << id
-                 << "payload=" << payload.toHex(' ').toUpper();
 
         QMetaObject::invokeMethod(sender, [sender, cmd]() { sender->submit(cmd); }, Qt::QueuedConnection);
     }
@@ -202,12 +174,12 @@ void SetUIRefreshTimeTask::start()
     if (!m_timeoutTimer) {
         m_timeoutTimer = new QTimer(this);
         m_timeoutTimer->setSingleShot(true);
-        connect(m_timeoutTimer, &QTimer::timeout, this, &SetUIRefreshTimeTask::onTimeout);
+        connect(m_timeoutTimer, &QTimer::timeout, this, &SetFoupInAutoPurgeEnableTask::onTimeout);
     }
     m_timeoutTimer->start(kTotalTimeoutMs);
 }
 
-void SetUIRefreshTimeTask::stop()
+void SetFoupInAutoPurgeEnableTask::stop()
 {
     m_stopped = true;
     if (m_timeoutTimer) {
@@ -215,10 +187,10 @@ void SetUIRefreshTimeTask::stop()
     }
     disconnectAll();
     setState(Cancelled);
-    emit finished(false, QStringLiteral("SetUIRefreshTimeTask: cancelled"));
+    emit finished(false, QStringLiteral("SetFoupInAutoPurgeEnableTask: cancelled"));
 }
 
-void SetUIRefreshTimeTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
+void SetFoupInAutoPurgeEnableTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
 {
     Q_UNUSED(masterId)
 
@@ -301,7 +273,7 @@ void SetUIRefreshTimeTask::onCommandFinished(ModbusCommand cmd, const QString &m
     checkAllFinished();
 }
 
-void SetUIRefreshTimeTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId)
+void SetFoupInAutoPurgeEnableTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId)
 {
     Q_UNUSED(masterId)
 
@@ -310,11 +282,16 @@ void SetUIRefreshTimeTask::onCommandTimeoutRetry(ModbusCommand cmd, const QStrin
     }
 
     const QString qrCode = m_pendingMap.value(cmd.uuid);
-    const int retryCount = qMax(0, cmd.sendCount - 1);
-    emit deviceRetrying(qrCode, retryCount, cmd.maxRetryCount);
+    emit deviceRetrying(qrCode, qMax(0, cmd.sendCount - 1), cmd.maxRetryCount);
 }
 
-void SetUIRefreshTimeTask::checkAllFinished()
+void SetFoupInAutoPurgeEnableTask::onTimeout()
+{
+    qWarning() << "[Scheduler][SetFoupInAutoPurgeEnableTask] timeout, pending:" << m_pendingMap.size();
+    forceFinish();
+}
+
+void SetFoupInAutoPurgeEnableTask::checkAllFinished()
 {
     const int done = m_completedCount.fetchAndAddOrdered(1) + 1;
     if (done < m_totalCount) {
@@ -323,13 +300,7 @@ void SetUIRefreshTimeTask::checkAllFinished()
     forceFinish();
 }
 
-void SetUIRefreshTimeTask::onTimeout()
-{
-    qWarning() << "[Scheduler][SetUIRefreshTimeTask] timeout, pending:" << m_pendingMap.size();
-    forceFinish();
-}
-
-void SetUIRefreshTimeTask::forceFinish()
+void SetFoupInAutoPurgeEnableTask::forceFinish()
 {
     if (m_allFinishedEmitted) {
         return;
@@ -360,16 +331,14 @@ void SetUIRefreshTimeTask::forceFinish()
     if (auto *opTaskEnd = SharedData::getOperationDispatchTask()) {
         QString description;
         if (allSuccess) {
-            description = QString("SetUIRefreshTime task completed: logo=%1s total=%2s switch=%3s, %4 devices succeeded")
-                              .arg(m_logoSec)
-                              .arg(m_paramTotalSec)
-                              .arg(m_paramSwitchSec)
+            description = QString("SetFoupInAutoPurgeEnable task completed: enable=%1, %2 devices succeeded")
+                              .arg(m_enableValue)
                               .arg(m_successCount);
         } else if (!persistSuccess) {
-            description = QString("SetUIRefreshTime task finished: config persistence failed (%1)")
+            description = QString("SetFoupInAutoPurgeEnable task finished: config persistence failed (%1)")
                               .arg(persistErrorMessage);
         } else {
-            description = QString("SetUIRefreshTime task finished: %1 succeeded, %2 failed")
+            description = QString("SetFoupInAutoPurgeEnable task finished: %1 succeeded, %2 failed")
                               .arg(m_successCount)
                               .arg(m_failedQrCodes.count());
         }
@@ -379,24 +348,19 @@ void SetUIRefreshTimeTask::forceFinish()
                        0);
     }
 
-    emit allFinished(allSuccess,
-                     m_successCount,
-                     m_failedQrCodes,
-                     m_logoSec,
-                     m_paramTotalSec,
-                     m_paramSwitchSec);
+    emit allFinished(allSuccess, m_successCount, m_failedQrCodes, m_enableValue);
     emit finished(allSuccess,
                   allSuccess
-                      ? QString("SetUIRefreshTimeTask: completed (%1 devices)").arg(m_successCount)
+                      ? QString("SetFoupInAutoPurgeEnableTask: completed (%1 devices)").arg(m_successCount)
                       : (!persistSuccess
-                             ? QString("SetUIRefreshTimeTask: config persistence failed (%1)")
+                             ? QString("SetFoupInAutoPurgeEnableTask: config persistence failed (%1)")
                                    .arg(persistErrorMessage)
-                             : QString("SetUIRefreshTimeTask: %1 succeeded, %2 failed")
+                             : QString("SetFoupInAutoPurgeEnableTask: %1 succeeded, %2 failed")
                                    .arg(m_successCount)
                                    .arg(m_failedQrCodes.count())));
 }
 
-bool SetUIRefreshTimeTask::persistConfig(QString *errorMessage)
+bool SetFoupInAutoPurgeEnableTask::persistConfig(QString *errorMessage)
 {
     OHBDeviceConfig &config = OHBDeviceConfig::getInstance();
     QStringList persistFailedQrCodes;
@@ -406,10 +370,7 @@ bool SetUIRefreshTimeTask::persistConfig(QString *errorMessage)
             continue;
         }
 
-        if (!config.setUIRefreshTimeByQRCode(qrCode,
-                                             m_logoSec,
-                                             m_paramTotalSec,
-                                             m_paramSwitchSec)) {
+        if (!config.setFoupInAutoPurgeEnableByQRCode(qrCode, m_enableValue)) {
             persistFailedQrCodes.append(qrCode);
             if (!m_failedQrCodes.contains(qrCode)) {
                 m_failedQrCodes.append(qrCode);
@@ -421,7 +382,7 @@ bool SetUIRefreshTimeTask::persistConfig(QString *errorMessage)
         if (persistFailedQrCodes.isEmpty()) {
             errorMessage->clear();
         } else {
-            *errorMessage = QString("write UI Refresh Time to %1 failed, qrcodes=%2")
+            *errorMessage = QString("write FoupInAutoPurgeEnable to %1 failed, qrcodes=%2")
                                 .arg(config.getConfigPath())
                                 .arg(persistFailedQrCodes.join(", "));
         }
@@ -430,33 +391,15 @@ bool SetUIRefreshTimeTask::persistConfig(QString *errorMessage)
     return persistFailedQrCodes.isEmpty();
 }
 
-void SetUIRefreshTimeTask::logFailedDevice(OperationDispatchTask *opTask, const QString &qrcode)
+QByteArray SetFoupInAutoPurgeEnableTask::buildRegisterValue(quint16 value) const
 {
-    const QString description = QString("[QRCode:%1]: SetUIRefreshTime failed logo=%2s total=%3s switch=%4s")
-                                    .arg(qrcode)
-                                    .arg(m_logoSec)
-                                    .arg(m_paramTotalSec)
-                                    .arg(m_paramSwitchSec);
-    opTask->log(OperationDispatchTask::MsgType::Error, description, 0);
-}
-
-QByteArray SetUIRefreshTimeTask::buildPayload() const
-{
-    const quint16 logoValue = static_cast<quint16>(qBound(0, m_logoSec, 0xFFFF));
-    const quint16 totalValue = static_cast<quint16>(qBound(0, m_paramTotalSec, 0xFFFF));
-    const quint16 switchValue = static_cast<quint16>(qBound(0, m_paramSwitchSec, 0xFFFF));
-
-    QByteArray bytes(kPayloadBytes, 0);
-    bytes[0] = static_cast<char>((logoValue >> 8) & 0xFF);
-    bytes[1] = static_cast<char>(logoValue & 0xFF);
-    bytes[2] = static_cast<char>((totalValue >> 8) & 0xFF);
-    bytes[3] = static_cast<char>(totalValue & 0xFF);
-    bytes[4] = static_cast<char>((switchValue >> 8) & 0xFF);
-    bytes[5] = static_cast<char>(switchValue & 0xFF);
+    QByteArray bytes(2, 0);
+    bytes[0] = static_cast<char>((value >> 8) & 0xFF);
+    bytes[1] = static_cast<char>(value & 0xFF);
     return bytes;
 }
 
-void SetUIRefreshTimeTask::disconnectAll()
+void SetFoupInAutoPurgeEnableTask::disconnectAll()
 {
     for (const QMetaObject::Connection &connection : qAsConst(m_connections)) {
         QObject::disconnect(connection);
@@ -464,21 +407,29 @@ void SetUIRefreshTimeTask::disconnectAll()
     m_connections.clear();
 }
 
-void SetUIRefreshTimeTask::writeDeviceSkipLog(const QString &qrCode,
-                                              const QString &commandId,
-                                              const QString &reason)
+void SetFoupInAutoPurgeEnableTask::logFailedDevice(OperationDispatchTask *opTask, const QString &qrcode)
+{
+    const QString description = QString("[QRCode:%1]: SetFoupInAutoPurgeEnable failed, value=%2")
+                                    .arg(qrcode)
+                                    .arg(m_enableValue);
+    opTask->log(OperationDispatchTask::MsgType::Error, description, 0);
+}
+
+void SetFoupInAutoPurgeEnableTask::writeDeviceSkipLog(const QString &qrCode,
+                                                      const QString &commandId,
+                                                      const QString &reason)
 {
     deviceDetailLogger().info(
-        QString("[SetUIRefreshTimeTask][QRCode:%1] skip command\ncommand: %2\nreason: %3")
+        QString("[SetFoupInAutoPurgeEnableTask][QRCode:%1] skip command\ncommand: %2\nreason: %3")
             .arg(qrCode)
             .arg(commandId)
             .arg(reason)
             .toStdString());
 }
 
-void SetUIRefreshTimeTask::writeDeviceCommandLog(const QString &qrCode,
-                                                 const ModbusCommand &cmd,
-                                                 bool success)
+void SetFoupInAutoPurgeEnableTask::writeDeviceCommandLog(const QString &qrCode,
+                                                         const ModbusCommand &cmd,
+                                                         bool success)
 {
     const std::string message = QString("[QRCode:%1] %2")
                                     .arg(qrCode)
@@ -491,7 +442,7 @@ void SetUIRefreshTimeTask::writeDeviceCommandLog(const QString &qrCode,
     }
 }
 
-QString SetUIRefreshTimeTask::commandFrameLogString(const ModbusCommand &cmd) const
+QString SetFoupInAutoPurgeEnableTask::commandFrameLogString(const ModbusCommand &cmd) const
 {
     QString responseFrame;
     if (cmd.received && !cmd.timedOut && !cmd.checksumError && !cmd.deviceBusy) {
@@ -524,23 +475,23 @@ QString SetUIRefreshTimeTask::commandFrameLogString(const ModbusCommand &cmd) co
         }
     }
 
-    return QString("[SetUIRefreshTimeTask] command finished\ncommand: %1\nrequest: %2\nresponse: %3")
+    return QString("[SetFoupInAutoPurgeEnableTask] command finished\ncommand: %1\nrequest: %2\nresponse: %3")
         .arg(cmd.id)
         .arg(bytesToHexWithCrc(cmd.request.rawBytes, cmd.request.crc))
         .arg(responseFrame);
 }
 
-QString SetUIRefreshTimeTask::subFunctionName() const
+QString SetFoupInAutoPurgeEnableTask::subFunctionName() const
 {
-    return QStringLiteral("set_ui_refresh_time");
+    return QStringLiteral("set_foup_in_auto_purge_enable");
 }
 
-QString SetUIRefreshTimeTask::deviceLogPath() const
+QString SetFoupInAutoPurgeEnableTask::deviceLogPath() const
 {
-    return QStringLiteral("scheduler/set_ui_refresh_time_task/%1").arg(subFunctionName());
+    return QStringLiteral("scheduler/set_foup_in_auto_purge_enable_task/%1").arg(subFunctionName());
 }
 
-ILogger &SetUIRefreshTimeTask::deviceDetailLogger()
+ILogger &SetFoupInAutoPurgeEnableTask::deviceDetailLogger()
 {
     if (!m_loggerInitialized) {
         deviceLogger.set_log_file(deviceLogPath().toStdString());

@@ -7,8 +7,66 @@
 #include "data/modbustcpmastermanager/modbustcpmastermanager.h"
 
 #include <QDateTime>
+#include <QSet>
 #include <QTime>
 #include <QTimer>
+#include <algorithm>
+
+namespace {
+bool recordTimeLess(const VEFCSensorMonitorRecord& left, const VEFCSensorMonitorRecord& right)
+{
+    if (left.recordTimestamp != right.recordTimestamp) {
+        return left.recordTimestamp < right.recordTimestamp;
+    }
+    return left.qrCode < right.qrCode;
+}
+
+bool qrcodeLess(const VEFCSensorMonitorRecord& left, const VEFCSensorMonitorRecord& right)
+{
+    bool leftOk = false;
+    bool rightOk = false;
+    const int leftValue = left.qrCode.toInt(&leftOk);
+    const int rightValue = right.qrCode.toInt(&rightOk);
+    if (leftOk && rightOk && leftValue != rightValue) {
+        return leftValue < rightValue;
+    }
+    return left.qrCode < right.qrCode;
+}
+
+void addMetricStats(QVector<VEFCSensorMonitor::DebugMetricStats>& stats,
+                    const QString& name,
+                    const QString& unit,
+                    const QVector<VEFCSensorMonitorRecord>& records,
+                    double VEFCSensorMonitorRecord::*member)
+{
+    VEFCSensorMonitor::DebugMetricStats metric;
+    metric.name = name;
+    metric.unit = unit;
+    metric.count = records.size();
+    metric.hasData = !records.isEmpty();
+    if (!metric.hasData) {
+        stats.append(metric);
+        return;
+    }
+
+    metric.min = records.first().*member;
+    metric.max = records.first().*member;
+    double sum = 0.0;
+    for (const VEFCSensorMonitorRecord& record : records) {
+        const double value = record.*member;
+        metric.min = qMin(metric.min, value);
+        metric.max = qMax(metric.max, value);
+        sum += value;
+    }
+    metric.average = sum / records.size();
+    stats.append(metric);
+}
+
+QString recordKey(const VEFCSensorMonitorRecord& record)
+{
+    return record.qrCode + QStringLiteral("@") + QString::number(record.recordTimestamp);
+}
+}
 
 // ====================================================================
 // VEFCSensorMonitorTask - 调度任务实现
@@ -23,6 +81,7 @@ VEFCSensorMonitorTask::VEFCSensorMonitorTask(QObject* parent)
     qRegisterMetaType<VEFCSensorMonitorTask::State>("VEFCSensorMonitorTask::State");
     qRegisterMetaType<VEFCSensorMonitorRecord>("VEFCSensorMonitorRecord");
     qRegisterMetaType<VEFCSensorMonitor::RoundSummary>("VEFCSensorMonitor::RoundSummary");
+    qRegisterMetaType<VEFCSensorMonitor::DebugSnapshot>("VEFCSensorMonitor::DebugSnapshot");
 
     initPeriodTimer();
     initDailyStatsTimer();
@@ -46,6 +105,7 @@ void VEFCSensorMonitorTask::start()
     m_roundIndex = 0;
     m_softwareFirstOpenLoggedQrcodes.clear();
     m_softwareFirstOpenRecords.clear();
+    m_runtimePersistedRecords.clear();
     const QDateTime startTime = QDateTime::currentDateTime();
     if (startTime.time() >= dailyStatsTriggerTime()) {
         m_lastDailyStatsDate = startTime.date().addDays(-1);
@@ -132,6 +192,11 @@ QString VEFCSensorMonitorTask::stateToString(State state)
 QStringList VEFCSensorMonitorTask::filterAvailableDevices() const
 {
     return m_deviceSelector.filterAvailableDevices();
+}
+
+void VEFCSensorMonitorTask::publishDebugSnapshot()
+{
+    emit debugSnapshotUpdated(buildDebugSnapshot());
 }
 
 void VEFCSensorMonitorTask::onPeriodTimeout()
@@ -428,9 +493,11 @@ void VEFCSensorMonitorTask::persistDeviceRecord(VEFCSensorMonitor::DeviceRoundSt
 
     db->insertRecord(state.record);
     state.persisted = true;
+    m_runtimePersistedRecords.append(state.record);
     emit recordPersisted(state.qrCode, state.record);
     logSoftwareFirstOpenRecordIfNeeded(state);
     m_logService.writeRecordPersisted(m_roundContext.roundId(), state);
+    publishDebugSnapshot();
 }
 
 void VEFCSensorMonitorTask::tryFinishRound()
@@ -449,6 +516,7 @@ void VEFCSensorMonitorTask::tryFinishRound()
                        summary.failedCount,
                        summary.skippedCount);
     emit allFinished(summary);
+    publishDebugSnapshot();
 
     m_roundContext.completeRound();
     m_roundRunner->clearPendingCommands();
@@ -534,6 +602,88 @@ void VEFCSensorMonitorTask::writeDailyStatsForDate(const QDate& statDate)
                                         m_deviceSelector.targetQrcodes(),
                                         records,
                                         m_softwareFirstOpenRecords);
+}
+
+VEFCSensorMonitor::DebugSnapshot VEFCSensorMonitorTask::buildDebugSnapshot() const
+{
+    VEFCSensorMonitor::DebugSnapshot snapshot;
+    snapshot.date = QDate::currentDate();
+
+    const QDateTime dayStart(snapshot.date, QTime(0, 0, 0));
+    const QDateTime nextDayStart(snapshot.date.addDays(1), QTime(0, 0, 0));
+    const qint64 dayStartMs = dayStart.toMSecsSinceEpoch();
+    const qint64 nextDayStartMs = nextDayStart.toMSecsSinceEpoch();
+
+    LogDB::VEFCSensorMonitorDBCon* db = LogDB::DatabaseManager::instance().vefcSensorMonitorCon();
+    if (!db) {
+        snapshot.databaseAvailable = false;
+        snapshot.errorMessage = QStringLiteral("VEFC monitor database is unavailable");
+    } else {
+        snapshot.databaseAvailable = true;
+        snapshot.todayRecords = db->queryRecordsByTimeRange(dayStartMs, nextDayStartMs);
+    }
+
+    QSet<QString> recordKeys;
+    for (const VEFCSensorMonitorRecord& record : qAsConst(snapshot.todayRecords)) {
+        recordKeys.insert(recordKey(record));
+    }
+
+    for (const VEFCSensorMonitorRecord& record : m_runtimePersistedRecords) {
+        if (record.recordTimestamp < dayStartMs || record.recordTimestamp >= nextDayStartMs) {
+            continue;
+        }
+        const QString key = recordKey(record);
+        if (!recordKeys.contains(key)) {
+            snapshot.todayRecords.append(record);
+            recordKeys.insert(key);
+        }
+    }
+
+    std::sort(snapshot.todayRecords.begin(), snapshot.todayRecords.end(), recordTimeLess);
+
+    snapshot.softwareFirstOpenRecords = m_softwareFirstOpenRecords.values().toVector();
+    std::sort(snapshot.softwareFirstOpenRecords.begin(), snapshot.softwareFirstOpenRecords.end(), qrcodeLess);
+
+    QHash<QString, VEFCSensorMonitorRecord> firstRecordMap;
+    QHash<QString, VEFCSensorMonitorRecord> latestRecordMap;
+    for (const VEFCSensorMonitorRecord& record : qAsConst(snapshot.todayRecords)) {
+        if (!firstRecordMap.contains(record.qrCode)
+            || record.recordTimestamp < firstRecordMap.value(record.qrCode).recordTimestamp) {
+            firstRecordMap.insert(record.qrCode, record);
+        }
+        if (!latestRecordMap.contains(record.qrCode)
+            || record.recordTimestamp > latestRecordMap.value(record.qrCode).recordTimestamp) {
+            latestRecordMap.insert(record.qrCode, record);
+        }
+    }
+
+    snapshot.todayFirstRecords = firstRecordMap.values().toVector();
+    snapshot.todayLatestRecords = latestRecordMap.values().toVector();
+    std::sort(snapshot.todayFirstRecords.begin(), snapshot.todayFirstRecords.end(), qrcodeLess);
+    std::sort(snapshot.todayLatestRecords.begin(), snapshot.todayLatestRecords.end(), qrcodeLess);
+
+    addMetricStats(snapshot.statistics,
+                   QStringLiteral("Gas Pressure"),
+                   QStringLiteral("KPa"),
+                   snapshot.todayRecords,
+                   &VEFCSensorMonitorRecord::gasPressure);
+    addMetricStats(snapshot.statistics,
+                   QStringLiteral("Actual Flow"),
+                   QStringLiteral("L/Min"),
+                   snapshot.todayRecords,
+                   &VEFCSensorMonitorRecord::actualFlow);
+    addMetricStats(snapshot.statistics,
+                   QStringLiteral("VEFC Pressure"),
+                   QStringLiteral("KPa"),
+                   snapshot.todayRecords,
+                   &VEFCSensorMonitorRecord::sensorPressure);
+    addMetricStats(snapshot.statistics,
+                   QStringLiteral("VEFC Temperature"),
+                   QStringLiteral("C"),
+                   snapshot.todayRecords,
+                   &VEFCSensorMonitorRecord::sensorTemperature);
+
+    return snapshot;
 }
 
 QString VEFCSensorMonitorTask::currentTimestamp()

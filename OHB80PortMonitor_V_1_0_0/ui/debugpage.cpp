@@ -4,6 +4,7 @@
 #include "ui_debugpage.h"
 #include "customwidget/configsettingwidget/humidityoffsetsettingwidget.h"
 #include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
+#include "customwidget/debugsettingwidget/configfilesettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdatesettingwidget.h"
 #include "customwidget/debugsettingwidget/foupinautopurgeenablewidget.h"
@@ -11,6 +12,7 @@
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
 #include "customwidget/debugsettingwidget/vefcflowunitmediumstatuswidget.h"
 #include "customwidget/debugsettingwidget/vefcgastypesettingwidget.h"
+#include "customwidget/debugsettingwidget/vefcsensormonitorwidget.h"
 #include "ohbdeviceconfig.h"
 
 #include <QScroller>
@@ -26,9 +28,11 @@ DebugPage::DebugPage(QWidget *parent)
     , m_uiRefreshTimeWidget(nullptr)
     , m_humidityOffsetWidget(nullptr)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
+    , m_vefcSensorMonitorWidget(nullptr)
     , m_boardEnableStatusWidget(nullptr)
     , m_foupInVacuumExtractionEnableWidget(nullptr)
     , m_foupInAutoPurgeEnableWidget(nullptr)
+    , m_configFileSettingWidget(nullptr)
 {
     ui->setupUi(this);
     initUI();
@@ -74,6 +78,9 @@ void DebugPage::initUI()
     m_vefcFlowUnitMediumStatusWidget = new VEFCFlowUnitMediumStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcFlowUnitMediumStatusWidget);
 
+    m_vefcSensorMonitorWidget = new VEFCSensorMonitorWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcSensorMonitorWidget);
+
     m_boardEnableStatusWidget = new BoardEnableStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_boardEnableStatusWidget);
 
@@ -82,6 +89,9 @@ void DebugPage::initUI()
 
     m_foupInAutoPurgeEnableWidget = new FoupInAutoPurgeEnableWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_foupInAutoPurgeEnableWidget);
+
+    m_configFileSettingWidget = new ConfigFileSettingWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_configFileSettingWidget);
 
     const QVector<OHBDeviceConfigInfo> devices = OHBDeviceConfig::getInstance().readDevices();
     if (!devices.isEmpty()) {
@@ -134,12 +144,16 @@ void DebugPage::navBtnClicked()
         targetWidget = m_humidityOffsetWidget;
     } else if (objName == "btnVEFCStatus") {
         targetWidget = m_vefcFlowUnitMediumStatusWidget;
+    } else if (objName == "btnVEFCSensorMonitor") {
+        targetWidget = m_vefcSensorMonitorWidget;
     } else if (objName == "btnBoardEnable") {
         targetWidget = m_boardEnableStatusWidget;
     } else if (objName == "btnFoupInVacuumExtraction") {
         targetWidget = m_foupInVacuumExtractionEnableWidget;
     } else if (objName == "btnFoupInAutoPurge") {
         targetWidget = m_foupInAutoPurgeEnableWidget;
+    } else if (objName == "btnConfigFiles") {
+        targetWidget = m_configFileSettingWidget;
     }
 
     if (targetWidget) {
@@ -174,6 +188,10 @@ void DebugPage::registerModulePermissions()
                                   ui->btnVEFCStatus,
                                   QStringLiteral("DebugPage"),
                                   QStringLiteral("VEFCFlowUnitMediumStatus"));
+    App::registerModulePermission(m_vefcSensorMonitorWidget,
+                                  ui->btnVEFCSensorMonitor,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("VEFCSensorMonitor"));
     App::registerModulePermission(m_boardEnableStatusWidget,
                                   ui->btnBoardEnable,
                                   QStringLiteral("DebugPage"),
@@ -186,4 +204,8 @@ void DebugPage::registerModulePermissions()
                                   ui->btnFoupInAutoPurge,
                                   QStringLiteral("DebugPage"),
                                   QStringLiteral("FoupInAutoPurgeEnable"));
+    App::registerModulePermission(m_configFileSettingWidget,
+                                  ui->btnConfigFiles,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("ConfigFiles"));
 }

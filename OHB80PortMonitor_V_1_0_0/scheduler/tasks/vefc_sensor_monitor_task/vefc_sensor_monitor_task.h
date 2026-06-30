@@ -59,6 +59,10 @@ public:
     // 供 UI 或调试场景查看当前可提交 VEFC 监控指令的设备列表。
     QStringList filterAvailableDevices() const;
 
+public slots:
+    // Debug 页面按需请求今日 VEFC 监控快照。
+    void publishDebugSnapshot();
+
 signals:
     // ---- 轮次级信号：供日志界面、调试页面或后续报表模块订阅 ----
     void roundStarted(const QString& roundId, int totalCount);
@@ -78,6 +82,7 @@ signals:
     void elapsedTick(int elapsedSeconds);
     void intervalCountdown(int remainingSeconds);
     void allFinished(const VEFCSensorMonitor::RoundSummary& summary);
+    void debugSnapshotUpdated(const VEFCSensorMonitor::DebugSnapshot& snapshot);
 
 private slots:
     // 周期定时器与执行器回调统一在 Task 中收口，再决定业务动作。
@@ -127,6 +132,7 @@ private:
     // 每天凌晨统计前一天原始记录，并写入同一个寿命日统计日志文件。
     void tryWriteDailyStats();
     void writeDailyStatsForDate(const QDate& statDate);
+    VEFCSensorMonitor::DebugSnapshot buildDebugSnapshot() const;
 
     // 轮次辅助方法：生成时间字符串、轮次 ID 与统一失败原因。
     static QString currentTimestamp();
@@ -153,6 +159,7 @@ private:
     State m_taskState = State::Stopped;
     QSet<QString> m_softwareFirstOpenLoggedQrcodes;
     QHash<QString, VEFCSensorMonitorRecord> m_softwareFirstOpenRecords;
+    QVector<VEFCSensorMonitorRecord> m_runtimePersistedRecords;
 
     // ---- 拆分后的功能模块 ----
     VEFCSensorMonitorRoundContext m_roundContext;

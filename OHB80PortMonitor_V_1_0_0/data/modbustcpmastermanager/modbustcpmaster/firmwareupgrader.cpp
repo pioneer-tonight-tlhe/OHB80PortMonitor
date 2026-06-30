@@ -2,12 +2,11 @@
 #include "modbustcpmaster.h"
 #include "modbuscrc.h"
 #include "modbuslogger.h"
+#include "commandresponseparser.h"
 #include "binfilereader.h"
 #include "qthelper.h"
 
 #include <QTcpSocket>
-#include <QRegularExpression>
-#include <QFileInfo>
 #include <QThread>
 
 // ======== 固定指令帧定义 ========
@@ -239,17 +238,11 @@ void FirmwareUpgrader::stop()
 
 // ======================================================
 // parseVersionFromFilename
-// 文件名格式：xxx_1_0_xxx.bin → "1.0"
+// 文件名格式：xxx_V_1_0_0xxx.bin → "V1.0.0"
 // ======================================================
 QString FirmwareUpgrader::parseVersionFromFilename(const QString &filePath)
 {
-    QString fileName = QFileInfo(filePath).fileName();
-    QRegularExpression re(R"(_(\d+)_(\d+)(?:[_.]|$))");
-    QRegularExpressionMatch match = re.match(fileName);
-    if (!match.hasMatch()) return QString();
-    return QString("%1.%2")
-        .arg(match.captured(1))
-        .arg(match.captured(2));
+    return BinFileReader::parseVersionFromFileName(filePath);
 }
 
 // ======================================================
@@ -664,11 +657,14 @@ bool FirmwareUpgrader::handleVersionResponse()
                   .arg(QString(resp.toHex(' ').toUpper())),
               resp);
 
-    // 解析版本字节：01 04 02 [ver1] [ver2] crc(2)
-    // 版本号是 ASCII 字符，例如 31 31 = "1.1"
-    quint8 ver1 = static_cast<quint8>(resp[3]);
-    quint8 ver2 = static_cast<quint8>(resp[4]);
-    QString currentVersion = QString("%1.%2").arg(ver1 - 0x30).arg(ver2 - 0x30);
+    // 解析版本字节：01 04 02 [major] [minor/patch] crc(2)
+    // 与 ReadVersion / ReadUIScreenVersion 保持一致：Byte0 为主版本，Byte1 高4位/低4位为次版本/补丁版本。
+    const QString currentVersion = CommandResponseParser::parseRegisterVersionString(resp.mid(3, 2), true);
+    if (currentVersion.isEmpty()) {
+        ModbusLogger::masterWarn(m_master->ID, "ModbusTcpMaster", "FirmwareUpgrader", "handleVersionResponse",
+            QString("版本号解析失败，响应帧=%1").arg(QString(resp.toHex(' ').toUpper())));
+        return false;
+    }
 
     // 更新 ModbusTcpMaster 中的固件版本号
     m_firmwareVersion = currentVersion;

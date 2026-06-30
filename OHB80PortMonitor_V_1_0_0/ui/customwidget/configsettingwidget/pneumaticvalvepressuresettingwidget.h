@@ -13,7 +13,7 @@ class SettingItemWidget;
 
 // ====================================================================
 // PneumaticValvePressureSettingWidget — 气控阀压力配置控件
-//   1. Target Device QRCode SpinBox（int, 0~99999, 默认第一个设备）
+//   1. Master Device 选择框（默认第一个主设备）
 //   2. Pressure SpinBox（0~1000 bar）+ Set（设置当前 SpinBox 设备 ID）
 //                                     + Set All（设置全部设备）
 // ====================================================================
@@ -28,13 +28,15 @@ public:
     void setInitialConfigValue(double pressureBar);
 
 private slots:
-    void onSetBtnClicked();      // 设置当前 SpinBox 设备 ID
-    void onSetAllBtnClicked();   // 设置全部设备
+    void onSetBtnClicked();      // 设置当前主设备
+    void onSetAllBtnClicked();   // 设置全部主设备
+    void onMasterDeviceChanged(const QString &qrCode);
 
 private:
     void initUI();
-    void initQrcodeItem();       // 设备选择项
+    void initQrcodeItem();       // 主设备选择项
     void initPressureItem();     // 压力设置项
+    void loadPressureFromConfig(const QString &qrCode);
 
     // 提交压力设置任务
     void submitPressureTask(const QStringList &qrcodes, double pressureBar);

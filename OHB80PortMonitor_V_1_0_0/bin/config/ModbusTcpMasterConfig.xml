@@ -571,7 +571,7 @@
              请求帧: 01 06 00 00 XX XX CRC
              响应帧: 01 06 00 00 XX XX CRC（镜像）
              Value = (256 * hi_byte + lo_byte)
-             备注：写流量 35（slm/sccm），按 35×100 写入，对应 3500
+             备注：写流量 35（slm/sccm），按 35×10 写入，对应 350
                    仅 FOUP IN 时有效，FOUP OUT 状态 VEFC 流量值固定为 0
              ======================================== -->
         <Command id="WritePurgeFlow">
@@ -579,7 +579,7 @@
                 <SlaveAddr>01</SlaveAddr>
                 <Function>06</Function>
                 <StartAddr>00 00</StartAddr>
-                <!-- 写入值，固定2字节：流量 × 100 -->
+                <!-- 写入值，固定2字节：流量 × 10 -->
                 <RegisterValue>00 00</RegisterValue>
             </request>
             <respond>

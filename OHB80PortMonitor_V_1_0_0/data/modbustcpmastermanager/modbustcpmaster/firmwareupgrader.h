@@ -112,7 +112,7 @@ private slots:
     void onSocketDisconnected();  // TCP断线 → 直接终止升级
 
 private:
-    // 根据文件名解析版本号（格式：xxx_1_0_0_xxx → "1.0.0"）
+    // 根据文件名解析版本号（格式：xxx_V_1_0_0xxx.bin → "V1.0.0"）
     QString parseVersionFromFilename(const QString &filePath);
 
     void sendPrepareCommand();

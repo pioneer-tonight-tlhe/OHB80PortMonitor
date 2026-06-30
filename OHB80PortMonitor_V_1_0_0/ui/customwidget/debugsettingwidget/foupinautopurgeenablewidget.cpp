@@ -1,10 +1,3 @@
-/**
- * @file foupinautopurgeenablewidget.cpp
- * @brief FOUPIN自动充气使能调试控件实现。
- * @author Simon（工号：13）
- * @date 2026-06-25
- */
-
 #include "foupinautopurgeenablewidget.h"
 
 #include "../modaltabledialog/modaltabledialog.h"
@@ -14,24 +7,22 @@
 #include "loggermanager.h"
 #include "ohbdeviceconfig.h"
 #include "scheduler/scheduler.h"
-#include "scheduler/tasks/send_command_task/send_command_task.h"
+#include "scheduler/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.h"
 
 #include <QColor>
 #include <QMessageBox>
 #include <QtGlobal>
 #include <QVector>
 
-namespace {
-
-const QString WriteCommandId = QStringLiteral("WriteFoupInAutoPurgeEnable");
-
-} // namespace
-
-FoupInAutoPurgeEnableWidget::FoupInAutoPurgeEnableWidget(QWidget* parent)
+FoupInAutoPurgeEnableWidget::FoupInAutoPurgeEnableWidget(QWidget *parent)
     : SettingWidget(parent)
 {
-    setTitle(QStringLiteral("FOUPIN自动充气使能"));
+    setTitle(QStringLiteral("FOUPIN Automatic Purge Enable"));
     initUI();
+
+    if (m_qrcodeSpinBox) {
+        loadEnableFromConfig(QString::number(m_qrcodeSpinBox->value()));
+    }
 }
 
 FoupInAutoPurgeEnableWidget::~FoupInAutoPurgeEnableWidget() = default;
@@ -57,8 +48,8 @@ void FoupInAutoPurgeEnableWidget::initUI()
 void FoupInAutoPurgeEnableWidget::initTargetItem()
 {
     m_targetItem = new SettingItemWidget(this);
-    m_targetItem->setTitle(QStringLiteral("目标设备"));
-    m_targetItem->setTip(QStringLiteral("选择需要设置 FOUPIN 自动充气使能的设备二维码"));
+    m_targetItem->setTitle(QStringLiteral("Target Device"));
+    m_targetItem->setTip(QStringLiteral("Choose the target device QRCode"));
 
     m_qrcodeSpinBox = new QSpinBox(m_targetItem);
     m_qrcodeSpinBox->setRange(0, 99999);
@@ -74,32 +65,54 @@ void FoupInAutoPurgeEnableWidget::initTargetItem()
     }
 
     m_targetItem->addWidget(QStringLiteral("qrcode_spin"), m_qrcodeSpinBox);
+    connect(m_qrcodeSpinBox,
+            QOverload<int>::of(&QSpinBox::valueChanged),
+            this,
+            [this](int value) { loadEnableFromConfig(QString::number(value)); });
     addItem(m_targetItem);
 }
 
 void FoupInAutoPurgeEnableWidget::initControlItem()
 {
     m_controlItem = new SettingItemWidget(this);
-    m_controlItem->setTitle(QStringLiteral("FOUPIN自动充气使能"));
-    m_controlItem->setTip(QStringLiteral("0=FOUP到位后不执行充气及相关功能；1=FOUP到位后正常充气并开启30min湿度检测"));
+    m_controlItem->setTitle(QStringLiteral("Foup In Auto Purge Enable"));
+    m_controlItem->setTip(QStringLiteral("0 disables auto purge; 1 enables auto purge and 30 min humidity check"));
 
     m_enableComboBox = new QComboBox(m_controlItem);
-    m_enableComboBox->addItem(QStringLiteral("0 - 不执行自动充气"), 0);
-    m_enableComboBox->addItem(QStringLiteral("1 - 正常充气并开启30min湿度检测"), 1);
+    m_enableComboBox->addItem(QStringLiteral("0 - Disabled"), 0);
+    m_enableComboBox->addItem(QStringLiteral("1 - Enabled"), 1);
     m_enableComboBox->setFixedWidth(260);
     m_controlItem->addWidget(QStringLiteral("enable_combo"), m_enableComboBox);
 
-    m_setSingleBtn = new QPushButton(QStringLiteral("设置单个设备"), m_controlItem);
+    m_setSingleBtn = new QPushButton(QStringLiteral("Set Single"), m_controlItem);
     m_controlItem->addWidget(QStringLiteral("set_single_btn"), m_setSingleBtn);
-    connect(m_setSingleBtn, &QPushButton::clicked,
-            this, &FoupInAutoPurgeEnableWidget::onSetSingleBtnClicked);
+    connect(m_setSingleBtn,
+            &QPushButton::clicked,
+            this,
+            &FoupInAutoPurgeEnableWidget::onSetSingleBtnClicked);
 
-    m_setAllBtn = new QPushButton(QStringLiteral("设置所有设备"), m_controlItem);
+    m_setAllBtn = new QPushButton(QStringLiteral("Set All"), m_controlItem);
     m_controlItem->addWidget(QStringLiteral("set_all_btn"), m_setAllBtn);
-    connect(m_setAllBtn, &QPushButton::clicked,
-            this, &FoupInAutoPurgeEnableWidget::onSetAllBtnClicked);
+    connect(m_setAllBtn,
+            &QPushButton::clicked,
+            this,
+            &FoupInAutoPurgeEnableWidget::onSetAllBtnClicked);
 
     addItem(m_controlItem);
+}
+
+void FoupInAutoPurgeEnableWidget::loadEnableFromConfig(const QString &qrCode)
+{
+    if (qrCode.isEmpty() || !m_enableComboBox) {
+        return;
+    }
+
+    const OHBDeviceConfigInfo deviceConfig = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCode);
+    if (deviceConfig.getQrCode().isEmpty()) {
+        return;
+    }
+
+    setInitialConfigValue(deviceConfig.getFoupInAutoPurgeEnable());
 }
 
 void FoupInAutoPurgeEnableWidget::onSetSingleBtnClicked()
@@ -112,47 +125,56 @@ void FoupInAutoPurgeEnableWidget::onSetAllBtnClicked()
     const QStringList qrcodes = SharedData::getAllQrcodes();
     if (qrcodes.isEmpty()) {
         QMessageBox::warning(this,
-                             QStringLiteral("设置失败"),
-                             QStringLiteral("没有可用的目标设备"));
+                             QStringLiteral("Set Failed"),
+                             QStringLiteral("No target device available"));
         return;
     }
 
     submitWriteAllTask(qrcodes, currentEnableValue());
 }
 
-void FoupInAutoPurgeEnableWidget::submitWriteTask(const QString& qrcode, quint16 enableValue)
+void FoupInAutoPurgeEnableWidget::submitWriteTask(const QString &qrcode, quint16 enableValue)
 {
-    auto* task = new SendCommandTask(this);
-    task->setSendToDevices(QVector<QString>{qrcode},
-                           WriteCommandId,
-                           QVector<quint16>{enableValue});
+    auto *task = new SetFoupInAutoPurgeEnableTask(QVector<QString>{qrcode},
+                                                  static_cast<int>(enableValue));
 
-    m_controlItem->setStatusWaiting(QStringLiteral("设置中..."));
+    m_controlItem->setStatusWaiting(QStringLiteral("Setting..."));
     setButtonsEnabled(false);
 
-    connect(task, &SendCommandTask::allFinished,
-            this, [this, qrcode, enableValue]
-                  (bool allSuccess, int successCount, int failCount, const QStringList& failedIds) {
+    connect(task,
+            &SetFoupInAutoPurgeEnableTask::deviceRetrying,
+            this,
+            [this](const QString &qrCode, int retryCount, int maxRetry) {
+                m_controlItem->setStatusWaiting(
+                    QString("Retrying %1 (%2/%3)").arg(qrCode).arg(retryCount).arg(maxRetry));
+            },
+            Qt::QueuedConnection);
+
+    connect(task,
+            &SetFoupInAutoPurgeEnableTask::allFinished,
+            this,
+            [this, qrcode, enableValue](bool allSuccess,
+                                        int successCount,
+                                        const QStringList &failedIds,
+                                        int finalEnableValue) {
                 Q_UNUSED(successCount)
-                Q_UNUSED(failCount)
+                Q_UNUSED(failedIds)
+                Q_UNUSED(finalEnableValue)
+
+                loadEnableFromConfig(qrcode);
 
                 if (allSuccess) {
-                    OHBDeviceConfig::getInstance().setFoupInAutoPurgeEnableByQRCode(
-                        qrcode,
-                        static_cast<int>(enableValue));
-                    m_controlItem->setStatusOK(QStringLiteral("设置成功"));
-                    QMessageBox::information(
-                        this,
-                        QStringLiteral("设置成功"),
-                        QStringLiteral("设备 %1：%2")
-                            .arg(qrcode, valueDisplayText(enableValue)));
+                    m_controlItem->setStatusOK(QStringLiteral("Set succeeded"));
+                    QMessageBox::information(this,
+                                             QStringLiteral("Set Succeeded"),
+                                             QStringLiteral("Device %1: %2")
+                                                 .arg(qrcode, valueDisplayText(enableValue)));
                 } else {
-                    m_controlItem->setStatusFailed(QStringLiteral("设置失败"));
-                    QMessageBox::warning(
-                        this,
-                        QStringLiteral("设置失败"),
-                        QStringLiteral("设备 %1 设置 FOUPIN 自动充气使能失败。\n%2")
-                            .arg(qrcode, failedIds.join(QStringLiteral(", "))));
+                    m_controlItem->setStatusFailed(QStringLiteral("Set failed"));
+                    QMessageBox::warning(this,
+                                         QStringLiteral("Set Failed"),
+                                         QStringLiteral("Device %1 failed to set Foup In Auto Purge Enable")
+                                             .arg(qrcode));
                 }
 
                 setButtonsEnabled(true);
@@ -160,71 +182,77 @@ void FoupInAutoPurgeEnableWidget::submitWriteTask(const QString& qrcode, quint16
 
     Scheduler::instance()->submitTask(task);
 
-    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[ui][FoupInAutoPurgeEnableWidget][submitWriteTask] qrcode=%1 enableValue=%2")
-            .arg(qrcode)
-            .arg(enableValue)
-            .toStdString());
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(),
+                                      Level::INFO,
+                                      QString("[ui][FoupInAutoPurgeEnableWidget] submit single task: qrcode=%1 enableValue=%2")
+                                          .arg(qrcode)
+                                          .arg(enableValue)
+                                          .toStdString());
 }
 
-void FoupInAutoPurgeEnableWidget::submitWriteAllTask(const QStringList& qrcodes,
+void FoupInAutoPurgeEnableWidget::submitWriteAllTask(const QStringList &qrcodes,
                                                      quint16 enableValue)
 {
-    const QVector<QString> qrcodeVec(qrcodes.begin(), qrcodes.end());
-    auto* task = new SendCommandTask(this);
-    task->setSendToDevices(qrcodeVec,
-                           WriteCommandId,
-                           QVector<quint16>{enableValue});
+    const QVector<QString> qrcodeVector(qrcodes.begin(), qrcodes.end());
+    auto *task = new SetFoupInAutoPurgeEnableTask(qrcodeVector,
+                                                  static_cast<int>(enableValue));
 
-    m_controlItem->setStatusWaiting(QStringLiteral("全部设置中..."));
+    m_controlItem->setStatusWaiting(QStringLiteral("Setting all..."));
     setButtonsEnabled(false);
 
-    auto* targetQrcodes = new QStringList(qrcodes);
+    QStringList *targetQrcodes = new QStringList(qrcodes);
 
-    connect(task, &SendCommandTask::allFinished,
-            this, [this, targetQrcodes, enableValue]
-                  (bool allSuccess, int successCount, int failCount, const QStringList& failedIds) {
+    connect(task,
+            &SetFoupInAutoPurgeEnableTask::deviceRetrying,
+            this,
+            [this](const QString &qrCode, int retryCount, int maxRetry) {
+                m_controlItem->setStatusWaiting(
+                    QString("Retrying %1 (%2/%3)").arg(qrCode).arg(retryCount).arg(maxRetry));
+            },
+            Qt::QueuedConnection);
+
+    connect(task,
+            &SetFoupInAutoPurgeEnableTask::allFinished,
+            this,
+            [this, targetQrcodes, enableValue](bool allSuccess,
+                                               int successCount,
+                                               const QStringList &failedIds,
+                                               int finalEnableValue) {
                 Q_UNUSED(successCount)
-                Q_UNUSED(failCount)
+                Q_UNUSED(finalEnableValue)
+
+                loadEnableFromConfig(m_qrcodeSpinBox ? QString::number(m_qrcodeSpinBox->value()) : QString());
 
                 if (allSuccess) {
-                    m_controlItem->setStatusOK(QStringLiteral("全部设置成功"));
+                    m_controlItem->setStatusOK(QStringLiteral("All succeeded"));
                 } else {
-                    m_controlItem->setStatusFailed(QStringLiteral("部分或全部设置失败"));
+                    m_controlItem->setStatusFailed(QStringLiteral("Completed with failures"));
                 }
 
                 QList<QStringList> tableRows;
-                for (const QString& qrcode : *targetQrcodes) {
-                    const bool failed = failedIds.contains(qrcode)
-                        || (!allSuccess && failedIds.isEmpty());
-                    if (!failed) {
-                        OHBDeviceConfig::getInstance().setFoupInAutoPurgeEnableByQRCode(
-                            qrcode,
-                            static_cast<int>(enableValue));
-                    }
+                for (const QString &qrcode : *targetQrcodes) {
+                    const bool failed = failedIds.contains(qrcode);
                     tableRows.append({
                         qrcode,
-                        failed ? QStringLiteral("失败") : QStringLiteral("成功"),
+                        failed ? QStringLiteral("Failed") : QStringLiteral("Success"),
                         FoupInAutoPurgeEnableWidget::valueDisplayText(enableValue)
                     });
                 }
 
-                auto* dialog = ModalTableDialog::showAsync(
+                ModalTableDialog *dialog = ModalTableDialog::showAsync(
                     this,
-                    QStringLiteral("FOUPIN自动充气使能设置结果"),
-                    QStringList{
-                        QStringLiteral("二维码"),
-                        QStringLiteral("状态"),
-                        QStringLiteral("设置值")
-                    },
+                    QStringLiteral("Foup In Auto Purge Enable Result"),
+                    QStringList{QStringLiteral("QRCode"),
+                                QStringLiteral("Status"),
+                                QStringLiteral("Value")},
                     tableRows);
 
                 if (dialog) {
-                    dialog->setFieldTextColor(QStringLiteral("状态"),
-                                              QStringLiteral("成功"),
+                    dialog->setFieldTextColor(QStringLiteral("Status"),
+                                              QStringLiteral("Success"),
                                               QColor(0, 150, 0));
-                    dialog->setFieldTextColor(QStringLiteral("状态"),
-                                              QStringLiteral("失败"),
+                    dialog->setFieldTextColor(QStringLiteral("Status"),
+                                              QStringLiteral("Failed"),
                                               QColor(210, 0, 0));
                 }
 
@@ -234,11 +262,12 @@ void FoupInAutoPurgeEnableWidget::submitWriteAllTask(const QStringList& qrcodes,
 
     Scheduler::instance()->submitTask(task);
 
-    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
-        QString("[ui][FoupInAutoPurgeEnableWidget][submitWriteAllTask] deviceCount=%1 enableValue=%2")
-            .arg(qrcodes.size())
-            .arg(enableValue)
-            .toStdString());
+    LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(),
+                                      Level::INFO,
+                                      QString("[ui][FoupInAutoPurgeEnableWidget] submit all task: deviceCount=%1 enableValue=%2")
+                                          .arg(qrcodes.size())
+                                          .arg(enableValue)
+                                          .toStdString());
 }
 
 void FoupInAutoPurgeEnableWidget::setButtonsEnabled(bool enabled)
@@ -259,13 +288,13 @@ quint16 FoupInAutoPurgeEnableWidget::currentEnableValue() const
 QString FoupInAutoPurgeEnableWidget::valueDisplayText(quint16 value)
 {
     const QString hexText = QStringLiteral("0x%1")
-        .arg(QString::number(value, 16).toUpper().rightJustified(4, QLatin1Char('0')));
+                                .arg(QString::number(value, 16).toUpper().rightJustified(4, QLatin1Char('0')));
 
     if (value == 0) {
-        return QStringLiteral("0 - FOUP到位后不执行充气及相关功能 (%1)").arg(hexText);
+        return QStringLiteral("0 - Disabled (%1)").arg(hexText);
     }
     if (value == 1) {
-        return QStringLiteral("1 - FOUP到位后正常充气并开启30min湿度检测 (%1)").arg(hexText);
+        return QStringLiteral("1 - Enabled (%1)").arg(hexText);
     }
-    return QStringLiteral("未知值 (%1)").arg(hexText);
+    return QStringLiteral("Unknown (%1)").arg(hexText);
 }

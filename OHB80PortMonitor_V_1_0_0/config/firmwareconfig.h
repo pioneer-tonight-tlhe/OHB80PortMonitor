@@ -7,6 +7,7 @@ class FirmwareConfig
 {
 public:
     static FirmwareConfig& getInstance();
+    void reloadConfig();
 
     // 读取固件配置
     int prepareCmdTimeoutMs() const;

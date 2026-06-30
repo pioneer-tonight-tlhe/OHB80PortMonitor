@@ -88,8 +88,8 @@ void PneumaticValvePressureSettingWidget::initUI()
 void PneumaticValvePressureSettingWidget::initQrcodeItem()
 {
     m_qrcodeItem = new SettingItemWidget(this);
-    m_qrcodeItem->setTitle("Target Device");
-    m_qrcodeItem->setTip("Target device QRCode (numeric, used by Set button)");
+    m_qrcodeItem->setTitle("Master Device");
+    m_qrcodeItem->setTip("Master device QRCode used by Set button");
 
     // m_qrcodeSpinBox = new QSpinBox(m_qrcodeItem);
     // m_qrcodeSpinBox->setRange(0, 99999);
@@ -111,9 +111,16 @@ void PneumaticValvePressureSettingWidget::initQrcodeItem()
         m_comboBox->addItem(qrcode);
     }
 
+    connect(m_comboBox, &QComboBox::currentTextChanged,
+            this, &PneumaticValvePressureSettingWidget::onMasterDeviceChanged);
+
     // m_qrcodeItem->addWidget("qrcode_spin", m_qrcodeSpinBox);
     m_qrcodeItem->addWidget("qrcode_spin", m_comboBox);
     addItem(m_qrcodeItem);
+
+    if (m_comboBox->count() > 0) {
+        loadPressureFromConfig(m_comboBox->currentText());
+    }
 }
 
 void PneumaticValvePressureSettingWidget::initPressureItem()
@@ -172,9 +179,28 @@ void PneumaticValvePressureSettingWidget::onSetAllBtnClicked()
     submitPressureTask(qrcodes, pressureBar);
 }
 
+void PneumaticValvePressureSettingWidget::onMasterDeviceChanged(const QString &qrCode)
+{
+    loadPressureFromConfig(qrCode);
+}
+
 // ============================================================
 // 内部辅助
 // ============================================================
+
+void PneumaticValvePressureSettingWidget::loadPressureFromConfig(const QString &qrCode)
+{
+    if (!m_pressureSpinBox || qrCode.isEmpty()) {
+        return;
+    }
+
+    const OHBDeviceConfigInfo deviceInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrCode);
+    if (deviceInfo.getQrCode().isEmpty()) {
+        return;
+    }
+
+    m_pressureSpinBox->setValue(deviceInfo.getVppePressureBar());
+}
 
 void PneumaticValvePressureSettingWidget::submitPressureTask(const QStringList &qrcodes,
                                                              double pressureBar)
@@ -188,12 +214,14 @@ void PneumaticValvePressureSettingWidget::submitPressureTask(const QStringList &
     setAllSetButtonsEnabled(false);
 
     connect(task, &SetPneumaticValvePressureTask::allFinished,
-            this, [this, qrcodes](bool /*allSuccess*/, int successCount,
+            this, [this, qrcodes](bool allSuccess, int successCount,
                          QStringList failedQrCodes, double pressureBarFinal) {
+                loadPressureFromConfig(m_comboBox ? m_comboBox->currentText() : QString());
+
                 // 只要有一台失败即视为本次任务失败
                 const bool hasFailure = !failedQrCodes.isEmpty();
                 const bool showDeviceTable = qrcodes.size() > 1 || failedQrCodes.size() > 1;
-                if (!hasFailure) {
+                if (allSuccess && !hasFailure) {
                     m_pressureItem->setStatusOK();
                     if (showDeviceTable) {
                         auto *dialog = ModalTableDialog::showAsync(

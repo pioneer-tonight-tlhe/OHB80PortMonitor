@@ -15,6 +15,7 @@ const char* const PurgeIntervalSecondsKey = "PurgeInterval_s";
 const char* const LegacyPurgeIntervalSecondsKey = "purge_interval_s";
 const int DefaultPurgeDurationSeconds = 10;
 const int DefaultPurgeIntervalSeconds = 5;
+const int MaxIdlePurgeSeconds = 65534;
 
 QVariant readConfigValue(QSettings &settings,
                          const QString &groupName,
@@ -89,15 +90,15 @@ bool IdlePurgeConfig::setEnabled(bool enabled)
 
 bool IdlePurgeConfig::setPurgeDurationSeconds(int seconds)
 {
-    // 对外部传入值做兜底，避免配置文件中写入非法时长。
-    m_purgeDurationSeconds = seconds > 0 ? seconds : DefaultPurgeDurationSeconds;
+    // 允许 0~65534 的配置值，超界时钳制到合法范围内。
+    m_purgeDurationSeconds = qBound(0, seconds, MaxIdlePurgeSeconds);
     return saveConfig();
 }
 
 bool IdlePurgeConfig::setPurgeIntervalSeconds(int seconds)
 {
-    // 对外部传入值做兜底，避免配置文件中写入非法周期。
-    m_purgeIntervalSeconds = seconds > 0 ? seconds : DefaultPurgeIntervalSeconds;
+    // 允许 0~65534 的配置值，超界时钳制到合法范围内。
+    m_purgeIntervalSeconds = qBound(0, seconds, MaxIdlePurgeSeconds);
     return saveConfig();
 }
 
@@ -131,11 +132,11 @@ void IdlePurgeConfig::loadConfig()
                                              LegacyPurgeIntervalSecondsKey,
                                              DefaultPurgeIntervalSeconds).toInt();
 
-    // 对读取到的异常秒数做兜底，避免后续界面和任务层拿到非法值。
-    if (m_purgeDurationSeconds <= 0) {
+    // 对读取到的越界秒数做兜底，避免后续界面和任务层拿到非法值。
+    if (m_purgeDurationSeconds < 0 || m_purgeDurationSeconds > MaxIdlePurgeSeconds) {
         m_purgeDurationSeconds = DefaultPurgeDurationSeconds;
     }
-    if (m_purgeIntervalSeconds <= 0) {
+    if (m_purgeIntervalSeconds < 0 || m_purgeIntervalSeconds > MaxIdlePurgeSeconds) {
         m_purgeIntervalSeconds = DefaultPurgeIntervalSeconds;
     }
 }

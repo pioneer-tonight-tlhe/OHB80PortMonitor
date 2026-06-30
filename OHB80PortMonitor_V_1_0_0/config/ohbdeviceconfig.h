@@ -34,7 +34,14 @@ public:
     OHBDeviceConfigInfo getDeviceByQRCode(const QString& qrCode) const;
     OHBDeviceConfigInfo getDeviceByMasterId(const QString& masterId) const;
     bool setDeviceEnable(const QString& qrCode, bool enable);
+    bool setPurgeFlowLitersPerMinuteByQRCode(const QString& qrCode, int purgeFlowLitersPerMinute);
     bool setVppePressureBarByQRCode(const QString& qrCode, double vppePressureBar);
+    bool setUIRefreshTimeByQRCode(const QString& qrCode,
+                                  int logoTimeSeconds,
+                                  int pageTotalTimeSeconds,
+                                  int pageSwitchIntervalSeconds);
+    bool setHumidityOffsetPercentByQRCode(const QString& qrCode, double humidityOffsetPercent);
+    bool setHumidityLowerLimitPercentByQRCode(const QString& qrCode, double humidityLowerLimitPercent);
     bool setFoupInAutoPurgeEnableByQRCode(const QString& qrCode, int enable);
     bool updateDeviceInfoByQRCode(const QString& oldQrCode,
                                   const QString& newQrCode,

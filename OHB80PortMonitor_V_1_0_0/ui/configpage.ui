@@ -15,19 +15,19 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="leftMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="topMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="rightMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="bottomMargin">
-    <number>3</number>
+    <number>1</number>
    </property>
    <item>
     <widget class="QWidget" name="widgetTop" native="true">
@@ -146,8 +146,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>492</width>
-           <height>386</height>
+           <width>496</width>
+           <height>392</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">

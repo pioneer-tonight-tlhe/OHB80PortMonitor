@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.5.12**
+**当前版本：v0.5.13**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -10,7 +10,188 @@
 
 ## 更新日志
 
+## v0.5.13
+
+### DebugPage 新增 VEFC 监控界面
+- 修改时间：2026-06-29
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：Debug 页面新增 `VEFC Monitor` 设置模块，用于查看软件首次打开、今日首次记录、今日最新记录、今日定时采集明细和今日统计数据。
+- 功能点明细：
+  - 新增 `VEFCSensorMonitorWidget`，用于展示软件首次打开、今日首次、今日最新、今日定时采集和今日统计等 VEFC 监控数据。
+  - `VEFC Monitor` 采用双页签布局：
+    `Overview` 页顶部提供 `qrcode` 选择框，依次展示 `Software First Open`、`Today First`、`Today Latest` 三张表格。
+    `Today Records` 页顶部提供 `qrcode` 选择框，依次展示 `Today Timed VEFC Records` 和 `Today VEFC Statistics` 两张表格。
+  - 两个页签的 `qrcode` 过滤均基于 `SharedData::getAllQrcodes()` 初始化范围，并按当前选中设备筛选展示对应记录。
+  - `VEFCSensorMonitorTask` 新增调试快照数据结构、`debugSnapshotUpdated` 信号和 `publishDebugSnapshot()` 槽函数，调度层负责聚合数据库记录与本轮运行时记录后反馈给 Debug UI。
+  - `module_permission.ini` 和 `ModulePermissionConfig` 默认权限中新增 `DebugPage/VEFCSensorMonitor = 3`。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_types.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/vefc_sensor_monitor_task/vefc_sensor_monitor_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/app/metatypes.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/vefcsensormonitorwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/vefcsensormonitorwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `README.md`
+- 兼容性影响：新增 DebugPage 工程师级只读监控入口；不改变 VEFC 调度层快照结构、原始采集、落库和日报统计逻辑。
+- 验证情况：已执行 qmake，并完成受影响源码编译检查。
+
+### DebugPage 新增配置文件编辑入口
+- 修改时间：2026-06-29
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：Debug 页面新增 `Config Files` 设置模块，用于查看并修改常用 ini 配置文件，配置写入统一提交到调度层任务执行。
+- 功能点明细：
+  - 新增 `ConfigFileSettingWidget`，包含 `app.ini`、`alarm.ini`、`logger_config.ini`、`firmware.ini`、`module_permission.ini`、`ohb_device.ini` 六个入口，每个入口通过 `Open` 按钮切换到对应设置界面。
+  - `app.ini`、`alarm.ini`、`logger_config.ini`、`firmware.ini`、`module_permission.ini` 使用通用表格编辑界面，支持按 `Group / Key / Value` 查看和提交配置值。
+  - `ohb_device.ini` 使用分页界面：`Global` 页维护 `[IdleConfig]`、`[SH85SelfCheckTask]`、`[MasterDevices]`；`OHB Device` 页维护单个 OHB 设备字段。
+  - `OHB Device` 页支持单个 QRCode 选择，也支持按 QRCode 区间从 `SharedData::getAllQrcodes()` 中筛选真实存在的设备；多设备匹配时通过下拉框切换当前显示的设备配置。
+  - 新增调度层任务 `SetConfigFileTask`，配置文件写入统一在调度层执行，UI 层只负责展示、收集输入和提交任务。
+  - `module_permission.ini` 和 `ModulePermissionConfig` 默认权限中新增 `DebugPage/ConfigFiles = 3`。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/configfilesettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/configfilesettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/config_file_task/set_config_file_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/config_file_task/set_config_file_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `README.md`
+- 兼容性影响：新增 DebugPage 工程师级入口；通用 ini 编辑器提交时仅覆写表格中存在的键值，不主动删除未展示配置项。
+- 验证情况：已执行 qmake，并使用 Qt 5.15.2 MinGW 64-bit Debug 完整构建通过。
+
+### ui界面设置参数持久化至配置文件
+- 修改时间：2026-06-29
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：补充 ConfigPage 中带调度任务的设置项在任务结束后统一按配置文件回读刷新 UI，并补齐 Humidity Offset 等参数的本地配置持久化能力。
+- 功能点明细：
+  - `SetPurgeFlowTask` 在设备写入成功后，新增 `PurgeFlow_l_min` 配置持久化逻辑。
+  - 调度层通过 `OHBDeviceConfig::setPurgeFlowLitersPerMinuteByQRCode()` 将目标设备的流量值写回 `ohb_device.ini`。
+  - `SetPneumaticValvePressureTask` 在设备写入成功后，会通过 `OHBDeviceConfig::setVppePressureBarByQRCode()` 将 `VPPEPressure_bar` 写回 `ohb_device.ini`。
+  - `SetHumidityOffsetTask` 新增本地配置持久化逻辑，成功写入设备后会通过调度层把 `HumidityLowerLimit_pct` 和 `HumidityOffset_pct` 写回 `ohb_device.ini`。
+  - `Idle Purge Configuration` 在 `SetIdlePurgeTask` 结束后，无论成功还是失败，都会重新读取 `IdlePurgeConfig` 刷新 `Enable`、`Purge Duration`、`Purge Interval` 当前显示值。
+  - `Purge Flow Configuration` 在任务结束后，无论成功还是失败，都会按当前 `QRCode` 重新读取 `PurgeFlow_l_min` 刷新界面。
+  - `Device Enable Configuration` 在任务结束后，无论成功还是失败，都会按当前 `QRCode` 重新读取 `Enable` 刷新界面。
+  - `Humidity Offset Configuration` 在任务结束后，无论成功还是失败，都会按当前 `QRCode` 重新读取 `HumidityLowerLimit_pct` 和 `HumidityOffset_pct` 刷新界面。
+  - `Pneumatic Valve Pressure Configuration` 的设备选择文案调整为 `Master Device`，并使用主设备列表作为设置目标；主设备切换和任务结束后都会按当前 `QRCode` 重新读取配置值刷新界面。
+  - `Device Information Configuration` 在 `SetDeviceInfoTask` 成功或失败后，都会通过 `refreshQrCodeRange(...)` 重新加载当前配置与显示内容。
+  - 若设备写入成功但配置文件写回失败，任务结果按失败返回，并携带配置持久化失败原因。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.h`
+  - `OHB80PortMonitor_V_1_0_0/config/ohbdeviceconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_humidity_offset_task/set_humidity_offset_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_humidity_offset_task/set_humidity_offset_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/idlepurgesettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/idlepurgesettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_purge_flow_task/set_purge_flow_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_purge_flow_task/set_purge_flow_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/purgeflowsettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/purgeflowsettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceenablesettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceenablesettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/humidityoffsetsettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/humidityoffsetsettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/pneumaticvalvepressuresettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/pneumaticvalvepressuresettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/deviceinfosettingwidget.cpp`
+  - `README.md`
+- 兼容性影响：不改变现有指令下发流程；ConfigPage 中相关设置项在调度任务结束后会统一以配置文件为准刷新界面显示，避免界面残留未持久化或失败后的临时值。
+- 验证情况：已完成受影响源码编译检查。
+
+### ui界面设置参数持久化至配置文件（补充）
+- 补充说明（2026-06-30）：
+  - `DebugPage/Firmware Cnf` 现已改为由 `SetFirmwareConfigTask` 负责写回 `firmware.ini`，`FirmwareUpdateConfigSettingWidget` 在任务结束后无论成功或失败都会重新加载配置文件内容刷新界面。
+  - `DebugPage/UI Refresh Time Cnf` 现已改为由 `SetUIRefreshTimeTask` 负责把 `LogoTime_s`、`PageTotalTime_s`、`PageSwitchInterval_s` 写回 `ohb_device.ini`，控件在任务结束后无论成功或失败都会按当前 `QRCode` 重新读取配置刷新界面。
+  - `DebugPage/Humidity Offset Cnf` 保持由 `SetHumidityOffsetTask` 负责配置持久化，控件在任务结束后无论成功或失败都会按当前 `QRCode` 从配置文件重新加载 `HumidityLowerLimit_pct` 与 `HumidityOffset_pct`。
+  - `DebugPage/Foup In 自动使能` 新增专用调度任务 `SetFoupInAutoPurgeEnableTask`，由任务层负责把 `FoupInAutoPurgeEnable` 写回 `ohb_device.ini`，UI 层不再直接修改 ini；控件在任务结束后无论成功或失败都会按配置文件刷新显示。
+  - 本轮相关改动文件补充：
+    - `OHB80PortMonitor_V_1_0_0/config/firmwareconfig.h`
+    - `OHB80PortMonitor_V_1_0_0/config/firmwareconfig.cpp`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_firmware_config_task/set_firmware_config_task.h`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_firmware_config_task/set_firmware_config_task.cpp`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.h`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.cpp`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.h`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.cpp`
+    - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+    - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h`
+    - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.cpp`
+    - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/uirefreshtimesettingwidget.h`
+    - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/uirefreshtimesettingwidget.cpp`
+    - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinautopurgeenablewidget.h`
+    - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/foupinautopurgeenablewidget.cpp`
+    - `README.md`
+
+### ConfigPage Idle Purge 权限与配置持久化调整
+- 修改时间：2026-06-29
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：细化 ConfigPage 中 Idle Purge 模块的子项权限控制，并调整 Idle Purge 调度任务的本地配置持久化策略。
+- 功能点明细：
+  - `module_permission.ini` 的 `[ConfigPage]` 下新增 `IdlePurgeConfiguration.PreparationTime = 3`，用于单独控制 `Preparation Time` 条目的可见权限。
+  - `ModulePermissionConfig` 默认权限同步新增 `IdlePurgeConfiguration.PreparationTime = 3`，保证配置文件缺失该项时仍按工程师权限处理。
+  - `ConfigPage` 在注册 `IdlePurgeConfiguration` 模块权限的同时，额外为 `Preparation Time` 条目注册子项权限。
+  - `SetIdlePurgeTask` 调整为在任务结束时统一调用本地配置持久化逻辑，不再以“所有设备写入成功”为前置条件。
+  - `Purge Duration` 和 `Purge Interval` 的输入范围统一调整为 `0~65534`，并同步放宽本地配置读写逻辑对 `0` 的支持。
+  - Idle Purge 本地配置仍统一写入 `ohb_device.ini` 的 `[IdleConfig]` 配置段，包含 `Enabled`、`PurgeDuration_s`、`PurgeInterval_s`。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/configpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/idlepurgesettingwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/idlepurgesettingwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_idle_purge_task/set_idle_purge_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_idle_purge_task/set_idle_purge_task.cpp`
+  - `README.md`
+- 兼容性影响：`Preparation Time` 从整块模块权限中拆分为独立子权限；Idle Purge 本地配置会在调度任务结束后更新，即使设备写入存在失败设备也会保留最新本地设置值。
+- 验证情况：已完成静态调用链检查，并使用 Qt 5.15.2 MinGW 64-bit Debug 对受影响源码执行构建验证。
+
+### 湿度未达标恢复日志文案调整
+- 修改时间：2026-06-29
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：调整 `HumidityNotReached(5101)` 告警恢复时在运行日志中的显示文案。
+- 功能点明细：
+  - `AlarmDispatchTask` 在处理 `5101` 告警恢复时，将 `[AlarmResolved]` 的描述从“Humidity Not Reached...”调整为“湿度成功达到标准（30min充氮后湿度达标）”。
+  - 告警发生时的原始告警描述保持不变，仅恢复日志使用新的成功文案。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp`
+  - `README.md`
+- 兼容性影响：仅影响 `5101` 告警恢复时的运行日志和对应 resolved 描述显示，不影响告警编码与触发/恢复逻辑。
+- 验证情况：已完成静态差异检查，并在本机完成受影响目标编译验证。
+
 ## v0.5.12
+
+### 固件版本号解析与固件包版本匹配调整
+- 修改时间：2026-06-28
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：调整读取固件版本号指令、固件升级版本校验和 bin 文件名版本号解析逻辑，使固件版本号寄存器解析方式与 UI 屏版本号一致，并要求固件包文件名必须包含 `V_x_x_x` 版本字段。
+- 功能点明细：
+  - `ReadVersion` 响应改为按 UI 屏版本号规则解析：第 1 字节为主版本，第 2 字节高 4 位/低 4 位分别为次版本和补丁版本。
+  - 新增统一版本寄存器解析方法，`ReadVersion` 和 `ReadUIScreenVersion` 共用同一套字节解析逻辑。
+  - `BinFileReader` 新增文件名版本解析接口，仅匹配 `V_x_x_x` 字段，例如 `OHB_V_1_0_0APP_0628.bin` 解析为 `V1.0.0`。
+  - 固件升级模块中的目标版本解析和升级后版本反馈解析同步改为新规则，保证 `currentVersion` 与 `targetVersion` 使用一致格式。
+  - `ModbusTcpMaster` 本体仅保存固件版本字符串，版本解析已在上游完成，本次无需额外修改 master 存储逻辑。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.cpp`
+  - `OHB80PortMonitor_V_1_0_0/tool/binfilereader/binfilereader.h`
+  - `OHB80PortMonitor_V_1_0_0/tool/binfilereader/binfilereader.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/firmwareupgrader.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/firmwareupgrader.cpp`
+  - `README.md`
+- 兼容性影响：旧的未包含 `V_x_x_x` 字段的 bin 文件名将无法解析出目标版本号；升级版本比对统一使用 `Vx.x.x` 格式。
+- 验证情况：已使用 Qt 5.15.2 MinGW 64-bit Debug 执行 `qmake` 和 `mingw32-make -f Makefile.Debug`，构建通过。
 
 ### DebugPage 新增 FOUPIN 自动充气使能
 - 修改时间：2026-06-25

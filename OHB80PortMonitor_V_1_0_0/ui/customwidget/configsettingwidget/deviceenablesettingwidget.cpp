@@ -72,6 +72,10 @@ void DeviceEnableSettingWidget::initQrcodeItem()
     }
 
     m_qrcodeItem->addWidget("qrcode_spin", m_qrcodeSpinBox);
+    connect(m_qrcodeSpinBox, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, [this](int value) {
+                loadEnableFromConfig(QString::number(value));
+            });
     addItem(m_qrcodeItem);
 }
 
@@ -181,6 +185,7 @@ void DeviceEnableSettingWidget::submitBoardEnableCommand(const QString &qrcode, 
                     mb->setWindowModality(Qt::NonModal);
                     mb->show();
                 }
+                loadEnableFromConfig(qrcode);
                 setAllSetButtonsEnabled(true);
             });
 
@@ -191,6 +196,23 @@ void DeviceEnableSettingWidget::submitBoardEnableCommand(const QString &qrcode, 
     LoggerManager::getInstance()->log(AppLogger::SystemLoggerPath().toStdString(), Level::INFO,
         QString("[ui][DeviceEnableSettingWidget] submitBoardEnableCommand qrcode=%1 enable=%2")
             .arg(qrcode).arg(enable).toStdString());
+}
+
+void DeviceEnableSettingWidget::loadEnableFromConfig(const QString &qrcode)
+{
+    if (!m_statusComboBox || qrcode.isEmpty()) {
+        return;
+    }
+
+    const OHBDeviceConfigInfo deviceInfo = OHBDeviceConfig::getInstance().getDeviceByQRCode(qrcode);
+    if (deviceInfo.getQrCode().isEmpty()) {
+        return;
+    }
+
+    const int index = m_statusComboBox->findData(deviceInfo.isEnabled());
+    if (index >= 0) {
+        m_statusComboBox->setCurrentIndex(index);
+    }
 }
 
 void DeviceEnableSettingWidget::setAllSetButtonsEnabled(bool enabled)

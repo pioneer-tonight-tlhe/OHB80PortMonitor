@@ -33,6 +33,12 @@ public:
     explicit DeviceInfoSettingWidget(QWidget* parent = nullptr);
     ~DeviceInfoSettingWidget() override;
 
+    // ============================ 权限注册访问 ============================
+    QWidget* viewItem() const;
+    QWidget* currentQrCodeItem() const;
+    QWidget* qrCodeModifyItem() const;
+    QWidget* endpointModifyItem() const;
+
 private slots:
     // ---- 业务功能 ----
     void onViewClicked();

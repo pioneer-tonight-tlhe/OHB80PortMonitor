@@ -363,24 +363,22 @@ void SetIdlePurgeTask::forceFinish()
     const QString propertyName = propertyToString(m_property);
     const QString propertyValue = getValueText(m_value);
     const bool deviceWriteSuccess = m_failedQrCodes.isEmpty();
-    bool persistSuccess = true;
+    const bool hasDeviceFailure = !deviceWriteSuccess;
     QString persistErrorMessage;
+    bool persistSuccess = persistConfig(&persistErrorMessage);
 
-    if (deviceWriteSuccess) {
-        persistSuccess = persistConfig(&persistErrorMessage);
-        if (!persistSuccess) {
-            qWarning() << "[Scheduler][SetIdlePurgeTask] config persistence failed:"
-                       << propertyName << propertyValue << persistErrorMessage;
-            deviceDetailLogger().warn(
-                QString("[SetIdlePurgeTask] config persistence failed\n"
-                        "property: %1\n"
-                        "value: %2\n"
-                        "reason: %3")
-                    .arg(propertyName)
-                    .arg(propertyValue)
-                    .arg(persistErrorMessage)
-                    .toStdString());
-        }
+    if (!persistSuccess) {
+        qWarning() << "[Scheduler][SetIdlePurgeTask] config persistence failed:"
+                   << propertyName << propertyValue << persistErrorMessage;
+        deviceDetailLogger().warn(
+            QString("[SetIdlePurgeTask] config persistence failed\n"
+                    "property: %1\n"
+                    "value: %2\n"
+                    "reason: %3")
+                .arg(propertyName)
+                .arg(propertyValue)
+                .arg(persistErrorMessage)
+                .toStdString());
     }
 
     const bool finalSuccess = deviceWriteSuccess && persistSuccess;
@@ -395,12 +393,20 @@ void SetIdlePurgeTask::forceFinish()
                        .arg(propertyName)
                        .arg(propertyValue)
                        .arg(m_successCount);
-        } else if (!deviceWriteSuccess) {
+        } else if (hasDeviceFailure && persistSuccess) {
             desc = QString("SetIdlePurge %1=%2 task finished: %3 succeeded, %4 failed")
                        .arg(propertyName)
                        .arg(propertyValue)
                        .arg(m_successCount)
                        .arg(m_failedQrCodes.count());
+            msgType = OperationDispatchTask::MsgType::Error;
+        } else if (hasDeviceFailure) {
+            desc = QString("SetIdlePurge %1=%2 task finished: %3 succeeded, %4 failed, config persistence failed (%5)")
+                       .arg(propertyName)
+                       .arg(propertyValue)
+                       .arg(m_successCount)
+                       .arg(m_failedQrCodes.count())
+                       .arg(persistErrorMessage);
             msgType = OperationDispatchTask::MsgType::Error;
         } else {
             desc = QString("SetIdlePurge %1=%2 task finished: %3 devices succeeded, but config persistence failed (%4)")
@@ -419,11 +425,17 @@ void SetIdlePurgeTask::forceFinish()
         finishedMessage = QString("SetIdlePurgeTask: %1 completed (%2 devices)")
                               .arg(propertyName)
                               .arg(m_successCount);
-    } else if (!deviceWriteSuccess) {
+    } else if (hasDeviceFailure && persistSuccess) {
         finishedMessage = QString("SetIdlePurgeTask: %1 completed, %2 succeeded, %3 failed")
                               .arg(propertyName)
                               .arg(m_successCount)
                               .arg(m_failedQrCodes.count());
+    } else if (hasDeviceFailure) {
+        finishedMessage = QString("SetIdlePurgeTask: %1 completed, %2 succeeded, %3 failed, config persistence failed (%4)")
+                              .arg(propertyName)
+                              .arg(m_successCount)
+                              .arg(m_failedQrCodes.count())
+                              .arg(persistErrorMessage);
     } else {
         finishedMessage = QString("SetIdlePurgeTask: %1 device write succeeded, but config persistence failed (%2)")
                               .arg(propertyName)

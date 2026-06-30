@@ -44,6 +44,7 @@ private:
 
     // 下发 SetBoardEnable Modbus 指令
     void submitBoardEnableCommand(const QString &qrcode, bool enable);
+    void loadEnableFromConfig(const QString &qrcode);
 
     // 设置任务运行期间所有 Set 按钮的启用状态
     void setAllSetButtonsEnabled(bool enabled);
