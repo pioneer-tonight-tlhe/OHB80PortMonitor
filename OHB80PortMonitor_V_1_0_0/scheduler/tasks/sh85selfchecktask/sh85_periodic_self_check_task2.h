@@ -106,7 +106,8 @@ private slots:
     void onCheckerFinished(bool success,
                            SH85SelfChecker::Result result,
                            const QString& message,
-                           const QString& masterId);
+                           const QString& masterId,
+                           double minimumHumidity);
 
 
     // ---- 转发自检过程中的命令/错误信号，供外层需要时订阅 ----

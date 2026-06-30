@@ -230,7 +230,8 @@ void SH85PeriodicSelfCheckTask3::stop()
         finishDevice(qrcode,
                      false,
                      SH85SelfChecker::Result::Cancelled,
-                     QStringLiteral("Cancelled by task stop"));
+                     QStringLiteral("Cancelled by task stop"),
+                     -1.0);
     }
 
     tryFinishRound();
@@ -411,9 +412,10 @@ QStringList SH85PeriodicSelfCheckTask3::filterAvailableDevices()
 void SH85PeriodicSelfCheckTask3::finishDevice(const QString& qrcode,
                                               bool success,
                                               SH85SelfChecker::Result result,
-                                              const QString& description)
+                                              const QString& description,
+                                              double minimumHumidity)
 {
-    if (!m_roundContext.finishDevice(qrcode, success, description)) {
+    if (!m_roundContext.finishDevice(qrcode, success, description, minimumHumidity)) {
         return;
     }
 
@@ -422,7 +424,7 @@ void SH85PeriodicSelfCheckTask3::finishDevice(const QString& qrcode,
                                      success,
                                      result,
                                      description);
-    emit oneFinished(qrcode, success, description);
+    emit oneFinished(qrcode, success, description, minimumHumidity);
 }
 
 void SH85PeriodicSelfCheckTask3::tryFinishRound()
@@ -485,7 +487,7 @@ void SH85PeriodicSelfCheckTask3::appendNotSubmittedAndFinish(const QString& qrco
                                                              const QString& reason)
 {
     m_logService.writeDeviceStartFailed(m_roundContext.roundId(), qrcode, result, reason);
-    finishDevice(qrcode, false, result, reason);
+    finishDevice(qrcode, false, result, reason, -1.0);
 }
 
 void SH85PeriodicSelfCheckTask3::enterTaskState(State state)
@@ -543,6 +545,7 @@ SH85PeriodicSelfCheckTask3::buildSelfCheckSummary(const SH85SelfCheck::RoundSumm
         detail.participated = result.participated;
         detail.success = result.success;
         detail.description = result.description;
+        detail.minimumHumidity = result.minimumHumidity;
         selfCheckSummary.details.append(detail);
     }
 
@@ -600,7 +603,8 @@ void SH85PeriodicSelfCheckTask3::onCheckerStateChanged(SH85SelfChecker::State st
 void SH85PeriodicSelfCheckTask3::onCheckerFinished(bool success,
                                                    SH85SelfChecker::Result result,
                                                    const QString& message,
-                                                   const QString& masterId)
+                                                   const QString& masterId,
+                                                   double minimumHumidity)
 {
     if (!m_roundContext.isActive() || !m_roundContext.isPending(masterId)) {
         return;
@@ -610,7 +614,7 @@ void SH85PeriodicSelfCheckTask3::onCheckerFinished(bool success,
         ? QStringLiteral("Success")
         : (message.isEmpty() ? SH85SelfChecker::resultToString(result) : message);
 
-    finishDevice(masterId, success, result, description);
+    finishDevice(masterId, success, result, description, minimumHumidity);
     tryFinishRound();
 }
 

@@ -11,6 +11,7 @@ struct DeviceResult {
     bool participated = false;
     bool success = false;
     QString description;
+    double minimumHumidity = -1.0;
 };
 
 // 一轮自检结束后的轻量汇总；供 Task3 通知 UI 或后续写轮次日志使用。

@@ -125,6 +125,7 @@ public:
      * @brief 获取当前状态
      */
     State currentState() const { return m_state; }
+    double minimumHumidity() const;
 
     /// 状态枚举转中文字符串（用于日志）
     static QString stateToString(State s);
@@ -174,7 +175,8 @@ signals:
     void finished(bool success,
                   SH85SelfChecker::Result result,
                   const QString& message,
-                  const QString& masterId);
+                  const QString& masterId,
+                  double minimumHumidity);
 
 private slots:
     /// 接收来自 master->sender() 的指令完成信号
@@ -193,6 +195,7 @@ private slots:
     void startCountdownTimer();
 
 private:
+    void sampleHumidity();
     /// 下发 StartSelfCheck（maxRetryCount = 0，不允许超时重发）
     bool submitStartSelfCheck();
     /// 下发 ReadSelfCheckStatus
@@ -226,6 +229,8 @@ private:
     QMetaObject::Connection m_senderRetryConn;    // sender::commandTimeoutRetry 连接句柄
 
     bool             m_finished = false;        // 防止重复 emit finished
+    bool             m_hasHumiditySample = false;
+    double           m_minimumHumidity = 0.0;
 };
 
 #endif // SH85_SELF_CHECKER_H

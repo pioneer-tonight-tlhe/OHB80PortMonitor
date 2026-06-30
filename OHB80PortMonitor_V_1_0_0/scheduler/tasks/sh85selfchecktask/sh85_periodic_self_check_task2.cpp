@@ -471,8 +471,10 @@ void SH85PeriodicSelfCheckTask2::onCheckerStateChanged(SH85SelfChecker::State st
 void SH85PeriodicSelfCheckTask2::onCheckerFinished(bool success,
                                                    SH85SelfChecker::Result result,
                                                    const QString& message,
-                                                   const QString& masterId)
+                                                   const QString& masterId,
+                                                   double minimumHumidity)
 {
+    Q_UNUSED(minimumHumidity)
     if (!m_roundActive || !m_pendingQrcodes.contains(masterId)) {
         return;
     }

@@ -41,7 +41,8 @@ signals:
     void finished(bool success,
                   SH85SelfChecker::Result result,
                   const QString& message,
-                  const QString& masterId);
+                  const QString& masterId,
+                  double minimumHumidity);
     void commandCompleted(ModbusCommand cmd, const QString& masterId);
     void commandRetrying(ModbusCommand cmd, const QString& masterId);
     void errorOccurred(SH85SelfChecker::Result result,

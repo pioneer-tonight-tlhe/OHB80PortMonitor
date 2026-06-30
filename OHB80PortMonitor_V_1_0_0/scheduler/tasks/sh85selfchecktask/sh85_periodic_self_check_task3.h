@@ -49,6 +49,7 @@ public:
         bool participated = false;
         bool success = false;
         QString description;
+        double minimumHumidity = -1.0;
     };
 
     struct SelfCheckSummary {
@@ -102,7 +103,10 @@ signals:
     // ---- 转发单设备自检信号，供 UI 显示倒计时/状态/单设备结果 ----
     void countdownTick(int remainingSeconds, const QString& masterId);
     void selfCheckerStateChanged(SH85SelfChecker::State state, const QString& masterId);
-    void oneFinished(const QString& masterId, bool success, const QString& message);
+    void oneFinished(const QString& masterId,
+                     bool success,
+                     const QString& message,
+                     double minimumHumidity);
 
     // ---- 转发自检过程中的命令/错误信号，供外层需要时订阅 ----
     void errorOccurred(SH85SelfChecker::Result result, const QString& message, const QString& masterId);
@@ -136,7 +140,8 @@ private slots:
     void onCheckerFinished(bool success,
                            SH85SelfChecker::Result result,
                            const QString& message,
-                           const QString& masterId);
+                           const QString& masterId,
+                           double minimumHumidity);
     void onCheckerCommandCompleted(ModbusCommand cmd, const QString& masterId);
     void onCheckerCommandRetrying(ModbusCommand cmd, const QString& masterId);
     void onCheckerErrorOccurred(SH85SelfChecker::Result result,
@@ -154,7 +159,8 @@ private:
     void finishDevice(const QString& qrcode,
                       bool success,
                       SH85SelfChecker::Result result,
-                      const QString& description);
+                      const QString& description,
+                      double minimumHumidity);
 
     // 当 pending 清空时发出整轮汇总信号。
     void tryFinishRound();

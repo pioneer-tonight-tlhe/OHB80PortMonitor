@@ -52,7 +52,10 @@ public slots:
     void onCheckerStateChanged(SH85SelfChecker::State state, const QString &masterId);
 
     /// 单设备结束（来自 task::oneFinished）
-    void onOneFinished(const QString &masterId, bool success, const QString &description);
+    void onOneFinished(const QString &masterId,
+                       bool success,
+                       const QString &description,
+                       double minimumHumidity);
 
     /// 一轮自检结束（来自 task::allFinished）
     void onAllFinished(const SH85PeriodicSelfCheckTask3::SelfCheckSummary &summary);
@@ -89,6 +92,7 @@ private:
         int     failureCount = 0;
         QString lastStartTime;
         bool    lastParticipated = false;
+        double  lastMinimumHumidity = -1.0;
         QString lastDescription;
     };
     QHash<QString, DeviceStat>  m_deviceStats;

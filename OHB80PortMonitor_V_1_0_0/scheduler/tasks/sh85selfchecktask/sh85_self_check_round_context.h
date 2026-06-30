@@ -54,7 +54,10 @@ public:
     void markPending(const QString& qrcode);
 
     // 结束设备：写入最终结果，并从 pending 中移除。
-    bool finishDevice(const QString& qrcode, bool success, const QString& description);
+    bool finishDevice(const QString& qrcode,
+                      bool success,
+                      const QString& description,
+                      double minimumHumidity);
 
     SH85SelfCheck::RoundSummary summary() const;
 

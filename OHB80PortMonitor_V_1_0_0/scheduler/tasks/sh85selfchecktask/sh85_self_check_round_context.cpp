@@ -85,7 +85,8 @@ void SH85SelfCheckRoundContext::markPending(const QString& qrcode)
 
 bool SH85SelfCheckRoundContext::finishDevice(const QString& qrcode,
                                              bool success,
-                                             const QString& description)
+                                             const QString& description,
+                                             double minimumHumidity)
 {
     if (!m_results.contains(qrcode)) {
         return false;
@@ -96,6 +97,7 @@ bool SH85SelfCheckRoundContext::finishDevice(const QString& qrcode,
     result.participated = true;
     result.success = success;
     result.description = description;
+    result.minimumHumidity = minimumHumidity;
     m_pendingQrcodes.remove(qrcode);
     return true;
 }

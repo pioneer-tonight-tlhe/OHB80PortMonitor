@@ -1009,6 +1009,28 @@
 
 ---
 
+### SH85 周期自检最小湿度统计与报告展示
+- 修改时间：2026-06-30
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：补充 SH85 周期自检过程中的最小湿度采集、轮次汇总与报告展示，并精简自检结果描述文案。
+- 功能点明细：
+  - `SH85SelfChecker` 在自检计时过程中实时读取全局 `FoupOfOHBInfo` 的湿度值，持续记录本轮自检的最小湿度。
+  - 自检结束后，`SH85SelfChecker::finished(...)` 完成信号新增 `minimumHumidity` 参数，将本轮最小湿度一并反馈给上层。
+  - `SH85PeriodicSelfCheckTask3` 的单设备结果与 `SelfCheckSummary.details` 新增最小湿度字段，主设备单轮结束后可同步携带该值。
+  - `SH85SelfCheckReportDialog` 的 `Live Log` 与 `History Log` 均新增 `Min Humidity(%)` 列，用于展示每轮自检期间监测到的最低湿度。
+  - SH85 自检 `description` 字段去除 `(CH_1=3)` / `(CH_1=4)` 后缀，仅保留业务结果文案，避免报告描述冗余。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbustcpmaster/sh85selfchecker.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/sh85selfchecktask/sh85_periodic_self_check_task3.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/configsettingwidget/sh85selfcheckreportdialog.cpp`
+  - `README.md`
+- 兼容性影响：本次为 SH85 自检结果字段与展示能力的增量扩展，不改变自检触发条件、执行流程与原有成功/失败判定逻辑。
+- 验证情况：已完成实现点与文档内容对照检查；本轮仅更新 README，未额外执行完整构建。
+
 ### 2026-06-02 - Simon
 
 #### SH85 周期自检：配置化与 UI 对接

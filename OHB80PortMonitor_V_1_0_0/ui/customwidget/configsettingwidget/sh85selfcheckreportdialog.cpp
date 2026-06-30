@@ -11,8 +11,8 @@
 #include <QVBoxLayout>
 
 namespace {
-constexpr int kLiveColCount    = 5;
-constexpr int kHistoryColCount = 5;
+constexpr int kLiveColCount    = 6;
+constexpr int kHistoryColCount = 6;
 
 // Live Log 列索引
 enum LiveCol {
@@ -20,7 +20,8 @@ enum LiveCol {
     LiveColState        = 1,
     LiveColCountdown    = 2,
     LiveColSuccess      = 3,
-    LiveColParticipated = 4
+    LiveColParticipated = 4,
+    LiveColMinHumidity  = 5
 };
 
 // History Log 列索引
@@ -29,8 +30,17 @@ enum HistoryCol {
     HistColSuccess      = 1,
     HistColFailure      = 2,
     HistColParticipated = 3,
-    HistColDescription  = 4
+    HistColMinHumidity  = 4,
+    HistColDescription  = 5
 };
+
+QString humidityText(double value)
+{
+    if (value < 0.0) {
+        return QStringLiteral("-");
+    }
+    return QString::number(value, 'f', 2);
+}
 
 QString stateText(SH85SelfChecker::State s) {
     const QString cn = SH85SelfChecker::stateToString(s);
@@ -105,7 +115,8 @@ void SH85SelfCheckReportDialog::initLiveLogTab()
         QStringLiteral("Execution Status"),
         QStringLiteral("Countdown(s)"),
         QStringLiteral("Success"),
-        QStringLiteral("Participated")
+        QStringLiteral("Participated"),
+        QStringLiteral("Min Humidity(%)")
     });
 
     m_liveTable = new QTableView(this);
@@ -126,6 +137,7 @@ void SH85SelfCheckReportDialog::initHistoryLogTab()
         QStringLiteral("Success Count"),
         QStringLiteral("Failure Count"),
         QStringLiteral("Participated"),
+        QStringLiteral("Min Humidity(%)"),
         QStringLiteral("Description")
     });
 
@@ -167,6 +179,7 @@ void SH85SelfCheckReportDialog::setQrcodes(const QStringList &qrcodes)
         liveRow.append(new QStandardItem(QStringLiteral("-")));
         liveRow.append(new QStandardItem(QStringLiteral("-")));
         liveRow.append(new QStandardItem(QStringLiteral("-")));
+        liveRow.append(new QStandardItem(QStringLiteral("-")));
         for (auto *item : liveRow) {
             item->setTextAlignment(Qt::AlignCenter);
         }
@@ -177,6 +190,7 @@ void SH85SelfCheckReportDialog::setQrcodes(const QStringList &qrcodes)
         histRow.append(new QStandardItem(QStringLiteral("-")));
         histRow.append(new QStandardItem(QStringLiteral("0")));
         histRow.append(new QStandardItem(QStringLiteral("0")));
+        histRow.append(new QStandardItem(QStringLiteral("-")));
         histRow.append(new QStandardItem(QStringLiteral("-")));
         histRow.append(new QStandardItem(QStringLiteral("-")));
         m_historyModel->appendRow(histRow);
@@ -211,6 +225,7 @@ void SH85SelfCheckReportDialog::onRoundStarted()
             it->setForeground(Qt::black);
         }
         if (auto *it = m_liveModel->item(row, LiveColParticipated)) it->setText(QStringLiteral("Yes"));
+        if (auto *it = m_liveModel->item(row, LiveColMinHumidity)) it->setText(QStringLiteral("-"));
     }
 }
 
@@ -232,7 +247,10 @@ void SH85SelfCheckReportDialog::onCheckerStateChanged(SH85SelfChecker::State sta
     }
 }
 
-void SH85SelfCheckReportDialog::onOneFinished(const QString &masterId, bool success, const QString &description)
+void SH85SelfCheckReportDialog::onOneFinished(const QString &masterId,
+                                              bool success,
+                                              const QString &description,
+                                              double minimumHumidity)
 {
     Q_UNUSED(description)
     const int row = liveRowOf(masterId);
@@ -246,6 +264,9 @@ void SH85SelfCheckReportDialog::onOneFinished(const QString &masterId, bool succ
             it->setBackground(QColor(220, 20, 60)); // Crimson red
             it->setForeground(Qt::white);
         }
+    }
+    if (auto *it = m_liveModel->item(row, LiveColMinHumidity)) {
+        it->setText(humidityText(minimumHumidity));
     }
 }
 
@@ -289,6 +310,7 @@ void SH85SelfCheckReportDialog::onAllFinished(const SH85PeriodicSelfCheckTask3::
         DeviceStat &stat = m_deviceStats[dr.qrcode];
         stat.lastStartTime    = summary.startTime;
         stat.lastParticipated = dr.participated;
+        stat.lastMinimumHumidity = dr.minimumHumidity;
         stat.lastDescription  = dr.description;
 
         if (dr.participated) {
@@ -304,6 +326,8 @@ void SH85SelfCheckReportDialog::onAllFinished(const SH85PeriodicSelfCheckTask3::
             it->setText(QString::number(stat.failureCount));
         if (auto *it = m_historyModel->item(row, HistColParticipated))
             it->setText(stat.lastParticipated ? QStringLiteral("Yes") : QStringLiteral("No"));
+        if (auto *it = m_historyModel->item(row, HistColMinHumidity))
+            it->setText(humidityText(stat.lastMinimumHumidity));
         if (auto *it = m_historyModel->item(row, HistColDescription)) {
             it->setText(stat.lastDescription);
             // 根据 success 状态设置背景色：失败为红色，成功为绿色

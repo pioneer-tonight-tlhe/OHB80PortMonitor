@@ -285,9 +285,14 @@ void SH85SelfCheckTask::onCheckerErrorOccurred(SH85SelfChecker::Result result, c
     emit statusChanged(normalizedMessage, m_qrcode);
 }
 
-void SH85SelfCheckTask::onCheckerFinished(bool success, SH85SelfChecker::Result result, const QString& message, const QString& masterId)
+void SH85SelfCheckTask::onCheckerFinished(bool success,
+                                          SH85SelfChecker::Result result,
+                                          const QString& message,
+                                          const QString& masterId,
+                                          double minimumHumidity)
 {
     Q_UNUSED(masterId)
+    Q_UNUSED(minimumHumidity)
     qDebug() << "[Scheduler][SH85SelfCheckTask] checker finished success=" << success
              << "result=" << SH85SelfChecker::resultToString(result)
              << "message=" << message;

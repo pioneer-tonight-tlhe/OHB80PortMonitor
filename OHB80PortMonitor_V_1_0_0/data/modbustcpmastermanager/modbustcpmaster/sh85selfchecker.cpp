@@ -4,6 +4,8 @@
 #include "modbuscommandsender.h"
 #include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "modbustcpmastermanager/modbuscommand/commandpool.h"
+#include "app/shareddata.h"
+#include "classes/foupofohbinfo.h"
 
 #include "modbuslogger.h"
 
@@ -92,6 +94,8 @@ bool SH85SelfChecker::start()
 
     m_finished     = false;
     m_pendingUuid  = 0;
+    m_hasHumiditySample = false;
+    m_minimumHumidity = 0.0;
 
     // 建立 sender 信号槽（QueuedConnection 保证跨线程安全）
     if (m_senderConn) QObject::disconnect(m_senderConn);
@@ -123,6 +127,11 @@ void SH85SelfChecker::stop()
     if (!isRunning()) return;
     qDebug() << "[data][SH85SelfChecker] stop() 被调用 masterId=" << (m_master ? m_master->ID : QString());
     finishOnly(false, Result::Cancelled, "Cancelled by user");
+}
+
+double SH85SelfChecker::minimumHumidity() const
+{
+    return m_hasHumiditySample ? m_minimumHumidity : -1.0;
 }
 
 QString SH85SelfChecker::stateToString(State s)
@@ -316,18 +325,23 @@ void SH85SelfChecker::onCommandFinished(ModbusCommand cmd, const QString& master
             return;
         case kStatusSuccess:
             // CH_1 == 2：自检成功
+            sampleHumidity();
             finishOnly(true, Result::Success, "Self-check passed");
             return;
         case kStatusHumidityFail:
-            emitErrorAndFinish(Result::HumidityExceeded, "Humidity exceeded (CH_1=3)");
+            sampleHumidity();
+            emitErrorAndFinish(Result::HumidityExceeded, "Humidity exceeded");
             return;
         case kStatusSensorCommFail:
-            emitErrorAndFinish(Result::SensorCommError, "SH85 sensor communication error (CH_1=4)");
+            sampleHumidity();
+            emitErrorAndFinish(Result::SensorCommError, "SH85 sensor communication error");
             return;
         case kStatusThresholdParam:
+            sampleHumidity();
             emitErrorAndFinish(Result::ThresholdParamError, "Threshold parameter error (CH_1=5)");
             return;
         default:
+            sampleHumidity();
             emitErrorAndFinish(Result::FirmwareAbnormal,
                 QString("Firmware status abnormal during polling, unknown CH_1=%1").arg(v));
             return;
@@ -447,8 +461,10 @@ void SH85SelfChecker::finishOnly(bool success, Result r, const QString& msg)
 {
     if (m_finished) return;
     m_finished = true;
+    sampleHumidity();
 
     const QString id = m_master ? m_master->ID : QString();
+    const double minimumHumidityValue = minimumHumidity();
     cleanup();
     enterState(State::Done);
 
@@ -460,12 +476,13 @@ void SH85SelfChecker::finishOnly(bool success, Result r, const QString& msg)
             QString("自检完成 success=%1 result=%2 msg=%3").arg(success).arg(resultToString(r), msg));
     }
 
-    emit finished(success, r, msg, id);
+    emit finished(success, r, msg, id, minimumHumidityValue);
 }
 
 void SH85SelfChecker::startCountdownTimer()
 {
     m_elapsed.start();
+    sampleHumidity();
     m_countdownTimer->start();
     emit countdownTick(kTotalDurationMs / 1000, m_master ? m_master->ID : QString());
 }
@@ -473,6 +490,7 @@ void SH85SelfChecker::startCountdownTimer()
 void SH85SelfChecker::onCountdownTick()
 {
     if (!isRunning()) return;
+    sampleHumidity();
     const int rem = qMax(0, static_cast<int>((kTotalDurationMs - m_elapsed.elapsed()) / 1000));
     emit countdownTick(rem, m_master ? m_master->ID : QString());
 }
@@ -493,4 +511,22 @@ void SH85SelfChecker::cleanup()
         m_senderRetryConn = QMetaObject::Connection();
     }
     m_pendingUuid = 0;
+}
+
+void SH85SelfChecker::sampleHumidity()
+{
+    if (!m_master) {
+        return;
+    }
+
+    FoupOfOHBInfo* foup = SharedData::getFoupByQRCode(m_master->ID);
+    if (!foup) {
+        return;
+    }
+
+    const double humidity = foup->RH();
+    if (!m_hasHumiditySample || humidity < m_minimumHumidity) {
+        m_minimumHumidity = humidity;
+        m_hasHumiditySample = true;
+    }
 }

@@ -503,8 +503,10 @@ void SH85PeriodicSelfCheckTask::tryEndRound()
 void SH85PeriodicSelfCheckTask::onCheckerFinished(bool success,
                                                   SH85SelfChecker::Result result,
                                                   const QString& message,
-                                                  const QString& masterId)
+                                                  const QString& masterId,
+                                                  double minimumHumidity)
 {
+    Q_UNUSED(minimumHumidity)
     if (m_state != State::Checking) return;
     if (!m_pendingQrcodes.contains(masterId)) return;
 
