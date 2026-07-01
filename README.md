@@ -12,6 +12,32 @@
 
 ## 待发布
 
+### 警报日志查询性能优化与压测数据工具
+- 发布状态：待发布
+- 修改时间：2026-07-01
+- 变更类型：Changed / Added
+- 开发人员：Simon（工号：13）
+- 功能概述：优化 `alarm_log` 在千万级数据量下的历史查询路径，并补充 Qt 独立压测数据写入工程，用于验证警报日志查询性能。
+- 功能点明细：
+  - `AlarmLogSqlLogic` 的条件分页查询和条件总数查询改为按实际筛选项动态拼接 SQL，减少通用 OR 条件导致的索引失效风险。
+  - 警报日志查询新增 `Resolved Time` 条件链路，UI、调度任务、DBCon 和 data 层均支持按解决时间过滤。
+  - 警报日志查询统一按 `occur_time DESC, id DESC` 稳定排序，避免同一秒内多条记录分页顺序不稳定。
+  - 查询权限过滤下沉到 data 层，调度任务传入当前用户权限，分页结果和总数统计都按 `user_permission <= 当前权限` 过滤。
+  - 数据库初始化和建表 SQL 补充 `alarm_log` 常用组合索引，覆盖发生时间、解决时间、设备、警报类型、警报等级、解决状态和权限过滤等查询路径。
+  - 新增 Qt Console 工程 `tools/alarm_log_seed_generator`，支持向 `logdb.db` 批量写入 6 个月、每秒 1 条的千万级警报日志压测数据。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogdbcon.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogdbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarmlogquerytask/alarmlogquerytask.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarmlogquerytask/alarmlogquerytask.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - `tools/alarm_log_seed_generator/`
+  - `README.md`
+- 兼容性影响：查询接口保留默认参数兼容内部旧调用；Debug/UI 查询会按当前用户权限返回数据，页数与可见数据保持一致。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建工具，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
 ### 通讯日志查询性能优化与压测数据工具
 - 发布状态：待发布
 - 修改时间：2026-06-30

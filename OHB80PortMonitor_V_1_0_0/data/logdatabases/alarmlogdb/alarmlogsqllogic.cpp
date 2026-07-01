@@ -23,7 +23,10 @@ AlarmLogQueryParts buildAlarmLogQueryParts(int alarmLevel,
                                            const QString& alarmType,
                                            int isResolved,
                                            const QString& startTime,
-                                           const QString& endTime)
+                                           const QString& endTime,
+                                           const QString& resolveStartTime,
+                                           const QString& resolveEndTime,
+                                           int maxUserPermission)
 {
     AlarmLogQueryParts parts;
 
@@ -50,6 +53,18 @@ AlarmLogQueryParts buildAlarmLogQueryParts(int alarmLevel,
     if (!endTime.isEmpty()) {
         parts.whereConditions << QStringLiteral("occur_time <= ?");
         parts.bindValues << endTime;
+    }
+    if (!resolveStartTime.isEmpty()) {
+        parts.whereConditions << QStringLiteral("resolve_time >= ?");
+        parts.bindValues << resolveStartTime;
+    }
+    if (!resolveEndTime.isEmpty()) {
+        parts.whereConditions << QStringLiteral("resolve_time <= ?");
+        parts.bindValues << resolveEndTime;
+    }
+    if (maxUserPermission >= 0) {
+        parts.whereConditions << QStringLiteral("user_permission <= ?");
+        parts.bindValues << maxUserPermission;
     }
 
     return parts;
@@ -80,7 +95,15 @@ bool ensureAlarmLogQueryIndexes(QSqlDatabase& database)
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_qr_time_id ON alarm_log(qr_code, occur_time DESC, id DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_type_time_id ON alarm_log(alarm_type, occur_time DESC, id DESC)"),
         QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_level_time_id ON alarm_log(alarm_level, occur_time DESC, id DESC)"),
-        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_qr_type_resolved_time_id ON alarm_log(qr_code, alarm_type, is_resolved, occur_time DESC, id DESC)")
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_resolve_time_id ON alarm_log(resolve_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_resolved_resolve_time_id ON alarm_log(is_resolved, resolve_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_qr_type_resolved_time_id ON alarm_log(qr_code, alarm_type, is_resolved, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_permission_time_id ON alarm_log(user_permission, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_qr_permission_time_id ON alarm_log(qr_code, user_permission, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_type_permission_time_id ON alarm_log(alarm_type, user_permission, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_level_permission_time_id ON alarm_log(alarm_level, user_permission, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_resolved_permission_time_id ON alarm_log(is_resolved, user_permission, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_alarm_log_qr_type_resolved_permission_time_id ON alarm_log(qr_code, alarm_type, is_resolved, user_permission, occur_time DESC, id DESC)")
     };
 
     QSqlQuery query(database);
@@ -202,7 +225,10 @@ QList<QVariantMap> AlarmLogSqlLogic::queryPageWithConditions(int alarmLevel,
                                                              const QString& startTime,
                                                              const QString& endTime,
                                                              int pageSize,
-                                                             int pageNumber)
+                                                             int pageNumber,
+                                                             const QString& resolveStartTime,
+                                                             const QString& resolveEndTime,
+                                                             int maxUserPermission)
 {
     QList<QVariantMap> results;
 
@@ -215,7 +241,10 @@ QList<QVariantMap> AlarmLogSqlLogic::queryPageWithConditions(int alarmLevel,
                                                                   alarmType,
                                                                   isResolved,
                                                                   startTime,
-                                                                  endTime);
+                                                                  endTime,
+                                                                  resolveStartTime,
+                                                                  resolveEndTime,
+                                                                  maxUserPermission);
     const QString baseSql = trimSqlTerminator(m_sqlMapper->getSql("query_page_with_conditions"));
     if (baseSql.isEmpty()) {
         qWarning() << "SQL not found: query_page_with_conditions";
@@ -252,10 +281,26 @@ QList<QVariantMap> AlarmLogSqlLogic::queryPageWithConditions(int alarmLevel,
     return results;
 }
 
-int AlarmLogSqlLogic::queryTotalCount()
+int AlarmLogSqlLogic::queryTotalCount(int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
+    }
+
+    if (maxUserPermission >= 0) {
+        QString sql = m_sqlMapper->getSql("query_total_count_with_permission");
+        if (sql.isEmpty()) {
+            qWarning() << "SQL not found: query_total_count_with_permission";
+            return 0;
+        }
+        QSqlQuery permissionQuery(m_database);
+        permissionQuery.prepare(sql);
+        permissionQuery.addBindValue(maxUserPermission);
+        if (!permissionQuery.exec()) {
+            qWarning() << "Query failed:" << permissionQuery.lastError().text();
+            return 0;
+        }
+        return permissionQuery.next() ? permissionQuery.value(0).toInt() : 0;
     }
 
     QString sql = m_sqlMapper->getSql("query_total_count");
@@ -284,7 +329,10 @@ int AlarmLogSqlLogic::queryTotalCountWithConditions(int alarmLevel,
                                                     const QString& alarmType,
                                                     int isResolved,
                                                     const QString& startTime,
-                                                    const QString& endTime)
+                                                    const QString& endTime,
+                                                    const QString& resolveStartTime,
+                                                    const QString& resolveEndTime,
+                                                    int maxUserPermission)
 {
     if (!m_database.isOpen()) {
         return 0;
@@ -295,7 +343,10 @@ int AlarmLogSqlLogic::queryTotalCountWithConditions(int alarmLevel,
                                                                   alarmType,
                                                                   isResolved,
                                                                   startTime,
-                                                                  endTime);
+                                                                  endTime,
+                                                                  resolveStartTime,
+                                                                  resolveEndTime,
+                                                                  maxUserPermission);
     const QString baseSql = trimSqlTerminator(m_sqlMapper->getSql("query_total_count_with_conditions"));
     if (baseSql.isEmpty()) {
         qWarning() << "SQL not found: query_total_count_with_conditions";

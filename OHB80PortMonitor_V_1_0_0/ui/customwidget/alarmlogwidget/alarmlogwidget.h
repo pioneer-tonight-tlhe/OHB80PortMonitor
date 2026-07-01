@@ -57,6 +57,8 @@ private:
     int     m_lastIsResolved;       // -1 表示未启用
     QString m_lastStartTime;
     QString m_lastEndTime;
+    QString m_lastResolveStartTime;
+    QString m_lastResolveEndTime;
 
     void submitQuery(int page);
     void setHistoryLogData(const QList<AlarmRecord>& data);

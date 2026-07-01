@@ -36,16 +36,22 @@ public:
                                                const QString& startTime,
                                                const QString& endTime,
                                                int pageSize,
-                                               int pageNumber);
+                                               int pageNumber,
+                                               const QString& resolveStartTime = QString(),
+                                               const QString& resolveEndTime = QString(),
+                                               int maxUserPermission = -1);
 
-    int queryTotalCount();
+    int queryTotalCount(int maxUserPermission = -1);
 
     int queryTotalCountWithConditions(int alarmLevel,
                                       const QString& qrCode,
                                       const QString& alarmType,
                                       int isResolved,
                                       const QString& startTime,
-                                      const QString& endTime);
+                                      const QString& endTime,
+                                      const QString& resolveStartTime = QString(),
+                                      const QString& resolveEndTime = QString(),
+                                      int maxUserPermission = -1);
 
     int queryMonthRange();
 

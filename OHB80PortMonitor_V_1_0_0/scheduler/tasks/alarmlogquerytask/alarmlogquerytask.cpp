@@ -8,6 +8,7 @@ AlarmLogQueryTask::AlarmLogQueryTask(QObject *parent)
     , m_db(nullptr)
     , m_alarmLevel(-1)
     , m_isResolved(-1)
+    , m_maxUserPermission(-1)
     , m_pageNumber(0)
     , m_pageSize(500)
 {
@@ -78,6 +79,17 @@ void AlarmLogQueryTask::setOccurTimeRange(const QString& startTime, const QStrin
     m_endTime = endTime;
 }
 
+void AlarmLogQueryTask::setResolveTimeRange(const QString& startTime, const QString& endTime)
+{
+    m_resolveStartTime = startTime;
+    m_resolveEndTime = endTime;
+}
+
+void AlarmLogQueryTask::setMaxUserPermission(int maxUserPermission)
+{
+    m_maxUserPermission = maxUserPermission;
+}
+
 void AlarmLogQueryTask::executeQuery()
 {
     // 使用 Defer 确保函数退出时刷新日志
@@ -92,17 +104,21 @@ void AlarmLogQueryTask::executeQuery()
         return;
     }
 
+    const bool hasOccurTimeCondition = !m_startTime.isEmpty() || !m_endTime.isEmpty();
     const bool hasUserConditions = (m_alarmLevel != -1)
         || !m_qrCode.isEmpty()
         || !m_alarmType.isEmpty()
         || (m_isResolved != -1)
-        || !m_startTime.isEmpty()
-        || !m_endTime.isEmpty();
+        || hasOccurTimeCondition
+        || !m_resolveStartTime.isEmpty()
+        || !m_resolveEndTime.isEmpty();
 
     QString dbEarliest;
     QString dbLatest;
-    m_db->queryTimeBounds(dbEarliest, dbLatest);
-    if (!dbEarliest.isEmpty() && !dbLatest.isEmpty()) {
+    if (hasOccurTimeCondition) {
+        m_db->queryTimeBounds(dbEarliest, dbLatest);
+    }
+    if (hasOccurTimeCondition && !dbEarliest.isEmpty() && !dbLatest.isEmpty()) {
         const QString effStart = m_startTime.isEmpty() ? dbEarliest : m_startTime;
         const QString effEnd   = m_endTime.isEmpty()   ? dbLatest   : m_endTime;
         const bool noOverlap = (effStart > dbLatest) || (effEnd < dbEarliest);
@@ -135,12 +151,20 @@ void AlarmLogQueryTask::executeQuery()
             .toStdString());
 
     // 有条件查询：当前页中所有满足条件的记录
+    LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO,
+        QString("[executeQuery] Resolve time range: %1 -> %2")
+            .arg(m_resolveStartTime.isEmpty() ? "All" : m_resolveStartTime)
+            .arg(m_resolveEndTime.isEmpty() ? "All" : m_resolveEndTime)
+            .toStdString());
+
     int pageRecordCount = 0;
     if (m_pageNumber > 0) {
         QList<AlarmRecord> pageRecords = m_db->queryPageWithConditions(
             m_alarmLevel, m_qrCode, m_alarmType, m_isResolved,
             m_startTime, m_endTime,
-            m_pageSize, m_pageNumber);
+            m_pageSize, m_pageNumber,
+            m_resolveStartTime, m_resolveEndTime,
+            m_maxUserPermission);
         pageRecordCount = pageRecords.size();
         emit pageWithConditionsResult(pageRecords);
     }
@@ -152,8 +176,11 @@ void AlarmLogQueryTask::executeQuery()
                                               m_alarmType,
                                               m_isResolved,
                                               m_startTime,
-                                              m_endTime)
-        : m_db->queryTotalCount();
+                                              m_endTime,
+                                              m_resolveStartTime,
+                                              m_resolveEndTime,
+                                              m_maxUserPermission)
+        : m_db->queryTotalCount(m_maxUserPermission);
     emit totalCountWithConditionsResult(totalCountWithConditions);
 
     setState(Finished);

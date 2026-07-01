@@ -147,7 +147,10 @@ void AlarmLogWidget::loadUnresolvedToLiveLog()
         /*startTime*/ QString(),
         /*endTime*/ QString(),
         /*pageSize*/ kLiveLogMaxRows,
-        /*pageNumber*/ 1);
+        /*pageNumber*/ 1,
+        /*resolveStartTime*/ QString(),
+        /*resolveEndTime*/ QString(),
+        /*maxUserPermission*/ static_cast<int>(UserManager::instance()->currentPermission()));
 
     // Feed older rows first so records with the same QRCode keep chronological order.
     for (auto it = rows.crbegin(); it != rows.crend(); ++it) {
@@ -423,6 +426,8 @@ void AlarmLogWidget::onSearchClicked()
     m_lastIsResolved = -1;
     m_lastStartTime.clear();
     m_lastEndTime.clear();
+    m_lastResolveStartTime.clear();
+    m_lastResolveEndTime.clear();
 
     if (ui->checkBoxQRCode->isChecked()) {
         m_lastQRCode = QString::number(ui->spinBoxQRCode->value());
@@ -468,6 +473,19 @@ void AlarmLogWidget::onSearchClicked()
     }
 
     // 点击 Search 总是回到第 1 页
+    if (ui->checkBoxResolvedTime->isChecked()) {
+        QString resolveStartTime = ui->lineEditResolvedTime->text().trimmed();
+        QString resolveEndTime = ui->lineEditResolvedEndTime->text().trimmed();
+        if (!resolveStartTime.isEmpty() || !resolveEndTime.isEmpty()) {
+            if (!resolveStartTime.isEmpty() && !resolveEndTime.isEmpty()
+                && resolveStartTime > resolveEndTime) {
+                qSwap(resolveStartTime, resolveEndTime);
+            }
+            m_lastResolveStartTime = resolveStartTime;
+            m_lastResolveEndTime = resolveEndTime;
+        }
+    }
+
     m_currentPage = 1;
     submitQuery(m_currentPage);
 }
@@ -494,6 +512,7 @@ void AlarmLogWidget::submitQuery(int page)
     AlarmLogQueryTask* task = new AlarmLogQueryTask();
     task->setPageNumber(page);
     task->setPageSize(m_pageSize);
+    task->setMaxUserPermission(static_cast<int>(UserManager::instance()->currentPermission()));
 
     if (m_lastAlarmLevel != -1)      task->setAlarmLevel(m_lastAlarmLevel);
     if (!m_lastQRCode.isEmpty())     task->setQRCode(m_lastQRCode);
@@ -507,6 +526,10 @@ void AlarmLogWidget::submitQuery(int page)
             qSwap(s, e);
         }
         task->setOccurTimeRange(s, e);
+    }
+
+    if (!m_lastResolveStartTime.isEmpty() || !m_lastResolveEndTime.isEmpty()) {
+        task->setResolveTimeRange(m_lastResolveStartTime, m_lastResolveEndTime);
     }
 
     connect(task, &AlarmLogQueryTask::pageWithConditionsResult,

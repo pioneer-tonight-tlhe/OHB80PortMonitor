@@ -45,10 +45,13 @@ public slots:
                                                const QString& startTime,
                                                const QString& endTime,
                                                int pageSize,
-                                               int pageNumber);
+                                               int pageNumber,
+                                               const QString& resolveStartTime = QString(),
+                                               const QString& resolveEndTime = QString(),
+                                               int maxUserPermission = -1);
 
     // 总记录数（无条件，直接读取 log_record_count 缓存表）
-    int queryTotalCount();
+    int queryTotalCount(int maxUserPermission = -1);
 
     // 条件查询的总记录数
     int queryTotalCountWithConditions(int alarmLevel,
@@ -56,7 +59,10 @@ public slots:
                                       const QString& alarmType,
                                       int isResolved,
                                       const QString& startTime,
-                                      const QString& endTime);
+                                      const QString& endTime,
+                                      const QString& resolveStartTime = QString(),
+                                      const QString& resolveEndTime = QString(),
+                                      int maxUserPermission = -1);
 
     // 查询数据库的最早/最晚时间（用于计算月份范围）
     QVariantMap queryMonthRange();
