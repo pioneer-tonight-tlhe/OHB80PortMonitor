@@ -1,39 +1,35 @@
+/*******************************************************************************************
+ * @file communicaterecord.h
+ * @author Simon <工号：13> 2026-07-01
+ *
+ * @class CommunicateRecord
+ * @brief 定义与 `communicate_log` 表字段一一对应的通讯日志记录结构。
+ *
+ * 设计目标：
+ *      1. 统一封装通讯日志在 data、scheduler 和 UI 之间传递的记录字段。
+ *      2. 保留帧数据、执行状态和权限字段，便于历史查询与实时显示复用。
+ *      3. 支持 Qt 元对象系统注册后跨线程通过信号槽传递。
+ *******************************************************************************************/
 #ifndef COMMUNICATERECORD_H
 #define COMMUNICATERECORD_H
 
-#include <QString>
 #include <QByteArray>
 #include <QMetaType>
+#include <QString>
 
-// ====================================================================
-// CommunicateRecord —— 与 communicate_log 表结构对齐的纯数据记录类
-//
-// 表结构：
-//   id INTEGER PRIMARY KEY AUTOINCREMENT,
-//   send_time TEXT NOT NULL,
-//   response_time TEXT,
-//   command_id TEXT NOT NULL,
-//   qr_code TEXT NOT NULL,
-//   exec_status INTEGER NOT NULL,
-//   retry_count INTEGER NOT NULL,
-//   send_frame BLOB,
-//   response_frame BLOB,
-//   description TEXT,
-//   user_permission INTEGER NOT NULL DEFAULT 0
-// ====================================================================
 struct CommunicateRecord
 {
-    int        id              = 0;     // 主键
-    QString    sendTime;               // 发送时间 "yyyy-MM-dd HH:mm:ss"
-    QString    responseTime;           // 响应时间 "yyyy-MM-dd HH:mm:ss"
-    QString    commandId;              // 命令ID
-    QString    qrCode;                 // 设备二维码
-    int        execStatus      = 0;     // 执行状态（ExecStatus：0=Success, 1=Failure, 2=Timeout）
-    int        retryCount      = 0;     // 重试次数
-    QByteArray sendFrame;              // 发送帧（BLOB）
-    QByteArray responseFrame;          // 响应帧（BLOB）
-    QString    description;            // 描述
-    int        userPermission  = 0;     // 触发该通讯的用户权限（UserPermission）
+    int id = 0;
+    QString sendTime;
+    QString responseTime;
+    QString commandId;
+    QString qrCode;
+    int execStatus = 0;
+    int retryCount = 0;
+    QByteArray sendFrame;
+    QByteArray responseFrame;
+    QString description;
+    int userPermission = 0;
 
     void reset()
     {

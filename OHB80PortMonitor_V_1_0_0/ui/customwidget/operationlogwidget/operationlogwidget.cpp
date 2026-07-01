@@ -62,8 +62,11 @@ OperationLogWidget::OperationLogWidget(QWidget *parent)
     , m_totalPages(0)
     , m_pendingSelect(PSNone)
     , m_pendingSelectId(0)
+    , m_totalCountInRange(0)
     , m_totalMatchedCount(0)
     , m_firstMatchedPositionOnPage(0)
+    , m_hasCachedTotalCountInRange(false)
+    , m_hasCachedTotalMatchedCount(false)
     , m_suppressPaginationSignal(false)
     , m_hasHistoryQuery(false)
 {
@@ -204,7 +207,10 @@ void OperationLogWidget::reloadLiveLogFromDatabase()
     model->removeRows(0, model->rowCount());
 
     auto* db = LogDB::DatabaseManager::instance().operationLogCon();
-    if (!db) return;
+    if (!db) {
+        hideWaitingDialog();
+        return;
+    }
 
     const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
     const QList<OperationRecord> records =
@@ -221,8 +227,11 @@ void OperationLogWidget::refreshByCurrentPermission()
     m_selected.reset();
     m_matchedIdsSet.clear();
     m_matchedIdsOrdered.clear();
+    m_totalCountInRange = 0;
     m_totalMatchedCount = 0;
     m_firstMatchedPositionOnPage = 0;
+    m_hasCachedTotalCountInRange = false;
+    m_hasCachedTotalMatchedCount = false;
     updatePageInfoLabel();
     updatePrevNextButtonsEnabled();
 
@@ -279,6 +288,8 @@ void OperationLogWidget::onSetRecordTimeClicked()
 // 让任务自动定位首条命中所在页。
 void OperationLogWidget::onSearchClicked()
 {
+    showWaitingDialog();
+
     m_conditions = MatchConditions();
     if (ui->checkBoxLogType->isChecked()) {
         m_conditions.logType = ui->comboBoxLogType->currentData().toInt();
@@ -297,27 +308,57 @@ void OperationLogWidget::onSearchClicked()
     }
 
     m_selected.reset();
+    m_totalCountInRange          = 0;
     m_totalMatchedCount          = 0;
     m_firstMatchedPositionOnPage = 0;
+    m_hasCachedTotalCountInRange = false;
+    m_hasCachedTotalMatchedCount = false;
     updatePageInfoLabel();
 
     // targetPage=0 → 任务自动定位首条命中所在页（无匹配条件时回退到第 1 页）
     submitQueryTask(1, 0);
 }
 
-void OperationLogWidget::submitQueryTask(int targetPage, int pendingSelectId)
+void OperationLogWidget::showWaitingDialog(bool restartElapsed)
 {
-    m_hasHistoryQuery = true;
-
     if (!m_waitDialog) {
         m_waitDialog = new WaitDialog(this);
         connect(m_waitDialog, &WaitDialog::cancelRequested,
                 this, &OperationLogWidget::onCancelRequested);
     }
-    m_waitDialog->setWaiting(tr("Querying, please wait..."));
+
+    if (restartElapsed || !m_waitDialog->isVisible()) {
+        m_waitDialog->setWaiting(tr("Querying, please wait..."));
+    }
+
     m_waitDialog->show();
     m_waitDialog->raise();
     m_waitDialog->activateWindow();
+}
+
+void OperationLogWidget::hideWaitingDialog()
+{
+    if (m_waitDialog) {
+        m_waitDialog->hide();
+    }
+}
+
+void OperationLogWidget::submitQueryTask(int targetPage,
+                                         int pendingSelectId,
+                                         PageQueryMode mode,
+                                         int anchorRecordId,
+                                         bool navigateToAdjacentMatch,
+                                         bool navigationNext,
+                                         int navigateToMatchedPosition)
+{
+    m_hasHistoryQuery = true;
+    showWaitingDialog(false);
+
+    const int sourceFirstMatchedPosition = m_firstMatchedPositionOnPage;
+    const int sourceMatchedCount = m_matchedIdsOrdered.size();
+    const bool canReuseAdjacentPagePosition = (mode != PageByNumber)
+                                              && !m_conditions.keyword.isEmpty()
+                                              && sourceFirstMatchedPosition > 0;
 
     m_matchedIdsSet.clear();
     m_matchedIdsOrdered.clear();
@@ -332,6 +373,30 @@ void OperationLogWidget::submitQueryTask(int targetPage, int pendingSelectId)
     if (targetPage > 0) {
         task->setTargetPage(targetPage);
     }
+    if (anchorRecordId > 0) {
+        if (mode == PageAfterAnchor) {
+            task->setNextPageAnchorId(anchorRecordId);
+        } else if (mode == PageBeforeAnchor) {
+            task->setPreviousPageAnchorId(anchorRecordId);
+        }
+    }
+    if (navigateToAdjacentMatch && anchorRecordId > 0) {
+        task->setNavigateToAdjacentMatch(anchorRecordId, navigationNext);
+    }
+    if (navigateToMatchedPosition > 0) {
+        task->setNavigateToMatchedPosition(navigateToMatchedPosition);
+    }
+    if (m_hasCachedTotalCountInRange) {
+        task->setCachedTotalCountInRange(m_totalCountInRange);
+    }
+    if (m_hasCachedTotalMatchedCount) {
+        task->setCachedTotalMatchedCount(m_totalMatchedCount);
+    }
+    if (canReuseAdjacentPagePosition) {
+        task->setAdjacentPagePositionHint(mode == PageAfterAnchor,
+                                          sourceFirstMatchedPosition,
+                                          sourceMatchedCount);
+    }
     if (!m_range.isEmpty()) {
         task->setTimeRange(m_range.startTime, m_range.endTime);
     }
@@ -344,6 +409,8 @@ void OperationLogWidget::submitQueryTask(int targetPage, int pendingSelectId)
 
     connect(task, &OperationLogQueryTask::targetPageResult,
             this, &OperationLogWidget::onTargetPageResult, Qt::QueuedConnection);
+    connect(task, &OperationLogQueryTask::pendingSelectIdResult,
+            this, &OperationLogWidget::onPendingSelectIdResult, Qt::QueuedConnection);
     connect(task, &OperationLogQueryTask::currentPageResult,
             this, &OperationLogWidget::onCurrentPageResult, Qt::QueuedConnection);
     connect(task, &OperationLogQueryTask::matchedIdsOnPageResult,
@@ -392,9 +459,7 @@ void OperationLogWidget::onCancelRequested()
         Scheduler::instance()->cancelTask(m_activeTaskId);
         m_activeTaskId.clear();
     }
-    if (m_waitDialog) {
-        m_waitDialog->hide();
-    }
+    hideWaitingDialog();
 }
 
 void OperationLogWidget::onTargetPageResult(int page)
@@ -406,13 +471,31 @@ void OperationLogWidget::onTargetPageResult(int page)
     m_suppressPaginationSignal = false;
 }
 
+void OperationLogWidget::onPendingSelectIdResult(int recordId)
+{
+    if (recordId <= 0) {
+        return;
+    }
+    m_pendingSelect = PSId;
+    m_pendingSelectId = recordId;
+}
+
 void OperationLogWidget::onPaginationPageChanged(int page)
 {
     if (m_suppressPaginationSignal) {
         return;
     }
     m_selected.reset();
-    submitQueryTask(page, 0);
+    PageQueryMode mode = PageByNumber;
+    int anchorRecordId = 0;
+    if (page == m_currentPage + 1 && !m_currentPageRecordIds.isEmpty()) {
+        mode = PageAfterAnchor;
+        anchorRecordId = m_currentPageRecordIds.last();
+    } else if (page == m_currentPage - 1 && !m_currentPageRecordIds.isEmpty()) {
+        mode = PageBeforeAnchor;
+        anchorRecordId = m_currentPageRecordIds.first();
+    }
+    submitQueryTask(page, 0, mode, anchorRecordId);
 }
 
 void OperationLogWidget::onCurrentPageResult(const QList<OperationRecord>& records)
@@ -465,6 +548,8 @@ void OperationLogWidget::onMatchedIdsOnPageResult(const QList<int>& matchedIds)
 
 void OperationLogWidget::onTotalCountInRangeResult(int totalCount)
 {
+    m_totalCountInRange = totalCount;
+    m_hasCachedTotalCountInRange = true;
     const int pageSize = (m_pageSize > 0) ? m_pageSize : 1;
     m_totalPages = (totalCount + pageSize - 1) / pageSize;
     ui->widgetPaginate->setTotalPages(m_totalPages);
@@ -473,6 +558,7 @@ void OperationLogWidget::onTotalCountInRangeResult(int totalCount)
 void OperationLogWidget::onTotalMatchedCountResult(int totalCount)
 {
     m_totalMatchedCount = totalCount;
+    m_hasCachedTotalMatchedCount = true;
     updatePageInfoLabel();
     updatePrevNextButtonsEnabled();
 }
@@ -573,16 +659,16 @@ void OperationLogWidget::onLiveLogClicked(const QModelIndex& index)
 void OperationLogWidget::jumpToMatchingId(bool next)
 {
     if (m_conditions.keyword.isEmpty()) {
+        hideWaitingDialog();
         return;
     }
 
-    // 1) 先尝试在本页内导航
     if (m_selected.id > 0) {
         const int idx = m_matchedIdsOrdered.indexOf(m_selected.id);
         if (idx >= 0) {
             const int targetIdx = next ? (idx + 1) : (idx - 1);
             if (targetIdx >= 0 && targetIdx < m_matchedIdsOrdered.size()) {
-                m_selected.id       = m_matchedIdsOrdered.at(targetIdx);
+                m_selected.id = m_matchedIdsOrdered.at(targetIdx);
                 m_selected.position = (m_firstMatchedPositionOnPage > 0)
                                           ? (m_firstMatchedPositionOnPage + targetIdx)
                                           : (targetIdx + 1);
@@ -590,77 +676,31 @@ void OperationLogWidget::jumpToMatchingId(bool next)
                 applyRowBackgrounds();
                 updatePageInfoLabel();
                 updatePrevNextButtonsEnabled();
+                hideWaitingDialog();
                 return;
             }
         }
     }
 
-    // 2) 跨页：基于 anchorId 查询下/上一条命中（在范围内）
-    auto* db = LogDB::DatabaseManager::instance().operationLogCon();
-    if (!db) return;
-
     int anchorId = m_selected.id;
     if (anchorId <= 0) {
-        // 当前未选中：以本页首/末条命中作为 anchor 起点
         if (!m_matchedIdsOrdered.isEmpty()) {
             anchorId = m_matchedIdsOrdered.first();
         } else if (!m_currentPageRecordIds.isEmpty()) {
             anchorId = next ? m_currentPageRecordIds.last() : m_currentPageRecordIds.first();
         } else {
+            hideWaitingDialog();
             return;
         }
     }
 
-    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
-    // The table is ordered by occur_time DESC: UI Next moves to an older row,
-    // while UI Pre moves to a newer row. When an edge is reached, wrap around.
-    int matchedId = next
-        ? db->queryPrevMatchingId(anchorId, m_range.startTime, m_range.endTime,
-                                   m_conditions.logType, m_conditions.keyword, currentPerm)
-        : db->queryNextMatchingId(anchorId, m_range.startTime, m_range.endTime,
-                                   m_conditions.logType, m_conditions.keyword, currentPerm);
-    if (matchedId <= 0) {
-        matchedId = next
-            ? db->queryFirstMatchedId(m_range.startTime, m_range.endTime,
-                                      m_conditions.logType, m_conditions.keyword, currentPerm)
-            : db->queryLastMatchedId(m_range.startTime, m_range.endTime,
-                                     m_conditions.logType, m_conditions.keyword, currentPerm);
-    }
-    if (matchedId <= 0) {
-        return;
-    }
-
-    const int localIdx = m_matchedIdsOrdered.indexOf(matchedId);
-    if (localIdx >= 0) {
-        m_selected.id       = matchedId;
-        m_selected.position = (m_firstMatchedPositionOnPage > 0)
-                                  ? (m_firstMatchedPositionOnPage + localIdx)
-                                  : (localIdx + 1);
-        selectAndScrollRowById(m_selected.id);
-        applyRowBackgrounds();
-        updatePageInfoLabel();
-        updatePrevNextButtonsEnabled();
-        return;
-    }
-
-    // 3) 算出该 id 在范围内的页号
-    int targetPage = db->queryRecordPageWithBaseConditions(matchedId,
-                                                            m_range.startTime, m_range.endTime,
-                                                            m_conditions.logType,
-                                                            m_pageSize, currentPerm);
-    if (targetPage <= 0) targetPage = 1;
-
-    if (targetPage == m_currentPage) {
-        // 同页但本页没有这个 id（不应发生）—— 退化为重查
-        submitQueryTask(targetPage, matchedId);
-    } else {
-        submitQueryTask(targetPage, matchedId);
-    }
+    submitQueryTask(0, 0, PageByNumber, anchorId, true, next);
 }
 
 void OperationLogWidget::jumpToMatchedPosition(int position)
 {
     if (m_conditions.keyword.isEmpty() || m_totalMatchedCount <= 0) {
+        hideWaitingDialog();
         return;
     }
 
@@ -671,50 +711,57 @@ void OperationLogWidget::jumpToMatchedPosition(int position)
         targetPosition = m_totalMatchedCount;
     }
 
-    auto* db = LogDB::DatabaseManager::instance().operationLogCon();
-    if (!db) return;
-
-    const int currentPerm = static_cast<int>(UserManager::instance()->currentPermission());
-    const int matchedId = db->queryMatchedIdByPosition(targetPosition,
-                                                       m_range.startTime, m_range.endTime,
-                                                       m_conditions.logType,
-                                                       m_conditions.keyword,
-                                                       currentPerm);
-    if (matchedId <= 0) {
+    if (m_selected.position == targetPosition && m_selected.id > 0) {
+        hideWaitingDialog();
         return;
     }
 
-    const int localIdx = m_matchedIdsOrdered.indexOf(matchedId);
-    if (localIdx >= 0) {
-        m_selected.id       = matchedId;
+    if (m_firstMatchedPositionOnPage > 0) {
+        const int localIdx = targetPosition - m_firstMatchedPositionOnPage;
+        if (localIdx >= 0 && localIdx < m_matchedIdsOrdered.size()) {
+            m_selected.id = m_matchedIdsOrdered.at(localIdx);
+            m_selected.position = targetPosition;
+            selectAndScrollRowById(m_selected.id);
+            applyRowBackgrounds();
+            updatePageInfoLabel();
+            updatePrevNextButtonsEnabled();
+            hideWaitingDialog();
+            return;
+        }
+    }
+
+    const int localIdx = targetPosition - 1;
+    if (m_firstMatchedPositionOnPage <= 0
+        && localIdx >= 0
+        && localIdx < m_matchedIdsOrdered.size()) {
+        m_selected.id = m_matchedIdsOrdered.at(localIdx);
         m_selected.position = targetPosition;
         selectAndScrollRowById(m_selected.id);
         applyRowBackgrounds();
         updatePageInfoLabel();
         updatePrevNextButtonsEnabled();
+        hideWaitingDialog();
         return;
     }
 
-    int targetPage = db->queryRecordPageWithBaseConditions(matchedId,
-                                                            m_range.startTime, m_range.endTime,
-                                                            m_conditions.logType,
-                                                            m_pageSize, currentPerm);
-    if (targetPage <= 0) targetPage = 1;
-    submitQueryTask(targetPage, matchedId);
+    submitQueryTask(0, 0, PageByNumber, 0, false, false, targetPosition);
 }
 
 void OperationLogWidget::onPreClicked()
 {
+    showWaitingDialog();
     jumpToMatchingId(false);
 }
 
 void OperationLogWidget::onNextClicked()
 {
+    showWaitingDialog();
     jumpToMatchingId(true);
 }
 
 void OperationLogWidget::onJumpRecordClicked()
 {
+    showWaitingDialog();
     jumpToMatchedPosition(ui->spinBoxMatchPosition->value());
 }
 
@@ -734,7 +781,7 @@ void OperationLogWidget::onTaskFinished(bool success, const QString& message)
     }
     QTimer::singleShot(1000, this, [this]() {
         if (m_waitDialog) {
-            m_waitDialog->hide();
+            hideWaitingDialog();
         }
     });
 }

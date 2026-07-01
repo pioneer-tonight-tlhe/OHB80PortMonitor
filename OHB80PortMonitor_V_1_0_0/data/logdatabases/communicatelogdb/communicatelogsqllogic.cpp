@@ -7,8 +7,89 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <QStringList>
 
 namespace LogDB {
+
+namespace {
+
+struct CommunicateLogQueryParts
+{
+    QStringList whereConditions;
+    QVariantList bindValues;
+};
+
+CommunicateLogQueryParts buildCommunicateLogQueryParts(const QString& commandId,
+                                                        const QString& qrCode,
+                                                        int execStatus,
+                                                        int retryCount,
+                                                        const QString& startTime,
+                                                        const QString& endTime,
+                                                        int maxUserPermission)
+{
+    CommunicateLogQueryParts parts;
+    parts.whereConditions << QStringLiteral("user_permission <= ?");
+    parts.bindValues << maxUserPermission;
+
+    if (!commandId.isEmpty()) {
+        parts.whereConditions << QStringLiteral("command_id = ?");
+        parts.bindValues << commandId;
+    }
+    if (!qrCode.isEmpty()) {
+        parts.whereConditions << QStringLiteral("qr_code = ?");
+        parts.bindValues << qrCode;
+    }
+    if (execStatus != -1) {
+        parts.whereConditions << QStringLiteral("exec_status = ?");
+        parts.bindValues << execStatus;
+    }
+    if (retryCount != -1) {
+        parts.whereConditions << QStringLiteral("retry_count = ?");
+        parts.bindValues << retryCount;
+    }
+    if (!startTime.isEmpty()) {
+        parts.whereConditions << QStringLiteral("send_time >= ?");
+        parts.bindValues << startTime;
+    }
+    if (!endTime.isEmpty()) {
+        parts.whereConditions << QStringLiteral("send_time <= ?");
+        parts.bindValues << endTime;
+    }
+
+    return parts;
+}
+
+void bindValues(QSqlQuery& query, const QVariantList& values)
+{
+    for (const QVariant& value : values) {
+        query.addBindValue(value);
+    }
+}
+
+bool ensureCommunicateLogQueryIndexes(QSqlDatabase& database)
+{
+    static const QStringList indexStatements = {
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_communicate_log_time_id ON communicate_log(send_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_communicate_log_qr_time_id ON communicate_log(qr_code, send_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_communicate_log_command_time_id ON communicate_log(command_id, send_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_communicate_log_status_time_id ON communicate_log(exec_status, send_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_communicate_log_retry_time_id ON communicate_log(retry_count, send_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_communicate_log_qr_command_time_id ON communicate_log(qr_code, command_id, send_time DESC, id DESC)")
+    };
+
+    QSqlQuery query(database);
+    for (const QString& statement : indexStatements) {
+        if (!query.exec(statement)) {
+            qWarning() << "Failed to create communicate_log query index:"
+                       << query.lastError().text()
+                       << statement;
+            return false;
+        }
+    }
+    return true;
+}
+
+} // namespace
 
 CommunicateLogSqlLogic::CommunicateLogSqlLogic(const QString& databasePath, QObject* parent)
     : QObject(parent)
@@ -39,6 +120,9 @@ bool CommunicateLogSqlLogic::initializeDatabase()
     QString dbFilePath = QString("%1/logdb.db").arg(m_databasePath);
     m_database = DBConnectionHelper::openSqlite(dbFilePath, m_connectionName);
     if (!m_database.isOpen()) {
+        return false;
+    }
+    if (!ensureCommunicateLogQueryIndexes(m_database)) {
         return false;
     }
 
@@ -121,31 +205,24 @@ QList<QVariantMap> CommunicateLogSqlLogic::queryPageWithConditions(const QString
         return results;
     }
 
-    QString sql = m_sqlMapper->getSql("query_page_with_conditions");
-    if (sql.isEmpty()) {
-        qWarning() << "SQL not found: query_page_with_conditions";
-        return results;
-    }
-
     const QString orderKeyword =
         (static_cast<SortOrder>(sortOrder) == SortOrder::Asc) ? QStringLiteral("ASC")
                                                               : QStringLiteral("DESC");
-    sql.replace(QStringLiteral("{ORDER}"), orderKeyword);
+    const CommunicateLogQueryParts queryParts = buildCommunicateLogQueryParts(commandId,
+                                                                              qrCode,
+                                                                              execStatus,
+                                                                              retryCount,
+                                                                              startTime,
+                                                                              endTime,
+                                                                              maxUserPermission);
+    const QString sql = QStringLiteral("SELECT * FROM communicate_log WHERE %1 "
+                                       "ORDER BY send_time %2, id %2 LIMIT ? OFFSET ?")
+                            .arg(queryParts.whereConditions.join(QStringLiteral(" AND ")),
+                                 orderKeyword);
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
-    query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
-    query.addBindValue(qrCode.isEmpty() ? QVariant() : qrCode);
-    query.addBindValue(qrCode.isEmpty() ? QVariant() : qrCode);
-    query.addBindValue(execStatus == -1 ? QVariant() : execStatus);
-    query.addBindValue(execStatus == -1 ? QVariant() : execStatus);
-    query.addBindValue(retryCount == -1 ? QVariant() : retryCount);
-    query.addBindValue(retryCount == -1 ? QVariant() : retryCount);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(endTime.isEmpty() ? QVariant() : endTime);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(pageSize);
     query.addBindValue(calculateOffset(pageSize, pageNumber));
 
@@ -200,26 +277,19 @@ int CommunicateLogSqlLogic::queryTotalCountWithConditions(const QString& command
         return 0;
     }
 
-    QString sql = m_sqlMapper->getSql("query_total_count_with_conditions");
-    if (sql.isEmpty()) {
-        qWarning() << "SQL not found: query_total_count_with_conditions";
-        return 0;
-    }
+    const CommunicateLogQueryParts queryParts = buildCommunicateLogQueryParts(commandId,
+                                                                              qrCode,
+                                                                              execStatus,
+                                                                              retryCount,
+                                                                              startTime,
+                                                                              endTime,
+                                                                              maxUserPermission);
+    const QString sql = QStringLiteral("SELECT COUNT(*) AS total_count FROM communicate_log WHERE %1")
+                            .arg(queryParts.whereConditions.join(QStringLiteral(" AND ")));
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
-    query.addBindValue(commandId.isEmpty() ? QVariant() : commandId);
-    query.addBindValue(qrCode.isEmpty() ? QVariant() : qrCode);
-    query.addBindValue(qrCode.isEmpty() ? QVariant() : qrCode);
-    query.addBindValue(execStatus == -1 ? QVariant() : execStatus);
-    query.addBindValue(execStatus == -1 ? QVariant() : execStatus);
-    query.addBindValue(retryCount == -1 ? QVariant() : retryCount);
-    query.addBindValue(retryCount == -1 ? QVariant() : retryCount);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(endTime.isEmpty() ? QVariant() : endTime);
+    bindValues(query, queryParts.bindValues);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();

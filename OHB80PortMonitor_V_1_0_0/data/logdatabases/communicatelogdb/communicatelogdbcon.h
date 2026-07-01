@@ -1,13 +1,27 @@
+/*******************************************************************************************
+ * @file communicatelogdbcon.h
+ * @author Simon <工号：13> 2026-07-01
+ *
+ * @class CommunicateLogDBCon
+ * @brief 封装通讯日志数据库线程访问、异步写入转发和查询结果类型转换。
+ *
+ * 设计目标：
+ *      1. 将通讯日志 SQL 逻辑固定在独立工作线程中执行，隔离 UI 线程阻塞风险。
+ *      2. 通过统一写入连接提交 INSERT 和 DELETE，避免多连接写竞争。
+ *      3. 为 scheduler 和 UI 提供带排序、权限过滤的类型化查询接口。
+ *******************************************************************************************/
 #ifndef COMMUNICATELOGDBCON_H
 #define COMMUNICATELOGDBCON_H
 
-#include <QObject>
-#include <QThread>
-#include <QVariantMap>
 #include <QByteArray>
+#include <QList>
+#include <QObject>
+#include <QString>
+#include <QThread>
+
+#include "communicaterecord.h"
 #include "communicatelogsqllogic.h"
 #include "writesqldbcon.h"
-#include "communicaterecord.h"
 
 namespace LogDB {
 
@@ -16,34 +30,31 @@ class CommunicateLogDBCon : public QObject
     Q_OBJECT
 
 public:
-    // 必须传入外部 WriteSqlDBCon，本类不拥有其生命周期
-    CommunicateLogDBCon(const QString& databasePath, WriteSqlDBCon* externalWriteCon, QObject* parent = nullptr);
+    // ============================ 构造函数 ============================
+    CommunicateLogDBCon(const QString& databasePath, WriteSqlDBCon* externalWriteCon,
+                        QObject* parent = nullptr);
     ~CommunicateLogDBCon();
 
-    // 禁用默认构造、拷贝、赋值
     CommunicateLogDBCon() = delete;
     CommunicateLogDBCon(const CommunicateLogDBCon&) = delete;
     CommunicateLogDBCon& operator=(const CommunicateLogDBCon&) = delete;
 
-    // 初始化
+    // ============================ 生命周期 ============================
     bool initialize();
     void cleanup();
 
-    // 查询接口
-    // sortOrder 控制按 send_time 的排序方向，默认降序（最新在前）
+    // ============================ 查询接口 ============================
     QList<CommunicateRecord> queryPageWithConditions(const QString& commandId,
-                                                   const QString& qrCode,
-                                                   int execStatus,
-                                                   int retryCount,
-                                                   const QString& startTime,
-                                                   const QString& endTime,
-                                                   int pageSize,
-                                                   int pageNumber,
-                                                   SortOrder sortOrder = SortOrder::Desc,
-                                                   int maxUserPermission = 0);
-
+                                                     const QString& qrCode,
+                                                     int execStatus,
+                                                     int retryCount,
+                                                     const QString& startTime,
+                                                     const QString& endTime,
+                                                     int pageSize,
+                                                     int pageNumber,
+                                                     SortOrder sortOrder = SortOrder::Desc,
+                                                     int maxUserPermission = 0);
     int queryTotalCount();
-
     int queryTotalCountWithConditions(const QString& commandId,
                                       const QString& qrCode,
                                       int execStatus,
@@ -51,16 +62,10 @@ public:
                                       const QString& startTime,
                                       const QString& endTime,
                                       int maxUserPermission = 0);
-
     int queryMonthRange();
-
-    // 查询数据库中 send_time 的最早 / 最晚时间。
-    // 输出为 "yyyy-MM-dd HH:mm:ss" 格式；表为空时返回两个空字符串。
     void queryTimeBounds(QString& earliestTime, QString& latestTime);
 
-    // 插入接口
-    // userPermission: 触发该通讯的用户权限级别（UserPermission 枚举），
-    //                 默认 0（UserPermission::Guest），兼容旧调用方
+    // ============================ 写入接口 ============================
     void insertRecord(const QString& sendTime,
                       const QString& responseTime,
                       const QString& commandId,
@@ -71,19 +76,18 @@ public:
                       const QByteArray& responseFrame,
                       const QString& description,
                       int userPermission = 0);
-
-    // 删除接口
     void deleteByTimeRange(const QString& startTime, const QString& endTime);
 
 signals:
-    // 实时事件：本 DBCon 提交的 INSERT 已成功落库
-    // 携带 CommunicateRecord（包含 communicate_log 表所有字段）
+    // ---- 实时结果 ----
     void recordInserted(const CommunicateRecord& record);
 
 private slots:
+    // ---- 写入结果 ----
     void onWriteTaskCompleted(const WriteResult& result);
 
 private:
+    // ---- 线程与逻辑成员 ----
     QThread* m_workerThread;
     CommunicateLogSqlLogic* m_sqlLogic;
     WriteSqlDBCon* m_writeCon;

@@ -6,6 +6,8 @@
 #include <QSqlRecord>
 #include <QDateTime>
 #include <QDebug>
+#include <QStringList>
+#include <algorithm>
 
 namespace LogDB {
 
@@ -19,6 +21,95 @@ QVariant buildKeywordLikeValue(const QString& keyword)
     return QStringLiteral("%") + keyword + QStringLiteral("%");
 }
 
+struct OperationLogQueryParts
+{
+    QStringList whereConditions;
+    QVariantList bindValues;
+};
+
+void bindValues(QSqlQuery& query, const QVariantList& values)
+{
+    for (const QVariant& value : values) {
+        query.addBindValue(value);
+    }
+}
+
+QString trimSqlTerminator(QString sql)
+{
+    sql = sql.trimmed();
+    while (sql.endsWith(QLatin1Char(';'))) {
+        sql.chop(1);
+        sql = sql.trimmed();
+    }
+    return sql;
+}
+
+OperationLogQueryParts buildOperationLogQueryParts(const QString& startTime,
+                                                   const QString& endTime,
+                                                   int logType,
+                                                   const QString& keyword,
+                                                   int maxUserPermission,
+                                                   bool useDescriptionSearchIndex = false)
+{
+    OperationLogQueryParts parts;
+
+    parts.whereConditions << QStringLiteral("user_permission <= ?");
+    parts.bindValues << maxUserPermission;
+
+    if (!startTime.isEmpty()) {
+        parts.whereConditions << QStringLiteral("occur_time >= ?");
+        parts.bindValues << startTime;
+    }
+    if (!endTime.isEmpty()) {
+        parts.whereConditions << QStringLiteral("occur_time <= ?");
+        parts.bindValues << endTime;
+    }
+    if (logType != -1) {
+        parts.whereConditions << QStringLiteral("log_type = ?");
+        parts.bindValues << logType;
+    }
+    if (!keyword.isEmpty()) {
+        parts.whereConditions << (useDescriptionSearchIndex
+            ? QStringLiteral("id IN (SELECT rowid FROM operation_log_description_fts WHERE description LIKE ?)")
+            : QStringLiteral("description LIKE ?"));
+        parts.bindValues << buildKeywordLikeValue(keyword);
+    }
+
+    return parts;
+}
+
+QString appendWhere(const QString& baseSql, const OperationLogQueryParts& queryParts)
+{
+    if (queryParts.whereConditions.isEmpty()) {
+        return trimSqlTerminator(baseSql);
+    }
+
+    return QStringLiteral("%1 WHERE %2")
+        .arg(trimSqlTerminator(baseSql),
+             queryParts.whereConditions.join(QStringLiteral(" AND ")));
+}
+
+bool ensureOperationLogQueryIndexes(QSqlDatabase& database)
+{
+    static const QStringList indexStatements = {
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_operation_log_time_id ON operation_log(occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_operation_log_type_time_id ON operation_log(log_type, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_operation_log_permission_time_id ON operation_log(user_permission, occur_time DESC, id DESC)"),
+        QStringLiteral("CREATE INDEX IF NOT EXISTS idx_operation_log_type_permission_time_id ON operation_log(log_type, user_permission, occur_time DESC, id DESC)")
+    };
+
+    QSqlQuery query(database);
+    for (const QString& statement : indexStatements) {
+        if (!query.exec(statement)) {
+            qWarning() << "Failed to create operation_log query index:"
+                       << query.lastError().text()
+                       << statement;
+            return false;
+        }
+    }
+    return true;
+}
+
 } // namespace
 
 OperationLogSqlLogic::OperationLogSqlLogic(const QString& databasePath, QObject* parent)
@@ -27,6 +118,7 @@ OperationLogSqlLogic::OperationLogSqlLogic(const QString& databasePath, QObject*
     , m_connectionName("OperationLogSqlLogicConnection")
     , m_sqlMapper(nullptr)
     , m_cleanupScheduler(nullptr)
+    , m_useDescriptionSearchIndex(false)
 {
     QString sqlFilePath = QString("%1/operation_log_queries.sql").arg(databasePath);
     m_sqlMapper = new SqlMapper(sqlFilePath);
@@ -80,6 +172,11 @@ bool OperationLogSqlLogic::initializeDatabase()
         }
     }
 
+    if (!ensureOperationLogQueryIndexes(m_database)) {
+        return false;
+    }
+    m_useDescriptionSearchIndex = initializeDescriptionSearchIndex();
+
     // 初始化清理调度器。
     initializeCleanupScheduler();
 
@@ -103,6 +200,74 @@ void OperationLogSqlLogic::initializeCleanupScheduler()
         return deleteByTimeRange(s, e);
     });
     m_cleanupScheduler->start();
+}
+
+bool OperationLogSqlLogic::initializeDescriptionSearchIndex()
+{
+    if (!m_database.isOpen()) {
+        return false;
+    }
+
+    QSqlQuery existsQuery(m_database);
+    existsQuery.prepare(QStringLiteral(
+        "SELECT 1 FROM sqlite_master "
+        "WHERE type = 'table' AND name = 'operation_log_description_fts'"));
+    const bool tableExisted = existsQuery.exec() && existsQuery.next();
+
+    QSqlQuery query(m_database);
+    const QString createFts = QStringLiteral(
+        "CREATE VIRTUAL TABLE IF NOT EXISTS operation_log_description_fts "
+        "USING fts5(description, content='operation_log', content_rowid='id', tokenize='trigram')");
+    if (!query.exec(createFts)) {
+        qWarning() << "[OperationLogSqlLogic] FTS5 trigram description index unavailable:"
+                   << query.lastError().text();
+        return false;
+    }
+
+    const QStringList triggerStatements = {
+        QStringLiteral(
+            "CREATE TRIGGER IF NOT EXISTS operation_log_description_fts_ai "
+            "AFTER INSERT ON operation_log BEGIN "
+            "INSERT INTO operation_log_description_fts(rowid, description) "
+            "VALUES (new.id, new.description); "
+            "END"),
+        QStringLiteral(
+            "CREATE TRIGGER IF NOT EXISTS operation_log_description_fts_ad "
+            "AFTER DELETE ON operation_log BEGIN "
+            "INSERT INTO operation_log_description_fts(operation_log_description_fts, rowid, description) "
+            "VALUES ('delete', old.id, old.description); "
+            "END"),
+        QStringLiteral(
+            "CREATE TRIGGER IF NOT EXISTS operation_log_description_fts_au "
+            "AFTER UPDATE OF description ON operation_log BEGIN "
+            "INSERT INTO operation_log_description_fts(operation_log_description_fts, rowid, description) "
+            "VALUES ('delete', old.id, old.description); "
+            "INSERT INTO operation_log_description_fts(rowid, description) "
+            "VALUES (new.id, new.description); "
+            "END")
+    };
+
+    for (const QString& statement : triggerStatements) {
+        if (!query.exec(statement)) {
+            qWarning() << "[OperationLogSqlLogic] Failed to create description FTS trigger:"
+                       << query.lastError().text()
+                       << statement;
+            return false;
+        }
+    }
+
+    if (!tableExisted) {
+        if (!query.exec(QStringLiteral(
+                "INSERT INTO operation_log_description_fts(operation_log_description_fts) "
+                "VALUES ('rebuild')"))) {
+            qWarning() << "[OperationLogSqlLogic] Failed to rebuild description FTS index:"
+                       << query.lastError().text();
+            return false;
+        }
+    }
+
+    qDebug() << "[OperationLogSqlLogic] FTS5 trigram description index enabled";
+    return true;
 }
 
 bool OperationLogSqlLogic::insertRecord(const QString& occurTime, int logType, const QString& description,
@@ -213,14 +378,15 @@ QList<QVariantMap> OperationLogSqlLogic::queryPaginationInRange(const QString& s
         qWarning() << "SQL not found: query_pagination_in_range";
         return results;
     }
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, -1, QString(), maxUserPermission);
+    sql = QStringLiteral("%1 ORDER BY occur_time DESC, id DESC LIMIT ? OFFSET ?")
+              .arg(appendWhere(sql, queryParts));
     int offset = calculateOffset(pageSize, pageNumber);
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(pageSize);
     query.addBindValue(offset);
 
@@ -254,18 +420,14 @@ QList<QVariantMap> OperationLogSqlLogic::queryPaginationWithBaseConditions(const
     }
 
     int offset = calculateOffset(pageSize, pageNumber);
-    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
-    const QVariant rangeEnd = endTime.isEmpty() ? QVariant() : endTime;
-    const QVariant typeValue = (logType == -1) ? QVariant() : QVariant(logType);
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, QString(), maxUserPermission);
+    sql = QStringLiteral("%1 ORDER BY occur_time DESC, id DESC LIMIT ? OFFSET ?")
+              .arg(appendWhere(sql, queryParts));
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeEnd);
-    query.addBindValue(typeValue);
-    query.addBindValue(typeValue);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(pageSize);
     query.addBindValue(offset);
 
@@ -284,6 +446,107 @@ QList<QVariantMap> OperationLogSqlLogic::queryPaginationWithBaseConditions(const
     return results;
 }
 
+QList<QVariantMap> OperationLogSqlLogic::queryPaginationAfterBaseConditions(int anchorRecordId,
+                                                                            const QString& startTime,
+                                                                            const QString& endTime,
+                                                                            int logType,
+                                                                            int pageSize,
+                                                                            int maxUserPermission)
+{
+    QList<QVariantMap> results;
+    if (!m_database.isOpen() || anchorRecordId <= 0 || pageSize <= 0) {
+        return results;
+    }
+
+    QString baseSql = m_sqlMapper->getSql("query_pagination_with_base_conditions");
+    if (baseSql.isEmpty()) {
+        qWarning() << "SQL not found: query_pagination_with_base_conditions";
+        return results;
+    }
+
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, QString(), maxUserPermission);
+    const QString sql = QStringLiteral("%1 AND ("
+                                       "occur_time < (SELECT occur_time FROM operation_log WHERE id = ?) "
+                                       "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) "
+                                       "AND id < ?)) "
+                                       "ORDER BY occur_time DESC, id DESC LIMIT ?")
+                            .arg(appendWhere(baseSql, queryParts));
+
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    bindValues(query, queryParts.bindValues);
+    query.addBindValue(anchorRecordId);
+    query.addBindValue(anchorRecordId);
+    query.addBindValue(anchorRecordId);
+    query.addBindValue(pageSize);
+
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return results;
+    }
+    while (query.next()) {
+        QSqlRecord record = query.record();
+        QVariantMap row;
+        for (int i = 0; i < record.count(); ++i) {
+            row[record.fieldName(i)] = record.value(i);
+        }
+        results.append(row);
+    }
+    return results;
+}
+
+QList<QVariantMap> OperationLogSqlLogic::queryPaginationBeforeBaseConditions(int anchorRecordId,
+                                                                             const QString& startTime,
+                                                                             const QString& endTime,
+                                                                             int logType,
+                                                                             int pageSize,
+                                                                             int maxUserPermission)
+{
+    QList<QVariantMap> results;
+    if (!m_database.isOpen() || anchorRecordId <= 0 || pageSize <= 0) {
+        return results;
+    }
+
+    QString baseSql = m_sqlMapper->getSql("query_pagination_with_base_conditions");
+    if (baseSql.isEmpty()) {
+        qWarning() << "SQL not found: query_pagination_with_base_conditions";
+        return results;
+    }
+
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, QString(), maxUserPermission);
+    const QString sql = QStringLiteral("%1 AND ("
+                                       "occur_time > (SELECT occur_time FROM operation_log WHERE id = ?) "
+                                       "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) "
+                                       "AND id > ?)) "
+                                       "ORDER BY occur_time ASC, id ASC LIMIT ?")
+                            .arg(appendWhere(baseSql, queryParts));
+
+    QSqlQuery query(m_database);
+    query.prepare(sql);
+    bindValues(query, queryParts.bindValues);
+    query.addBindValue(anchorRecordId);
+    query.addBindValue(anchorRecordId);
+    query.addBindValue(anchorRecordId);
+    query.addBindValue(pageSize);
+
+    if (!query.exec()) {
+        qWarning() << "Query failed:" << query.lastError().text();
+        return results;
+    }
+    while (query.next()) {
+        QSqlRecord record = query.record();
+        QVariantMap row;
+        for (int i = 0; i < record.count(); ++i) {
+            row[record.fieldName(i)] = record.value(i);
+        }
+        results.append(row);
+    }
+    std::reverse(results.begin(), results.end());
+    return results;
+}
+
 int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const QString& endTime,
                                                  int maxUserPermission)
 {
@@ -291,7 +554,7 @@ int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const
         return 0;
     }
     // 无范围时直接查询当前权限可见的总数。
-    if (startTime.isEmpty()) {
+    if (startTime.isEmpty() && endTime.isEmpty()) {
         return queryTotalCount(maxUserPermission);
     }
     QString sql = m_sqlMapper->getSql("query_total_count_in_range");
@@ -299,12 +562,12 @@ int OperationLogSqlLogic::queryTotalCountInRange(const QString& startTime, const
         qWarning() << "SQL not found: query_total_count_in_range";
         return 0;
     }
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, -1, QString(), maxUserPermission);
+    sql = appendWhere(sql, queryParts);
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime);
-    query.addBindValue(startTime);
-    query.addBindValue(endTime);
+    bindValues(query, queryParts.bindValues);
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
         return 0;
@@ -328,18 +591,13 @@ int OperationLogSqlLogic::queryTotalCountWithBaseConditions(const QString& start
         return 0;
     }
 
-    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
-    const QVariant rangeEnd = endTime.isEmpty() ? QVariant() : endTime;
-    const QVariant typeValue = (logType == -1) ? QVariant() : QVariant(logType);
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, QString(), maxUserPermission);
+    sql = appendWhere(sql, queryParts);
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeEnd);
-    query.addBindValue(typeValue);
-    query.addBindValue(typeValue);
+    bindValues(query, queryParts.bindValues);
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
         return 0;
@@ -362,14 +620,19 @@ int OperationLogSqlLogic::queryRecordPageInRange(int recordId, const QString& st
         qWarning() << "SQL not found: query_record_page_in_range";
         return 0;
     }
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, -1, QString(), maxUserPermission);
+    sql = QStringLiteral("%1 AND ("
+                         "occur_time > (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "AND id >= ?))"
+                         ") AS sub")
+              .arg(appendWhere(sql, queryParts));
     QSqlQuery query(m_database);
     query.prepare(sql);
     query.addBindValue(pageSize);
     query.addBindValue(pageSize);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(recordId);
     query.addBindValue(recordId);
     query.addBindValue(recordId);
@@ -395,20 +658,20 @@ int OperationLogSqlLogic::queryRecordPageWithBaseConditions(int recordId, const 
         return 0;
     }
 
-    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
-    const QVariant rangeEnd = endTime.isEmpty() ? QVariant() : endTime;
-    const QVariant typeValue = (logType == -1) ? QVariant() : QVariant(logType);
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, QString(), maxUserPermission);
+    sql = QStringLiteral("%1 AND ("
+                         "occur_time > (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "AND id >= ?))"
+                         ") AS sub")
+              .arg(appendWhere(sql, queryParts));
 
     QSqlQuery query(m_database);
     query.prepare(sql);
     query.addBindValue(pageSize);
     query.addBindValue(pageSize);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeEnd);
-    query.addBindValue(typeValue);
-    query.addBindValue(typeValue);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(recordId);
     query.addBindValue(recordId);
     query.addBindValue(recordId);
@@ -440,20 +703,17 @@ QList<QVariantMap> OperationLogSqlLogic::queryPageWithConditions(const QString& 
     }
 
     int offset = calculateOffset(pageSize, pageNumber);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("%1 ORDER BY occur_time DESC, id DESC LIMIT ? OFFSET ?")
+              .arg(appendWhere(sql, queryParts));
 
     QSqlQuery query(m_database);
     query.prepare(sql);
-    query.addBindValue(maxUserPermission);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(pageSize);
     query.addBindValue(offset);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -485,17 +745,14 @@ int OperationLogSqlLogic::queryTotalCountWithConditions(const QString& startTime
         return 0;
     }
 
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = appendWhere(sql, queryParts);
+
     QSqlQuery query(m_database);
     query.prepare(sql);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -525,31 +782,25 @@ int OperationLogSqlLogic::queryRecordPosition(int recordId, const QString& start
     }
 
     QSqlQuery query(m_database);
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    const QString whereSql = queryParts.whereConditions.join(QStringLiteral(" AND "));
+    sql = QStringLiteral(
+        "SELECT CASE "
+        "WHEN (SELECT COUNT(*) FROM operation_log WHERE %1 AND id = ?) > 0 "
+        "THEN (SELECT COUNT(*) + 1 FROM operation_log WHERE %1 "
+        "AND (occur_time > (SELECT occur_time FROM operation_log WHERE id = ?) "
+        "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) AND id > ?))) "
+        "ELSE 0 END AS position")
+              .arg(whereSql);
+
     query.prepare(sql);
-
-    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
-    const QVariant rangeEnd = startTime.isEmpty() ? QVariant() : endTime;
-    const QVariant typeValue = logType == -1 ? QVariant() : logType;
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
-
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeEnd);
-    query.addBindValue(typeValue);
-    query.addBindValue(typeValue);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(recordId);
-
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeEnd);
-    query.addBindValue(typeValue);
-    query.addBindValue(typeValue);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
+    query.addBindValue(recordId);
+    query.addBindValue(recordId);
     query.addBindValue(recordId);
 
     if (!query.exec()) {
@@ -578,24 +829,20 @@ int OperationLogSqlLogic::queryFirstRecordPage(const QString& startTime, const Q
         return 0;
     }
 
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("SELECT (first_id + ? - 1) / ? AS page_number FROM ("
+                         "%1 ORDER BY occur_time DESC, id DESC LIMIT 1"
+                         ") subquery")
+              .arg(appendWhere(sql, queryParts).replace(QStringLiteral("SELECT *"),
+                                                        QStringLiteral("SELECT id AS first_id")));
+
     QSqlQuery query(m_database);
     query.prepare(sql);
-
-    const QVariant rangeStart = startTime.isEmpty() ? QVariant() : startTime;
-    const QVariant rangeEnd = startTime.isEmpty() ? QVariant() : endTime;
-    const QVariant typeValue = logType == -1 ? QVariant() : logType;
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
-
     query.addBindValue(pageSize);
     query.addBindValue(pageSize);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeStart);
-    query.addBindValue(rangeEnd);
-    query.addBindValue(typeValue);
-    query.addBindValue(typeValue);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -620,17 +867,14 @@ int OperationLogSqlLogic::queryFirstMatchedId(const QString& startTime, const QS
         qWarning() << "SQL not found: query_first_matched_id";
         return 0;
     }
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("%1 ORDER BY occur_time DESC, id DESC LIMIT 1")
+              .arg(appendWhere(sql, queryParts));
     QSqlQuery query(m_database);
     query.prepare(sql);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
         return 0;
@@ -652,17 +896,14 @@ int OperationLogSqlLogic::queryLastMatchedId(const QString& startTime, const QSt
         qWarning() << "SQL not found: query_last_matched_id";
         return 0;
     }
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("%1 ORDER BY occur_time ASC, id ASC LIMIT 1")
+              .arg(appendWhere(sql, queryParts));
     QSqlQuery query(m_database);
     query.prepare(sql);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
         return 0;
@@ -684,17 +925,14 @@ int OperationLogSqlLogic::queryMatchedIdByPosition(int position, const QString& 
         qWarning() << "SQL not found: query_matched_id_by_position";
         return 0;
     }
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("%1 ORDER BY occur_time DESC, id DESC LIMIT 1 OFFSET ?")
+              .arg(appendWhere(sql, queryParts));
     QSqlQuery query(m_database);
     query.prepare(sql);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(position - 1);
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -719,18 +957,22 @@ int OperationLogSqlLogic::queryPrevMatchingId(int anchorId, const QString& start
         return 0;
     }
 
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("%1 AND ("
+                         "occur_time < (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "AND id < ?)) "
+                         "ORDER BY occur_time DESC, id DESC LIMIT 1")
+              .arg(appendWhere(sql, queryParts));
+
     QSqlQuery query(m_database);
     query.prepare(sql);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(anchorId);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    query.addBindValue(anchorId);
+    query.addBindValue(anchorId);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();
@@ -757,18 +999,22 @@ int OperationLogSqlLogic::queryNextMatchingId(int anchorId, const QString& start
         return 0;
     }
 
+    const OperationLogQueryParts queryParts =
+        buildOperationLogQueryParts(startTime, endTime, logType, keyword,
+                                    maxUserPermission, m_useDescriptionSearchIndex);
+    sql = QStringLiteral("%1 AND ("
+                         "occur_time > (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "OR (occur_time = (SELECT occur_time FROM operation_log WHERE id = ?) "
+                         "AND id > ?)) "
+                         "ORDER BY occur_time ASC, id ASC LIMIT 1")
+              .arg(appendWhere(sql, queryParts));
+
     QSqlQuery query(m_database);
     query.prepare(sql);
-    const QVariant keywordValue = buildKeywordLikeValue(keyword);
+    bindValues(query, queryParts.bindValues);
     query.addBindValue(anchorId);
-    query.addBindValue(maxUserPermission);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : startTime);
-    query.addBindValue(startTime.isEmpty() ? QVariant() : endTime);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(logType == -1 ? QVariant() : logType);
-    query.addBindValue(keywordValue);
-    query.addBindValue(keywordValue);
+    query.addBindValue(anchorId);
+    query.addBindValue(anchorId);
 
     if (!query.exec()) {
         qWarning() << "Query failed:" << query.lastError().text();

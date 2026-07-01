@@ -100,20 +100,40 @@ QList<AlarmRecord> AlarmLogDBCon::queryPageWithConditions(int alarmLevel,
                                                           const QString& startTime,
                                                           const QString& endTime,
                                                           int pageSize,
-                                                          int pageNumber)
+                                                          int pageNumber,
+                                                          const QString& resolveStartTime,
+                                                          const QString& resolveEndTime,
+                                                          int maxUserPermission)
 {
     QList<QVariantMap> varResults;
-    QMetaObject::invokeMethod(m_sqlLogic, "queryPageWithConditions",
-                              Qt::BlockingQueuedConnection,
-                              Q_RETURN_ARG(QList<QVariantMap>, varResults),
-                              Q_ARG(int, alarmLevel),
-                              Q_ARG(QString, qrCode),
-                              Q_ARG(QString, alarmType),
-                              Q_ARG(int, isResolved),
-                              Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime),
-                              Q_ARG(int, pageSize),
-                              Q_ARG(int, pageNumber));
+    QMetaObject::invokeMethod(m_sqlLogic,
+                              [this,
+                               &varResults,
+                               alarmLevel,
+                               qrCode,
+                               alarmType,
+                               isResolved,
+                               startTime,
+                               endTime,
+                               pageSize,
+                               pageNumber,
+                               resolveStartTime,
+                               resolveEndTime,
+                               maxUserPermission]() {
+                                  varResults = m_sqlLogic->queryPageWithConditions(
+                                      alarmLevel,
+                                      qrCode,
+                                      alarmType,
+                                      isResolved,
+                                      startTime,
+                                      endTime,
+                                      pageSize,
+                                      pageNumber,
+                                      resolveStartTime,
+                                      resolveEndTime,
+                                      maxUserPermission);
+                              },
+                              Qt::BlockingQueuedConnection);
 
     // 转换 QVariantMap 为 AlarmRecord
     QList<AlarmRecord> results;
@@ -134,12 +154,13 @@ QList<AlarmRecord> AlarmLogDBCon::queryPageWithConditions(int alarmLevel,
     return results;
 }
 
-int AlarmLogDBCon::queryTotalCount()
+int AlarmLogDBCon::queryTotalCount(int maxUserPermission)
 {
     int count = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCount",
                               Qt::BlockingQueuedConnection,
-                              Q_RETURN_ARG(int, count));
+                              Q_RETURN_ARG(int, count),
+                              Q_ARG(int, maxUserPermission));
     return count;
 }
 
@@ -148,7 +169,10 @@ int AlarmLogDBCon::queryTotalCountWithConditions(int alarmLevel,
                                                  const QString& alarmType,
                                                  int isResolved,
                                                  const QString& startTime,
-                                                 const QString& endTime)
+                                                 const QString& endTime,
+                                                 const QString& resolveStartTime,
+                                                 const QString& resolveEndTime,
+                                                 int maxUserPermission)
 {
     int count = 0;
     QMetaObject::invokeMethod(m_sqlLogic, "queryTotalCountWithConditions",
@@ -159,7 +183,10 @@ int AlarmLogDBCon::queryTotalCountWithConditions(int alarmLevel,
                               Q_ARG(QString, alarmType),
                               Q_ARG(int, isResolved),
                               Q_ARG(QString, startTime),
-                              Q_ARG(QString, endTime));
+                              Q_ARG(QString, endTime),
+                              Q_ARG(QString, resolveStartTime),
+                              Q_ARG(QString, resolveEndTime),
+                              Q_ARG(int, maxUserPermission));
     return count;
 }
 

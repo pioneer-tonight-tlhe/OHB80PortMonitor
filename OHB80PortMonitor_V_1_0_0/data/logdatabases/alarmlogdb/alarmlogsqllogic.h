@@ -1,13 +1,27 @@
+/*******************************************************************************************
+ * @file alarmlogsqllogic.h
+ * @author Simon <工号：13> 2026-07-01
+ *
+ * @class AlarmLogSqlLogic
+ * @brief 在数据库工作线程中执行警报日志 SQL 初始化、查询和清理请求。
+ *
+ * 设计目标：
+ *      1. 集中维护 `alarm_log` 表的 SQL 构造、分页查询和状态更新逻辑。
+ *      2. 将时间范围、解决状态和权限过滤统一下沉到 data 层执行。
+ *      3. 复用月度清理调度器，保持警报日志数据库生命周期管理一致。
+ *******************************************************************************************/
 #ifndef ALARMLOGSQLLOGIC_H
 #define ALARMLOGSQLLOGIC_H
 
 #include <QObject>
 #include <QSqlDatabase>
+#include <QString>
 #include <QVariant>
-#include <QVariantMap>
 #include <QVariantList>
-#include "sqlmapper.h"
+#include <QVariantMap>
+
 #include "dbtypes.h"
+#include "sqlmapper.h"
 
 namespace LogDB {
 
@@ -18,15 +32,15 @@ class AlarmLogSqlLogic : public QObject
     Q_OBJECT
 
 public:
+    // ============================ 构造函数 ============================
     explicit AlarmLogSqlLogic(const QString& databasePath, QObject* parent = nullptr);
     ~AlarmLogSqlLogic();
 
 public slots:
-    // 初始化数据库连接
+    // ============================ 生命周期 ============================
     bool initializeDatabase();
 
-    // 插入数据
-    // userPermission 默认 0（UserPermission::Guest），兼容旧调用方
+    // ============================ 写入接口 ============================
     bool insertRecord(int alarmLevel,
                       const QString& occurTime,
                       const QString& qrCode,
@@ -36,8 +50,7 @@ public slots:
                       const QString& description,
                       int userPermission = 0);
 
-    // 分页条件查询
-    // 任意条件传入空字符串/-1表示不应用该条件
+    // ============================ 查询接口 ============================
     QList<QVariantMap> queryPageWithConditions(int alarmLevel,
                                                const QString& qrCode,
                                                const QString& alarmType,
@@ -45,36 +58,38 @@ public slots:
                                                const QString& startTime,
                                                const QString& endTime,
                                                int pageSize,
-                                               int pageNumber);
-
-    // 总记录数（无条件，直接读取 log_record_count 缓存表）
-    int queryTotalCount();
-
-    // 条件查询的总记录数
+                                               int pageNumber,
+                                               const QString& resolveStartTime = QString(),
+                                               const QString& resolveEndTime = QString(),
+                                               int maxUserPermission = -1);
+    int queryTotalCount(int maxUserPermission = -1);
     int queryTotalCountWithConditions(int alarmLevel,
                                       const QString& qrCode,
                                       const QString& alarmType,
                                       int isResolved,
                                       const QString& startTime,
-                                      const QString& endTime);
-
-    // 查询数据库的最早/最晚时间（用于计算月份范围）
+                                      const QString& endTime,
+                                      const QString& resolveStartTime = QString(),
+                                      const QString& resolveEndTime = QString(),
+                                      int maxUserPermission = -1);
     QVariantMap queryMonthRange();
 
-    // 批量删除时间区间记录
+    // ============================ 清理接口 ============================
     bool deleteByTimeRange(const QString& startTime, const QString& endTime);
-
-    // 把指定 (qrCode, alarmType) 下 is_resolved=0 的记录原位标记为已解决
     bool updateResolve(const QString& qrCode, const QString& alarmType, const QString& resolveTime);
 
 signals:
-    // 写入语句执行结果信号
+    // ---- 写入请求 ----
     void writeExecuted(const WriteResult& result);
 
 private:
+    // ---- 初始化辅助 ----
     void initializeCleanupScheduler();
+
+    // ---- 查询辅助 ----
     int calculateOffset(int pageSize, int pageNumber);
 
+    // ---- 数据库状态成员 ----
     QString m_databasePath;
     QString m_connectionName;
     SqlMapper* m_sqlMapper;

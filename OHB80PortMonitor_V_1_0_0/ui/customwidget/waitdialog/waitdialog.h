@@ -2,9 +2,12 @@
 #define WAITDIALOG_H
 
 #include <QDialog>
+#include <QElapsedTimer>
 
 class QLabel;
 class QPushButton;
+class QHideEvent;
+class QTimer;
 
 // 通用等待对话框：
 //   - Waiting：显示提示文本 + "取消"按钮（点击发出 cancelRequested 信号）
@@ -29,13 +32,20 @@ signals:
 
 private slots:
     void onButtonClicked();
+    void updateElapsedTime();
+
+protected:
+    void hideEvent(QHideEvent* event) override;
 
 private:
     enum class Mode { Waiting, Success, Failure };
 
     Mode          m_mode;
     QLabel*       m_label;
+    QLabel*       m_elapsedLabel;
     QPushButton*  m_button;
+    QTimer*       m_elapsedTimer;
+    QElapsedTimer m_elapsedTime;
 };
 
 #endif // WAITDIALOG_H
