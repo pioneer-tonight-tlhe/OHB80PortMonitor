@@ -10,6 +10,34 @@
 
 ## 更新日志
 
+## 待发布
+
+### 通讯日志查询性能优化与压测数据工具
+- 发布状态：待发布
+- 修改时间：2026-06-30
+- 变更类型：Changed / Added
+- 开发人员：Simon（工号：13）
+- 功能概述：优化通讯日志历史查询在大数据量场景下的 SQL 执行路径，并新增 Qt 独立压测数据插入工程，用于向 `logdb.db` 写入 6 个月、每秒 1 条的千万级通讯日志记录，辅助验证查询性能。
+- 功能点明细：
+  - `CommunicateLogSqlLogic` 的条件分页查询和条件总数查询由通用 `(? IS NULL OR field = ?)` SQL 改为按实际筛选条件动态拼接 SQL，减少 SQLite 因 OR 条件导致的索引失效风险。
+  - 通讯日志历史查询排序调整为 `ORDER BY send_time, id`，保证同一秒内多条记录的分页顺序稳定。
+  - 通讯日志数据库初始化时自动确保查询优化索引存在，覆盖 `send_time/id`、`qr_code/send_time/id`、`command_id/send_time/id`、`exec_status/send_time/id`、`retry_count/send_time/id`、`qr_code/command_id/send_time/id` 等常用查询路径。
+  - 新增 Qt Console 工程 `tools/communicate_log_seed_generator`，使用 `QSqlDatabase`、`QXmlStreamReader` 和 `QSettings` 读取通讯指令 XML 与设备配置，批量生成通讯日志压测数据，不依赖 Python 环境。
+  - 插数工具默认写入 `OHB80PortMonitor_V_1_0_0/bin/x64/databases/logdb.db`，默认从当前时间向前 6 个月生成记录，支持 `--rows`、`--months`、`--batch-size`、`--clear`、`--dry-run` 等参数。
+  - 通讯日志查询等待弹框新增等待时间计时显示，进入等待状态后从 `00:00` 开始刷新，查询完成、失败或关闭弹框时停止计时。
+  - 通用分页控件规则调整：总页数 `<=20` 时显示全部页码；总页数 `>20` 时显示前 5 页、当前页附近 5 页、后 5 页，中间不连续位置使用省略号。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/communicatelogdb/communicatelogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/waitdialog/waitdialog.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/waitdialog/waitdialog.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/paginationwidget/paginationwidget.cpp`
+  - `tools/communicate_log_seed_generator/communicate_log_seed_generator.pro`
+  - `tools/communicate_log_seed_generator/main.cpp`
+  - `tools/communicate_log_seed_generator/README.md`
+  - `README.md`
+- 兼容性影响：不改变通讯日志查询入口和 UI 调用方式；分页控件为通用控件，复用该控件的日志页面会同步使用新的页码显示规则。压测插数工具为独立工程，不参与主程序运行。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 `qmake`，完整 Qt 编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
 ## v0.5.13
 
 ### DebugPage 新增 VEFC 监控界面

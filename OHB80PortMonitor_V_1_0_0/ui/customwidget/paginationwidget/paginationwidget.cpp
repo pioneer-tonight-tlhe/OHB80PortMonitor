@@ -112,22 +112,40 @@ void PaginationWidget::onJumpReturnPressed()
 // 结果按升序返回。
 static QList<int> collectPagesToShow(int currentPage, int totalPages)
 {
+    constexpr int kShowAllPageThreshold = 20;
+    constexpr int kEdgeButtonCount = 5;
+    constexpr int kCurrentWindowButtonCount = 5;
+
     QSet<int> set;
-    if (totalPages <= 8) {
+    if (totalPages <= kShowAllPageThreshold) {
         for (int p = 1; p <= totalPages; ++p) {
             set.insert(p);
         }
     } else {
         // 首部：1, 2, 3
-        for (int p = 1; p <= 3; ++p) {
+        for (int p = 1; p <= kEdgeButtonCount; ++p) {
             set.insert(p);
         }
         // 当前页及其后 4 页
-        for (int p = currentPage; p <= currentPage + 4 && p <= totalPages; ++p) {
-            if (p >= 1) set.insert(p);
+        int windowStart = currentPage - (kCurrentWindowButtonCount / 2);
+        int windowEnd = windowStart + kCurrentWindowButtonCount - 1;
+        if (windowStart < 1) {
+            windowEnd += 1 - windowStart;
+            windowStart = 1;
+        }
+        if (windowEnd > totalPages) {
+            windowStart -= windowEnd - totalPages;
+            windowEnd = totalPages;
+        }
+        windowStart = qMax(1, windowStart);
+
+        for (int p = windowStart; p <= windowEnd; ++p) {
+            set.insert(p);
         }
         // 末页
-        set.insert(totalPages);
+        for (int p = qMax(1, totalPages - kEdgeButtonCount + 1); p <= totalPages; ++p) {
+            set.insert(p);
+        }
     }
     QList<int> pages = set.values();
     std::sort(pages.begin(), pages.end());
