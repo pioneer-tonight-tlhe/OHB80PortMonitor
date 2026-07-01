@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.5.13**
+**当前版本：v0.6.0**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -10,7 +10,7 @@
 
 ## 更新日志
 
-## 待发布
+## v0.6.0
 
 ### 运行日志查询性能优化与压测数据工具
 - 发布状态：待发布
