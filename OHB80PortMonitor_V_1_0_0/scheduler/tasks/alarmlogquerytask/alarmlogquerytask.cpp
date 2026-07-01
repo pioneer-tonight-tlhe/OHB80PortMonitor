@@ -92,6 +92,13 @@ void AlarmLogQueryTask::executeQuery()
         return;
     }
 
+    const bool hasUserConditions = (m_alarmLevel != -1)
+        || !m_qrCode.isEmpty()
+        || !m_alarmType.isEmpty()
+        || (m_isResolved != -1)
+        || !m_startTime.isEmpty()
+        || !m_endTime.isEmpty();
+
     QString dbEarliest;
     QString dbLatest;
     m_db->queryTimeBounds(dbEarliest, dbLatest);
@@ -139,9 +146,14 @@ void AlarmLogQueryTask::executeQuery()
     }
 
     // 有条件查询：总记录数
-    int totalCountWithConditions = m_db->queryTotalCountWithConditions(
-        m_alarmLevel, m_qrCode, m_alarmType, m_isResolved,
-        m_startTime, m_endTime);
+    int totalCountWithConditions = hasUserConditions
+        ? m_db->queryTotalCountWithConditions(m_alarmLevel,
+                                              m_qrCode,
+                                              m_alarmType,
+                                              m_isResolved,
+                                              m_startTime,
+                                              m_endTime)
+        : m_db->queryTotalCount();
     emit totalCountWithConditionsResult(totalCountWithConditions);
 
     setState(Finished);
