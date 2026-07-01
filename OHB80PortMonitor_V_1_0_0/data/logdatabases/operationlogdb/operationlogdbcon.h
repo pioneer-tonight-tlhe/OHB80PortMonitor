@@ -1,14 +1,14 @@
 /*******************************************************************************************
  * @file operationlogdbcon.h
- * @author Simon <工号:13> 2026-06-15
+ * @author Simon <工号：13> 2026-07-01
  *
  * @class OperationLogDBCon
  * @brief 封装运行日志数据库线程访问、异步写入转发和查询结果类型转换。
  *
- * 设计目标:
- *      1. 将运行日志 SQL 逻辑固定在独立工作线程中执行。
- *      2. 通过统一写入连接提交 INSERT/DELETE，避免多个写连接竞争。
- *      3. 为 UI 和调度任务提供带用户权限过滤的类型化查询接口。
+ * 设计目标：
+ *      1. 将运行日志 SQL 逻辑固定在独立工作线程中执行，隔离 UI 线程阻塞风险。
+ *      2. 通过统一写入连接提交 INSERT 和 DELETE，避免多连接写竞争。
+ *      3. 为 scheduler 和 UI 提供带权限过滤的类型化查询和实时信号接口。
  *******************************************************************************************/
 #ifndef OPERATIONLOGDBCON_H
 #define OPERATIONLOGDBCON_H
@@ -48,9 +48,24 @@ public:
     QList<OperationRecord> queryPaginationInRange(const QString& startTime, const QString& endTime,
                                                   int pageSize, int pageNumber,
                                                   int maxUserPermission);
-    QList<OperationRecord> queryPaginationWithBaseConditions(const QString& startTime, const QString& endTime,
-                                                             int logType, int pageSize, int pageNumber,
+    QList<OperationRecord> queryPaginationWithBaseConditions(const QString& startTime,
+                                                             const QString& endTime,
+                                                             int logType,
+                                                             int pageSize,
+                                                             int pageNumber,
                                                              int maxUserPermission);
+    QList<OperationRecord> queryPaginationAfterBaseConditions(int anchorRecordId,
+                                                              const QString& startTime,
+                                                              const QString& endTime,
+                                                              int logType,
+                                                              int pageSize,
+                                                              int maxUserPermission);
+    QList<OperationRecord> queryPaginationBeforeBaseConditions(int anchorRecordId,
+                                                               const QString& startTime,
+                                                               const QString& endTime,
+                                                               int logType,
+                                                               int pageSize,
+                                                               int maxUserPermission);
     int queryTotalCountInRange(const QString& startTime, const QString& endTime,
                                int maxUserPermission);
     int queryTotalCountWithBaseConditions(const QString& startTime, const QString& endTime,
@@ -90,7 +105,7 @@ public:
     void deleteByTimeRange(const QString& startTime, const QString& endTime);
 
 signals:
-    // ---- 写入结果 ----
+    // ---- 实时结果 ----
     void recordInserted(const OperationRecord& record);
 
 private slots:

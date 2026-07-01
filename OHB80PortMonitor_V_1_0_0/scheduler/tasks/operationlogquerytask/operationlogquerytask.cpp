@@ -11,6 +11,22 @@ OperationLogQueryTask::OperationLogQueryTask(QObject *parent)
     , m_maxUserPermission(0)
     , m_pageSize(500)
     , m_targetPage(0)
+    , m_anchorRecordId(0)
+    , m_queryNextPageFromAnchor(false)
+    , m_queryPreviousPageFromAnchor(false)
+    , m_hasCachedTotalCountInRange(false)
+    , m_cachedTotalCountInRange(0)
+    , m_hasCachedTotalMatchedCount(false)
+    , m_cachedTotalMatchedCount(0)
+    , m_hasAdjacentPagePositionHint(false)
+    , m_pageAfterSource(false)
+    , m_sourceFirstMatchedPosition(0)
+    , m_sourceMatchedCount(0)
+    , m_navigateToAdjacentMatch(false)
+    , m_navigationNext(false)
+    , m_navigationAnchorRecordId(0)
+    , m_navigateToMatchedPosition(false)
+    , m_navigationTargetPosition(0)
     , m_cancelRequested(0)
 {
     LoggerManager::getInstance()->log(m_taskLogPath, Level::INFO, "[OperationLogQueryTask] 运行日志查询任务已构造");
@@ -46,6 +62,55 @@ void OperationLogQueryTask::setMaxUserPermission(int maxUserPermission)
 void OperationLogQueryTask::setTargetPage(int page)
 {
     m_targetPage = page;
+}
+
+void OperationLogQueryTask::setNextPageAnchorId(int recordId)
+{
+    m_anchorRecordId = recordId;
+    m_queryNextPageFromAnchor = (recordId > 0);
+    m_queryPreviousPageFromAnchor = false;
+}
+
+void OperationLogQueryTask::setPreviousPageAnchorId(int recordId)
+{
+    m_anchorRecordId = recordId;
+    m_queryPreviousPageFromAnchor = (recordId > 0);
+    m_queryNextPageFromAnchor = false;
+}
+
+void OperationLogQueryTask::setCachedTotalCountInRange(int totalCount)
+{
+    m_hasCachedTotalCountInRange = true;
+    m_cachedTotalCountInRange = totalCount;
+}
+
+void OperationLogQueryTask::setCachedTotalMatchedCount(int totalCount)
+{
+    m_hasCachedTotalMatchedCount = true;
+    m_cachedTotalMatchedCount = totalCount;
+}
+
+void OperationLogQueryTask::setAdjacentPagePositionHint(bool pageAfterSource,
+                                                        int sourceFirstMatchedPosition,
+                                                        int sourceMatchedCount)
+{
+    m_hasAdjacentPagePositionHint = true;
+    m_pageAfterSource = pageAfterSource;
+    m_sourceFirstMatchedPosition = sourceFirstMatchedPosition;
+    m_sourceMatchedCount = sourceMatchedCount;
+}
+
+void OperationLogQueryTask::setNavigateToAdjacentMatch(int anchorRecordId, bool next)
+{
+    m_navigateToAdjacentMatch = (anchorRecordId > 0);
+    m_navigationAnchorRecordId = anchorRecordId;
+    m_navigationNext = next;
+}
+
+void OperationLogQueryTask::setNavigateToMatchedPosition(int position)
+{
+    m_navigateToMatchedPosition = (position > 0);
+    m_navigationTargetPosition = position;
 }
 
 void OperationLogQueryTask::start()
@@ -132,14 +197,92 @@ void OperationLogQueryTask::executeQuery()
 
     // 1. 确定本次查询使用的页号：
     int targetPage = (m_targetPage > 0) ? m_targetPage : 1;
+    int pendingSelectId = 0;
+    if (m_navigateToMatchedPosition && hasKeyword && m_navigationTargetPosition > 0) {
+        pendingSelectId = m_db->queryMatchedIdByPosition(m_navigationTargetPosition,
+                                                         m_startTime,
+                                                         m_endTime,
+                                                         m_logType,
+                                                         m_keyword,
+                                                         m_maxUserPermission);
+        if (pendingSelectId > 0) {
+            targetPage = m_db->queryRecordPageWithBaseConditions(pendingSelectId,
+                                                                 m_startTime,
+                                                                 m_endTime,
+                                                                 m_logType,
+                                                                 m_pageSize,
+                                                                 m_maxUserPermission);
+            if (targetPage <= 0) {
+                targetPage = 1;
+            }
+        }
+    } else if (m_navigateToAdjacentMatch && hasKeyword && m_navigationAnchorRecordId > 0) {
+        pendingSelectId = m_navigationNext
+            ? m_db->queryPrevMatchingId(m_navigationAnchorRecordId,
+                                        m_startTime,
+                                        m_endTime,
+                                        m_logType,
+                                        m_keyword,
+                                        m_maxUserPermission)
+            : m_db->queryNextMatchingId(m_navigationAnchorRecordId,
+                                        m_startTime,
+                                        m_endTime,
+                                        m_logType,
+                                        m_keyword,
+                                        m_maxUserPermission);
+        if (pendingSelectId <= 0) {
+            pendingSelectId = m_navigationNext
+                ? m_db->queryFirstMatchedId(m_startTime,
+                                            m_endTime,
+                                            m_logType,
+                                            m_keyword,
+                                            m_maxUserPermission)
+                : m_db->queryLastMatchedId(m_startTime,
+                                           m_endTime,
+                                           m_logType,
+                                           m_keyword,
+                                           m_maxUserPermission);
+        }
+        if (pendingSelectId > 0) {
+            targetPage = m_db->queryRecordPageWithBaseConditions(pendingSelectId,
+                                                                 m_startTime,
+                                                                 m_endTime,
+                                                                 m_logType,
+                                                                 m_pageSize,
+                                                                 m_maxUserPermission);
+            if (targetPage <= 0) {
+                targetPage = 1;
+            }
+        }
+    }
+    if ((m_navigateToAdjacentMatch || m_navigateToMatchedPosition) && pendingSelectId <= 0) {
+        setState(Failed);
+        emit finished(false, "No matched record");
+        return;
+    }
     emit targetPageResult(targetPage);
+    if (pendingSelectId > 0) {
+        emit pendingSelectIdResult(pendingSelectId);
+    }
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 2. 范围内分页：该页全部记录（用于显示）
-    QList<OperationRecord> currentPageRecords =
-        m_db->queryPaginationWithBaseConditions(m_startTime, m_endTime, m_logType,
-                                                m_pageSize, targetPage,
-                                                m_maxUserPermission);
+    QList<OperationRecord> currentPageRecords;
+    if (m_queryNextPageFromAnchor && m_anchorRecordId > 0) {
+        currentPageRecords = m_db->queryPaginationAfterBaseConditions(
+            m_anchorRecordId, m_startTime, m_endTime, m_logType,
+            m_pageSize, m_maxUserPermission);
+    } else if (m_queryPreviousPageFromAnchor && m_anchorRecordId > 0) {
+        currentPageRecords = m_db->queryPaginationBeforeBaseConditions(
+            m_anchorRecordId, m_startTime, m_endTime, m_logType,
+            m_pageSize, m_maxUserPermission);
+    }
+    if (currentPageRecords.isEmpty()) {
+        currentPageRecords = m_db->queryPaginationWithBaseConditions(
+            m_startTime, m_endTime, m_logType,
+            m_pageSize, targetPage,
+            m_maxUserPermission);
+    }
     emit currentPageResult(currentPageRecords);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
@@ -162,16 +305,25 @@ void OperationLogQueryTask::executeQuery()
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 4. 范围内总记录数（用于分页总页数）
-    int totalCountInRange = m_db->queryTotalCountWithBaseConditions(
-        m_startTime, m_endTime, m_logType, m_maxUserPermission);
+    int totalCountInRange = 0;
+    if (m_hasCachedTotalCountInRange) {
+        totalCountInRange = m_cachedTotalCountInRange;
+    } else {
+        totalCountInRange = m_db->queryTotalCountWithBaseConditions(
+            m_startTime, m_endTime, m_logType, m_maxUserPermission);
+    }
     emit totalCountInRangeResult(totalCountInRange);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
 
     // 5. 范围 + 条件总命中数（用于 X/Y 显示）
     int totalMatched = 0;
     if (hasKeyword) {
-        totalMatched = m_db->queryTotalCountWithConditions(
-            m_startTime, m_endTime, m_logType, m_keyword, m_maxUserPermission);
+        if (m_hasCachedTotalMatchedCount) {
+            totalMatched = m_cachedTotalMatchedCount;
+        } else {
+            totalMatched = m_db->queryTotalCountWithConditions(
+                m_startTime, m_endTime, m_logType, m_keyword, m_maxUserPermission);
+        }
     }
     emit totalMatchedCountResult(totalMatched);
     if (isCancelled()) { emit finished(false, "Cancelled"); return; }
@@ -179,10 +331,20 @@ void OperationLogQueryTask::executeQuery()
     // 6. 该页首条命中记录在范围+条件结果集中的全局顺序号（1-based；0 表示无命中）
     int position = 0;
     if (hasKeyword && !matchedIds.isEmpty()) {
-        const int firstId = matchedIds.first();
-        if (firstId > 0) {
-            position = m_db->queryRecordPosition(
-                firstId, m_startTime, m_endTime, m_logType, m_keyword, m_maxUserPermission);
+        if (m_hasAdjacentPagePositionHint && m_sourceFirstMatchedPosition > 0) {
+            if (m_pageAfterSource) {
+                position = m_sourceFirstMatchedPosition + m_sourceMatchedCount;
+            } else {
+                position = m_sourceFirstMatchedPosition - matchedIds.size();
+            }
+        }
+
+        if (position <= 0) {
+            const int firstId = matchedIds.first();
+            if (firstId > 0) {
+                position = m_db->queryRecordPosition(
+                    firstId, m_startTime, m_endTime, m_logType, m_keyword, m_maxUserPermission);
+            }
         }
     }
     emit firstMatchedPositionResult(position);

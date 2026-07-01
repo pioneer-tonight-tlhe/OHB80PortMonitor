@@ -1,14 +1,14 @@
 /*******************************************************************************************
  * @file operationlogsqllogic.h
- * @author Simon <工号:13> 2026-06-15
+ * @author Simon <工号：13> 2026-07-01
  *
  * @class OperationLogSqlLogic
- * @brief 在数据库工作线程中执行运行日志 SQL 初始化、查询和清理请求提交。
+ * @brief 在数据库工作线程中执行运行日志 SQL 初始化、查询和清理请求。
  *
- * 设计目标:
- *      1. 集中维护 operation_log 表的 SQL 查询与写入请求构造。
- *      2. 将用户权限过滤放入 SQL 查询条件，保证分页统计和可见记录一致。
- *      3. 持有运行日志月度清理调度器，统一处理保留周期清理。
+ * 设计目标：
+ *      1. 集中维护 `operation_log` 表的 SQL 构造、分页查询和写入逻辑。
+ *      2. 将权限过滤、关键词过滤和分页定位统一下沉到 data 层执行。
+ *      3. 复用月度清理调度器，保持运行日志数据库生命周期管理一致。
  *******************************************************************************************/
 #ifndef OPERATIONLOGSQLLOGIC_H
 #define OPERATIONLOGSQLLOGIC_H
@@ -50,9 +50,24 @@ public slots:
     QList<QVariantMap> queryPaginationInRange(const QString& startTime, const QString& endTime,
                                               int pageSize, int pageNumber,
                                               int maxUserPermission);
-    QList<QVariantMap> queryPaginationWithBaseConditions(const QString& startTime, const QString& endTime,
-                                                         int logType, int pageSize, int pageNumber,
+    QList<QVariantMap> queryPaginationWithBaseConditions(const QString& startTime,
+                                                         const QString& endTime,
+                                                         int logType,
+                                                         int pageSize,
+                                                         int pageNumber,
                                                          int maxUserPermission);
+    QList<QVariantMap> queryPaginationAfterBaseConditions(int anchorRecordId,
+                                                          const QString& startTime,
+                                                          const QString& endTime,
+                                                          int logType,
+                                                          int pageSize,
+                                                          int maxUserPermission);
+    QList<QVariantMap> queryPaginationBeforeBaseConditions(int anchorRecordId,
+                                                           const QString& startTime,
+                                                           const QString& endTime,
+                                                           int logType,
+                                                           int pageSize,
+                                                           int maxUserPermission);
     int queryTotalCountInRange(const QString& startTime, const QString& endTime,
                                int maxUserPermission);
     int queryTotalCountWithBaseConditions(const QString& startTime, const QString& endTime,
@@ -95,6 +110,7 @@ signals:
 private:
     // ---- 初始化辅助 ----
     void initializeCleanupScheduler();
+    bool initializeDescriptionSearchIndex();
 
     // ---- 查询辅助 ----
     int calculateOffset(int pageSize, int pageNumber);
@@ -105,6 +121,7 @@ private:
     SqlMapper* m_sqlMapper;
     QSqlDatabase m_database;
     LogCleanupScheduler* m_cleanupScheduler;
+    bool m_useDescriptionSearchIndex;
 };
 
 } // namespace LogDB

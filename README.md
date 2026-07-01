@@ -12,6 +12,110 @@
 
 ## 待发布
 
+### 运行日志查询性能优化与压测数据工具
+- 发布状态：待发布
+- 修改时间：2026-07-01
+- 变更类型：Added
+- 开发人员：Simon（工号：13）
+- 功能概述：新增 Qt 独立压测数据写入工程，用于向 `operation_log` 批量写入 6 个月、每秒 1 条的千万级运行日志记录，辅助验证运行日志查询性能优化效果。
+- 功能点明细：
+  - 新增 Qt Console 工程 `tools/operation_log_seed_generator`，不依赖 Python 环境，可直接使用 Qt Creator 按主工程 Kit 编译运行。
+  - 默认写入 `OHB80PortMonitor_V_1_0_0/bin/x64/databases/logdb.db`，默认从当前时间向前生成 6 个月记录，间隔为每秒 1 条。
+  - 支持 `--rows`、`--months`、`--batch-size`、`--clear`、`--dry-run`、`--rebuild-indexes` 和 `--rebuild-description-index` 参数。
+  - 写入数据覆盖 Message、Warn、Error 三类运行日志，并在描述中混入 QRCode、VEFC、Idle Purge、FOUP、Humidity、Command 等关键词，便于验证日志类型、时间范围和关键词查询。
+  - 插入完成后自动更新 `log_record_count` 中的 `operation_log` 计数；可选择重建普通索引和 description FTS 索引。
+- 改动文件：
+  - `tools/operation_log_seed_generator/operation_log_seed_generator.pro`
+  - `tools/operation_log_seed_generator/main.cpp`
+  - `tools/operation_log_seed_generator/README.md`
+  - `README.md`
+- 兼容性影响：新增独立工具工程，不参与主程序运行；建议关闭主程序后执行，避免 SQLite 数据库锁冲突。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建工具，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
+### 运行日志查询性能优化
+- 发布状态：待发布
+- 修改时间：2026-07-01
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：优化 `operation_log` 在大数据量下的历史查询路径，第一阶段聚焦动态 SQL、稳定排序和索引补齐。
+- 功能点明细：
+  - `OperationLogSqlLogic` 的范围分页、基础条件分页、总数统计、记录页号定位和关键词辅助定位查询改为按实际筛选项动态拼接 SQL，减少通用 OR 条件导致的索引失效风险。
+  - 运行日志历史查询排序统一补充 `id` 作为同秒记录的稳定排序字段，使用 `occur_time DESC, id DESC` 保证分页顺序稳定。
+  - 运行日志上一条/下一条命中定位补充同秒 `id` 判断，避免同一秒多条记录时跳转不准确。
+  - 数据库初始化和建表 SQL 补充 `operation_log` 常用组合索引，覆盖发生时间、日志类型、权限过滤和稳定分页路径。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/operation_log_queries.sql`
+  - `OHB80PortMonitor_V_1_0_0/bin/x64/databases/create_operation_log.sql`
+  - `README.md`
+- 兼容性影响：不改变 UI 查询入口和调度任务接口；关键词仍保持原有 `LIKE` 查询语义，全文检索和深分页优化留到后续阶段。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建工具，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
+### 运行日志关键词查询性能优化
+- 发布状态：待发布
+- 修改时间：2026-07-01
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：在运行日志第一阶段动态 SQL 优化基础上，增加 description 关键词查询的可选 SQLite FTS5 trigram 加速路径。
+- 功能点明细：
+  - `OperationLogSqlLogic` 初始化时尝试创建 `operation_log_description_fts` 虚拟表，使用 FTS5 trigram tokenizer 加速 `description LIKE '%keyword%'` 场景。
+  - 新增 INSERT / DELETE / UPDATE 触发器同步维护 description 搜索索引，首次创建索引时会对现有 `operation_log` 数据执行一次 rebuild。
+  - 如果当前 SQLite 不支持 FTS5 trigram，会自动回退到原有 `description LIKE ?` 查询，不影响软件启动和查询结果正确性。
+  - 关键词查询仍保留原有 LIKE 语义，只是在支持 trigram 的环境下通过 `operation_log_description_fts` 缩小候选记录范围。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.cpp`
+  - `README.md`
+- 兼容性影响：不改变 UI、调度任务和 DBCon 接口；首次在大库上创建 FTS 索引可能需要额外初始化时间，后续写入通过触发器自动同步。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建工具，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
+### 运行日志深分页优化
+- 发布状态：待发布
+- 修改时间：2026-07-01
+- 变更类型：Changed
+- 开发人员：Simon（工号：13）
+- 功能概述：优化运行日志历史页相邻翻页路径，减少深页场景下连续上一页/下一页操作对 `LIMIT OFFSET` 的依赖。
+- 功能点明细：
+  - `OperationLogSqlLogic` 新增基于当前页首/尾记录 ID 的 keyset 分页查询，支持按基础条件获取上一页或下一页数据。
+  - `OperationLogQueryTask` 新增相邻翻页锚点参数，接收到锚点时优先走 keyset 查询，查询不到数据时回退到原页码查询。
+  - `OperationLogWidget` 在用户从当前页切换到相邻页时传入当前页首/尾记录作为锚点；随机页码跳转仍保留原有 OFFSET 逻辑。
+  - keyset 查询继续使用 `occur_time, id` 稳定排序，避免同一秒多条运行日志导致相邻翻页漏数据或重复数据。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogdbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/operationlogdb/operationlogdbcon.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/operationlogquerytask/operationlogquerytask.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/operationlogquerytask/operationlogquerytask.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.cpp`
+  - `README.md`
+- 兼容性影响：不改变分页控件显示和随机跳页能力；连续上一页/下一页会优先使用 keyset，随机跳页仍使用原页码查询作为兜底。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建工具，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
+### 运行日志 Pre/Next/Jump 等待弹框与 UI 卡顿优化
+- 发布状态：待发布
+- 修改时间：2026-07-01
+- 变更类型：Changed / Fixed
+- 开发人员：Simon（工号：13）
+- 功能概述：修复运行日志模糊查询后点击 `Pre` / `Next` / `Jump` 时等待弹框显示不及时、界面短暂卡住的问题，将跨页命中定位中的同步数据库查询迁移到调度任务中执行。
+- 功能点明细：
+  - `OperationLogWidget::jumpToMatchingId()` 仅保留页内命中跳转和跨页 `anchorId` 计算，不再在 UI 线程中直接调用 `queryPrevMatchingId()`、`queryNextMatchingId()`、`queryFirstMatchedId()`、`queryLastMatchedId()` 和 `queryRecordPageWithBaseConditions()`。
+  - `OperationLogWidget::jumpToMatchedPosition()` 仅保留当前页快速定位和目标位置边界修正；跨页 `Jump` 不再在 UI 线程中直接调用 `queryMatchedIdByPosition()` 和 `queryRecordPageWithBaseConditions()`。
+  - `OperationLogQueryTask` 新增相邻命中导航模式，接收 `anchorRecordId` 和方向后，在调度任务中完成上一条/下一条命中记录定位、循环首尾定位和目标页计算。
+  - `OperationLogQueryTask` 新增按命中序号导航模式，接收目标命中位置后，在调度任务中完成第 N 条命中记录定位和目标页计算。
+  - `OperationLogQueryTask` 新增 `pendingSelectIdResult(int)` 信号，查询到目标记录后通知 UI 设置待选中记录，页面数据返回后继续复用原有选中、高亮和滚动逻辑。
+  - `Search`、分页切换、`Pre`、`Next` 和 `Jump` 触发查询时继续立即显示等待弹框；跨页 `Pre` / `Next` / `Jump` 不再因为 UI 线程执行 `Qt::BlockingQueuedConnection` 数据库查询而阻塞弹框计时和界面重绘。
+  - 翻页任务继续复用已缓存的范围总数和关键词命中总数，减少模糊查询翻页时重复执行重统计查询。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/operationlogwidget/operationlogwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/operationlogquerytask/operationlogquerytask.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/operationlogquerytask/operationlogquerytask.cpp`
+  - `README.md`
+- 兼容性影响：不改变运行日志历史查询入口、表格显示、命中高亮、`Pre` / `Next` 循环跳转和 `Jump` 按序号定位语义；仅调整跨页命中定位的执行线程，避免 UI 线程被同步数据库查询阻塞。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建入口，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
+
 ### 警报日志查询性能优化与压测数据工具
 - 发布状态：待发布
 - 修改时间：2026-07-01

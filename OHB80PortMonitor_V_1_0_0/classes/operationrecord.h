@@ -1,34 +1,36 @@
+/*******************************************************************************************
+ * @file operationrecord.h
+ * @author Simon <工号：13> 2026-07-01
+ *
+ * @class OperationRecord
+ * @brief 定义与 `operation_log` 表字段一一对应的运行日志记录结构。
+ *
+ * 设计目标：
+ *      1. 统一封装运行日志在 data、scheduler 和 UI 之间传递的记录字段。
+ *      2. 为描述模板格式化保留轻量辅助接口，避免调度层重复拼接逻辑。
+ *      3. 支持 Qt 元对象系统注册后跨线程通过信号槽传递。
+ *******************************************************************************************/
 #ifndef OPERATIONRECORD_H
 #define OPERATIONRECORD_H
 
-#include <QString>
 #include <QMetaType>
+#include <QString>
+#include <QStringList>
 
-// ====================================================================
-// OperationRecord —— 与 operation_log 表结构对齐的纯数据记录类
-//
-// 表结构：
-//   id INTEGER PRIMARY KEY AUTOINCREMENT,
-//   occur_time TEXT NOT NULL,
-//   log_type INTEGER NOT NULL,
-//   description TEXT NOT NULL,
-//   user_permission INTEGER NOT NULL DEFAULT 0
-// ====================================================================
 struct OperationRecord
 {
-    int     id              = 0;     // 主键
-    QString occurTime;               // 发生时间 "yyyy-MM-dd HH:mm:ss"
-    int     logType         = 0;     // 日志类型（LogType：0=Message, 1=Warn, 2=Error）
-    QString description;             // 操作描述
-    int     userPermission  = 0;     // 触发该操作的用户权限（UserPermission）
-
-    // 描述格式字符串（用于格式化 description）
+    int id = 0;
+    QString occurTime;
+    int logType = 0;
+    QString description;
+    int userPermission = 0;
     QString m_descFormat;
 
-    // 设置描述格式
-    void setDescFormat(const QString& format) { m_descFormat = format; }
+    void setDescFormat(const QString& format)
+    {
+        m_descFormat = format;
+    }
 
-    // 使用格式字符串和参数列表设置 description
     void setDescription(const QStringList& args)
     {
         description = m_descFormat;
@@ -37,7 +39,6 @@ struct OperationRecord
         }
     }
 
-    // 便捷重载：支持 1-3 个参数
     void setDescription(const QString& arg1)
     {
         setDescription(QStringList{arg1});

@@ -180,6 +180,70 @@ QList<OperationRecord> OperationLogDBCon::queryPaginationWithBaseConditions(cons
     return results;
 }
 
+QList<OperationRecord> OperationLogDBCon::queryPaginationAfterBaseConditions(int anchorRecordId,
+                                                                             const QString& startTime,
+                                                                             const QString& endTime,
+                                                                             int logType,
+                                                                             int pageSize,
+                                                                             int maxUserPermission)
+{
+    QList<QVariantMap> varResults;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryPaginationAfterBaseConditions",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(QList<QVariantMap>, varResults),
+                              Q_ARG(int, anchorRecordId),
+                              Q_ARG(QString, startTime),
+                              Q_ARG(QString, endTime),
+                              Q_ARG(int, logType),
+                              Q_ARG(int, pageSize),
+                              Q_ARG(int, maxUserPermission));
+
+    QList<OperationRecord> results;
+    results.reserve(varResults.size());
+    for (const QVariantMap& row : varResults) {
+        OperationRecord rec;
+        rec.id              = row.value(QStringLiteral("id")).toInt();
+        rec.occurTime       = row.value(QStringLiteral("occur_time")).toString();
+        rec.logType         = row.value(QStringLiteral("log_type")).toInt();
+        rec.description     = row.value(QStringLiteral("description")).toString();
+        rec.userPermission  = row.value(QStringLiteral("user_permission")).toInt();
+        results.append(rec);
+    }
+    return results;
+}
+
+QList<OperationRecord> OperationLogDBCon::queryPaginationBeforeBaseConditions(int anchorRecordId,
+                                                                              const QString& startTime,
+                                                                              const QString& endTime,
+                                                                              int logType,
+                                                                              int pageSize,
+                                                                              int maxUserPermission)
+{
+    QList<QVariantMap> varResults;
+    QMetaObject::invokeMethod(m_sqlLogic, "queryPaginationBeforeBaseConditions",
+                              Qt::BlockingQueuedConnection,
+                              Q_RETURN_ARG(QList<QVariantMap>, varResults),
+                              Q_ARG(int, anchorRecordId),
+                              Q_ARG(QString, startTime),
+                              Q_ARG(QString, endTime),
+                              Q_ARG(int, logType),
+                              Q_ARG(int, pageSize),
+                              Q_ARG(int, maxUserPermission));
+
+    QList<OperationRecord> results;
+    results.reserve(varResults.size());
+    for (const QVariantMap& row : varResults) {
+        OperationRecord rec;
+        rec.id              = row.value(QStringLiteral("id")).toInt();
+        rec.occurTime       = row.value(QStringLiteral("occur_time")).toString();
+        rec.logType         = row.value(QStringLiteral("log_type")).toInt();
+        rec.description     = row.value(QStringLiteral("description")).toString();
+        rec.userPermission  = row.value(QStringLiteral("user_permission")).toInt();
+        results.append(rec);
+    }
+    return results;
+}
+
 int OperationLogDBCon::queryTotalCountInRange(const QString& startTime, const QString& endTime, int maxUserPermission)
 {
     int count = 0;
