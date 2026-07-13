@@ -41,6 +41,8 @@ HEADERS += \
     $$PWD/tasks/set_humidity_offset_task/set_humidity_offset_task.h \
     $$PWD/tasks/set_device_info_task/set_device_info_task.h \
     $$PWD/tasks/set_purge_flow_task/set_purge_flow_task.h \
+    $$PWD/tasks/purge_task/purge_task_types.h \
+    $$PWD/tasks/purge_task/purge_task.h \
     $$PWD/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.h \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.h \
     $$PWD/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.h \
@@ -89,6 +91,8 @@ SOURCES += \
     $$PWD/tasks/set_humidity_offset_task/set_humidity_offset_task.cpp \
     $$PWD/tasks/set_device_info_task/set_device_info_task.cpp \
     $$PWD/tasks/set_purge_flow_task/set_purge_flow_task.cpp \
+    $$PWD/tasks/purge_task/purge_task_types.cpp \
+    $$PWD/tasks/purge_task/purge_task.cpp \
     $$PWD/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.cpp \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.cpp \
     $$PWD/tasks/set_ui_refresh_time_task/set_ui_refresh_time_task.cpp \

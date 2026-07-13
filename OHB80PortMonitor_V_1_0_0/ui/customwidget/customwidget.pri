@@ -76,4 +76,8 @@ INCLUDEPATH += $$PWD/modaltabledialog
 include ($$PWD/scrollingtiplabel/scrollingtiplabel.pri)
 INCLUDEPATH += $$PWD/scrollingtiplabel
 
+#chartmanager
+include ($$PWD/chartmanager/chartmanager.pri)
+INCLUDEPATH += $$PWD/chartmanager
+
 FORMS +=

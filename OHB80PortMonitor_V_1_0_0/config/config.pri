@@ -6,6 +6,7 @@ SOURCES += \
     $$PWD/loggerconfig.cpp \
     $$PWD/modulepermissionconfig.cpp \
     $$PWD/ohbdeviceconfig.cpp \
+    $$PWD/purgetaskconfig.cpp \
     $$PWD/userinfoconfig.cpp
 
 HEADERS += \
@@ -15,6 +16,7 @@ HEADERS += \
     $$PWD/loggerconfig.h \
     $$PWD/modulepermissionconfig.h \
     $$PWD/ohbdeviceconfig.h \
+    $$PWD/purgetaskconfig.h \
     $$PWD/userinfoconfig.h
 
 INCLUDEPATH += $$PWD
