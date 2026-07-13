@@ -2,9 +2,9 @@
 
 #include "../settingwidget/settingitemwidget.h"
 #include "modaltabledialog.h"
-#include "modbustcpmastermanager/modbustcpmastermanager.h"
 #include "scheduler/scheduler.h"
 #include "idlepurgeconfig.h"
+#include "ohbdeviceconfig.h"
 
 #include <QColor>
 #include <QList>
@@ -65,6 +65,7 @@ void applyResultColors(ModalTableDialog *dialog)
 IdlePurgeSettingWidget::IdlePurgeSettingWidget(QWidget *parent)
     : SettingWidget(parent)
     , m_preparationTimeLineEdit(nullptr)
+    , m_qrCodeComboBox(nullptr)
     , m_enableComboBox(nullptr)
     , m_durationSpinBox(nullptr)
     , m_intervalSpinBox(nullptr)
@@ -72,12 +73,14 @@ IdlePurgeSettingWidget::IdlePurgeSettingWidget(QWidget *parent)
     , m_durationSetBtn(nullptr)
     , m_intervalSetBtn(nullptr)
     , m_enableItem(nullptr)
+    , m_qrCodeItem(nullptr)
     , m_durationItem(nullptr)
     , m_intervalItem(nullptr)
     , m_preparationTimeItem(nullptr)
 {
     setTitle("Idle Purge Configuration");
     initUI();
+    loadConfigValues();
 }
 
 IdlePurgeSettingWidget::~IdlePurgeSettingWidget()
@@ -86,6 +89,7 @@ IdlePurgeSettingWidget::~IdlePurgeSettingWidget()
 
 void IdlePurgeSettingWidget::initUI()
 {
+    initQRCodeItem();
     initPreparationTimeItem();
     initEnableItem();
     initDurationItem();
@@ -114,15 +118,39 @@ void IdlePurgeSettingWidget::setConfigValues(bool enabled,
 
 void IdlePurgeSettingWidget::loadConfigValues()
 {
+    if (!m_qrCodeComboBox || m_qrCodeComboBox->currentText().isEmpty()) {
+        return;
+    }
+
+    const QString qrCode = m_qrCodeComboBox->currentText();
     IdlePurgeConfig &config = IdlePurgeConfig::getInstance();
-    setConfigValues(config.isEnabled(),
-                    config.getPurgeDurationSeconds(),
-                    config.getPurgeIntervalSeconds());
+    setConfigValues(config.isEnabled(qrCode),
+                    config.getPurgeDurationSeconds(qrCode),
+                    config.getPurgeIntervalSeconds(qrCode));
 }
 
 QWidget* IdlePurgeSettingWidget::preparationTimeItem() const
 {
     return m_preparationTimeItem;
+}
+
+void IdlePurgeSettingWidget::initQRCodeItem()
+{
+    m_qrCodeItem = new SettingItemWidget(this);
+    m_qrCodeItem->setTitle("QRCode");
+    m_qrCodeItem->setTip("Select the OHB device to view and update idle purge settings");
+
+    m_qrCodeComboBox = new QComboBox(m_qrCodeItem);
+    const QVector<QString> qrCodes = OHBDeviceConfig::getInstance().readQRCodes();
+    for (const QString &qrCode : qrCodes) {
+        m_qrCodeComboBox->addItem(qrCode);
+    }
+    m_qrCodeComboBox->setFixedWidth(120);
+    m_qrCodeItem->addWidget("qrcode_combo", m_qrCodeComboBox);
+    connect(m_qrCodeComboBox, &QComboBox::currentTextChanged,
+            this, [this](const QString &) { loadConfigValues(); });
+
+    addItem(m_qrCodeItem);
 }
 
 void IdlePurgeSettingWidget::initPreparationTimeItem()
@@ -144,7 +172,7 @@ void IdlePurgeSettingWidget::initEnableItem()
 {
     m_enableItem = new SettingItemWidget(this);
     m_enableItem->setTitle("Idle Purge Enable");
-    m_enableItem->setTip("Enable or disable idle purge function for all devices");
+    m_enableItem->setTip("Enable or disable idle purge for the selected device");
 
     m_enableComboBox = new QComboBox(m_enableItem);
     m_enableComboBox->addItem("Enable", 1);
@@ -164,7 +192,7 @@ void IdlePurgeSettingWidget::initDurationItem()
 {
     m_durationItem = new SettingItemWidget(this);
     m_durationItem->setTitle("Purge Duration");
-    m_durationItem->setTip("Set idle purge inflation duration (seconds) for all devices");
+    m_durationItem->setTip("Set idle purge inflation duration for the selected device");
 
     m_durationSpinBox = new QSpinBox(m_durationItem);
     m_durationSpinBox->setRange(kIdlePurgeValueMin, kIdlePurgeValueMax);
@@ -185,7 +213,7 @@ void IdlePurgeSettingWidget::initIntervalItem()
 {
     m_intervalItem = new SettingItemWidget(this);
     m_intervalItem->setTitle("Purge Interval");
-    m_intervalItem->setTip("Set idle purge interval between cycles (seconds) for all devices");
+    m_intervalItem->setTip("Set idle purge interval for the selected device");
 
     m_intervalSpinBox = new QSpinBox(m_intervalItem);
     m_intervalSpinBox->setRange(kIdlePurgeValueMin, kIdlePurgeValueMax);
@@ -224,8 +252,14 @@ void IdlePurgeSettingWidget::submitCommand(SettingItemWidget *item,
                                            SetIdlePurgeTask::IdlePurgeProperty property,
                                            quint16 value)
 {
-    auto *task = new SetIdlePurgeTask(property, value);
-    const QStringList targetQrCodes = ModbusTcpMasterManager::instance().masterIds();
+    const QString targetQrCode = m_qrCodeComboBox ? m_qrCodeComboBox->currentText() : QString();
+    if (targetQrCode.isEmpty()) {
+        QMessageBox::warning(this, "Set Failed", "No QRCode selected.");
+        return;
+    }
+
+    auto *task = new SetIdlePurgeTask(property, value, targetQrCode);
+    const QStringList targetQrCodes{targetQrCode};
 
     item->setStatusWaiting();
     setAllSetButtonsEnabled(false);

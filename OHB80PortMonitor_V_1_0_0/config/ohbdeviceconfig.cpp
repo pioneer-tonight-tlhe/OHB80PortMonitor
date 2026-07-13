@@ -43,6 +43,10 @@ const char* const LegacyHumidityLowerLimitKey = "HumidityLowerLimit";
 const char* const FoupInAutoPurgeEnableKey = "FoupInAutoPurgeEnable";
 const char* const LegacyFoupInAutoPurgeEnableKeyWithUnderscore = "foup_in_auto_purge_enable";
 
+const char* const IdlePurgeEnabledKey = "IdleP_Enabled";
+const char* const IdlePurgeDurationSecondsKey = "IdleP_PurgeDuration_s";
+const char* const IdlePurgeIntervalSecondsKey = "IdleP_PurgeInterval_s";
+
 const char* const MasterDevicesGroup = "MasterDevices";
 const char* const MasterDevicesKey = "List";
 const char* const LegacyMasterDevicesKey = "list";
@@ -62,6 +66,10 @@ const int DefaultPageTotalTimeSeconds = 5;
 const double DefaultHumidityOffsetPercent = 0.0;
 const double DefaultHumidityLowerLimitPercent = 5.0;
 const int DefaultFoupInAutoPurgeEnable = 0;
+const bool DefaultIdlePurgeEnabled = true;
+const int DefaultIdlePurgeDurationSeconds = 5;
+const int DefaultIdlePurgeIntervalSeconds = 10;
+const int MaxIdlePurgeSeconds = 65534;
 const int DefaultSh85SelfCheckPeriodSeconds = 1800;
 
 QString formatConfigDouble(double value, int precision = 2)
@@ -157,6 +165,20 @@ OHBDeviceConfigInfo readDeviceInfoFromCurrentGroup(const QSettings &settings)
         settings,
         {FoupInAutoPurgeEnableKey, LegacyFoupInAutoPurgeEnableKeyWithUnderscore},
         DefaultFoupInAutoPurgeEnable).toInt();
+    const bool idlePurgeEnabled = readCurrentGroupValue(
+        settings, {IdlePurgeEnabledKey}, DefaultIdlePurgeEnabled).toBool();
+    const int idlePurgeDurationSeconds = qBound(
+        0,
+        readCurrentGroupValue(settings,
+                              {IdlePurgeDurationSecondsKey},
+                              DefaultIdlePurgeDurationSeconds).toInt(),
+        MaxIdlePurgeSeconds);
+    const int idlePurgeIntervalSeconds = qBound(
+        0,
+        readCurrentGroupValue(settings,
+                              {IdlePurgeIntervalSecondsKey},
+                              DefaultIdlePurgeIntervalSeconds).toInt(),
+        MaxIdlePurgeSeconds);
 
     return OHBDeviceConfigInfo(qrCode,
                                ip,
@@ -169,7 +191,10 @@ OHBDeviceConfigInfo readDeviceInfoFromCurrentGroup(const QSettings &settings)
                                humidityOffsetPercent,
                                humidityLowerLimitPercent,
                                vppePressureBar,
-                               qBound(0, foupInAutoPurgeEnable, 1));
+                               qBound(0, foupInAutoPurgeEnable, 1),
+                               idlePurgeEnabled,
+                               idlePurgeDurationSeconds,
+                               idlePurgeIntervalSeconds);
 }
 }
 
@@ -242,6 +267,9 @@ bool OHBDeviceConfig::writeDevices(const QVector<OHBDeviceConfigInfo>& devices)
         settings.setValue(HumidityOffsetKey, formatConfigDouble(deviceInfo.getHumidityOffsetPercent()));
         settings.setValue(HumidityLowerLimitKey, formatConfigDouble(deviceInfo.getHumidityLowerLimitPercent()));
         settings.setValue(FoupInAutoPurgeEnableKey, deviceInfo.getFoupInAutoPurgeEnable());
+        settings.setValue(IdlePurgeEnabledKey, deviceInfo.isIdlePurgeEnabled());
+        settings.setValue(IdlePurgeDurationSecondsKey, deviceInfo.getIdlePurgeDurationSeconds());
+        settings.setValue(IdlePurgeIntervalSecondsKey, deviceInfo.getIdlePurgeIntervalSeconds());
         settings.endGroup();
     }
 
@@ -518,6 +546,59 @@ bool OHBDeviceConfig::setFoupInAutoPurgeEnableByQRCode(const QString& qrCode, in
 
     qWarning() << "OHBDeviceConfig: 未找到 QRCode=" << qrCode
                << "的设备，无法写入 FoupInAutoPurgeEnable";
+    return false;
+}
+
+bool OHBDeviceConfig::setIdlePurgeEnabledByQRCode(const QString& qrCode, bool enabled)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        if (settings.value(QRCodeKey).toString() == qrCode) {
+            settings.setValue(IdlePurgeEnabledKey, enabled);
+            settings.endGroup();
+            settings.sync();
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+    return false;
+}
+
+bool OHBDeviceConfig::setIdlePurgeDurationSecondsByQRCode(const QString& qrCode, int seconds)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        if (settings.value(QRCodeKey).toString() == qrCode) {
+            settings.setValue(IdlePurgeDurationSecondsKey,
+                              qBound(0, seconds, MaxIdlePurgeSeconds));
+            settings.endGroup();
+            settings.sync();
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
+    return false;
+}
+
+bool OHBDeviceConfig::setIdlePurgeIntervalSecondsByQRCode(const QString& qrCode, int seconds)
+{
+    QSettings settings(m_configFilePath, QSettings::IniFormat);
+    for (int i = 1; i <= 80; ++i) {
+        const QString groupName = QString("OHB%1").arg(i);
+        settings.beginGroup(groupName);
+        if (settings.value(QRCodeKey).toString() == qrCode) {
+            settings.setValue(IdlePurgeIntervalSecondsKey,
+                              qBound(0, seconds, MaxIdlePurgeSeconds));
+            settings.endGroup();
+            settings.sync();
+            return settings.status() == QSettings::NoError;
+        }
+        settings.endGroup();
+    }
     return false;
 }
 

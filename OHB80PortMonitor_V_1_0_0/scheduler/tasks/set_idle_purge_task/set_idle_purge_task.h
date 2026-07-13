@@ -42,6 +42,7 @@ public:
     // ============================ 构造函数 ============================
     explicit SetIdlePurgeTask(IdlePurgeProperty property,
                               quint16 value,
+                              const QString &targetQrCode,
                               QObject *parent = nullptr);
     ~SetIdlePurgeTask() override;
 
@@ -95,6 +96,7 @@ private:
     // ---- 任务状态成员 ----
     IdlePurgeProperty m_property;
     quint16 m_value;
+    QString m_targetQrCode;
     QHash<qint64, QString> m_pendingMap;
     QList<QMetaObject::Connection> m_connections;
     int m_totalCount = 0;

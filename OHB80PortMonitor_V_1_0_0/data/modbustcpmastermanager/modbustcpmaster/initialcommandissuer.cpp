@@ -1,6 +1,5 @@
 #include "initialcommandissuer.h"
 
-#include "idlepurgeconfig.h"
 #include "modbuscommand/commandresponseparser.h"
 #include "modbuslogger.h"
 #include "modbustcpmaster.h"
@@ -249,15 +248,14 @@ QList<ModbusCommand> InitialCommandIssuer::buildConfiguredCommandQueue(const QLi
 
 void InitialCommandIssuer::configureCommand(ModbusCommand& cmd, const OHBDeviceConfigInfo& deviceInfo)
 {
-    IdlePurgeConfig& idleConfig = IdlePurgeConfig::getInstance();
     cmd.module = CommandModule::InitialCommandIssuer;
 
     if (cmd.id == QLatin1String(kWriteIdlePurgeEnableCommandId)) {
-        fillWriteSingleRegister(cmd, idleConfig.isEnabled() ? 1 : 0);
+        fillWriteSingleRegister(cmd, deviceInfo.isIdlePurgeEnabled() ? 1 : 0);
     } else if (cmd.id == QLatin1String(kWriteIdlePurgeTimeCommandId)) {
-        fillWriteSingleRegister(cmd, static_cast<quint16>(qBound(0, idleConfig.getPurgeDurationSeconds(), 0xFFFF)));
+        fillWriteSingleRegister(cmd, static_cast<quint16>(qBound(0, deviceInfo.getIdlePurgeDurationSeconds(), 0xFFFF)));
     } else if (cmd.id == QLatin1String(kWriteIdlePurgeIntervalCommandId)) {
-        fillWriteSingleRegister(cmd, static_cast<quint16>(qBound(0, idleConfig.getPurgeIntervalSeconds(), 0xFFFF)));
+        fillWriteSingleRegister(cmd, static_cast<quint16>(qBound(0, deviceInfo.getIdlePurgeIntervalSeconds(), 0xFFFF)));
     } else if (cmd.id == QLatin1String(kSetBoardEnableCommandId)) {
         fillWriteSingleRegister(cmd, deviceInfo.isEnabled() ? 0 : 1);
     } else if (cmd.id == QLatin1String(kWritePurgeFlowCommandId)) {

@@ -43,10 +43,12 @@ QString bytesToHexWithCrc(const QByteArray &bytes, const QByteArray &crc)
 
 SetIdlePurgeTask::SetIdlePurgeTask(IdlePurgeProperty property,
                                    quint16 value,
+                                   const QString &targetQrCode,
                                    QObject *parent)
     : SchedulerTask(parent)
     , m_property(property)
     , m_value(value)
+    , m_targetQrCode(targetQrCode)
     , m_deviceLogger("scheduler/set_idle_purge_task/detail")
 {
     qDebug() << "[Scheduler][SetIdlePurgeTask] create task"
@@ -92,7 +94,9 @@ void SetIdlePurgeTask::start()
         return;
     }
 
-    const QStringList masterIds = masterManager.masterIds();
+    const QStringList masterIds = m_targetQrCode.isEmpty()
+        ? QStringList()
+        : QStringList{m_targetQrCode};
     if (masterIds.isEmpty()) {
         setState(Failed);
         emit allFinished(false, 0, {}, propertyName, m_value);
@@ -453,13 +457,13 @@ bool SetIdlePurgeTask::persistConfig(QString *errorMessage)
 
     switch (m_property) {
     case IdlePurgeProperty::Enable:
-        success = config.setEnabled(m_value != 0);
+        success = config.setEnabled(m_targetQrCode, m_value != 0);
         break;
     case IdlePurgeProperty::PurgeTime:
-        success = config.setPurgeDurationSeconds(static_cast<int>(m_value));
+        success = config.setPurgeDurationSeconds(m_targetQrCode, static_cast<int>(m_value));
         break;
     case IdlePurgeProperty::PurgeInterval:
-        success = config.setPurgeIntervalSeconds(static_cast<int>(m_value));
+        success = config.setPurgeIntervalSeconds(m_targetQrCode, static_cast<int>(m_value));
         break;
     }
 

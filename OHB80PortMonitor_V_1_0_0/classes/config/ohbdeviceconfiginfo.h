@@ -32,7 +32,10 @@ public:
                         double humidityOffsetPercent = 0.0,
                         double humidityLowerLimitPercent = 5.0,
                         double vppePressureBar = 3.0,
-                        int foupInAutoPurgeEnable = 0);
+                        int foupInAutoPurgeEnable = 0,
+                        bool idlePurgeEnabled = true,
+                        int idlePurgeDurationSeconds = 5,
+                        int idlePurgeIntervalSeconds = 10);
     
     // ============================ 业务功能 ============================
     // 获取设备二维码。
@@ -107,6 +110,13 @@ public:
     // 设置 FOUPIN 自动充气使能。
     void setFoupInAutoPurgeEnable(int enable);
 
+    bool isIdlePurgeEnabled() const;
+    void setIdlePurgeEnabled(bool enabled);
+    int getIdlePurgeDurationSeconds() const;
+    void setIdlePurgeDurationSeconds(int seconds);
+    int getIdlePurgeIntervalSeconds() const;
+    void setIdlePurgeIntervalSeconds(int seconds);
+
 private:
     // ---- 状态成员 ----
     QString m_qrCode;                      // 设备二维码。
@@ -121,6 +131,9 @@ private:
     double m_humidityOffsetPercent;        // 用于初始化 DebugPage 的湿度偏移量，单位 %。
     double m_humidityLowerLimitPercent;    // 用于初始化 DebugPage 的湿度下限值，单位 %。
     int m_foupInAutoPurgeEnable;           // FOUPIN 自动充气使能，0=默认关闭，1=开启。
+    bool m_idlePurgeEnabled;               // Idle Purge enable state for this device.
+    int m_idlePurgeDurationSeconds;        // Idle Purge duration in seconds.
+    int m_idlePurgeIntervalSeconds;        // Idle Purge interval in seconds.
 };
 
 #endif // OHBDEVICECONFIGINFO_H

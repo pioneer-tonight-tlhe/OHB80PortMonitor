@@ -33,10 +33,7 @@ public:
     void stop() override;
 
     void setGenericIni(const QString &fileName, const QVector<IniEntry> &entries);
-    void setOhbGlobal(bool idleEnabled,
-                      int purgeDurationSeconds,
-                      int purgeIntervalSeconds,
-                      bool sh85Enabled,
+    void setOhbGlobal(bool sh85Enabled,
                       int sh85PeriodSeconds,
                       const QVector<QString> &masterDevices);
     void setOhbDevice(const QString &originalQrCode, const OHBDeviceConfigInfo &deviceInfo);
@@ -53,9 +50,6 @@ private:
     QString m_fileName;
     QVector<IniEntry> m_entries;
 
-    bool m_idleEnabled;
-    int m_purgeDurationSeconds;
-    int m_purgeIntervalSeconds;
     bool m_sh85Enabled;
     int m_sh85PeriodSeconds;
     QVector<QString> m_masterDevices;

@@ -39,6 +39,7 @@ public:
 private:
     // ============================ 界面初始化 ============================
     void initUI();
+    void initQRCodeItem();
     void initPreparationTimeItem();
     void initEnableItem();
     void initDurationItem();
@@ -60,6 +61,7 @@ private slots:
 private:
     // ---- 控件成员 ----
     QLineEdit *m_preparationTimeLineEdit;
+    QComboBox *m_qrCodeComboBox;
     QComboBox *m_enableComboBox;
     QSpinBox *m_durationSpinBox;
     QSpinBox *m_intervalSpinBox;
@@ -69,6 +71,7 @@ private:
 
     // ---- 条目成员 ----
     SettingItemWidget *m_enableItem;
+    SettingItemWidget *m_qrCodeItem;
     SettingItemWidget *m_durationItem;
     SettingItemWidget *m_intervalItem;
     SettingItemWidget *m_preparationTimeItem;

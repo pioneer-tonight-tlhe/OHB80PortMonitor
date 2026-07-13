@@ -2,7 +2,6 @@
 
 #include "app/appconfig.h"
 #include "app/shareddata.h"
-#include "idlepurgeconfig.h"
 #include "ohbdeviceconfig.h"
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 
@@ -12,9 +11,6 @@
 SetConfigFileTask::SetConfigFileTask(QObject *parent)
     : SchedulerTask(parent)
     , m_mode(Mode::None)
-    , m_idleEnabled(false)
-    , m_purgeDurationSeconds(0)
-    , m_purgeIntervalSeconds(0)
     , m_sh85Enabled(false)
     , m_sh85PeriodSeconds(0)
 {
@@ -28,17 +24,11 @@ void SetConfigFileTask::setGenericIni(const QString &fileName,
     m_entries = entries;
 }
 
-void SetConfigFileTask::setOhbGlobal(bool idleEnabled,
-                                     int purgeDurationSeconds,
-                                     int purgeIntervalSeconds,
-                                     bool sh85Enabled,
+void SetConfigFileTask::setOhbGlobal(bool sh85Enabled,
                                      int sh85PeriodSeconds,
                                      const QVector<QString> &masterDevices)
 {
     m_mode = Mode::OhbGlobal;
-    m_idleEnabled = idleEnabled;
-    m_purgeDurationSeconds = purgeDurationSeconds;
-    m_purgeIntervalSeconds = purgeIntervalSeconds;
     m_sh85Enabled = sh85Enabled;
     m_sh85PeriodSeconds = sh85PeriodSeconds;
     m_masterDevices = masterDevices;
@@ -130,13 +120,9 @@ bool SetConfigFileTask::writeGenericIni(QString *errorMessage)
 
 bool SetConfigFileTask::writeOhbGlobal(QString *errorMessage)
 {
-    IdlePurgeConfig &idleConfig = IdlePurgeConfig::getInstance();
     OHBDeviceConfig &ohbConfig = OHBDeviceConfig::getInstance();
 
-    bool success = idleConfig.setEnabled(m_idleEnabled);
-    success = idleConfig.setPurgeDurationSeconds(m_purgeDurationSeconds) && success;
-    success = idleConfig.setPurgeIntervalSeconds(m_purgeIntervalSeconds) && success;
-    success = ohbConfig.setSH85SelfCheckEnabled(m_sh85Enabled) && success;
+    bool success = ohbConfig.setSH85SelfCheckEnabled(m_sh85Enabled);
     success = ohbConfig.setSH85SelfCheckPeriodSeconds(m_sh85PeriodSeconds) && success;
     success = ohbConfig.writeMasterDevices(m_masterDevices) && success;
 

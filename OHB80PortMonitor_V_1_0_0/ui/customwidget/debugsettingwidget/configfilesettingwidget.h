@@ -78,9 +78,6 @@ private:
 
     SettingItemWidget *m_ohbNavItem;
 
-    QCheckBox *m_idleEnabledCheck;
-    QSpinBox *m_purgeDurationSpin;
-    QSpinBox *m_purgeIntervalSpin;
     QCheckBox *m_sh85EnabledCheck;
     QSpinBox *m_sh85PeriodSpin;
     QLineEdit *m_masterDevicesEdit;
@@ -104,6 +101,9 @@ private:
     QDoubleSpinBox *m_humidityOffsetSpin;
     QDoubleSpinBox *m_humidityLowerLimitSpin;
     QComboBox *m_foupInAutoPurgeCombo;
+    QCheckBox *m_idlePurgeEnabledCheck;
+    QSpinBox *m_idlePurgeDurationSpin;
+    QSpinBox *m_idlePurgeIntervalSpin;
 
     QString m_currentDeviceQrCode;
     QVector<OHBDeviceConfigInfo> m_devices;

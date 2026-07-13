@@ -11,6 +11,9 @@ OHBDeviceConfigInfo::OHBDeviceConfigInfo()
     , m_humidityOffsetPercent(0.0)
     , m_humidityLowerLimitPercent(5.0)
     , m_foupInAutoPurgeEnable(0)
+    , m_idlePurgeEnabled(true)
+    , m_idlePurgeDurationSeconds(5)
+    , m_idlePurgeIntervalSeconds(10)
 {
 }
 
@@ -25,7 +28,10 @@ OHBDeviceConfigInfo::OHBDeviceConfigInfo(const QString& qrCode,
                                          double humidityOffsetPercent,
                                          double humidityLowerLimitPercent,
                                          double vppePressureBar,
-                                         int foupInAutoPurgeEnable)
+                                         int foupInAutoPurgeEnable,
+                                         bool idlePurgeEnabled,
+                                         int idlePurgeDurationSeconds,
+                                         int idlePurgeIntervalSeconds)
     : m_qrCode(qrCode)
     , m_ip(ip)
     , m_port(port)
@@ -38,6 +44,9 @@ OHBDeviceConfigInfo::OHBDeviceConfigInfo(const QString& qrCode,
     , m_humidityOffsetPercent(humidityOffsetPercent)
     , m_humidityLowerLimitPercent(humidityLowerLimitPercent)
     , m_foupInAutoPurgeEnable(foupInAutoPurgeEnable)
+    , m_idlePurgeEnabled(idlePurgeEnabled)
+    , m_idlePurgeDurationSeconds(idlePurgeDurationSeconds)
+    , m_idlePurgeIntervalSeconds(idlePurgeIntervalSeconds)
 {
 }
 
@@ -159,4 +168,34 @@ int OHBDeviceConfigInfo::getFoupInAutoPurgeEnable() const
 void OHBDeviceConfigInfo::setFoupInAutoPurgeEnable(int enable)
 {
     m_foupInAutoPurgeEnable = enable;
+}
+
+bool OHBDeviceConfigInfo::isIdlePurgeEnabled() const
+{
+    return m_idlePurgeEnabled;
+}
+
+void OHBDeviceConfigInfo::setIdlePurgeEnabled(bool enabled)
+{
+    m_idlePurgeEnabled = enabled;
+}
+
+int OHBDeviceConfigInfo::getIdlePurgeDurationSeconds() const
+{
+    return m_idlePurgeDurationSeconds;
+}
+
+void OHBDeviceConfigInfo::setIdlePurgeDurationSeconds(int seconds)
+{
+    m_idlePurgeDurationSeconds = seconds;
+}
+
+int OHBDeviceConfigInfo::getIdlePurgeIntervalSeconds() const
+{
+    return m_idlePurgeIntervalSeconds;
+}
+
+void OHBDeviceConfigInfo::setIdlePurgeIntervalSeconds(int seconds)
+{
+    m_idlePurgeIntervalSeconds = seconds;
 }

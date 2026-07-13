@@ -43,6 +43,9 @@ public:
     bool setHumidityOffsetPercentByQRCode(const QString& qrCode, double humidityOffsetPercent);
     bool setHumidityLowerLimitPercentByQRCode(const QString& qrCode, double humidityLowerLimitPercent);
     bool setFoupInAutoPurgeEnableByQRCode(const QString& qrCode, int enable);
+    bool setIdlePurgeEnabledByQRCode(const QString& qrCode, bool enabled);
+    bool setIdlePurgeDurationSecondsByQRCode(const QString& qrCode, int seconds);
+    bool setIdlePurgeIntervalSecondsByQRCode(const QString& qrCode, int seconds);
     bool updateDeviceInfoByQRCode(const QString& oldQrCode,
                                   const QString& newQrCode,
                                   const QString& ip,

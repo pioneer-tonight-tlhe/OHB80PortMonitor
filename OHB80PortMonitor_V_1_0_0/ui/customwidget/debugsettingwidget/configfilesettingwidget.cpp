@@ -3,7 +3,6 @@
 #include "../settingwidget/settingitemwidget.h"
 #include "app/appconfig.h"
 #include "app/shareddata.h"
-#include "idlepurgeconfig.h"
 #include "ohbdeviceconfig.h"
 #include "scheduler/scheduler.h"
 #include "scheduler/tasks/config_file_task/set_config_file_task.h"
@@ -65,9 +64,6 @@ ConfigFileSettingWidget::ConfigFileSettingWidget(QWidget *parent)
     : SettingWidget(parent)
     , m_stack(nullptr)
     , m_ohbNavItem(nullptr)
-    , m_idleEnabledCheck(nullptr)
-    , m_purgeDurationSpin(nullptr)
-    , m_purgeIntervalSpin(nullptr)
     , m_sh85EnabledCheck(nullptr)
     , m_sh85PeriodSpin(nullptr)
     , m_masterDevicesEdit(nullptr)
@@ -89,6 +85,9 @@ ConfigFileSettingWidget::ConfigFileSettingWidget(QWidget *parent)
     , m_humidityOffsetSpin(nullptr)
     , m_humidityLowerLimitSpin(nullptr)
     , m_foupInAutoPurgeCombo(nullptr)
+    , m_idlePurgeEnabledCheck(nullptr)
+    , m_idlePurgeDurationSpin(nullptr)
+    , m_idlePurgeIntervalSpin(nullptr)
 {
     setTitle(QStringLiteral("Config Files"));
     initUI();
@@ -204,17 +203,11 @@ QWidget *ConfigFileSettingWidget::createOhbGlobalTab()
     form->setLabelAlignment(Qt::AlignRight);
     form->setFormAlignment(Qt::AlignTop);
 
-    m_idleEnabledCheck = new QCheckBox(QStringLiteral("Enabled"), page);
-    m_purgeDurationSpin = createIntSpinBox(0, MaxUInt16ConfigValue, page);
-    m_purgeIntervalSpin = createIntSpinBox(0, MaxUInt16ConfigValue, page);
     m_sh85EnabledCheck = new QCheckBox(QStringLiteral("Enabled"), page);
     m_sh85PeriodSpin = createIntSpinBox(1, 86400, page);
     m_masterDevicesEdit = new QLineEdit(page);
     m_masterDevicesEdit->setPlaceholderText(QStringLiteral("12001,12002,12003"));
 
-    addFormRow(form, QStringLiteral("[IdleConfig] Enabled"), m_idleEnabledCheck);
-    addFormRow(form, QStringLiteral("[IdleConfig] PurgeDuration_s"), m_purgeDurationSpin);
-    addFormRow(form, QStringLiteral("[IdleConfig] PurgeInterval_s"), m_purgeIntervalSpin);
     addFormRow(form, QStringLiteral("[SH85SelfCheckTask] Enabled"), m_sh85EnabledCheck);
     addFormRow(form, QStringLiteral("[SH85SelfCheckTask] Period_s"), m_sh85PeriodSpin);
     addFormRow(form, QStringLiteral("[MasterDevices] List"), m_masterDevicesEdit);
@@ -290,6 +283,9 @@ QWidget *ConfigFileSettingWidget::createOhbDeviceTab()
     m_foupInAutoPurgeCombo = new QComboBox(page);
     m_foupInAutoPurgeCombo->addItem(QStringLiteral("0"), 0);
     m_foupInAutoPurgeCombo->addItem(QStringLiteral("1"), 1);
+    m_idlePurgeEnabledCheck = new QCheckBox(QStringLiteral("Enabled"), page);
+    m_idlePurgeDurationSpin = createIntSpinBox(0, MaxUInt16ConfigValue, page);
+    m_idlePurgeIntervalSpin = createIntSpinBox(0, MaxUInt16ConfigValue, page);
 
     addFormRow(form, QStringLiteral("QRCode"), m_qrcodeEdit);
     addFormRow(form, QStringLiteral("Ip"), m_ipEdit);
@@ -303,6 +299,9 @@ QWidget *ConfigFileSettingWidget::createOhbDeviceTab()
     addFormRow(form, QStringLiteral("HumidityOffset_pct"), m_humidityOffsetSpin);
     addFormRow(form, QStringLiteral("HumidityLowerLimit_pct"), m_humidityLowerLimitSpin);
     addFormRow(form, QStringLiteral("FoupInAutoPurgeEnable"), m_foupInAutoPurgeCombo);
+    addFormRow(form, QStringLiteral("IdleP_Enabled"), m_idlePurgeEnabledCheck);
+    addFormRow(form, QStringLiteral("IdleP_PurgeDuration_s"), m_idlePurgeDurationSpin);
+    addFormRow(form, QStringLiteral("IdleP_PurgeInterval_s"), m_idlePurgeIntervalSpin);
     layout->addLayout(form);
 
     auto *buttonRow = new QWidget(page);
@@ -443,16 +442,12 @@ void ConfigFileSettingWidget::addGenericRow(ConfigPageKind kind)
 
 void ConfigFileSettingWidget::loadOhbGlobalValues()
 {
-    if (!m_idleEnabledCheck) {
+    if (!m_sh85EnabledCheck) {
         return;
     }
 
-    IdlePurgeConfig &idleConfig = IdlePurgeConfig::getInstance();
     OHBDeviceConfig &ohbConfig = OHBDeviceConfig::getInstance();
 
-    m_idleEnabledCheck->setChecked(idleConfig.isEnabled());
-    m_purgeDurationSpin->setValue(idleConfig.getPurgeDurationSeconds());
-    m_purgeIntervalSpin->setValue(idleConfig.getPurgeIntervalSeconds());
     m_sh85EnabledCheck->setChecked(ohbConfig.readSH85SelfCheckEnabled());
     m_sh85PeriodSpin->setValue(ohbConfig.readSH85SelfCheckPeriodSeconds());
 
@@ -476,10 +471,7 @@ void ConfigFileSettingWidget::submitOhbGlobalValues()
     }
 
     auto *task = new SetConfigFileTask();
-    task->setOhbGlobal(m_idleEnabledCheck->isChecked(),
-                       m_purgeDurationSpin->value(),
-                       m_purgeIntervalSpin->value(),
-                       m_sh85EnabledCheck->isChecked(),
+    task->setOhbGlobal(m_sh85EnabledCheck->isChecked(),
                        m_sh85PeriodSpin->value(),
                        masters);
 
@@ -575,6 +567,9 @@ void ConfigFileSettingWidget::showDeviceConfig(const QString &qrcode)
             m_humidityOffsetSpin->setValue(device.getHumidityOffsetPercent());
             m_humidityLowerLimitSpin->setValue(device.getHumidityLowerLimitPercent());
             m_foupInAutoPurgeCombo->setCurrentIndex(device.getFoupInAutoPurgeEnable() == 1 ? 1 : 0);
+            m_idlePurgeEnabledCheck->setChecked(device.isIdlePurgeEnabled());
+            m_idlePurgeDurationSpin->setValue(device.getIdlePurgeDurationSeconds());
+            m_idlePurgeIntervalSpin->setValue(device.getIdlePurgeIntervalSeconds());
             return;
         }
     }
@@ -595,7 +590,10 @@ OHBDeviceConfigInfo ConfigFileSettingWidget::collectDeviceConfig() const
                                m_humidityOffsetSpin->value(),
                                m_humidityLowerLimitSpin->value(),
                                m_vppePressureSpin->value(),
-                               m_foupInAutoPurgeCombo->currentData().toInt());
+                               m_foupInAutoPurgeCombo->currentData().toInt(),
+                               m_idlePurgeEnabledCheck->isChecked(),
+                               m_idlePurgeDurationSpin->value(),
+                               m_idlePurgeIntervalSpin->value());
 }
 
 void ConfigFileSettingWidget::submitOhbDeviceValues()
