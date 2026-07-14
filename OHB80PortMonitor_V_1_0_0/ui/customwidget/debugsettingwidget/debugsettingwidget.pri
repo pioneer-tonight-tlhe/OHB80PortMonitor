@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/uirefreshtimesettingwidget.h \
     $$PWD/vefcflowunitmediumstatuswidget.h \
     $$PWD/vefcsensormonitorwidget.h \
+    $$PWD/alarmresetwidget.h \
     $$PWD/boardenablestatuswidget.h \
     $$PWD/foupinvacuumextractionenablewidget.h \
     $$PWD/foupinautopurgeenablewidget.h \
@@ -19,6 +20,7 @@ SOURCES += \
     $$PWD/uirefreshtimesettingwidget.cpp \
     $$PWD/vefcflowunitmediumstatuswidget.cpp \
     $$PWD/vefcsensormonitorwidget.cpp \
+    $$PWD/alarmresetwidget.cpp \
     $$PWD/boardenablestatuswidget.cpp \
     $$PWD/foupinvacuumextractionenablewidget.cpp \
     $$PWD/foupinautopurgeenablewidget.cpp \

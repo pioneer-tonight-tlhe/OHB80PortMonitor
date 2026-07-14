@@ -29,6 +29,11 @@ DataMonitorChartPlot::DataMonitorChartPlot(const QString &plotId,
     }
 }
 
+DataMonitorChartPlot::~DataMonitorChartPlot()
+{
+    clearVerticalMarkers();
+}
+
 QString DataMonitorChartPlot::plotId() const
 {
     return m_plotId;
@@ -164,6 +169,7 @@ bool DataMonitorChartPlot::clearGraphData(int graphId)
 void DataMonitorChartPlot::clearAllGraphData()
 {
     m_xData.clear();
+    clearVerticalMarkers();
 
     for (const QSharedPointer<ChartGraph> &graph : m_graphs) {
         if (graph)
@@ -177,6 +183,64 @@ void DataMonitorChartPlot::clearAllGraphData()
 
     if (m_chart)
         m_chart->replot(QCustomPlot::rpQueuedReplot);
+}
+
+bool DataMonitorChartPlot::addVerticalMarker(double x, const QPen &pen)
+{
+    if (!m_chart || !qIsFinite(x)) {
+        return false;
+    }
+
+    QCPItemLine *marker = new QCPItemLine(m_chart.data());
+    marker->setPen(pen);
+    marker->setSelectable(false);
+    marker->setLayer(QStringLiteral("overlay"));
+    marker->setClipToAxisRect(true);
+    marker->setClipAxisRect(m_chart->axisRect());
+
+    marker->start->setAxes(m_chart->xAxis, m_chart->yAxis);
+    marker->end->setAxes(m_chart->xAxis, m_chart->yAxis);
+    marker->start->setAxisRect(m_chart->axisRect());
+    marker->end->setAxisRect(m_chart->axisRect());
+    marker->start->setTypeX(QCPItemPosition::ptPlotCoords);
+    marker->end->setTypeX(QCPItemPosition::ptPlotCoords);
+    marker->start->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    marker->end->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    marker->start->setCoords(x, 0.0);
+    marker->end->setCoords(x, 1.0);
+
+    m_verticalMarkers.append(marker);
+    m_chart->replot(QCustomPlot::rpQueuedReplot);
+    return true;
+}
+
+bool DataMonitorChartPlot::addVerticalMarkerAtLatestX(const QPen &pen, double *x)
+{
+    if (m_xData.isEmpty()) {
+        return false;
+    }
+
+    const double latestX = m_xData.constLast();
+    if (x) {
+        *x = latestX;
+    }
+    return addVerticalMarker(latestX, pen);
+}
+
+void DataMonitorChartPlot::clearVerticalMarkers()
+{
+    const bool hadMarkers = !m_verticalMarkers.isEmpty();
+    if (m_chart) {
+        for (QCPItemLine *marker : qAsConst(m_verticalMarkers)) {
+            if (marker) {
+                m_chart->removeItem(marker);
+            }
+        }
+    }
+    m_verticalMarkers.clear();
+    if (m_chart && hadMarkers) {
+        m_chart->replot(QCustomPlot::rpQueuedReplot);
+    }
 }
 
 void DataMonitorChartPlot::setXAxisMode(int arg1)

@@ -4,17 +4,22 @@
 #include "datamonitorchartplotmanager.h"
 #include "foupofohbinfo.h"
 #include "ohbdeviceconfig.h"
+#include "scheduler/tasks/purge_task/purge_data_recorder.h"
 #include "purgetaskconfig.h"
 #include "qcustomplot.h"
 #include "scheduler/scheduler.h"
 #include "shareddata.h"
 
+#include <QAbstractSpinBox>
 #include <QBrush>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QDir>
+#include <QDoubleSpinBox>
 #include <QFile>
+#include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
@@ -38,6 +43,9 @@ ChartPage::~ChartPage()
     if (m_refreshTimer) {
         m_refreshTimer->stop();
     }
+    if (m_dataRecorder) {
+        m_dataRecorder->stop();
+    }
 
     const auto manager = DataMonitorChartPlotManager::getInstance();
     if (manager && manager->containsPlot(kPlotId)) {
@@ -58,9 +66,9 @@ void ChartPage::setupPage()
     ui->verticalLayout->setContentsMargins(12, 12, 12, 12);
     ui->verticalLayout->setSpacing(10);
 
-    setupChart();
-    setupGraphControls();
     setupControls();
+    setupGraphControls();
+    setupChart();
     loadQRCodes();
 
     m_refreshTimer = new QTimer(this);
@@ -69,6 +77,7 @@ void ChartPage::setupPage()
     m_refreshTimer->start();
 
     setTaskRunning(false);
+    updateControlStates();
     updateStatusText(tr("Ready"));
 }
 
@@ -113,15 +122,25 @@ void ChartPage::setupChart()
     m_chart->xAxis->grid()->setPen(QPen(QColor(QStringLiteral("#CDD8DF")), 1, Qt::DashLine));
     m_chart->yAxis->grid()->setPen(QPen(QColor(QStringLiteral("#CDD8DF")), 1, Qt::DashLine));
     m_chart->yAxis->setLabel(tr("Realtime value"));
-    m_chart->yAxis->setRange(-20.0, 210.0);
+    m_chart->yAxis->setRange(-20.0, 100.0);
     m_chart->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 }
 
 void ChartPage::setupGraphControls()
 {
-    QHBoxLayout *graphControlsLayout = new QHBoxLayout;
+    QFrame *graphControlsPanel = new QFrame(this);
+    graphControlsPanel->setObjectName(QStringLiteral("graphControlsPanel"));
+    graphControlsPanel->setStyleSheet(QStringLiteral(
+        "QFrame#graphControlsPanel {"
+        " background-color: #EDF3F6;"
+        " border: 1px solid #C6D3DA;"
+        " border-radius: 6px;"
+        "}"));
+
+    QHBoxLayout *graphControlsLayout = new QHBoxLayout(graphControlsPanel);
+    graphControlsLayout->setContentsMargins(12, 8, 12, 8);
     graphControlsLayout->setSpacing(12);
-    graphControlsLayout->addWidget(new QLabel(tr("Curves:"), this));
+    graphControlsLayout->addWidget(new QLabel(tr("Curves:"), graphControlsPanel));
 
     const QStringList graphNames = {
         tr("Inlet pressure"),
@@ -141,7 +160,7 @@ void ChartPage::setupGraphControls()
     const auto manager = DataMonitorChartPlotManager::getInstance();
     m_graphVisibilityChecks.reserve(graphNames.size());
     for (int graphIndex = 0; graphIndex < graphNames.size(); ++graphIndex) {
-        QCheckBox *checkBox = new QCheckBox(graphNames.at(graphIndex), this);
+        QCheckBox *checkBox = new QCheckBox(graphNames.at(graphIndex), graphControlsPanel);
         checkBox->setChecked(true);
         checkBox->setStyleSheet(QStringLiteral("QCheckBox { color: %1; font-weight: 600; }")
                                     .arg(graphColors.at(graphIndex)));
@@ -156,46 +175,88 @@ void ChartPage::setupGraphControls()
     }
 
     graphControlsLayout->addStretch(1);
-    m_appendDataCheckBox = new QCheckBox(tr("Append curve data"), this);
-    m_appendDataCheckBox->setChecked(true);
-    m_appendDataCheckBox->setToolTip(tr("Uncheck to pause adding new points to all curves."));
-    graphControlsLayout->addWidget(m_appendDataCheckBox);
+    m_elapsedTimeCheckBox = new QCheckBox(tr("Curve append mode (seconds)"), graphControlsPanel);
+    m_elapsedTimeCheckBox->setChecked(false);
+    m_elapsedTimeCheckBox->setToolTip(
+        tr("When checked, the X axis uses elapsed seconds; otherwise it displays hh:mm:ss."));
+    connect(m_elapsedTimeCheckBox, &QCheckBox::stateChanged, this, [this, manager](int state) {
+        if (manager) {
+            manager->setXAxisMode(kPlotId, state);
+        }
+        resetRecordingSession();
+    });
+    graphControlsLayout->addWidget(m_elapsedTimeCheckBox);
 
-    ui->verticalLayout->addLayout(graphControlsLayout);
+    m_chartPauseButton = new QPushButton(tr("Pause chart"), graphControlsPanel);
+    connect(m_chartPauseButton,
+            &QPushButton::clicked,
+            this,
+            &ChartPage::toggleChartPaused);
+    graphControlsLayout->addWidget(m_chartPauseButton);
+
+    ui->verticalLayout->addWidget(graphControlsPanel);
 }
 
 void ChartPage::setupControls()
 {
-    QHBoxLayout *controlsLayout = new QHBoxLayout;
+    QFrame *controlsPanel = new QFrame(this);
+    controlsPanel->setObjectName(QStringLiteral("taskControlsPanel"));
+    controlsPanel->setStyleSheet(QStringLiteral(
+        "QFrame#taskControlsPanel {"
+        " background-color: #E4EDF2;"
+        " border: 1px solid #B8C9D3;"
+        " border-radius: 6px;"
+        "}"));
+
+    QHBoxLayout *controlsLayout = new QHBoxLayout(controlsPanel);
+    controlsLayout->setContentsMargins(12, 8, 12, 8);
     controlsLayout->setSpacing(8);
 
-    QLabel *qrCodeLabel = new QLabel(tr("QRCode:"), this);
-    m_qrCodeCombo = new QComboBox(this);
+    QLabel *qrCodeLabel = new QLabel(tr("QRCode:"), controlsPanel);
+    m_qrCodeCombo = new QComboBox(controlsPanel);
     m_qrCodeCombo->setMinimumWidth(140);
 
-    m_startButton = new QPushButton(tr("Start task"), this);
-    m_stopButton = new QPushButton(tr("End task"), this);
-    m_openRecordButton = new QPushButton(tr("Open record"), this);
-    m_statusLabel = new QLabel(this);
+    m_recordButton = new QPushButton(tr("Start recording"), controlsPanel);
+    m_startButton = new QPushButton(tr("Start task"), controlsPanel);
+    m_stopButton = new QPushButton(tr("End task"), controlsPanel);
+    QLabel *markerTimeLabel = new QLabel(tr("Marker time:"), controlsPanel);
+    m_markerTimeSpinBox = new QDoubleSpinBox(controlsPanel);
+    m_markerTimeSpinBox->setRange(0.0, 86400.0);
+    m_markerTimeSpinBox->setDecimals(1);
+    m_markerTimeSpinBox->setSingleStep(0.5);
+    m_markerTimeSpinBox->setSuffix(tr(" s"));
+    m_markerTimeSpinBox->setReadOnly(true);
+    m_markerTimeSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    m_markerTimeSpinBox->setFixedWidth(100);
+    m_markerButton = new QPushButton(tr("Mark"), controlsPanel);
+    m_openRecordButton = new QPushButton(tr("Open record"), controlsPanel);
+    m_statusLabel = new QLabel(controlsPanel);
     m_statusLabel->setMinimumWidth(220);
 
     controlsLayout->addWidget(qrCodeLabel);
     controlsLayout->addWidget(m_qrCodeCombo);
     controlsLayout->addSpacing(12);
+    controlsLayout->addWidget(m_recordButton);
     controlsLayout->addWidget(m_startButton);
     controlsLayout->addWidget(m_stopButton);
+    controlsLayout->addSpacing(12);
+    controlsLayout->addWidget(markerTimeLabel);
+    controlsLayout->addWidget(m_markerTimeSpinBox);
+    controlsLayout->addWidget(m_markerButton);
     controlsLayout->addWidget(m_openRecordButton);
     controlsLayout->addStretch(1);
     controlsLayout->addWidget(m_statusLabel);
 
-    ui->verticalLayout->addLayout(controlsLayout);
+    ui->verticalLayout->addWidget(controlsPanel);
 
     connect(m_qrCodeCombo,
             qOverload<int>(&QComboBox::currentIndexChanged),
             this,
             &ChartPage::onQRCodeChanged);
+    connect(m_recordButton, &QPushButton::clicked, this, &ChartPage::toggleDataRecording);
     connect(m_startButton, &QPushButton::clicked, this, &ChartPage::startPurgeTask);
     connect(m_stopButton, &QPushButton::clicked, this, &ChartPage::requestStopPurgeTask);
+    connect(m_markerButton, &QPushButton::clicked, this, &ChartPage::addTimeMarker);
     connect(m_openRecordButton, &QPushButton::clicked, this, &ChartPage::openRecordDirectory);
 }
 
@@ -234,15 +295,17 @@ void ChartPage::loadQRCodes()
 
 void ChartPage::onQRCodeChanged()
 {
+    m_currentOutputDir.clear();
     const auto manager = DataMonitorChartPlotManager::getInstance();
     if (manager) {
         manager->clearAllGraphData(kPlotId);
     }
+    resetRecordingSession();
 }
 
 void ChartPage::refreshChartData()
 {
-    if (!m_appendDataCheckBox || !m_appendDataCheckBox->isChecked()) {
+    if (m_chartPaused) {
         return;
     }
 
@@ -261,12 +324,127 @@ void ChartPage::refreshChartData()
         return;
     }
 
-    manager->refreshGraphs(kPlotId,
-                           QVector<double>{foup->inletPressure(),
-                                           foup->negativePressure(),
-                                           foup->inletFlow(),
-                                           foup->RH(),
-                                           foup->temperature()});
+    if (manager->refreshGraphs(kPlotId,
+                               QVector<double>{foup->inletPressure(),
+                                               foup->negativePressure(),
+                                               foup->inletFlow(),
+                                               foup->RH(),
+                                               foup->temperature()})) {
+        if (m_isRecording && m_recordingElapsedTimer.isValid()) {
+            m_recordedDurationSeconds = m_recordingElapsedTimer.elapsed() / 1000.0;
+            if (!m_hasRecordedSamples) {
+                m_hasRecordedSamples = true;
+                updateControlStates();
+            }
+        }
+    }
+}
+
+void ChartPage::toggleDataRecording()
+{
+    if (m_isRecording) {
+        m_recordedDurationSeconds = m_recordingElapsedTimer.elapsed() / 1000.0;
+        if (m_dataRecorder) {
+            m_dataRecorder->stop();
+        }
+        m_isRecording = false;
+        updateControlStates();
+        updateStatusText(tr("Data recording stopped at %1 s")
+                             .arg(m_recordedDurationSeconds, 0, 'f', 1));
+        return;
+    }
+
+    const QString qrCode = selectedQRCode();
+    if (qrCode.isEmpty()) {
+        QMessageBox::warning(this, tr("Data recording"), tr("Please select an OHB device."));
+        return;
+    }
+
+    const auto manager = DataMonitorChartPlotManager::getInstance();
+    if (!manager || !manager->clearAllGraphData(kPlotId)) {
+        QMessageBox::warning(this, tr("Data recording"), tr("Unable to initialize the chart."));
+        return;
+    }
+
+    if (m_dataRecorder) {
+        m_dataRecorder->stop();
+        m_dataRecorder->deleteLater();
+        m_dataRecorder.clear();
+    }
+
+    PurgeDataRecorder *recorder = new PurgeDataRecorder(qrCode, this);
+    connect(recorder, &PurgeDataRecorder::recordingFailed,
+            this, [this, recorder](const QString &message, const QString &outputDir) {
+        if (m_dataRecorder != recorder) {
+            return;
+        }
+
+        m_recordedDurationSeconds = m_recordingElapsedTimer.isValid()
+            ? m_recordingElapsedTimer.elapsed() / 1000.0
+            : m_recordedDurationSeconds;
+        m_isRecording = false;
+        if (!outputDir.isEmpty()) {
+            m_currentOutputDir = outputDir;
+        }
+        updateControlStates();
+        updateStatusText(message);
+        QMessageBox::warning(this, tr("Data recording"), message);
+    });
+
+    QString errorMessage;
+    if (!recorder->start(&errorMessage)) {
+        recorder->deleteLater();
+        QMessageBox::warning(this, tr("Data recording"), errorMessage);
+        return;
+    }
+
+    m_dataRecorder = recorder;
+    m_currentOutputDir = recorder->outputDir();
+    m_recordingStartEpochSeconds = QDateTime::currentMSecsSinceEpoch() / 1000.0;
+    m_recordingElapsedTimer.restart();
+    m_recordedDurationSeconds = 0.0;
+    m_hasRecordedSamples = false;
+    m_isRecording = true;
+    m_chartPaused = false;
+    if (m_markerTimeSpinBox) {
+        m_markerTimeSpinBox->setValue(0.0);
+    }
+
+    updateControlStates();
+    updateStatusText(tr("Recording data: QRCode=%1").arg(qrCode));
+}
+
+void ChartPage::toggleChartPaused()
+{
+    m_chartPaused = !m_chartPaused;
+    updateControlStates();
+    updateStatusText(m_chartPaused ? tr("Chart paused") : tr("Chart resumed"));
+}
+
+void ChartPage::addTimeMarker()
+{
+    if (!m_markerTimeSpinBox || !m_hasRecordedSamples) {
+        return;
+    }
+
+    const auto manager = DataMonitorChartPlotManager::getInstance();
+    double markerX = 0.0;
+    if (!manager
+        || !manager->addVerticalMarkerAtLatestX(
+            kPlotId,
+            QPen(QColor(QStringLiteral("#FFD200")), 3, Qt::SolidLine),
+            &markerX)) {
+        QMessageBox::warning(this, tr("Chart marker"), tr("Unable to add the chart marker."));
+        return;
+    }
+
+    const bool elapsedMode = m_elapsedTimeCheckBox && m_elapsedTimeCheckBox->isChecked();
+    const double markerSeconds = qMax(0.0,
+                                      elapsedMode
+                                          ? markerX
+                                          : markerX - m_recordingStartEpochSeconds);
+    m_markerTimeSpinBox->setValue(markerSeconds);
+    updateStatusText(tr("Marker added at %1 s").arg(markerSeconds, 0, 'f', 1));
 }
 
 void ChartPage::startPurgeTask()
@@ -289,18 +467,27 @@ void ChartPage::startPurgeTask()
     }
 
     PurgeTask *task = new PurgeTask(definition);
+    task->setOutputDir(m_currentOutputDir);
     m_runningTask = task;
-    m_currentOutputDir.clear();
 
     connect(task, &PurgeTask::outputDirectoryReady, this, [this](const QString &outputDir) {
         m_currentOutputDir = outputDir;
     });
     connect(task, &PurgeTask::purgeStageStarted, this,
             [this](int stageNo, const QString &stageName, int durationSeconds) {
+        if (m_dataRecorder && m_dataRecorder->isRecording()) {
+            m_dataRecorder->setCurrentStage(stageNo, stageName);
+        }
         updateStatusText(tr("Stage %1: %2 (%3 s)")
                              .arg(stageNo)
                              .arg(stageName)
                              .arg(durationSeconds));
+    });
+    connect(task, &PurgeTask::purgeStageFinished, this,
+            [this](int, const QString &) {
+        if (m_dataRecorder && m_dataRecorder->isRecording()) {
+            m_dataRecorder->clearCurrentStage();
+        }
     });
     connect(task, &PurgeTask::purgeActionFinished, this,
             [this](int stageNo,
@@ -365,6 +552,9 @@ void ChartPage::onPurgeTaskFinished(bool success,
                                     const QString &outputDir)
 {
     m_runningTask.clear();
+    if (m_dataRecorder && m_dataRecorder->isRecording()) {
+        m_dataRecorder->clearCurrentStage();
+    }
     if (!outputDir.trimmed().isEmpty()) {
         m_currentOutputDir = outputDir;
     }
@@ -390,18 +580,60 @@ void ChartPage::onPurgeTaskFinished(bool success,
 
 void ChartPage::setTaskRunning(bool running)
 {
+    m_taskRunning = running;
+    updateControlStates();
+}
+
+void ChartPage::updateControlStates()
+{
+    const bool hasQRCode = m_qrCodeCombo && m_qrCodeCombo->count() > 0;
     if (m_qrCodeCombo) {
-        m_qrCodeCombo->setEnabled(!running);
+        m_qrCodeCombo->setEnabled(!m_isRecording && !m_taskRunning);
+    }
+    if (m_recordButton) {
+        m_recordButton->setEnabled(hasQRCode && (m_isRecording || !m_taskRunning));
+        m_recordButton->setText(m_isRecording ? tr("Stop recording") : tr("Start recording"));
     }
     if (m_startButton) {
-        m_startButton->setEnabled(!running && m_qrCodeCombo && m_qrCodeCombo->count() > 0);
+        m_startButton->setEnabled(!m_taskRunning && hasQRCode);
     }
     if (m_stopButton) {
-        m_stopButton->setEnabled(running);
+        m_stopButton->setEnabled(m_taskRunning);
+    }
+    if (m_markerTimeSpinBox) {
+        m_markerTimeSpinBox->setEnabled(m_hasRecordedSamples);
+    }
+    if (m_markerButton) {
+        m_markerButton->setEnabled(m_hasRecordedSamples);
+    }
+    if (m_elapsedTimeCheckBox) {
+        m_elapsedTimeCheckBox->setEnabled(!m_isRecording);
+    }
+    if (m_chartPauseButton) {
+        m_chartPauseButton->setText(m_chartPaused ? tr("Resume chart") : tr("Pause chart"));
     }
     if (m_openRecordButton) {
-        m_openRecordButton->setEnabled(!running && isValidRecordDirectory(m_currentOutputDir));
+        m_openRecordButton->setEnabled(!m_taskRunning && isValidRecordDirectory(m_currentOutputDir));
     }
+}
+
+void ChartPage::resetRecordingSession()
+{
+    if (m_dataRecorder) {
+        m_dataRecorder->stop();
+        m_dataRecorder->deleteLater();
+        m_dataRecorder.clear();
+    }
+    m_isRecording = false;
+    m_chartPaused = false;
+    m_hasRecordedSamples = false;
+    m_recordingElapsedTimer.invalidate();
+    m_recordingStartEpochSeconds = 0.0;
+    m_recordedDurationSeconds = 0.0;
+    if (m_markerTimeSpinBox) {
+        m_markerTimeSpinBox->setValue(0.0);
+    }
+    updateControlStates();
 }
 
 void ChartPage::updateStatusText(const QString &text)

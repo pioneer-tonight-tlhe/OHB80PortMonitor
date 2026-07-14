@@ -6,6 +6,7 @@
 #include "modbustcpmastermanager/modbuscommand/commandpool.h"
 #include "app/shareddata.h"
 #include "app/alarmtype.h"
+#include "classes/alarminfo.h"
 #include "classes/foupofohbinfo.h"
 #include "scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h"
 #include "scheduler/tasks/network_status_task/network_status_task_qrcode_logger.h"
@@ -32,6 +33,16 @@ QString statusToString(ModbusConnecter::ConnectionStatus status)
 QString masterEndpoint(ModbusTcpMaster* master)
 {
     return master ? QString("%1:%2").arg(master->ip()).arg(master->port()) : QStringLiteral("-");
+}
+
+QString deviceOfflineAlarmId(const QString& masterId)
+{
+    AlarmInfo info;
+    info.record.alarmType = static_cast<int>(AlarmType::DeviceOffline);
+    info.record.alarmLevel = alarmTypeToLevel(info.record.alarmType);
+    info.record.qrCode = masterId;
+    info.alarmSource = static_cast<int>(AlarmSource::Device);
+    return info.generateAlarmId();
 }
 } // namespace
 
@@ -151,10 +162,25 @@ void NetworkStatusTask::onStatusChanged(ModbusConnecter::ConnectionStatus status
     const bool offlineAlreadyReported = m_offlineReportedMap.value(masterId, false);
 
     // 自动重连期间会反复出现 Error -> Connecting -> Error。
-    // 离线会话已经上报后，重复的重连过渡状态不再写设备日志，也不重复提交离线告警。
+    // Connecting 仍作为重连过渡态跳过；重连再次失败时，如果 active 离线警报已被后台重置，
+    // 允许重新上报一次 DeviceOffline，恢复现场警报显示。
     if (offlineAlreadyReported
-        && (isOfflineStatus || status == ModbusConnecter::ConnectionStatus::Connecting)) {
+        && status == ModbusConnecter::ConnectionStatus::Connecting) {
         return;
+    }
+    if (offlineAlreadyReported && isOfflineStatus) {
+        bool hasActiveOfflineAlarm = false;
+        if (AlarmDispatchTask* dispatcher = SharedData::getAlarmDispatchTask()) {
+            hasActiveOfflineAlarm = dispatcher->isActive(deviceOfflineAlarmId(masterId));
+        }
+
+        if (hasActiveOfflineAlarm) {
+            return;
+        }
+
+        m_logger->deviceWarn(masterId, "onStatusChanged",
+            QString("离线会话已上报，但 active 离线警报不存在；当前状态=%1，允许重连失败后重新上报")
+                .arg(statusToString(status)));
     }
 
     const QString ipPortStr = masterEndpoint(master);

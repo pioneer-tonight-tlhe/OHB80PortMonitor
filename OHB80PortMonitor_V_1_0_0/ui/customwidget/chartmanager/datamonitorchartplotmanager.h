@@ -74,6 +74,12 @@ public:
     // 清空指定设备图表中的全部曲线数据。
     bool clearAllGraphData(const QString &plotId);
 
+    bool addVerticalMarker(const QString &plotId, double x, const QPen &pen);
+    bool addVerticalMarkerAtLatestX(const QString &plotId,
+                                    const QPen &pen,
+                                    double *x = nullptr);
+    bool clearVerticalMarkers(const QString &plotId);
+
     // ================================坐标轴管理================================
     // 设置指定设备图表的 X 轴模式。
     bool setXAxisMode(const QString &plotId, int arg1);

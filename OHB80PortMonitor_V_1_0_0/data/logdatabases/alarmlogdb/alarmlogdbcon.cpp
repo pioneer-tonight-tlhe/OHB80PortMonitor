@@ -280,4 +280,36 @@ void AlarmLogDBCon::updateResolve(const QString& qrCode, const QString& alarmTyp
                               Q_ARG(QString, resolveTime));
 }
 
+QList<AlarmRecord> AlarmLogDBCon::resolveUnresolvedBatch(int batchSize, const QString& resolveTime)
+{
+    QList<QVariantMap> varResults;
+    QMetaObject::invokeMethod(m_sqlLogic,
+                              [this, &varResults, batchSize, resolveTime]() {
+                                  varResults = m_sqlLogic->resolveUnresolvedBatch(batchSize, resolveTime);
+                              },
+                              Qt::BlockingQueuedConnection);
+
+    QList<AlarmRecord> records;
+    records.reserve(varResults.size());
+    for (const QVariantMap& row : varResults) {
+        AlarmRecord rec;
+        rec.id              = row.value(QStringLiteral("id")).toInt();
+        rec.alarmLevel      = row.value(QStringLiteral("alarm_level")).toInt();
+        rec.occurTime       = row.value(QStringLiteral("occur_time")).toString();
+        rec.qrCode          = row.value(QStringLiteral("qr_code")).toString();
+        rec.alarmType       = row.value(QStringLiteral("alarm_type")).toInt();
+        rec.isResolved      = row.value(QStringLiteral("is_resolved")).toInt();
+        rec.resolveTime     = row.value(QStringLiteral("resolve_time")).toString();
+        rec.description     = row.value(QStringLiteral("description")).toString();
+        rec.userPermission  = row.value(QStringLiteral("user_permission")).toInt();
+        records.append(rec);
+    }
+
+    if (!records.isEmpty()) {
+        emit recordsResolved(records);
+    }
+
+    return records;
+}
+
 } // namespace LogDB

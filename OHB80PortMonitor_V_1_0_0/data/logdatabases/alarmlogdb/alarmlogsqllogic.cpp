@@ -450,6 +450,93 @@ bool AlarmLogSqlLogic::updateResolve(const QString& qrCode, const QString& alarm
     return true;
 }
 
+QList<QVariantMap> AlarmLogSqlLogic::resolveUnresolvedBatch(int batchSize, const QString& resolveTime)
+{
+    QList<QVariantMap> resolvedRows;
+
+    if (!m_database.isOpen() || batchSize <= 0) {
+        return resolvedRows;
+    }
+
+    QString selectSql = m_sqlMapper->getSql("query_unresolved_reset_batch");
+    if (selectSql.isEmpty()) {
+        qWarning() << "SQL not found: query_unresolved_reset_batch, using fallback SQL";
+        selectSql = QStringLiteral(
+            "SELECT * FROM alarm_log "
+            "WHERE is_resolved = 0 "
+            "ORDER BY occur_time ASC, id ASC "
+            "LIMIT ?");
+    }
+
+    QSqlQuery selectQuery(m_database);
+    selectQuery.prepare(selectSql);
+    selectQuery.addBindValue(batchSize);
+    if (!selectQuery.exec()) {
+        qWarning() << "Query unresolved alarm batch failed:" << selectQuery.lastError().text();
+        return resolvedRows;
+    }
+
+    QVariantList ids;
+    while (selectQuery.next()) {
+        QSqlRecord record = selectQuery.record();
+        QVariantMap row;
+        for (int i = 0; i < record.count(); ++i) {
+            row[record.fieldName(i)] = record.value(i);
+        }
+        ids << row.value(QStringLiteral("id"));
+        resolvedRows.append(row);
+    }
+    selectQuery.finish();
+
+    if (ids.isEmpty()) {
+        return resolvedRows;
+    }
+
+    QStringList placeholders;
+    placeholders.reserve(ids.size());
+    for (int i = 0; i < ids.size(); ++i) {
+        placeholders << QStringLiteral("?");
+    }
+
+    const QString updateSql = QStringLiteral(
+        "UPDATE alarm_log "
+        "SET is_resolved = 1, resolve_time = ? "
+        "WHERE is_resolved = 0 AND id IN (%1)")
+        .arg(placeholders.join(QStringLiteral(",")));
+
+    if (!m_database.transaction()) {
+        qWarning() << "Resolve unresolved alarm batch begin transaction failed:"
+                   << m_database.lastError().text();
+        return QList<QVariantMap>();
+    }
+
+    QSqlQuery updateQuery(m_database);
+    updateQuery.prepare(updateSql);
+    updateQuery.addBindValue(resolveTime);
+    for (const QVariant& id : ids) {
+        updateQuery.addBindValue(id);
+    }
+
+    if (!updateQuery.exec()) {
+        qWarning() << "Resolve unresolved alarm batch failed:" << updateQuery.lastError().text();
+        m_database.rollback();
+        return QList<QVariantMap>();
+    }
+
+    if (!m_database.commit()) {
+        qWarning() << "Resolve unresolved alarm batch commit failed:" << m_database.lastError().text();
+        m_database.rollback();
+        return QList<QVariantMap>();
+    }
+
+    for (QVariantMap& row : resolvedRows) {
+        row[QStringLiteral("is_resolved")] = 1;
+        row[QStringLiteral("resolve_time")] = resolveTime;
+    }
+
+    return resolvedRows;
+}
+
 int AlarmLogSqlLogic::calculateOffset(int pageSize, int pageNumber)
 {
     if (pageNumber <= 0) {

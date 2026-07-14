@@ -75,7 +75,7 @@ void ChartXAxisController::refreshRange(double currentX, const QVector<double> &
         return;
 
     if (m_mode == ElapsedSeconds) {
-        const double lower = xData.isEmpty() ? 0.0 : xData.first();
+        const double lower = xData.isEmpty() ? 0.0 : qMin(0.0, xData.first());
         const double upper = qMax(currentX, lower + 1.0);
         m_chart->xAxis->setRange(lower, upper);
         return;

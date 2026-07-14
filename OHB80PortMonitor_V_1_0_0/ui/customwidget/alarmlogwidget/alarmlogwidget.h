@@ -63,6 +63,7 @@ private slots:
     void onTotalCountWithConditionsResult(int totalCount);
     void onRecordInserted(const AlarmRecord& record);
     void onRecordResolved(const QString& qrCode, const QString& alarmType, const QString& resolveTime);
+    void onRecordsResolved(const QList<AlarmRecord>& records);
     void onTaskFinished(bool success, const QString& message);
 
 private:

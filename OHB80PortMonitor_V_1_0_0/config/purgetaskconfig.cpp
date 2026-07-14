@@ -4,9 +4,11 @@
 
 #include <QDir>
 #include <QFile>
+#include <QDebug>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QSettings>
+#include <QTextStream>
 
 namespace {
 const char *const TaskGroup = "Task";
@@ -18,14 +20,93 @@ const char *const StageDurationSecondsKey = "Duration_s";
 const char *const ActionCountKey = "ActionCount";
 const char *const DefaultQRCode = "12001";
 
-QJsonObject parseJsonObject(const QString &jsonText)
+bool parseJsonObject(const QString &jsonText, QJsonObject *result)
 {
     QJsonParseError error;
     const QJsonDocument doc = QJsonDocument::fromJson(jsonText.toUtf8(), &error);
     if (error.error != QJsonParseError::NoError || !doc.isObject()) {
-        return {};
+        return false;
     }
-    return doc.object();
+
+    if (result) {
+        *result = doc.object();
+    }
+    return true;
+}
+
+bool readRawIniValue(const QString &filePath,
+                     const QString &group,
+                     const QString &key,
+                     QString *value)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return false;
+    }
+
+    QTextStream stream(&file);
+    stream.setCodec("UTF-8");
+    bool inTargetGroup = false;
+
+    while (!stream.atEnd()) {
+        const QString line = stream.readLine();
+        const QString trimmed = line.trimmed();
+        if (trimmed.startsWith(QLatin1Char('[')) && trimmed.endsWith(QLatin1Char(']'))) {
+            inTargetGroup = trimmed.mid(1, trimmed.size() - 2).trimmed() == group;
+            continue;
+        }
+
+        if (!inTargetGroup || trimmed.isEmpty()
+            || trimmed.startsWith(QLatin1Char(';'))
+            || trimmed.startsWith(QLatin1Char('#'))) {
+            continue;
+        }
+
+        const int equalsIndex = line.indexOf(QLatin1Char('='));
+        if (equalsIndex < 0 || line.left(equalsIndex).trimmed() != key) {
+            continue;
+        }
+
+        if (value) {
+            *value = line.mid(equalsIndex + 1).trimmed();
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool readActionParams(const QString &filePath,
+                      const QString &stageGroup,
+                      const QString &paramsKey,
+                      const QVariant &settingsValue,
+                      QJsonObject *params)
+{
+    QString rawValue;
+    const bool rawValueFound = readRawIniValue(filePath, stageGroup, paramsKey, &rawValue);
+    if (!rawValueFound && !settingsValue.isValid()) {
+        if (params) {
+            *params = {};
+        }
+        return true;
+    }
+
+    if (rawValueFound && rawValue.trimmed().isEmpty()) {
+        if (params) {
+            *params = {};
+        }
+        return true;
+    }
+
+    // QSettings strips unescaped quotes from hand-written JSON in INI values.
+    // Parse the original text first, then fall back to QSettings-decoded text
+    // for files generated through QSettings itself.
+    if (rawValueFound && parseJsonObject(rawValue, params)) {
+        return true;
+    }
+
+    const QString decodedValue = settingsValue.toString().trimmed();
+    return decodedValue.isEmpty() || parseJsonObject(decodedValue, params);
 }
 
 QString actionKey(int actionIndex, const QString &suffix)
@@ -99,7 +180,16 @@ PurgeTaskDefinition PurgeTaskConfig::readTaskDefinition(const QString &qrCode) c
                                   .arg(stageIndex)
                                   .arg(actionIndex);
             action.commandId = settings.value(actionKey(actionIndex, QStringLiteral("CommandId"))).toString().trimmed();
-            action.params = parseJsonObject(settings.value(actionKey(actionIndex, QStringLiteral("Params"))).toString());
+            const QString paramsKey = actionKey(actionIndex, QStringLiteral("Params"));
+            if (!readActionParams(m_configFilePath,
+                                  stageGroup,
+                                  paramsKey,
+                                  settings.value(paramsKey),
+                                  &action.params)) {
+                qWarning() << "[PurgeTaskConfig] invalid action params JSON:"
+                           << stageGroup << paramsKey;
+                return defaultDefinition(qrCode);
+            }
             action.required = settings.value(actionKey(actionIndex, QStringLiteral("Required")), true).toBool();
             stage.actions.append(action);
         }
@@ -173,7 +263,7 @@ PurgeTaskDefinition PurgeTaskConfig::defaultDefinition(const QString &qrCode) co
     PurgeActionDefinition action1;
     action1.actionId = QStringLiteral("stage_1_action_1");
     action1.commandId = QStringLiteral("WritePurgeFlow");
-    action1.params = parseJsonObject(QStringLiteral("{\"flow_l_min\":10}"));
+    parseJsonObject(QStringLiteral("{\"flow_l_min\":10}"), &action1.params);
     stage1.actions.append(action1);
 
     PurgeStageDefinition stage2;
@@ -182,7 +272,7 @@ PurgeTaskDefinition PurgeTaskConfig::defaultDefinition(const QString &qrCode) co
     PurgeActionDefinition action2;
     action2.actionId = QStringLiteral("stage_2_action_1");
     action2.commandId = QStringLiteral("WritePurgeFlow");
-    action2.params = parseJsonObject(QStringLiteral("{\"flow_l_min\":30}"));
+    parseJsonObject(QStringLiteral("{\"flow_l_min\":30}"), &action2.params);
     stage2.actions.append(action2);
 
     definition.stages.append(stage1);

@@ -39,6 +39,7 @@ public:
     explicit DataMonitorChartPlot(const QString &plotId,
                                   QCustomPlot *chart,
                                   QObject *parent = nullptr);
+    ~DataMonitorChartPlot() override;
 
     // ================================图表信息================================
     // 获取当前数据监控图表的业务 ID。
@@ -86,6 +87,10 @@ public:
 
     // 清空当前图表的所有曲线数据和共享 xData。
     void clearAllGraphData();
+
+    bool addVerticalMarker(double x, const QPen &pen);
+    bool addVerticalMarkerAtLatestX(const QPen &pen, double *x = nullptr);
+    void clearVerticalMarkers();
 
     // ================================坐标轴管理================================
     // 设置 X 轴模式。
@@ -138,6 +143,7 @@ private:
     // 当前 QCustomPlot 内由本类管理的曲线集合。
     // QVector 下标与 QCustomPlot 内部 QCPGraph 数组索引保持一致。
     QVector<QSharedPointer<ChartGraph>> m_graphs;
+    QVector<QCPItemLine *> m_verticalMarkers;
 
     // ------ 数据刷新 ------
     // 当前图表共享的 X 轴时间数据。

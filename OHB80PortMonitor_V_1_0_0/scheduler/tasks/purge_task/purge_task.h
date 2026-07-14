@@ -2,6 +2,7 @@
 #define PURGE_TASK_H
 
 #include "scheduler/scheduler_task.h"
+#include "purge_task_logger.h"
 #include "purge_task_types.h"
 #include "modbustcpmastermanager/modbuscommand/modbuscommand.h"
 
@@ -22,6 +23,7 @@ public:
     QString taskType() const override { return QStringLiteral("PurgeTask"); }
 
     QString outputDir() const;
+    void setOutputDir(const QString &outputDir);
 
 signals:
     void outputDirectoryReady(const QString &outputDir);
@@ -39,11 +41,8 @@ private slots:
     void onCommandFinished(ModbusCommand cmd, const QString &masterId);
     void onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId);
     void onStageTimeout();
-    void onSampleTimeout();
 
 private:
-    bool prepareOutputDirectory(QString *errorMessage);
-    bool prepareStageCsv(QString *errorMessage);
     void createTimersIfNeeded();
     void stopTimers();
 
@@ -63,12 +62,9 @@ private:
     void applyRegisterValue(ModbusCommand &cmd, const QByteArray &registerValue) const;
     void disconnectCommandSignals();
 
-    QStringList csvHeaders() const;
-    QStringList currentCsvRow() const;
-    QString formatNumber(double value, int precision = 3) const;
-
 private:
     PurgeTaskDefinition m_definition;
+    PurgeTaskLogger m_logger;
 
     bool m_cancelRequested = false;
     bool m_finishEmitted = false;
@@ -81,13 +77,10 @@ private:
     QList<QMetaObject::Connection> m_commandConnections;
 
     QTimer *m_stageTimer = nullptr;
-    QTimer *m_sampleTimer = nullptr;
     QDateTime m_taskStartedAt;
     QDateTime m_currentStageTimingStartedAt;
 
     QString m_outputDir;
-    QString m_currentStageCsvPath;
-    QString m_allStageCsvPath;
 };
 
 #endif // PURGE_TASK_H

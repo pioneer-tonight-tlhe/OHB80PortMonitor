@@ -3,6 +3,7 @@
 #include "app.h"
 #include "ui_debugpage.h"
 #include "customwidget/configsettingwidget/humidityoffsetsettingwidget.h"
+#include "customwidget/debugsettingwidget/alarmresetwidget.h"
 #include "customwidget/debugsettingwidget/boardenablestatuswidget.h"
 #include "customwidget/debugsettingwidget/configfilesettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h"
@@ -29,6 +30,7 @@ DebugPage::DebugPage(QWidget *parent)
     , m_humidityOffsetWidget(nullptr)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
     , m_vefcSensorMonitorWidget(nullptr)
+    , m_alarmResetWidget(nullptr)
     , m_boardEnableStatusWidget(nullptr)
     , m_foupInVacuumExtractionEnableWidget(nullptr)
     , m_foupInAutoPurgeEnableWidget(nullptr)
@@ -80,6 +82,9 @@ void DebugPage::initUI()
 
     m_vefcSensorMonitorWidget = new VEFCSensorMonitorWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcSensorMonitorWidget);
+
+    m_alarmResetWidget = new AlarmResetWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_alarmResetWidget);
 
     m_boardEnableStatusWidget = new BoardEnableStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_boardEnableStatusWidget);
@@ -146,6 +151,8 @@ void DebugPage::navBtnClicked()
         targetWidget = m_vefcFlowUnitMediumStatusWidget;
     } else if (objName == "btnVEFCSensorMonitor") {
         targetWidget = m_vefcSensorMonitorWidget;
+    } else if (objName == "btnAlarmReset") {
+        targetWidget = m_alarmResetWidget;
     } else if (objName == "btnBoardEnable") {
         targetWidget = m_boardEnableStatusWidget;
     } else if (objName == "btnFoupInVacuumExtraction") {
@@ -192,6 +199,10 @@ void DebugPage::registerModulePermissions()
                                   ui->btnVEFCSensorMonitor,
                                   QStringLiteral("DebugPage"),
                                   QStringLiteral("VEFCSensorMonitor"));
+    App::registerModulePermission(m_alarmResetWidget,
+                                  ui->btnAlarmReset,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("AlarmReset"));
     App::registerModulePermission(m_boardEnableStatusWidget,
                                   ui->btnBoardEnable,
                                   QStringLiteral("DebugPage"),

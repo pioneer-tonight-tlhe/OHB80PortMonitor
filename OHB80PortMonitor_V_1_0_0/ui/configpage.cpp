@@ -10,7 +10,6 @@
 #include "customwidget/configsettingwidget/sh85periodicselfchecksettingwidget.h"
 #include "customwidget/configsettingwidget/sh85selfchecksettingwidget.h"
 #include "ohbdeviceconfig.h"
-#include "idlepurgeconfig.h"
 
 #include <QScroller>
 #include <QScrollerProperties>
@@ -51,10 +50,6 @@ void ConfigPage::initUI()
     }
 
     m_idlePurgeWidget = new IdlePurgeSettingWidget(this);
-    IdlePurgeConfig &idlePurgeConfig = IdlePurgeConfig::getInstance();
-    m_idlePurgeWidget->setConfigValues(idlePurgeConfig.isEnabled(),
-                                       idlePurgeConfig.getPurgeDurationSeconds(),
-                                       idlePurgeConfig.getPurgeIntervalSeconds());
     m_ui->scrollAreaWidgetContents->layout()->addWidget(m_idlePurgeWidget);
 
     m_pneumaticValvePressureWidget = new PneumaticValvePressureSettingWidget(this);

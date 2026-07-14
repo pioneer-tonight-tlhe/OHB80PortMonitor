@@ -1,8 +1,5 @@
 #include "purge_task.h"
 
-#include "appconfig.h"
-#include "csvfilewriter.h"
-#include "foupofohbinfo.h"
 #include "modbustcpmastermanager/modbustcpmaster/modbuscommandsender.h"
 #include "modbustcpmastermanager/modbustcpmaster/modbustcpmaster.h"
 #include "modbustcpmastermanager/modbuscommand/commandpool.h"
@@ -10,8 +7,6 @@
 #include "shareddata.h"
 
 #include <QDebug>
-#include <QDir>
-#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QtGlobal>
@@ -86,6 +81,9 @@ void PurgeTask::start()
         return;
     }
 
+    m_taskStartedAt = QDateTime::currentDateTime();
+    m_logger.logTaskStarting(taskId(), m_definition);
+
     QString errorMessage;
     if (!m_definition.isValid(&errorMessage)) {
         finishTask(false, errorMessage, SchedulerTask::Failed);
@@ -99,19 +97,16 @@ void PurgeTask::start()
         return;
     }
 
-    if (!prepareOutputDirectory(&errorMessage)) {
-        finishTask(false, errorMessage, SchedulerTask::Failed);
-        return;
-    }
-
     createTimersIfNeeded();
     m_cancelRequested = false;
     m_currentStageIndex = -1;
     m_currentActionIndex = -1;
-    m_taskStartedAt = QDateTime::currentDateTime();
 
     setState(SchedulerTask::Running);
-    emit outputDirectoryReady(m_outputDir);
+    m_logger.logTaskStarted(taskId(), m_definition, m_outputDir);
+    if (!m_outputDir.isEmpty()) {
+        emit outputDirectoryReady(m_outputDir);
+    }
     emit purgeStarted(m_definition.qrCode);
     emit progress(0, QStringLiteral("Purge task started: QRCode=%1").arg(m_definition.qrCode));
 
@@ -131,6 +126,11 @@ void PurgeTask::stop()
 QString PurgeTask::outputDir() const
 {
     return m_outputDir;
+}
+
+void PurgeTask::setOutputDir(const QString &outputDir)
+{
+    m_outputDir = outputDir.trimmed();
 }
 
 void PurgeTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
@@ -163,6 +163,15 @@ void PurgeTask::onCommandFinished(ModbusCommand cmd, const QString &masterId)
         ? QStringLiteral("OK")
         : (cmd.errorMessage.isEmpty() ? QStringLiteral("command failed") : cmd.errorMessage);
 
+    m_logger.logCommandFinished(taskId(),
+                                m_definition.qrCode,
+                                m_currentStageIndex + 1,
+                                m_currentActionIndex + 1,
+                                action,
+                                cmd,
+                                success,
+                                message);
+
     emit purgeActionFinished(m_currentStageIndex + 1,
                              m_currentActionIndex + 1,
                              action.commandId,
@@ -190,6 +199,12 @@ void PurgeTask::onCommandTimeoutRetry(ModbusCommand cmd, const QString &masterId
         return;
     }
 
+    m_logger.logCommandRetry(taskId(),
+                             m_definition.qrCode,
+                             m_currentStageIndex + 1,
+                             m_currentActionIndex + 1,
+                             cmd);
+
     const int retryCount = qMax(0, cmd.sendCount - 1);
     emit progress(0,
                   QStringLiteral("Purge command retry: %1 (%2/%3)")
@@ -207,66 +222,6 @@ void PurgeTask::onStageTimeout()
     finishCurrentStage();
 }
 
-void PurgeTask::onSampleTimeout()
-{
-    if (m_finishEmitted || m_cancelRequested || m_currentStageIndex < 0) {
-        return;
-    }
-
-    const QStringList headers = csvHeaders();
-    const QStringList row = currentCsvRow();
-    QString errorMessage;
-
-    if (!CsvFileWriter::appendRow(m_currentStageCsvPath, headers, row, &errorMessage)
-        || !CsvFileWriter::appendRow(m_allStageCsvPath, headers, row, &errorMessage)) {
-        finishTask(false,
-                   QStringLiteral("PurgeTask: failed to write CSV record: %1").arg(errorMessage),
-                   SchedulerTask::Failed);
-    }
-}
-
-bool PurgeTask::prepareOutputDirectory(QString *errorMessage)
-{
-    const QDateTime now = QDateTime::currentDateTime();
-    const QString baseDir = QDir(AppConfig::getInstance().getRootDir())
-                                .filePath(QStringLiteral("OHB_%1_Monitor_Graph").arg(m_definition.qrCode));
-    const QString dateDir = QDir(baseDir).filePath(now.toString(QStringLiteral("yyyyMMdd")));
-    const QString qrDir = QDir(dateDir).filePath(m_definition.qrCode);
-    m_outputDir = QDir(qrDir).filePath(now.toString(QStringLiteral("HHmmss")));
-
-    QDir dir;
-    if (!dir.mkpath(m_outputDir)) {
-        if (errorMessage) {
-            *errorMessage = QStringLiteral("PurgeTask: failed to create output directory: %1").arg(m_outputDir);
-        }
-        return false;
-    }
-
-    m_allStageCsvPath = QDir(m_outputDir).filePath(QStringLiteral("stage_all.csv"));
-    if (!CsvFileWriter::ensureFileWithHeader(m_allStageCsvPath, csvHeaders(), errorMessage)) {
-        return false;
-    }
-
-    if (errorMessage) {
-        errorMessage->clear();
-    }
-    return true;
-}
-
-bool PurgeTask::prepareStageCsv(QString *errorMessage)
-{
-    if (m_currentStageIndex < 0) {
-        if (errorMessage) {
-            *errorMessage = QStringLiteral("PurgeTask: current stage index is invalid");
-        }
-        return false;
-    }
-
-    m_currentStageCsvPath = QDir(m_outputDir)
-                                .filePath(QStringLiteral("stage_%1.csv").arg(m_currentStageIndex + 1));
-    return CsvFileWriter::ensureFileWithHeader(m_currentStageCsvPath, csvHeaders(), errorMessage);
-}
-
 void PurgeTask::createTimersIfNeeded()
 {
     if (!m_stageTimer) {
@@ -274,22 +229,12 @@ void PurgeTask::createTimersIfNeeded()
         m_stageTimer->setSingleShot(true);
         connect(m_stageTimer, &QTimer::timeout, this, &PurgeTask::onStageTimeout);
     }
-
-    if (!m_sampleTimer) {
-        m_sampleTimer = new QTimer(this);
-        m_sampleTimer->setInterval(1000);
-        connect(m_sampleTimer, &QTimer::timeout, this, &PurgeTask::onSampleTimeout);
-    }
 }
 
 void PurgeTask::stopTimers()
 {
     if (m_stageTimer) {
         m_stageTimer->stop();
-    }
-
-    if (m_sampleTimer) {
-        m_sampleTimer->stop();
     }
 }
 
@@ -307,11 +252,11 @@ void PurgeTask::startNextStage()
         return;
     }
 
-    QString errorMessage;
-    if (!prepareStageCsv(&errorMessage)) {
-        finishTask(false, errorMessage, SchedulerTask::Failed);
-        return;
-    }
+    const PurgeStageDefinition &stage = m_definition.stages.at(m_currentStageIndex);
+    m_logger.logStagePreparing(taskId(),
+                               m_definition.qrCode,
+                               m_currentStageIndex + 1,
+                               stage);
 
     const int percent = m_definition.stages.isEmpty()
         ? 0
@@ -339,6 +284,12 @@ void PurgeTask::startNextAction()
     const PurgeActionDefinition &action = stage.actions.at(m_currentActionIndex);
     QString errorMessage;
     if (!submitActionCommand(action, &errorMessage)) {
+        m_logger.logCommandSubmitFailed(taskId(),
+                                        m_definition.qrCode,
+                                        m_currentStageIndex + 1,
+                                        m_currentActionIndex + 1,
+                                        action,
+                                        errorMessage);
         emit purgeActionFinished(m_currentStageIndex + 1,
                                  m_currentActionIndex + 1,
                                  action.commandId,
@@ -360,21 +311,16 @@ void PurgeTask::startStageTiming()
 
     const PurgeStageDefinition &stage = m_definition.stages.at(m_currentStageIndex);
     m_currentStageTimingStartedAt = QDateTime::currentDateTime();
+    m_logger.logStageStarted(taskId(),
+                             m_definition.qrCode,
+                             m_currentStageIndex + 1,
+                             stage);
 
     emit purgeStageStarted(m_currentStageIndex + 1,
                            stage.name,
                            stage.durationSeconds);
     emit progress(0,
                   QStringLiteral("Purge stage %1 started").arg(m_currentStageIndex + 1));
-
-    onSampleTimeout();
-    if (m_finishEmitted) {
-        return;
-    }
-
-    if (m_sampleTimer) {
-        m_sampleTimer->start();
-    }
 
     if (stage.durationSeconds <= 0) {
         QTimer::singleShot(0, this, [this]() {
@@ -395,11 +341,15 @@ void PurgeTask::finishCurrentStage()
         return;
     }
 
-    if (m_sampleTimer) {
-        m_sampleTimer->stop();
-    }
-
     const PurgeStageDefinition &stage = m_definition.stages.at(m_currentStageIndex);
+    const qint64 elapsedMs = m_currentStageTimingStartedAt.isValid()
+        ? m_currentStageTimingStartedAt.msecsTo(QDateTime::currentDateTime())
+        : -1;
+    m_logger.logStageFinished(taskId(),
+                              m_definition.qrCode,
+                              m_currentStageIndex + 1,
+                              stage,
+                              elapsedMs);
     emit purgeStageFinished(m_currentStageIndex + 1, stage.name);
 
     const int percent = m_definition.stages.isEmpty()
@@ -427,6 +377,15 @@ void PurgeTask::finishTask(bool success,
     m_lastError = message;
 
     setState(finalState);
+    const qint64 elapsedMs = m_taskStartedAt.isValid()
+        ? m_taskStartedAt.msecsTo(QDateTime::currentDateTime())
+        : -1;
+    m_logger.logTaskFinished(taskId(),
+                             m_definition.qrCode,
+                             success,
+                             message,
+                             elapsedMs);
+    m_logger.flush();
     emit purgeFinished(success, message, m_outputDir);
     emit finished(success, message);
 }
@@ -486,6 +445,13 @@ bool PurgeTask::submitActionCommand(const PurgeActionDefinition &action, QString
                                         this,
                                         &PurgeTask::onCommandTimeoutRetry,
                                         Qt::QueuedConnection));
+
+    m_logger.logCommandSubmitting(taskId(),
+                                  m_definition.qrCode,
+                                  m_currentStageIndex + 1,
+                                  m_currentActionIndex + 1,
+                                  action,
+                                  cmd);
 
     QMetaObject::invokeMethod(sender, [sender, cmd]() {
         sender->submit(cmd);
@@ -627,50 +593,4 @@ void PurgeTask::disconnectCommandSignals()
         QObject::disconnect(connection);
     }
     m_commandConnections.clear();
-}
-
-QStringList PurgeTask::csvHeaders() const
-{
-    return {
-        QStringLiteral("timestamp"),
-        QStringLiteral("qr_code"),
-        QStringLiteral("stage_no"),
-        QStringLiteral("stage_name"),
-        QStringLiteral("inlet_pressure"),
-        QStringLiteral("negative_pressure"),
-        QStringLiteral("inlet_flow"),
-        QStringLiteral("humidity"),
-        QStringLiteral("temperature"),
-        QStringLiteral("foup_in"),
-        QStringLiteral("idle_purge_enabled"),
-        QStringLiteral("idle_state"),
-        QStringLiteral("idle_working_time_sec")
-    };
-}
-
-QStringList PurgeTask::currentCsvRow() const
-{
-    const FoupOfOHBInfo *foup = SharedData::getFoupByQRCode(m_definition.qrCode);
-    const PurgeStageDefinition &stage = m_definition.stages.at(m_currentStageIndex);
-
-    return {
-        QDateTime::currentDateTime().toString(Qt::ISODateWithMs),
-        m_definition.qrCode,
-        QString::number(m_currentStageIndex + 1),
-        stage.name,
-        foup ? formatNumber(foup->inletPressure()) : QString(),
-        foup ? formatNumber(foup->negativePressure()) : QString(),
-        foup ? formatNumber(foup->inletFlow()) : QString(),
-        foup ? formatNumber(foup->RH()) : QString(),
-        foup ? formatNumber(foup->temperature()) : QString(),
-        foup ? QString::number(foup->foupIn() ? 1 : 0) : QString(),
-        foup ? QString::number(foup->idlePurgeEnabled() ? 1 : 0) : QString(),
-        foup ? QString::number(static_cast<int>(foup->idleState())) : QString(),
-        foup ? QString::number(foup->idleWorkingTimeSec()) : QString()
-    };
-}
-
-QString PurgeTask::formatNumber(double value, int precision) const
-{
-    return QString::number(value, 'f', precision);
 }

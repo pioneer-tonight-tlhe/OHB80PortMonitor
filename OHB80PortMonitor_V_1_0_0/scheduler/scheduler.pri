@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/scheduler_task.h \
     $$PWD/scheduler.h \
     $$PWD/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.h \
+    $$PWD/tasks/alarm_reset_task/alarm_reset_task.h \
     $$PWD/tasks/alarmlogquerytask/alarmlogquerytask.h \
     $$PWD/tasks/communicatelogquerytask/communicatelogquerytask.h \
     $$PWD/tasks/foup_in_va_extr_enable/foupinvaextrenabletask.h \
@@ -42,6 +43,8 @@ HEADERS += \
     $$PWD/tasks/set_device_info_task/set_device_info_task.h \
     $$PWD/tasks/set_purge_flow_task/set_purge_flow_task.h \
     $$PWD/tasks/purge_task/purge_task_types.h \
+    $$PWD/tasks/purge_task/purge_data_recorder.h \
+    $$PWD/tasks/purge_task/purge_task_logger.h \
     $$PWD/tasks/purge_task/purge_task.h \
     $$PWD/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.h \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.h \
@@ -57,6 +60,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/scheduler.cpp \
     $$PWD/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.cpp \
+    $$PWD/tasks/alarm_reset_task/alarm_reset_task.cpp \
     $$PWD/tasks/alarmlogquerytask/alarmlogquerytask.cpp \
     $$PWD/tasks/communicatelogquerytask/communicatelogquerytask.cpp \
     $$PWD/tasks/monitor_data_task/monitor_data_task.cpp \
@@ -92,6 +96,8 @@ SOURCES += \
     $$PWD/tasks/set_device_info_task/set_device_info_task.cpp \
     $$PWD/tasks/set_purge_flow_task/set_purge_flow_task.cpp \
     $$PWD/tasks/purge_task/purge_task_types.cpp \
+    $$PWD/tasks/purge_task/purge_data_recorder.cpp \
+    $$PWD/tasks/purge_task/purge_task_logger.cpp \
     $$PWD/tasks/purge_task/purge_task.cpp \
     $$PWD/tasks/set_foup_in_auto_purge_enable_task/set_foup_in_auto_purge_enable_task.cpp \
     $$PWD/tasks/set_vefc_gas_type_task/set_vefc_gas_type_task.cpp \

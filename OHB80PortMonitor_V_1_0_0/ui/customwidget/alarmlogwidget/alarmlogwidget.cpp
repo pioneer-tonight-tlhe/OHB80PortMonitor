@@ -127,6 +127,8 @@ void AlarmLogWidget::initLiveLog()
                 this, &AlarmLogWidget::onRecordInserted);
         connect(db, &LogDB::AlarmLogDBCon::recordResolved,
                 this, &AlarmLogWidget::onRecordResolved);
+        connect(db, &LogDB::AlarmLogDBCon::recordsResolved,
+                this, &AlarmLogWidget::onRecordsResolved);
     }
 
     // 启动时预点状态：将上一次未解决的警报载入 live log
@@ -257,6 +259,15 @@ void AlarmLogWidget::onRecordResolved(const QString& qrCode,
     }
 
     trimLiveLogRows();
+}
+
+void AlarmLogWidget::onRecordsResolved(const QList<AlarmRecord>& records)
+{
+    for (const AlarmRecord& record : records) {
+        onRecordResolved(record.qrCode,
+                         QString::number(record.alarmType),
+                         record.resolveTime);
+    }
 }
 
 void AlarmLogWidget::onRecordInserted(const AlarmRecord& record)

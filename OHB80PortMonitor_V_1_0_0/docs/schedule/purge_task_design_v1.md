@@ -218,19 +218,15 @@ struct PurgeSampleRecord {
     QDateTime timestamp;
 
     QString qrCode;
-    int stageNo = 0;
     QString stageName;
 
-    double inletPressure = 0.0;
-    double negativePressure = 0.0;
-    double inletFlow = 0.0;
-    double humidity = 0.0;
-    double temperature = 0.0;
+    double inletPressure = 0.0;     // Mpa
+    double negativePressure = 0.0;  // Kpa
+    double inletFlow = 0.0;         // L/Min
+    double humidity = 0.0;          // %
+    double temperature = 0.0;       // ℃
 
     bool foupIn = false;
-    bool idlePurgeEnabled = false;
-    int idleState = 0;
-    quint16 idleWorkingTimeSec = 0;
 };
 ```
 
@@ -774,17 +770,13 @@ QString m_currentStageCsvPath;
 QStringList headers = {
     "timestamp",
     "qr_code",
-    "stage_no",
     "stage_name",
-    "inlet_pressure",
-    "negative_pressure",
-    "inlet_flow",
-    "humidity",
-    "temperature",
-    "foup_in",
-    "idle_purge_enabled",
-    "idle_state",
-    "idle_working_time_sec"
+    "inlet_pressure（Mpa）",
+    "negative_pressure（Kpa）",
+    "inlet_flow（L/Min）",
+    "humidity（%）",
+    "temperature（℃）",
+    "foup_in"
 };
 ```
 
@@ -792,8 +784,10 @@ QStringList headers = {
 
 - `timestamp`：采样时间
 - `qr_code`：目标设备二维码
-- `stage_no / stage_name`：方便 `stage_all.csv` 按阶段过滤
-- 后面字段来自共享内存中的设备快照
+- `stage_name`：方便 `stage_all.csv` 按阶段过滤
+- 五个实时监控字段直接在表头中标注单位
+- `stage_no`、`idle_purge_enabled`、`idle_state`、`idle_working_time_sec` 不写入 CSV
+- 其余字段来自共享内存中的设备快照
 
 如果后续需要补更多监控字段，直接在这套表头末尾追加即可。
 
@@ -970,19 +964,40 @@ QList<QMetaObject::Connection> m_connections;
 
 这和现有单设备/多设备命令任务风格一致，例如 [scheduler/tasks/send_command_task/send_command_task.h](D:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/send_command_task/send_command_task.h:1) 和 [scheduler/tasks/set_purge_flow_task/set_purge_flow_task.h](D:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/set_purge_flow_task/set_purge_flow_task.h:1) 都是这样做的。
 
-#### 规则 4：第一版不强制任务类持有独立 `ILogger`
+#### 规则 4：PurgeTask 使用独立日志子目录
 
-当前项目已经有统一业务日志入口：
+PurgeTask 需要保留任务生命周期日志和指令原始帧日志，因此新增专属日志组件：
 
-- [app/shareddata.h](D:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/app/shareddata.h:55) `getOperationDispatchTask()`
-- [scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h](D:/Project/CYTC_Project/OHB80PortMonitor/OHB80PortMonitor_V_1_0_0/scheduler/tasks/operation_dispatch_task/operation_dispatch_task.h:1)
+```text
+scheduler/tasks/purge_task/purge_task_logger.h
+scheduler/tasks/purge_task/purge_task_logger.cpp
+```
 
-所以第一版建议：
+日志输出到独立子目录：
 
-- 任务运行日志优先走 `OperationDispatchTask`
-- 不强制再给 `PurgeTask` 加一套独立 `ILogger` 成员
+```text
+logs/年月日/scheduler/purge_task/
+├── summary.log
+└── commands.log
+```
 
-如果后续发现需要专门的设备明细文本日志，再单独补。
+`summary.log` 至少记录：
+
+- TaskId、QRCode、任务开始和结束结果
+- 输出目录
+- 阶段准备、阶段正式开始和阶段结束
+- CSV 写入等任务级错误
+
+`commands.log` 必须记录：
+
+- TaskId、QRCode、阶段号和动作号
+- actionId、commandId、指令 UUID 和 JSON 参数
+- 指令发送前的完整请求原始帧，包括 CRC
+- 指令成功后的完整响应原始帧，包括 CRC
+- 指令失败时的失败原因；如果存在响应帧，同时保留响应帧
+- 发送次数、重试信息、发送时间、响应时间和耗时
+
+PurgeTask 仍然不直接操作运行日志数据库；专属文本日志只负责执行过程和通信诊断。
 
 #### 规则 5：任务类方法保持“小而固定”
 

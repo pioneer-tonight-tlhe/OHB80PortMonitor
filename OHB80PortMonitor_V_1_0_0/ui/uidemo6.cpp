@@ -64,7 +64,7 @@ void UIDemo6::initForm()
     ui->btnDebug->setProperty("icoName", "debugpage");
 
     // ui->btnDebug->hide();
-    ui->btnChart->hide();
+    // ui->btnChart->hide();
     ui->btnMenu_Max->hide();
 
     QList<QToolButton *> btns = ui->widgetLeft->findChildren<QToolButton *>();

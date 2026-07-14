@@ -78,11 +78,13 @@ public:
                       int userPermission = 0);
     void deleteByTimeRange(const QString& startTime, const QString& endTime);
     void updateResolve(const QString& qrCode, const QString& alarmType, const QString& resolveTime);
+    QList<AlarmRecord> resolveUnresolvedBatch(int batchSize, const QString& resolveTime);
 
 signals:
     // ---- 实时结果 ----
     void recordInserted(const AlarmRecord& record);
     void recordResolved(const QString& qrCode, const QString& alarmType, const QString& resolveTime);
+    void recordsResolved(const QList<AlarmRecord>& records);
 
 private slots:
     // ---- 写入结果 ----

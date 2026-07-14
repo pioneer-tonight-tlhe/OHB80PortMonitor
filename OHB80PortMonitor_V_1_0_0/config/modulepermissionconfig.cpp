@@ -260,6 +260,7 @@ QMap<QString, QMap<QString, int>> ModulePermissionConfig::createDefaultPermissio
     debugPagePermissions.insert("HumidityOffsetConfiguration", 3);
     debugPagePermissions.insert("VEFCFlowUnitMediumStatus", 3);
     debugPagePermissions.insert("VEFCSensorMonitor", 3);
+    debugPagePermissions.insert("AlarmReset", 3);
     debugPagePermissions.insert("BoardEnableStatus", 3);
     debugPagePermissions.insert("FoupInVacuumExtractionEnable", 3);
     debugPagePermissions.insert("FoupInAutoPurgeEnable", 3);

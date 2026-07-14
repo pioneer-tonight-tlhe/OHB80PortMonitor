@@ -59,6 +59,7 @@ public:
     int activeCount() const;
     QList<AlarmInfo> activeAlarms() const;
     void clearActive();
+    int resetActiveAlarmsByRecords(const QList<AlarmRecord>& records);
 
 private:
     // ---- 持久化与标准化 ----

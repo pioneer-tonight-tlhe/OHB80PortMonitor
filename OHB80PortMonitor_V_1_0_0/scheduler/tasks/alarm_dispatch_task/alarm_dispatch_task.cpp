@@ -783,6 +783,44 @@ void AlarmDispatchTask::clearActive()
     m_active.clear();
 }
 
+int AlarmDispatchTask::resetActiveAlarmsByRecords(const QList<AlarmRecord>& records)
+{
+    QList<AlarmInfo> resolvedInfos;
+    resolvedInfos.reserve(records.size());
+
+    {
+        QMutexLocker locker(&m_mutex);
+        for (const AlarmRecord& record : records) {
+            AlarmInfo probe;
+            probe.record = record;
+            probe.record.isResolved = 1;
+            probe.alarmSource = static_cast<int>(AlarmSource::Device);
+            probe.alarmId = probe.generateAlarmId();
+
+            auto it = m_active.find(probe.alarmId);
+            if (it != m_active.end()) {
+                AlarmInfo activeInfo = it.value();
+                m_active.erase(it);
+                activeInfo.record.id = record.id;
+                activeInfo.record.isResolved = 1;
+                activeInfo.record.resolveTime = record.resolveTime;
+                activeInfo.record.description = record.description;
+                resolvedInfos.append(activeInfo);
+            } else {
+                resolvedInfos.append(probe);
+            }
+        }
+    }
+
+    for (const AlarmInfo& info : qAsConst(resolvedInfos)) {
+        emit alarmResolved(info);
+        emit alarmResolvePersisted(info.record);
+    }
+
+    syncAllFoupAlarmStates();
+    return resolvedInfos.size();
+}
+
 // =====================================================================
 // 启动加载：从 alarm_log 恢复 is_resolved=0 的警报到 m_active
 // =====================================================================

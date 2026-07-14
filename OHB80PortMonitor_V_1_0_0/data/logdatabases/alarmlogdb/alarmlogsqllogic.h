@@ -13,6 +13,7 @@
 #ifndef ALARMLOGSQLLOGIC_H
 #define ALARMLOGSQLLOGIC_H
 
+#include <QList>
 #include <QObject>
 #include <QSqlDatabase>
 #include <QString>
@@ -77,6 +78,7 @@ public slots:
     // ============================ 清理接口 ============================
     bool deleteByTimeRange(const QString& startTime, const QString& endTime);
     bool updateResolve(const QString& qrCode, const QString& alarmType, const QString& resolveTime);
+    QList<QVariantMap> resolveUnresolvedBatch(int batchSize, const QString& resolveTime);
 
 signals:
     // ---- 写入请求 ----

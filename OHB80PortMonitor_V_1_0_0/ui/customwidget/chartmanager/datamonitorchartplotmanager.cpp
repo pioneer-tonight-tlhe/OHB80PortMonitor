@@ -99,6 +99,33 @@ bool DataMonitorChartPlotManager::clearAllGraphData(const QString &plotId)
     return true;
 }
 
+bool DataMonitorChartPlotManager::addVerticalMarker(const QString &plotId,
+                                                    double x,
+                                                    const QPen &pen)
+{
+    DataMonitorChartPlot *monitorPlot = plot(plotId);
+    return monitorPlot ? monitorPlot->addVerticalMarker(x, pen) : false;
+}
+
+bool DataMonitorChartPlotManager::addVerticalMarkerAtLatestX(const QString &plotId,
+                                                             const QPen &pen,
+                                                             double *x)
+{
+    DataMonitorChartPlot *monitorPlot = plot(plotId);
+    return monitorPlot ? monitorPlot->addVerticalMarkerAtLatestX(pen, x) : false;
+}
+
+bool DataMonitorChartPlotManager::clearVerticalMarkers(const QString &plotId)
+{
+    DataMonitorChartPlot *monitorPlot = plot(plotId);
+    if (!monitorPlot) {
+        return false;
+    }
+
+    monitorPlot->clearVerticalMarkers();
+    return true;
+}
+
 bool DataMonitorChartPlotManager::setXAxisMode(const QString &plotId, int arg1)
 {
     DataMonitorChartPlot *monitorPlot = plot(plotId);

@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.6.0**
+**当前版本：v0.6.1**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,45 @@
 ---
 
 ## 更新日志
+
+## v0.6.1
+
+### DebugPage 警报重置与离线重连告警恢复
+- 发布状态：待发布
+- 修改时间：2026-07-02
+- 变更类型：Added / Fixed
+- 开发人员：Simon（工号：13）
+- 功能概述：DebugPage 新增警报重置入口，通过后台调度任务分批将 `alarm_log` 中未解决警报置为已解决；同时修复警报被批量重置后，设备仍处于重连失败状态时无法重新上报 `DeviceOffline` 的问题。
+- 功能点明细：
+  - 新增 `AlarmResetTask` 后台调度任务，启动时统计当前未解决警报数量，每批默认处理 100 条，批次之间间隔 1s，通过 `QTimer` 延迟下一批，避免阻塞调度线程。
+  - 新增 DebugPage `Alarm Reset` 设置控件，显示未解决数量、批量处理进度和任务结果，UI 只提交调度任务，不直接修改数据库。
+  - `AlarmLogSqlLogic` 新增按主键 `id` 精确批量重置未解决警报的接口，避免按 `QRCode + alarm_type` 误更新历史同类型记录。
+  - `AlarmLogDBCon` 新增 `recordsResolved` 批量解决信号，`AlarmLogWidget` 订阅后同步刷新 live log 中的未解决记录状态。
+  - `AlarmDispatchTask` 新增批量记录同步接口，警报重置后同步清理 active 告警缓存并派发解决信号，避免 UI 当前警报状态与数据库不一致。
+  - `alarm_log_queries.sql` 新增 `query_unresolved_reset_batch`；同时在代码中加入内置 SQL 兜底，目标设备运行目录 SQL 文件未同步时仍可正常执行警报重置。
+  - `NetworkStatusTask` 调整离线重连失败逻辑：若离线会话已上报但 `AlarmDispatchTask` 中对应 `DeviceOffline` active 告警已不存在，则允许在重连再次失败时重新上报离线警报；`Connecting` 过渡状态仍保持跳过。
+  - `module_permission.ini` 新增 `DebugPage/AlarmReset = 3` 权限项。
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_reset_task/`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/alarmresetwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/alarmresetwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogsqllogic.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogsqllogic.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogdbcon.h`
+  - `OHB80PortMonitor_V_1_0_0/data/logdatabases/alarmlogdb/alarmlogdbcon.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/alarm_dispatch_task/alarm_dispatch_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/network_status_task/network_status_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/alarmlogwidget/alarmlogwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `OHB80PortMonitor_V_1_0_0/bin/config/module_permission.ini`
+  - `README.md`
+- 兼容性影响：不改变原有单条告警提交/解决接口；批量重置为 DebugPage 后台维护功能。即使部署环境未同步新版 `alarm_log_queries.sql`，批量重置也会使用内置 SQL 兜底。
+- 验证情况：已完成静态差异检查与 `git diff --check`；当前命令行环境未检测到 Qt 构建工具，完整编译需在 Qt Creator 或已配置 Qt Kit 的终端中执行。
 
 ## v0.6.0
 

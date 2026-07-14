@@ -103,6 +103,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="btnAlarmReset">
+        <property name="text">
+         <string>Alarm Reset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="btnBoardEnable">
         <property name="text">
          <string>Board Enable</string>
