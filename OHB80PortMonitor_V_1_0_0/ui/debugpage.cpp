@@ -7,6 +7,7 @@
 #include "customwidget/debugsettingwidget/configfilesettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdateconfigsettingwidget.h"
 #include "customwidget/debugsettingwidget/firmwareupdatesettingwidget.h"
+#include "customwidget/debugsettingwidget/freertostaskstackmonitorwidget.h"
 #include "customwidget/debugsettingwidget/foupinautopurgeenablewidget.h"
 #include "customwidget/debugsettingwidget/foupinvacuumextractionenablewidget.h"
 #include "customwidget/debugsettingwidget/uirefreshtimesettingwidget.h"
@@ -29,6 +30,7 @@ DebugPage::DebugPage(QWidget *parent)
     , m_humidityOffsetWidget(nullptr)
     , m_vefcFlowUnitMediumStatusWidget(nullptr)
     , m_vefcSensorMonitorWidget(nullptr)
+    , m_freeRTOSTaskStackMonitorWidget(nullptr)
     , m_boardEnableStatusWidget(nullptr)
     , m_foupInVacuumExtractionEnableWidget(nullptr)
     , m_foupInAutoPurgeEnableWidget(nullptr)
@@ -80,6 +82,9 @@ void DebugPage::initUI()
 
     m_vefcSensorMonitorWidget = new VEFCSensorMonitorWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_vefcSensorMonitorWidget);
+
+    m_freeRTOSTaskStackMonitorWidget = new FreeRTOSTaskStackMonitorWidget(this);
+    ui->scrollAreaWidgetContents->layout()->addWidget(m_freeRTOSTaskStackMonitorWidget);
 
     m_boardEnableStatusWidget = new BoardEnableStatusWidget(this);
     ui->scrollAreaWidgetContents->layout()->addWidget(m_boardEnableStatusWidget);
@@ -146,6 +151,8 @@ void DebugPage::navBtnClicked()
         targetWidget = m_vefcFlowUnitMediumStatusWidget;
     } else if (objName == "btnVEFCSensorMonitor") {
         targetWidget = m_vefcSensorMonitorWidget;
+    } else if (objName == "btnFreeRTOSTaskStack") {
+        targetWidget = m_freeRTOSTaskStackMonitorWidget;
     } else if (objName == "btnBoardEnable") {
         targetWidget = m_boardEnableStatusWidget;
     } else if (objName == "btnFoupInVacuumExtraction") {
@@ -192,6 +199,10 @@ void DebugPage::registerModulePermissions()
                                   ui->btnVEFCSensorMonitor,
                                   QStringLiteral("DebugPage"),
                                   QStringLiteral("VEFCSensorMonitor"));
+    App::registerModulePermission(m_freeRTOSTaskStackMonitorWidget,
+                                  ui->btnFreeRTOSTaskStack,
+                                  QStringLiteral("DebugPage"),
+                                  QStringLiteral("FreeRTOSTaskStackMonitor"));
     App::registerModulePermission(m_boardEnableStatusWidget,
                                   ui->btnBoardEnable,
                                   QStringLiteral("DebugPage"),

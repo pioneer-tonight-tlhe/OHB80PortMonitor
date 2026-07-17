@@ -26,6 +26,8 @@ void CommandResponseParser::registerBuiltinParsers()
                    &CommandResponseParser::parseReadVEFCFlowUnitAndMediumStatus);
     registerParser("ReadVersion", &CommandResponseParser::parseReadVersion);
     registerParser("ReadUIScreenVersion", &CommandResponseParser::parseReadUIScreenVersion);
+    registerParser("ReadFreeRTOSTaskMinStackWaterLevels",
+                   &CommandResponseParser::parseReadFreeRTOSTaskMinStackWaterLevels);
 }
 
 void CommandResponseParser::registerParser(const QString& commandId, ParseFunc func)
@@ -266,6 +268,24 @@ QVariantMap CommandResponseParser::parseReadUIScreenVersion(const ModbusCommand&
     result["uiScreenVersionMinor"] = minorPart;
     result["uiScreenVersionPatch"] = patchPart;
     result["uiScreenVersion"] = parseRegisterVersionString(payload);
+    return result;
+}
+
+QVariantMap CommandResponseParser::parseReadFreeRTOSTaskMinStackWaterLevels(const ModbusCommand& cmd)
+{
+    QVariantMap result;
+    const QByteArray& payload = cmd.response.registerValue;
+
+    if (payload.size() < 8) {
+        qWarning() << "[CommandResponseParser] ReadFreeRTOSTaskMinStackWaterLevels payload too short, actual="
+                   << payload.size();
+        return result;
+    }
+
+    result["task1MinStackWords"] = static_cast<int>(readU16BE(payload, 0));
+    result["task2MinStackWords"] = static_cast<int>(readU16BE(payload, 2));
+    result["task3MinStackWords"] = static_cast<int>(readU16BE(payload, 4));
+    result["task4MinStackWords"] = static_cast<int>(readU16BE(payload, 6));
     return result;
 }
 

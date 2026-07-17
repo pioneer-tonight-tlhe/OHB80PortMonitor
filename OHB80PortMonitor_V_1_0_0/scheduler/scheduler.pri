@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/scheduler_task.h \
     $$PWD/scheduler.h \
     $$PWD/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.h \
+    $$PWD/tasks/free_rtos_task_stack_monitor_task/free_rtos_task_stack_monitor_task.h \
     $$PWD/tasks/alarmlogquerytask/alarmlogquerytask.h \
     $$PWD/tasks/communicatelogquerytask/communicatelogquerytask.h \
     $$PWD/tasks/foup_in_va_extr_enable/foupinvaextrenabletask.h \
@@ -55,6 +56,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/scheduler.cpp \
     $$PWD/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.cpp \
+    $$PWD/tasks/free_rtos_task_stack_monitor_task/free_rtos_task_stack_monitor_task.cpp \
     $$PWD/tasks/alarmlogquerytask/alarmlogquerytask.cpp \
     $$PWD/tasks/communicatelogquerytask/communicatelogquerytask.cpp \
     $$PWD/tasks/monitor_data_task/monitor_data_task.cpp \

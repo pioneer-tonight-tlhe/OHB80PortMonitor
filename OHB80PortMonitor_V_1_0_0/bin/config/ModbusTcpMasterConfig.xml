@@ -748,6 +748,34 @@
             </respond>
         </Command>
 
+        <!-- ========================================
+             功能码 04 - 读输入寄存器
+             读取四个 FreeRTOS 任务的最小剩余栈水位
+             请求帧: 01 04 00 30 00 04 CRC
+             响应帧: 01 04 08 XX XX XX XX XX XX XX XX CRC
+             CH_1: Task1 最小剩余栈
+             CH_2: Task2 最小剩余栈
+             CH_3: Task3 最小剩余栈
+             CH_4: Task4 最小剩余栈
+             备注:
+               - 图片中标注 Byte_Len 为 0x12，但按 4 个 2byte 通道计算，有效载荷应为 0x08。
+               - 固件说明中提到，对应全局变量初始化为 0xFFFF。
+             ======================================== -->
+        <Command id="ReadFreeRTOSTaskMinStackWaterLevels">
+            <request>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <StartAddr>00 30</StartAddr>
+                <RegisterCount>00 04</RegisterCount>
+            </request>
+            <respond>
+                <SlaveAddr>01</SlaveAddr>
+                <Function>04</Function>
+                <ByteCount>08</ByteCount>
+                <RegisterValue>00 00 00 00 00 00 00 00</RegisterValue>
+            </respond>
+        </Command>
+
     </CommandDefinitions>
 
 </ModbusTcpMasterConfig>

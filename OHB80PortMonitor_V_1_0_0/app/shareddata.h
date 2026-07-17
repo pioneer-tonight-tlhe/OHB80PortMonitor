@@ -14,6 +14,7 @@ class AlarmDispatchTask;
 class OperationDispatchTask;
 class SH85PeriodicSelfCheckTask3;
 class VEFCSensorMonitorTask;
+class FreeRTOSTaskStackMonitorTask;
 class VEFCMonitorInfo;
 class DiskPressureCleanupTask;
 
@@ -59,6 +60,7 @@ public:
 
     // 获取 VEFC 传感器监控任务（常驻任务）
     static VEFCSensorMonitorTask* getVEFCSensorMonitorTask();
+    static FreeRTOSTaskStackMonitorTask* getFreeRTOSTaskStackMonitorTask();
 
     // 获取 VEFC 监控信息（按 QRCode）
     static VEFCMonitorInfo* getVEFCMonitorInfo(const QString& qrCode);
@@ -71,6 +73,7 @@ private:
     static OperationDispatchTask* s_operationDispatchTask;
     static SH85PeriodicSelfCheckTask3* s_sh85PeriodicSelfCheckTask3;
     static VEFCSensorMonitorTask* s_vefcSensorMonitorTask;
+    static FreeRTOSTaskStackMonitorTask* s_freeRTOSTaskStackMonitorTask;
     static DiskPressureCleanupTask* s_diskPressureCleanupTask;
 };
 

@@ -26,6 +26,7 @@ class UIRefreshTimeSettingWidget;
 class HumidityOffsetSettingWidget;
 class VEFCFlowUnitMediumStatusWidget;
 class VEFCSensorMonitorWidget;
+class FreeRTOSTaskStackMonitorWidget;
 class BoardEnableStatusWidget;
 class FoupInVacuumExtractionEnableWidget;
 class FoupInAutoPurgeEnableWidget;
@@ -64,6 +65,7 @@ private:
     HumidityOffsetSettingWidget *m_humidityOffsetWidget;
     VEFCFlowUnitMediumStatusWidget *m_vefcFlowUnitMediumStatusWidget;
     VEFCSensorMonitorWidget *m_vefcSensorMonitorWidget;
+    FreeRTOSTaskStackMonitorWidget *m_freeRTOSTaskStackMonitorWidget;
     BoardEnableStatusWidget *m_boardEnableStatusWidget;
     FoupInVacuumExtractionEnableWidget *m_foupInVacuumExtractionEnableWidget;
     FoupInAutoPurgeEnableWidget *m_foupInAutoPurgeEnableWidget;

@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.6.0**
+**当前版本：v0.7.0**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,43 @@
 ---
 
 ## 更新日志
+
+## v0.7.0
+
+### DebugPage 新增 FreeRTOS 栈水位监控
+- 发布状态：待发布
+- 修改时间：2026-07-17
+- 变更类型：Added
+- 开发人员：Codex（AI 辅助）
+- 功能概述：新增常驻调度任务，每隔 1 小时轮询所有设备的 FreeRTOS 最小剩余栈水位，并在 DebugPage 提供只读表格显示。
+- 功能点明细：
+  - 新增 `FreeRTOSTaskStackMonitorTask` 常驻普通任务，启动后立即执行首轮查询，之后每隔 1 小时再次轮询。
+  - 调度任务对所有已连接设备发送 `ReadFreeRTOSTaskMinStackWaterLevels` 指令，读取 4 个 FreeRTOS 任务的最小剩余栈水位。
+  - 栈水位原始值按 16 位无符号数解析，最大值为 `0xFFFF = 65535`，单位为字，`1 字 = 4 字节`。
+  - 调度任务使用 `ILogger` 记录各设备读取结果与异常信息，日志中保留设备 `QRCode`。
+  - 调度任务在解析成功后向 UI 发出 `stackWaterLevelsUpdated(QVector<int>)` 信号。
+  - DebugPage 新增 `RTOS Stack` 调试入口，对应 `FreeRTOS Task Stack Monitor` 表格页面。
+  - 表格列为 `时间`、`任务1栈`、`任务2栈`、`任务3栈`、`任务4栈`，时间精确到毫秒，任务栈显示格式为 `187字`。
+  - 当前表格按信号到达顺序追加记录，不单独显示设备编号；如需区分设备，请结合日志中的 `QRCode` 查看。
+- 改动文件：
+  - `OHB80PortMonitor_V_1_0_0/bin/config/ModbusTcpMasterConfig.xml`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/free_rtos_task_stack_monitor_task/free_rtos_task_stack_monitor_task.h`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/free_rtos_task_stack_monitor_task/free_rtos_task_stack_monitor_task.cpp`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.h`
+  - `OHB80PortMonitor_V_1_0_0/app/shareddata.cpp`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.h`
+  - `OHB80PortMonitor_V_1_0_0/data/modbustcpmastermanager/modbuscommand/commandresponseparser.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/freertostaskstackmonitorwidget.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/freertostaskstackmonitorwidget.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/customwidget/debugsettingwidget/debugsettingwidget.pri`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.h`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.cpp`
+  - `OHB80PortMonitor_V_1_0_0/ui/debugpage.ui`
+  - `OHB80PortMonitor_V_1_0_0/config/modulepermissionconfig.cpp`
+  - `README.md`
+- 兼容性影响：新增只读监控能力，不改变现有业务指令流程和设备参数。
+- 验证情况：已完成静态代码接线检查；当前命令行环境未检测到可用 Qt 构建工具，尚未完成完整编译验证。
 
 ## v0.6.0
 

@@ -88,6 +88,7 @@ private:
     // ReadUIScreenVersion：1个寄存器，2字节。
     // Byte0 表示版本第一段；Byte1 高4位/低4位分别表示第二段/第三段。
     static QVariantMap parseReadUIScreenVersion(const ModbusCommand& cmd);
+    static QVariantMap parseReadFreeRTOSTaskMinStackWaterLevels(const ModbusCommand& cmd);
 
     QMap<QString, ParseFunc> m_parsers;
 };

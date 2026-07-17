@@ -103,6 +103,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="btnFreeRTOSTaskStack">
+        <property name="text">
+         <string>RTOS Stack</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="btnBoardEnable">
         <property name="text">
          <string>Board Enable</string>
