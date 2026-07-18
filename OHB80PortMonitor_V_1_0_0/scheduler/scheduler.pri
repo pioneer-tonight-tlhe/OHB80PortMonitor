@@ -3,6 +3,9 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/scheduler_task.h \
     $$PWD/scheduler.h \
+    $$PWD/tasks/foup_in_staged_charging_task/foup_in_staged_charging_task.h \
+    $$PWD/tasks/foup_in_staged_charging_task/foup_in_staged_charging_stage_executor.h \
+    $$PWD/tasks/foup_in_staged_charging_task/foup_in_staged_charging_task_types.h \
     $$PWD/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.h \
     $$PWD/tasks/free_rtos_task_stack_monitor_task/free_rtos_task_stack_monitor_task.h \
     $$PWD/tasks/alarmlogquerytask/alarmlogquerytask.h \
@@ -55,6 +58,8 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/scheduler.cpp \
+    $$PWD/tasks/foup_in_staged_charging_task/foup_in_staged_charging_task.cpp \
+    $$PWD/tasks/foup_in_staged_charging_task/foup_in_staged_charging_stage_executor.cpp \
     $$PWD/tasks/disk_pressure_cleanup_task/disk_pressure_cleanup_task.cpp \
     $$PWD/tasks/free_rtos_task_stack_monitor_task/free_rtos_task_stack_monitor_task.cpp \
     $$PWD/tasks/alarmlogquerytask/alarmlogquerytask.cpp \

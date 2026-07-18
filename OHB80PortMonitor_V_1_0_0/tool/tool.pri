@@ -19,3 +19,7 @@ INCLUDEPATH += $$PWD/communicationrecorder
 # defer - RAII 模式，在作用域结束时自动执行回调函数
 include ($$PWD/defer/defer.pri)
 INCLUDEPATH += $$PWD/defer
+
+# iocsv - CSV 文件读写工具
+include ($$PWD/iocsv/iocsv.pri)
+INCLUDEPATH += $$PWD/iocsv

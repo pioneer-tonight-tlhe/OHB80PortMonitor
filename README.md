@@ -1,7 +1,7 @@
 # OHB80PortMonitor
 80port ohb 充氮设备监控上位机
 
-**当前版本：v0.7.0**
+**当前版本：v0.8.0**
 
 ## 项目文档
 详细的项目框架文档请参阅：[PROJECT_STRUCTURE.md](./OHB80PortMonitor_V_1_0_0/docs/PROJECT_STRUCTURE.md)
@@ -9,6 +9,24 @@
 ---
 
 ## 更新日志
+
+## v0.8.0
+
+### 新增 FOUP IN 分阶段充气调度任务
+- 修改时间：2026-07-18
+- 变更类型：Added / Refactored
+- 开发人员：Simon（工号：13）
+- 功能概述：新增 `FoupInStagedChargingTask`，支持 FOUP IN 后先执行固定时长的抽真空前置准备，再按照用户配置依次执行多个充气阶段。
+- 功能特点：
+  - 调度任务负责前置准备、阶段索引、阶段切换、阶段计时和任务生命周期。
+  - 新增 `FoupInStagedChargingStageExecutor`，负责单个阶段内行为串行执行、Modbus 指令构建、响应匹配和重试通知。
+  - 一个行为对应一条 Modbus 指令，当前行为最终成功后才执行下一个行为。
+  - 前置准备阶段通过 `SharedData` 监测进气流量，但固定等待时间结束后直接进入第一充气阶段，不进行流量异常判定。
+  - 提供任务、阶段、行为和前置准备配置数据结构，并支持 JSON 配置校验。
+- 修改文件：
+  - `OHB80PortMonitor_V_1_0_0/scheduler/tasks/foup_in_staged_charging_task/`
+  - `OHB80PortMonitor_V_1_0_0/scheduler/scheduler.pri`
+  - `OHB80PortMonitor_V_1_0_0/docs/FOUP_IN分阶段充气调度任务设计.md`
 
 ## v0.7.0
 
